@@ -1,0 +1,50 @@
+spec:
+  inputs:
+    stage:
+      description: Pipeline stage for the proctor job.
+      type: string
+      default: test
+    image:
+      description: Docker image for the proctor job.
+      type: string
+      default: php:8.4-cli
+    allow_failure:
+      description: Whether the proctor job can fail without failing the pipeline.
+      type: boolean
+      default: false
+    proctor_command:
+      description: The proctor command to run.
+      type: string
+      default: vendor/bin/proctor check --format=codequality
+    working_dir:
+      description: Directory to run the command in, relative to the project root.
+      type: string
+      default: "."
+---
+proctor:
+  stage: $[[ inputs.stage ]]
+  image: $[[ inputs.image ]]
+  # Boolean input interpolated as a real YAML boolean (docs: an input that
+  # replaces an entire YAML value is interpolated as its specified type).
+  allow_failure: $[[ inputs.allow_failure ]]
+  script:
+    # php:8.4-cli does not ship Composer, unzip or git. The image is
+    # Debian-based, so apt is used. Composer is installed with the official
+    # getcomposer.org installer; its SHA-384 is fetched at runtime from
+    # composer.github.io/installer.sig so the component keeps working when
+    # Composer releases a new version. No $ variables appear in the php -r
+    # code, so GitLab CI variable expansion cannot corrupt it.
+    - apt-get update && apt-get install -y --no-install-recommends unzip git
+    - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+    - php -r "if (hash_file('sha384', 'composer-setup.php') === trim(file_get_contents('https://composer.github.io/installer.sig'))) { require 'composer-setup.php'; } else { unlink('composer-setup.php'); exit(1); }"
+    - rm composer-setup.php
+    - cd $[[ inputs.working_dir ]]
+    - composer install --no-interaction --no-progress
+    # A plain redirect (not tee) keeps proctor's exit code as the job result.
+    # The report is written at the project root so the artifact path is the
+    # same for every working_dir, including ".".
+    - $[[ inputs.proctor_command ]] > "$CI_PROJECT_DIR/gl-code-quality-report.json"
+  artifacts:
+    when: always
+    reports:
+      codequality: gl-code-quality-report.json

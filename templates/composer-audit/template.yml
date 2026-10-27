@@ -1,0 +1,24 @@
+spec:
+  inputs:
+    stage:
+      description: Pipeline stage for the composer-audit job.
+      type: string
+      default: test
+    image:
+      description: Docker image for the composer-audit job.
+      type: string
+      default: composer:2
+    working_dir:
+      description: Directory to run composer audit in, relative to the project root.
+      type: string
+      default: "."
+---
+composer-audit:
+  stage: $[[ inputs.stage ]]
+  # The composer:2 image already ships Composer, so no install step is
+  # needed. composer audit --locked exits non-zero when it finds advisories,
+  # which fails the job. No allow_failure input: advisories must fail.
+  image: $[[ inputs.image ]]
+  script:
+    - cd $[[ inputs.working_dir ]]
+    - composer audit --locked
