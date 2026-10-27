@@ -422,8 +422,10 @@ usual way to live with that: keep the tag and add the digest (`image:tag@sha256:
 digest moves. Be careful with automerge settings that skip review (see 1.7). A digest on a matrix image
 (`php:${PHP_VERSION}-cli`) needs one digest per version, so the matrix would need to carry the digest too.
 
-### 4.2 Use images the instance controls, and match what Citadel runs
-Pull through a registry or proxy under WSU's control, and test on the image family that deploys.
+### 4.2 Use images the instance controls, and test on the image family of the target you deploy to
+Pull through a registry or proxy under WSU's control, and test on the image family of the target you deploy to.
+Citadel's images are the `citadel` target, and the official `php` images are the default for raw Docker, OpenShift
+and Coolify.
 
 Why: Docker Hub rate limits and tag changes can fail a pipeline, and a Debian `php:*-cli` image can differ from the
 deploy image in extensions and settings.
@@ -431,8 +433,9 @@ deploy image in extensions and settings.
 Sources: [GitLab: dependency proxy for container images (all tiers)](https://docs.gitlab.com/user/packages/dependency_proxy/);
 [Docker: build best practices](https://docs.docker.com/build/building/best-practices/).
 
-**How the stack holds it: Not yet.** `design/instance-runner-case.md` says tests should use Citadel's own images. The
-templates use Docker Hub images.
+**How the stack holds it: Partially.** The templates use the official `php` images from Docker Hub, the default for
+raw Docker, OpenShift and Coolify. For the `citadel` target, the jobs should run on Citadel's own images; the
+templates do not switch on the target yet.
 
 Second pass, rate limits re-checked in Docker's docs: unauthenticated pulls are limited to 100 per 6 hours per IPv4
 address or IPv6 /64 subnet, and free authenticated users to 200 per 6 hours. A shared instance runner usually sits behind
@@ -581,12 +584,14 @@ Sources: [Composer: download page](https://getcomposer.org/download/);
 8.2 to 8.5 are Debian trixie, and bookworm builds carry an explicit `-bookworm` suffix.
 
 Why: the templates run `apt-get install unzip git` on the image. A change of base release can change package names,
-versions and the installed C libraries, and it can differ from what Citadel runs. Name the variant, or match Citadel's.
+versions and the installed C libraries, and it can differ from what the target runs. Name the variant, or match the
+image family of the target you deploy to.
 
 Sources: [Docker Official Image: php](https://github.com/docker-library/docs/blob/master/php/README.md).
 
-**How the stack holds it: Not yet.** The defaults use the bare `cli` tag. Which Debian release Citadel's PHP images use
-is not stated in the documents read for this guide.
+**How the stack holds it: Not yet.** The defaults use the bare `cli` tag of the official `php` images, the default for
+raw Docker, OpenShift and Coolify. For the `citadel` target, the jobs should run on Citadel's own images; which Debian
+release those use is not stated in the documents read for this guide.
 
 ### 4.11 Use Composer's malware and advisory blocking, and review lock changes
 Run Composer 2.10 or later so flagged versions are refused at install and audit. Review `composer.lock` diffs after any
@@ -903,7 +908,7 @@ Added in the second pass (2026-10-27):
     Renovate handles `component:` includes first.
 30. 1.6: Put the commit SHA in every release note and tell apps to pin it.
 31. 4.11: Write the stack's rule for Composer malware, advisory and abandoned policy, and require Composer 2.10 or later.
-32. 4.10: Name the Debian release in image tags, or match Citadel's.
+32. 4.10: Name the Debian release in image tags, or match the image family of the target you deploy to.
 33. 2.9: Add `timeout` and `interruptible` to each job.
 34. 3.4 (updated): Put the `workflow:rules` example in the README, and say it must live in the app's own file.
 35. 3.5 and 3.6: Tell app owners to restrict pipeline variables and keep fork merge requests away from secrets.
