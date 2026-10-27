@@ -106,8 +106,9 @@ Why: consumers pin a range such as `@1`, and a rename breaks them without warnin
 Sources: [GitLab: components, partial semver](https://docs.gitlab.com/ci/components/);
 [GitLab: component examples, versioning](https://docs.gitlab.com/ci/components/examples/).
 
-**How the stack holds it: Documented.** Objectives rule 6 (versioned promises) covers it for the stack. There is no
-contract file for the inputs and no test that would catch a rename.
+**How the stack holds it: Checked.** `contract/inputs.json` lists each component's inputs (name, type, default) and
+job names. `tests/check-contract.sh` and `tests/check-contract.ps1` compare the templates with it on every pipeline,
+so a renamed input or job, a changed type or a changed default fails the `contract` job.
 
 ### 1.5 Know that components work only inside one GitLab instance
 A component can be used only by projects on the same instance. Another instance needs a mirror.
@@ -364,7 +365,8 @@ Why: components set no `rules`, and two pipelines per push waste runner time.
 Sources: [GitLab: merge request pipelines](https://docs.gitlab.com/ci/pipelines/merge_request_pipelines/);
 [GitLab: CI/CD YAML, `workflow:rules`](https://docs.gitlab.com/ci/yaml/).
 
-**How the stack holds it: Not yet.** The README has no `workflow:rules` example, and the components leave `rules` unset.
+**How the stack holds it: Documented.** The README's "When the components run" section has a `workflow:rules` example
+and says it must be copied into each app's own `.gitlab-ci.yml`. The components still leave `rules` unset.
 
 Second pass: GitLab's merge request pipeline page says the `merge_request_event` rule must be in the app's own
 `.gitlab-ci.yml`. Rules that arrive through `include:component` do not satisfy it. So the README cannot fix this from the
@@ -411,8 +413,9 @@ Sources: [GitLab: pipeline security, Docker images](https://docs.gitlab.com/ci/p
 [Docker: build best practices, pin base image versions](https://docs.docker.com/build/building/best-practices/);
 [OpenSSF Scorecard: Pinned-Dependencies](https://github.com/ossf/scorecard/blob/main/docs/checks.md).
 
-**How the stack holds it: Not yet.** The defaults are `php:8.4-cli`, `composer:2` and `php:${PHP_VERSION}-cli`, none
-pinned by digest.
+**How the stack holds it: Enforced.** The `proctor` and `composer-audit` image defaults carry a digest
+(`php:8.4-cli@sha256:...` and `composer:2@sha256:...`), and the README's "Updating image pins" says how to move them.
+The exception is `php-test`: its matrix image `php:${PHP_VERSION}-cli` is still a tag, because each version would need its own digest.
 
 Second pass: GitLab's pipeline security page says "Always use SHA digests for Docker images". Renovate documents the
 usual way to live with that: keep the tag and add the digest (`image:tag@sha256:...`), and let a bot open a change when the
@@ -556,8 +559,9 @@ Why: pinned tools make a run repeatable, and Composer's audit behaviour has chan
 Sources: [GitLab: pipeline security, shell tools](https://docs.gitlab.com/ci/pipeline_security/);
 [Composer: download, versioned releases with checksums](https://getcomposer.org/download/).
 
-**How the stack holds it: Not yet.** The installer fetches the latest Composer, and `composer-audit` uses the moving
-`composer:2` tag.
+**How the stack holds it: Enforced.** `proctor` and `php-test` install the Composer release named by the
+`composer_version` input (default `2.10.3`, which must match `^2\.\d+\.\d+$`), after checking the installer's SHA-384.
+`composer-audit` uses a digest-pinned `composer:2` image.
 
 Second pass: this practice pulls two ways, and the guide should say so. A pinned Composer is repeatable, but Composer
 shipped security releases on 2026-04 (2.9.6), 2026-06-04 (2.10.1), 2026-07-01 (2.10.2) and 2026-08-27 (2.10.3), and
