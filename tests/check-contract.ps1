@@ -7,8 +7,8 @@
 #
 # PowerShell 7 has no YAML parser built in, and this script must run with no
 # modules, so the YAML is parsed by running yq in Docker:
-#   docker run --rm -v "<root>:/w" -w /w mikefarah/yq:4 -o=json eval ...
-# Needs Docker and the mikefarah/yq:4 image. The .sh twin needs only yq.
+#   docker run --rm -v "<root>:/w" -w /w mikefarah/yq@sha256:4b3d9475d65571d28cbb19544d3820ec2945e4c8b2f18279394282b8dc3a592e -o=json eval ...
+# Needs Docker and the mikefarah/yq@sha256:4b3d9475d65571d28cbb19544d3820ec2945e4c8b2f18279394282b8dc3a592e image. The .sh twin needs only yq.
 
 $ErrorActionPreference = "Stop"
 
@@ -29,9 +29,9 @@ $contract = Get-Content -LiteralPath $ContractPath -Raw | ConvertFrom-Json
 
 function Invoke-YqJson {
   param([string[]]$YqArgs)
-  docker run --rm -v "${Root}:/w" -w /w mikefarah/yq:4 -o=json @YqArgs
+  docker run --rm -v "${Root}:/w" -w /w mikefarah/yq@sha256:4b3d9475d65571d28cbb19544d3820ec2945e4c8b2f18279394282b8dc3a592e -o=json @YqArgs
   if ($LASTEXITCODE -ne 0) {
-    throw "yq failed (exit $LASTEXITCODE): mikefarah/yq:4 $($YqArgs -join ' ')"
+    throw "yq failed (exit $LASTEXITCODE): mikefarah/yq@sha256:4b3d9475d65571d28cbb19544d3820ec2945e4c8b2f18279394282b8dc3a592e $($YqArgs -join ' ')"
   }
 }
 
