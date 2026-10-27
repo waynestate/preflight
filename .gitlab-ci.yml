@@ -18,3 +18,13 @@ include:
 stages:
   - test
   - audit
+
+# The inputs contract: templates must keep the inputs and job names they
+# promised in contract/inputs.json (BEST_PRACTICES.md 1.4). Runs on the
+# mikefarah/yq image, pinned by digest.
+contract:
+  stage: test
+  image: mikefarah/yq@sha256:4b3d9475d65571d28cbb19544d3820ec2945e4c8b2f18279394282b8dc3a592e
+  entrypoint: ["sh"]
+  script:
+    - tests/check-contract.sh
