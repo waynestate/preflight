@@ -7,7 +7,7 @@ spec:
     image:
       description: Docker image for the proctor job.
       type: string
-      default: php:8.4-cli
+      default: php:8.4-cli@sha256:debadc2e36b857657846e2e952cbaf52702e55482dd3c2c43806f68d8c534a70
     allow_failure:
       description: Whether the proctor job can fail without failing the pipeline.
       type: boolean

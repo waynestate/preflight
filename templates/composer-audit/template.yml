@@ -7,7 +7,7 @@ spec:
     image:
       description: Docker image for the composer-audit job.
       type: string
-      default: composer:2
+      default: composer:2@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc
     working_dir:
       description: Directory to run composer audit in, relative to the project root.
       type: string
