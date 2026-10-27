@@ -48,7 +48,7 @@ proctor:
     - php -r "if (hash_file('sha384', 'composer-setup.php') !== trim(file_get_contents('https://composer.github.io/installer.sig'))) { unlink('composer-setup.php'); exit(1); }"
     - php composer-setup.php --quiet --install-dir=/usr/local/bin --filename=composer --version=$[[ inputs.composer_version ]]
     - rm composer-setup.php
-    - cd $[[ inputs.working_dir ]]
+    - cd "$[[ inputs.working_dir ]]"
     - composer install --no-interaction --no-progress
     # A plain redirect (not tee) keeps proctor's exit code as the job result.
     # The report is written at the project root so the artifact path is the

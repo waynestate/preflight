@@ -20,5 +20,5 @@ composer-audit:
   # which fails the job. No allow_failure input: advisories must fail.
   image: $[[ inputs.image ]]
   script:
-    - cd $[[ inputs.working_dir ]]
+    - cd "$[[ inputs.working_dir ]]"
     - composer audit --locked
