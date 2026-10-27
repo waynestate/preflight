@@ -1,0 +1,20 @@
+# Tests the components of this project against the fixture app.
+# Note: $CI_COMMIT_SHA testing requires this project to be on the same
+# GitLab instance as the runner. Components cannot be used across instances.
+include:
+  - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/proctor@$CI_COMMIT_SHA
+    inputs:
+      working_dir: tests/fixture-app
+      proctor_command: bin/proctor check --format=codequality
+  - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/php-test@$CI_COMMIT_SHA
+    inputs:
+      working_dir: tests/fixture-app
+      test_command: vendor/bin/phpunit
+  - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/composer-audit@$CI_COMMIT_SHA
+    inputs:
+      stage: audit
+      working_dir: tests/fixture-app
+
+stages:
+  - test
+  - audit

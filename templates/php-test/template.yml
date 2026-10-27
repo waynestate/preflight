@@ -1,0 +1,48 @@
+spec:
+  inputs:
+    stage:
+      description: Pipeline stage for the php-test jobs.
+      type: string
+      default: test
+    php_versions:
+      description: PHP versions to test against.
+      type: array
+      default: ["8.2", "8.3", "8.4", "8.5"]
+    test_command:
+      description: The test command to run.
+      type: string
+      default: vendor/bin/phpunit
+    working_dir:
+      description: Directory to run the command in, relative to the project root.
+      type: string
+      default: "."
+---
+php-test:
+  stage: $[[ inputs.stage ]]
+  # An array input that replaces an entire YAML value is interpolated as its
+  # specified type (docs: Input types), so the array feeds parallel:matrix
+  # directly. One job is created per PHP version; PHP_VERSION becomes a
+  # CI/CD variable in each job, which the image line expands.
+  parallel:
+    matrix:
+      - PHP_VERSION: $[[ inputs.php_versions ]]
+  image: php:${PHP_VERSION}-cli
+  script:
+    # php:*-cli images do not ship Composer, unzip or git. The images are
+    # Debian-based, so apt is used.
+    # Composer is installed with the official getcomposer.org installer;
+    # its SHA-384 is fetched at runtime from
+    # composer.github.io/installer.sig so the component keeps working when
+    # Composer releases a new version. The php -r check only verifies the
+    # download: on a mismatch it deletes the installer and exits 1. The
+    # installer then writes composer to /usr/local/bin/composer, so it is
+    # on PATH, and the installer file is removed. No $ variables appear in
+    # the php -r code, so GitLab CI variable expansion cannot corrupt it.
+    - apt-get update && apt-get install -y --no-install-recommends unzip git
+    - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+    - php -r "if (hash_file('sha384', 'composer-setup.php') !== trim(file_get_contents('https://composer.github.io/installer.sig'))) { unlink('composer-setup.php'); exit(1); }"
+    - php composer-setup.php --quiet --install-dir=/usr/local/bin --filename=composer
+    - rm composer-setup.php
+    - cd $[[ inputs.working_dir ]]
+    - composer install --no-interaction --no-progress
+    - $[[ inputs.test_command ]]
