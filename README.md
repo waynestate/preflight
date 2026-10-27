@@ -16,12 +16,12 @@ result as a GitLab Code Quality report.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/proctor@1.0.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@0.1.0
     inputs:
       proctor_command: vendor/bin/proctor check --format=codequality
 ```
 
-`@1.0.0` is the first tag and is not yet cut.
+`@0.1.0` is the first tag and is not cut yet. Until it is, pin a full commit SHA instead.
 
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
@@ -37,13 +37,13 @@ Runs the test command on each supported PHP version through `parallel:matrix`.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/php-test@1.0.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.0
     inputs:
       php_versions: ["8.2", "8.3", "8.4", "8.5"]
       test_command: vendor/bin/phpunit
 ```
 
-`@1.0.0` is the first tag and is not yet cut.
+`@0.1.0` is the first tag and is not cut yet. Until it is, pin a full commit SHA instead.
 
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
@@ -58,12 +58,12 @@ Runs `composer audit --locked` and fails on advisories.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/composer-audit@1.0.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@0.1.0
     inputs:
       working_dir: .
 ```
 
-`@1.0.0` is the first tag and is not yet cut.
+`@0.1.0` is the first tag and is not cut yet. Until it is, pin a full commit SHA instead.
 
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
