@@ -32,6 +32,8 @@ proctor:
   # Boolean input interpolated as a real YAML boolean (docs: an input that
   # replaces an entire YAML value is interpolated as its specified type).
   allow_failure: $[[ inputs.allow_failure ]]
+  interruptible: true
+  timeout: 30 minutes
   script:
     # php:8.4-cli does not ship Composer, unzip or git. The image is
     # Debian-based, so apt is used.

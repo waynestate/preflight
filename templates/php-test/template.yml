@@ -33,6 +33,8 @@ php-test:
     matrix:
       - PHP_VERSION: $[[ inputs.php_versions ]]
   image: php:${PHP_VERSION}-cli
+  interruptible: true
+  timeout: 30 minutes
   script:
     # php:*-cli images do not ship Composer, unzip or git. The images are
     # Debian-based, so apt is used.
