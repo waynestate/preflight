@@ -7,7 +7,7 @@ spec:
     php_versions:
       description: PHP versions to test against, one job per entry (for example "8.3"). Jobs use the official php:<version>-cli tag, so they test the newest patch release.
       type: array
-      default: ["8.2", "8.3", "8.4", "8.5"]
+      default: ["8.3", "8.4", "8.5"]
     composer_version:
       description: Composer version to install.
       type: string
