@@ -27,6 +27,7 @@ include:
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the job. |
 | `image` | string | `php:8.4-cli@sha256:debadc2e36b857657846e2e952cbaf52702e55482dd3c2c43806f68d8c534a70` | Docker image for the job. |
+| `composer_version` | string | `2.10.3` | Composer version to install. |
 | `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline. |
 | `proctor_command` | string | `vendor/bin/proctor check --format=codequality` | The proctor command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
@@ -39,7 +40,6 @@ Runs the test command on each supported PHP version through `parallel:matrix`.
 include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.0
     inputs:
-      php_versions: ["8.2", "8.3", "8.4", "8.5"]
       test_command: vendor/bin/phpunit
 ```
 
@@ -49,6 +49,7 @@ include:
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the jobs. |
 | `php_versions` | array | full image references, one per PHP version (see below) | PHP image references (tag plus digest) to test against, one job per entry. |
+| `composer_version` | string | `2.10.3` | Composer version to install. |
 | `test_command` | string | `vendor/bin/phpunit` | The test command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
 

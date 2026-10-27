@@ -8,6 +8,11 @@ spec:
       description: Docker image for the proctor job.
       type: string
       default: php:8.4-cli@sha256:debadc2e36b857657846e2e952cbaf52702e55482dd3c2c43806f68d8c534a70
+    composer_version:
+      description: Composer version to install.
+      type: string
+      default: 2.10.3
+      regex: /^2\.\d+\.\d+$/
     allow_failure:
       description: Whether the proctor job can fail without failing the pipeline.
       type: boolean
@@ -32,16 +37,16 @@ proctor:
     # Debian-based, so apt is used.
     # Composer is installed with the official getcomposer.org installer;
     # its SHA-384 is fetched at runtime from
-    # composer.github.io/installer.sig so the component keeps working when
-    # Composer releases a new version. The php -r check only verifies the
+    # composer.github.io/installer.sig. The php -r check only verifies the
     # download: on a mismatch it deletes the installer and exits 1. The
-    # installer then writes composer to /usr/local/bin/composer, so it is
-    # on PATH, and the installer file is removed. No $ variables appear in
-    # the php -r code, so GitLab CI variable expansion cannot corrupt it.
+    # installer then writes the pinned composer_version to
+    # /usr/local/bin/composer, so it is on PATH, and the installer file is
+    # removed. No $ variables appear in the php -r code, so GitLab CI
+    # variable expansion cannot corrupt it.
     - apt-get update && apt-get install -y --no-install-recommends unzip git
     - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
     - php -r "if (hash_file('sha384', 'composer-setup.php') !== trim(file_get_contents('https://composer.github.io/installer.sig'))) { unlink('composer-setup.php'); exit(1); }"
-    - php composer-setup.php --quiet --install-dir=/usr/local/bin --filename=composer
+    - php composer-setup.php --quiet --install-dir=/usr/local/bin --filename=composer --version=$[[ inputs.composer_version ]]
     - rm composer-setup.php
     - cd $[[ inputs.working_dir ]]
     - composer install --no-interaction --no-progress
