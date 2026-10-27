@@ -1,0 +1,34 @@
+{
+  "note": "The inputs contract for the PREFLIGHT components. Inside a major version, an input keeps its name, type and default, and a job keeps its name (BEST_PRACTICES.md 1.4). tests/check-contract.sh and tests/check-contract.ps1 compare templates/*/template.yml against this file on every pipeline. Only name, type and default are compared, so a template may add fields such as regex: without breaking the contract.",
+  "components": {
+    "proctor": {
+      "inputs": [
+        { "name": "stage", "type": "string", "default": "test" },
+        { "name": "image", "type": "string", "default": "php:8.4-cli@sha256:debadc2e36b857657846e2e952cbaf52702e55482dd3c2c43806f68d8c534a70" },
+        { "name": "composer_version", "type": "string", "default": "2.10.3" },
+        { "name": "allow_failure", "type": "boolean", "default": false },
+        { "name": "proctor_command", "type": "string", "default": "vendor/bin/proctor check --format=codequality" },
+        { "name": "working_dir", "type": "string", "default": "." }
+      ],
+      "jobs": ["proctor"]
+    },
+    "php-test": {
+      "inputs": [
+        { "name": "stage", "type": "string", "default": "test" },
+        { "name": "php_versions", "type": "array", "default": ["8.2", "8.3", "8.4", "8.5"] },
+        { "name": "composer_version", "type": "string", "default": "2.10.3" },
+        { "name": "test_command", "type": "string", "default": "vendor/bin/phpunit" },
+        { "name": "working_dir", "type": "string", "default": "." }
+      ],
+      "jobs": ["php-test"]
+    },
+    "composer-audit": {
+      "inputs": [
+        { "name": "stage", "type": "string", "default": "test" },
+        { "name": "image", "type": "string", "default": "composer:2@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc" },
+        { "name": "working_dir", "type": "string", "default": "." }
+      ],
+      "jobs": ["composer-audit"]
+    }
+  }
+}
