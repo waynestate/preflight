@@ -29,14 +29,19 @@ proctor:
   allow_failure: $[[ inputs.allow_failure ]]
   script:
     # php:8.4-cli does not ship Composer, unzip or git. The image is
-    # Debian-based, so apt is used. Composer is installed with the official
-    # getcomposer.org installer; its SHA-384 is fetched at runtime from
+    # Debian-based, so apt is used.
+    # Composer is installed with the official getcomposer.org installer;
+    # its SHA-384 is fetched at runtime from
     # composer.github.io/installer.sig so the component keeps working when
-    # Composer releases a new version. No $ variables appear in the php -r
-    # code, so GitLab CI variable expansion cannot corrupt it.
+    # Composer releases a new version. The php -r check only verifies the
+    # download: on a mismatch it deletes the installer and exits 1. The
+    # installer then writes composer to /usr/local/bin/composer, so it is
+    # on PATH, and the installer file is removed. No $ variables appear in
+    # the php -r code, so GitLab CI variable expansion cannot corrupt it.
     - apt-get update && apt-get install -y --no-install-recommends unzip git
     - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-    - php -r "if (hash_file('sha384', 'composer-setup.php') === trim(file_get_contents('https://composer.github.io/installer.sig'))) { require 'composer-setup.php'; } else { unlink('composer-setup.php'); exit(1); }"
+    - php -r "if (hash_file('sha384', 'composer-setup.php') !== trim(file_get_contents('https://composer.github.io/installer.sig'))) { unlink('composer-setup.php'); exit(1); }"
+    - php composer-setup.php --quiet --install-dir=/usr/local/bin --filename=composer
     - rm composer-setup.php
     - cd $[[ inputs.working_dir ]]
     - composer install --no-interaction --no-progress
