@@ -2,7 +2,7 @@
 
 **The mark is a runway threshold seen from the cockpit:** the striped "piano key" markings every aircraft crosses
 before takeoff, with a gold centreline running ahead. Every push crosses PREFLIGHT's checks before it reaches
-Citadel.
+production.
 
 ## Colours
 | Role | Colour |
