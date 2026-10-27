@@ -26,7 +26,8 @@ include:
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the job. |
-| `image` | string | `php:8.4-cli` | Docker image for the job. |
+| `image` | string | `php:8.4-cli@sha256:debadc2e36b857657846e2e952cbaf52702e55482dd3c2c43806f68d8c534a70` | Docker image for the job. |
+| `composer_version` | string | `2.10.3` | Composer version to install. |
 | `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline. |
 | `proctor_command` | string | `vendor/bin/proctor check --format=codequality` | The proctor command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
@@ -39,7 +40,6 @@ Runs the test command on each supported PHP version through `parallel:matrix`.
 include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.0
     inputs:
-      php_versions: ["8.2", "8.3", "8.4", "8.5"]
       test_command: vendor/bin/phpunit
 ```
 
@@ -49,6 +49,7 @@ include:
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the jobs. |
 | `php_versions` | array | `["8.2", "8.3", "8.4", "8.5"]` | PHP versions to test against. |
+| `composer_version` | string | `2.10.3` | Composer version to install. |
 | `test_command` | string | `vendor/bin/phpunit` | The test command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
 
@@ -68,7 +69,7 @@ include:
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the job. |
-| `image` | string | `composer:2` | Docker image for the job. |
+| `image` | string | `composer:2@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. |
 | `working_dir` | string | `.` | Directory to run composer audit in, relative to the project root. |
 
 ## Same instance only
@@ -87,6 +88,28 @@ app must live on or be mirrored to GitLab. See
 - Composer vendor: `waynestate/`
 - Licence: MIT
 - PHP floor: `^8.2`
+
+## Updating image pins
+
+Every image the components run is pinned by digest (`name:tag@sha256:...`),
+so a repointed tag cannot quietly change what a pipeline executes. The tag
+stays in front of the digest so a diff still reads like a version bump.
+
+The php-test matrix is the one exception. Its PHP images are tag-pinned on
+purpose, so those jobs run on the newest PHP patch release; every other
+component image is digest-pinned.
+
+To look up the digest for an image:
+
+```sh
+docker buildx imagetools inspect <image>:<tag>
+```
+
+Use the top-level `Digest:` line (the multi-arch index digest), not a
+per-platform one. Without `buildx`, `docker manifest inspect -v <image>:<tag>`
+shows the same index digest.
+
+Pins change only through a reviewed merge request.
 
 ## Local checks
 

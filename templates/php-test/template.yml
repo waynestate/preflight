@@ -5,9 +5,14 @@ spec:
       type: string
       default: test
     php_versions:
-      description: PHP versions to test against.
+      description: PHP versions to test against, one job per entry (for example "8.3"). Jobs use the official php:<version>-cli tag, so they test the newest patch release.
       type: array
       default: ["8.2", "8.3", "8.4", "8.5"]
+    composer_version:
+      description: Composer version to install.
+      type: string
+      default: 2.10.3
+      regex: /^2\.\d+\.\d+$/
     test_command:
       description: The test command to run.
       type: string
@@ -22,7 +27,8 @@ php-test:
   # An array input that replaces an entire YAML value is interpolated as its
   # specified type (docs: Input types), so the array feeds parallel:matrix
   # directly. One job is created per PHP version; PHP_VERSION becomes a
-  # CI/CD variable in each job, which the image line expands.
+  # CI/CD variable in each job, which the image line expands. The PHP images
+  # are deliberately tag-pinned (see README, "Updating image pins").
   parallel:
     matrix:
       - PHP_VERSION: $[[ inputs.php_versions ]]
@@ -32,16 +38,16 @@ php-test:
     # Debian-based, so apt is used.
     # Composer is installed with the official getcomposer.org installer;
     # its SHA-384 is fetched at runtime from
-    # composer.github.io/installer.sig so the component keeps working when
-    # Composer releases a new version. The php -r check only verifies the
+    # composer.github.io/installer.sig. The php -r check only verifies the
     # download: on a mismatch it deletes the installer and exits 1. The
-    # installer then writes composer to /usr/local/bin/composer, so it is
-    # on PATH, and the installer file is removed. No $ variables appear in
-    # the php -r code, so GitLab CI variable expansion cannot corrupt it.
+    # installer then writes the pinned composer_version to
+    # /usr/local/bin/composer, so it is on PATH, and the installer file is
+    # removed. No $ variables appear in the php -r code, so GitLab CI
+    # variable expansion cannot corrupt it.
     - apt-get update && apt-get install -y --no-install-recommends unzip git
     - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
     - php -r "if (hash_file('sha384', 'composer-setup.php') !== trim(file_get_contents('https://composer.github.io/installer.sig'))) { unlink('composer-setup.php'); exit(1); }"
-    - php composer-setup.php --quiet --install-dir=/usr/local/bin --filename=composer
+    - php composer-setup.php --quiet --install-dir=/usr/local/bin --filename=composer --version=$[[ inputs.composer_version ]]
     - rm composer-setup.php
     - cd $[[ inputs.working_dir ]]
     - composer install --no-interaction --no-progress
