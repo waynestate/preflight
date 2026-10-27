@@ -99,6 +99,24 @@ The `workflow:rules` block must live in the app's own file. A component
 cannot set the pipeline's `workflow:rules` for the project that includes it,
 so the `merge_request_event` rule goes in the app's `.gitlab-ci.yml`.
 
+## What the components cannot force
+
+An included component is a set of ordinary jobs. The app's own `.gitlab-ci.yml` is merged over them, so an app can
+override a job's keys, skip it with `rules`, or delete the `include:` line. PREFLIGHT makes the safe pipeline the easy
+one; it does not lock it. ROLLCALL is where skipped or weakened gates will show up. A preflight checklist only works
+if the pilot reads it.
+
+Three project settings make the gates harder to skip. All three work on GitLab Community Edition:
+
+- **Protect the default branch** and require a merge request to change it. Every change to `.gitlab-ci.yml` then
+  gets a reviewer. (Code owner approval needs Premium, so on Community Edition the reviewer is whoever merges.)
+- **Set "Minimum role to use pipeline variables" to `no_one_allowed`** unless the project needs pipeline variables.
+  The components take inputs, which are fixed and type checked for the whole run. Self-managed GitLab defaults this
+  setting to `maintainer`.
+- **Keep secrets away from fork merge requests.** A fork's merge request pipeline runs the fork's configuration.
+  Review a fork's `.gitlab-ci.yml` before running its pipeline, and never give it protected variables.
+
+
 ## Strongly recommended: a git.wayne.edu instance runner.
 
 Until git.wayne.edu has a runner, CI runs on GitLab, and PREFLIGHT and each
