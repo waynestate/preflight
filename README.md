@@ -76,6 +76,28 @@ include:
 Components work only inside the GitLab instance that hosts this project.
 Components cannot be used across instances except by mirroring.
 
+## When the components run
+
+The components are ordinary jobs, so they run whenever the app's pipeline
+runs. To run them on every merge request and on pushes to the default
+branch, put a `workflow:rules` block in the app's own `.gitlab-ci.yml`:
+
+```yaml
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@0.1.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@0.1.0
+```
+
+The `workflow:rules` block must live in the app's own file. A component
+cannot set the pipeline's `workflow:rules` for the project that includes it,
+so the `merge_request_event` rule goes in the app's `.gitlab-ci.yml`.
+
 ## Strongly recommended: a git.wayne.edu instance runner.
 
 Until git.wayne.edu has a runner, CI runs on GitLab, and PREFLIGHT and each
