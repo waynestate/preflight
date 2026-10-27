@@ -5,13 +5,9 @@ spec:
       type: string
       default: test
     php_versions:
-      description: PHP image references (tag plus digest) to test against, one job per entry.
+      description: PHP versions to test against, one job per entry (for example "8.3"). Jobs use the official php:<version>-cli tag, so they test the newest patch release.
       type: array
-      default:
-        - php:8.2-cli@sha256:f7c6b9fc4b410e6fa01160cf72b1c19bce7d5e35fd065c9290fceb15097a480b
-        - php:8.3-cli@sha256:98d555ff97b3865140ad31032508c3ca089fa97a8944b14ca9dc03ea05d788cd
-        - php:8.4-cli@sha256:debadc2e36b857657846e2e952cbaf52702e55482dd3c2c43806f68d8c534a70
-        - php:8.5-cli@sha256:635a4b998025ab269194639a5549c6fdcd9b4f88ec8cd761b092de8653d40663
+      default: ["8.2", "8.3", "8.4", "8.5"]
     composer_version:
       description: Composer version to install.
       type: string
@@ -30,13 +26,13 @@ php-test:
   stage: $[[ inputs.stage ]]
   # An array input that replaces an entire YAML value is interpolated as its
   # specified type (docs: Input types), so the array feeds parallel:matrix
-  # directly. One job is created per entry; PHP_IMAGE becomes a CI/CD variable
-  # in each job, which the image line expands. Each entry is a full image
-  # reference (tag plus digest), so the readable tag stays next to the pin.
+  # directly. One job is created per PHP version; PHP_VERSION becomes a
+  # CI/CD variable in each job, which the image line expands. The PHP images
+  # are deliberately tag-pinned (see README, "Updating image pins").
   parallel:
     matrix:
-      - PHP_IMAGE: $[[ inputs.php_versions ]]
-  image: ${PHP_IMAGE}
+      - PHP_VERSION: $[[ inputs.php_versions ]]
+  image: php:${PHP_VERSION}-cli
   script:
     # php:*-cli images do not ship Composer, unzip or git. The images are
     # Debian-based, so apt is used.

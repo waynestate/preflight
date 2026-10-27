@@ -48,19 +48,10 @@ include:
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the jobs. |
-| `php_versions` | array | full image references, one per PHP version (see below) | PHP image references (tag plus digest) to test against, one job per entry. |
+| `php_versions` | array | `["8.2", "8.3", "8.4", "8.5"]` | PHP versions to test against. |
 | `composer_version` | string | `2.10.3` | Composer version to install. |
 | `test_command` | string | `vendor/bin/phpunit` | The test command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
-
-The default `php_versions` is:
-
-```yaml
-- php:8.2-cli@sha256:f7c6b9fc4b410e6fa01160cf72b1c19bce7d5e35fd065c9290fceb15097a480b
-- php:8.3-cli@sha256:98d555ff97b3865140ad31032508c3ca089fa97a8944b14ca9dc03ea05d788cd
-- php:8.4-cli@sha256:debadc2e36b857657846e2e952cbaf52702e55482dd3c2c43806f68d8c534a70
-- php:8.5-cli@sha256:635a4b998025ab269194639a5549c6fdcd9b4f88ec8cd761b092de8653d40663
-```
 
 ### composer-audit
 
@@ -103,6 +94,10 @@ app must live on or be mirrored to GitLab. See
 Every image the components run is pinned by digest (`name:tag@sha256:...`),
 so a repointed tag cannot quietly change what a pipeline executes. The tag
 stays in front of the digest so a diff still reads like a version bump.
+
+The php-test matrix is the one exception. Its PHP images are tag-pinned on
+purpose, so those jobs run on the newest PHP patch release; every other
+component image is digest-pinned.
 
 To look up the digest for an image:
 
