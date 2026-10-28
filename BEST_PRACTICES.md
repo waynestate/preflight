@@ -7,8 +7,8 @@ of the repo on that date (no release tagged yet).
 ## What this covers
 
 PREFLIGHT is a set of GitLab CI/CD components that every stack project and WSU app includes with
-`include: component:`. Today it has four: `php-test` (PHP versions through `parallel:matrix`), `composer-audit`,
-`proctor` and `sbom`. Accessibility and contract suites come later.
+`include: component:`. Today it has six: `php-test` (PHP versions through `parallel:matrix`), `composer-audit`,
+`proctor`, `sbom`, `pint` and `phpstan`. Accessibility and contract suites come later.
 
 This guide is for two groups:
 
@@ -640,6 +640,30 @@ Sources: [CycloneDX: Composer generator](https://github.com/CycloneDX/cyclonedx-
 **How the stack holds it: Enforced.** The `sbom` component runs `composer CycloneDX:make-sbom --validate`, which fails
 the job on an invalid SBOM, and publishes the file as an artifact. Like every component, an app can skip the include,
 so the enforcement is "when included". The SBOM is the passenger manifest; without it, a stowaway is a mystery.
+
+### 4.14 Check code style with the app's own Pint
+Run the app's own Laravel Pint in test mode and fail the pipeline on style errors.
+
+Why: a shared style gate keeps every app's PHP readable and consistent, and running the app's own config means the
+standard is the one the app already agreed to, not one imposed by the template.
+
+Sources: [Laravel Pint](https://laravel.com/docs/12.x/pint).
+
+**How the stack holds it: Enforced.** The `pint` component installs the app's dependencies and runs
+`vendor/bin/pint --test` against the app's own `pint.json`. Like every component, an app can skip the include, so the
+enforcement is "when included".
+
+### 4.15 Catch static analysis errors with the app's own PHPStan
+Run the app's own PHPStan and fail the pipeline on static analysis errors, publishing a Code Quality report.
+
+Why: static analysis finds bugs before they run, and a Code Quality report gives reviewers a per-file, per-line view
+of what to fix. Running the app's own config means the level and paths are the ones the app already agreed to.
+
+Sources: [PHPStan](https://phpstan.org/); [GitLab: Code Quality](https://docs.gitlab.com/ci/testing/code_quality/).
+
+**How the stack holds it: Enforced.** The `phpstan` component installs the app's dependencies and runs
+`vendor/bin/phpstan analyse --error-format=gitlab` against the app's own `phpstan.neon`, publishing the report. Like
+every component, an app can skip the include, so the enforcement is "when included".
 
 ---
 

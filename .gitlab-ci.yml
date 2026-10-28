@@ -17,6 +17,12 @@ include:
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/sbom@$CI_COMMIT_SHA
     inputs:
       stage: audit
+  - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/pint@$CI_COMMIT_SHA
+    inputs:
+      working_dir: tests/fixture-app
+  - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/phpstan@$CI_COMMIT_SHA
+    inputs:
+      working_dir: tests/fixture-app
 
 stages:
   - test
