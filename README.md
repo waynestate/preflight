@@ -328,6 +328,9 @@ Pins change only through a reviewed merge request.
 - `image-no-tag` and `image-latest`: image references with no tag or with `latest`
 - `image-no-digest`: a warning for a tagged image that is not pinned by digest
 
+The container-build rules (`privileged`, `dind-service`, `docker-sock` and `kaniko-image`) are explained in
+BEST_PRACTICES.md 4.17.
+
 Known warnings can be allowlisted in `lint-allow.yml`. Each entry needs `file`,
 `rule` and `reason`; the reason is required so an allowlist entry is a reviewed
 decision, not a silence. The preflight checklist checks the checklist.
