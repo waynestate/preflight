@@ -684,6 +684,29 @@ Sources: [ESLint](https://eslint.org/); [Prettier](https://prettier.io/).
 app's own config. Like every component, an app can skip the include, so the enforcement is "when included". ESLint is
 the preflight checklist for your JavaScript.
 
+### 4.17 Build images without privileged runners or the Docker socket
+Do not give a job `privileged: true`, a Docker-in-Docker service, or a mount of the host's `/var/run/docker.sock`
+just to build an image.
+
+Why: a privileged container can reach the host's devices and step outside the sandbox, and a mounted Docker socket
+hands the job the host's Docker daemon, which runs as root on the machine. Either one turns a CI job into a path to
+the runner host, and on a shared instance runner that is every project on it.
+
+Sources: [GitLab Runner: security](https://docs.gitlab.com/runner/security/);
+[CISA and NSA: Defending CI/CD environments](https://cisa.gov/news-events/alerts/2023/06/28/cisa-and-nsa-release-joint-guidance-defending-continuous-integrationcontinuous-delivery-cicd).
+
+**How the stack holds it: Enforced.** The template lint (`bin/lint-templates`, run by `composer ci`) fails a
+template on all four patterns. Rule `privileged` reports "privileged: true is not allowed"; rule `dind-service`
+reports "Docker-in-Docker service is not allowed" for any `docker:dind` or `*-dind` service; rule `docker-sock`
+reports "references docker.sock" for any string that names the socket; rule `kaniko-image` reports "Kaniko image is
+not allowed" for a Kaniko image or service. None of the components builds an image, so nothing in `templates/` needs
+an allowlist entry.
+
+What to do instead: keep image building out of the pipeline jobs. Where a build must run in CI, use a builder that
+does not need privileges, such as Buildah or BuildKit in rootless mode (lead: verify). Kaniko is not the fallback
+here: the lint rejects it, and nothing in the repo records why. The runner side of the same rule is 5.3. A mounted
+Docker socket is the one line the preflight checklist never signs.
+
 ---
 
 ## 5. Secrets, tokens and runners
