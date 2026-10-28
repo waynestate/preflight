@@ -23,9 +23,7 @@ final class TemplateLinter
     /** @var array<string, true> */
     private array $seen = [];
 
-    public function __construct(private readonly string $root)
-    {
-    }
+    public function __construct(private readonly string $root) {}
 
     public function run(): int
     {
@@ -204,7 +202,7 @@ final class TemplateLinter
 
         return array_values(array_filter(
             $documents,
-            static fn (string $document): bool => self::hasYamlContent($document),
+            static fn(string $document): bool => self::hasYamlContent($document),
         ));
     }
 
