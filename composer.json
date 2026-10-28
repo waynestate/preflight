@@ -1,0 +1,31 @@
+{
+    "name": "waynestate/preflight",
+    "description": "GitLab CI/CD components and a reusable GitHub Actions workflow for WSU PHP packages.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Wayne State University, Enterprise Applications"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "symfony/yaml": "^7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "WayneState\\Preflight\\": "src/"
+        }
+    },
+    "config": {
+        "platform": {
+            "php": "8.3.0"
+        },
+        "sort-packages": true
+    },
+    "scripts": {
+        "ci": [
+            "php bin/lint-templates",
+            "php bin/lint-templates --test"
+        ]
+    }
+}
