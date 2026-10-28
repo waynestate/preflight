@@ -38,7 +38,7 @@ Get-ChildItem -Path (Join-Path $Root "templates") -Directory | ForEach-Object {
     if ($lines[$i] -match '^---[ \t]*$') { $sepIndex = $i }
   }
   if ($sepIndex -lt 0) {
-    Fail "${name}: no `---` separator between the spec and jobs documents"
+    Fail "${name}: no '---' separator between the spec and jobs documents"
     return
   }
   $spec = @($lines[0..($sepIndex - 1)])

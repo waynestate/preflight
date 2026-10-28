@@ -34,7 +34,7 @@ for tpl in "$ROOT"/templates/*/template.yml; do
   # The spec document is everything before the last `---` line.
   sep=$(grep -nE '^---[[:blank:]]*$' "$tpl" | tail -n 1 | cut -d: -f1)
   if [ -z "$sep" ]; then
-    fail "$name: no `---` separator between the spec and jobs documents"
+    fail "$name: no '---' separator between the spec and jobs documents"
     continue
   fi
   spec=$(awk -v n="$sep" 'NR < n' "$tpl")
