@@ -51,6 +51,13 @@ include:
 | `test_command` | string | `vendor/bin/phpunit` | The test command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
 
+#### Caching
+
+The jobs always cache Composer downloads in `.composer-cache/` so repeat runs
+do not re-download every package. The cache key depends on `composer.lock`
+and is prefixed with the PHP version, so a dependency change invalidates the
+cache and each PHP version gets its own cache.
+
 ### composer-audit
 
 Runs `composer audit --locked` and fails on advisories.

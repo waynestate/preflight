@@ -547,7 +547,7 @@ Why: pipelines run faster, and an unreviewed branch cannot poison the cache that
 
 Sources: [GitLab: caching](https://docs.gitlab.com/ci/caching/).
 
-**How the stack holds it: Not yet.** The templates define no cache, so each matrix job downloads all packages again.
+**How the stack holds it: Checked.** `php-test` caches Composer downloads in `.composer-cache/`, keyed on `composer.lock` and prefixed with the PHP version, so a dependency change invalidates the cache and each PHP version gets its own cache. `tests/check-php-test-cache.sh` (and its `.ps1` twin) fail if the key stops depending on `composer.lock` or the prefix stops including the PHP version. `proctor` and `composer-audit` still define no cache.
 
 Second pass: GitLab appends `-protected` or `-non_protected` to every cache key. Pipelines on protected branches or tags,
 and pipelines started by a Maintainer or Owner, get `-protected`. The separation is on by default and GitLab calls it

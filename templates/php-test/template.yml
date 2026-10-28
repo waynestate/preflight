@@ -36,6 +36,20 @@ php-test:
   image: php:${PHP_VERSION}-cli
   interruptible: true
   timeout: 30 minutes
+  # The cache is always on. COMPOSER_CACHE_DIR points Composer at a path
+  # inside the project so GitLab can cache it. The key depends on
+  # composer.lock and the PHP version, so a dependency change invalidates the
+  # cache and each PHP version gets its own.
+  cache:
+    key:
+      files:
+        - composer.lock
+      prefix: php-${PHP_VERSION}
+    paths:
+      - .composer-cache/
+    policy: pull-push
+  variables:
+    COMPOSER_CACHE_DIR: "$CI_PROJECT_DIR/.composer-cache"
   script:
     # php:*-cli images do not ship Composer, unzip or git. The images are
     # Debian-based, so apt is used.
