@@ -48,6 +48,15 @@ include:
 | `composer_version` | string | `2.10.3` | Composer version to install. |
 | `test_command` | string | `vendor/bin/phpunit` | The test command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
+| `cache` | boolean | `true` | Whether to cache Composer downloads between runs. |
+
+#### Caching
+
+By default the jobs cache Composer downloads in `.composer-cache/` so repeat
+runs do not re-download every package. The cache key depends on
+`composer.lock` and is prefixed with the PHP version, so a dependency change
+invalidates the cache and each PHP version gets its own cache. Set
+`cache: false` to disable it.
 
 ### composer-audit
 

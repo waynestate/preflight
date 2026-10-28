@@ -22,7 +22,28 @@ spec:
       description: Directory to run the command in, relative to the project root.
       type: string
       default: "."
+    cache:
+      description: Whether to cache Composer downloads between runs.
+      type: boolean
+      default: true
 ---
+# The cache block lives on a hidden job so the boolean cache input can turn it
+# on or off (docs: Components, "Use boolean inputs to conditionally configure
+# jobs"). When cache is false the job extends the empty hidden job, so no cache
+# is configured.
+.php-test:cache:false:
+  extends: null
+
+.php-test:cache:true:
+  cache:
+    key:
+      files:
+        - composer.lock
+      prefix: php-${PHP_VERSION}
+    paths:
+      - .composer-cache/
+    policy: pull-push
+
 php-test:
   stage: $[[ inputs.stage ]]
   # An array input that replaces an entire YAML value is interpolated as its
@@ -36,6 +57,12 @@ php-test:
   image: php:${PHP_VERSION}-cli
   interruptible: true
   timeout: 30 minutes
+  # The boolean cache input selects which hidden job to extend, so the cache
+  # block is present only when cache is true. COMPOSER_CACHE_DIR points
+  # Composer at a path inside the project so GitLab can cache it.
+  extends: '.php-test:cache:$[[ inputs.cache ]]'
+  variables:
+    COMPOSER_CACHE_DIR: "$CI_PROJECT_DIR/.composer-cache"
   script:
     # php:*-cli images do not ship Composer, unzip or git. The images are
     # Debian-based, so apt is used.
