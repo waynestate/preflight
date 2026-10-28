@@ -703,8 +703,9 @@ not allowed" for a Kaniko image or service. None of the components builds an ima
 an allowlist entry.
 
 What to do instead: keep image building out of the pipeline jobs. Where a build must run in CI, use a builder that
-does not need privileges, such as Buildah or BuildKit in rootless mode (lead: verify). Kaniko is not the fallback
-here: the lint rejects it, and nothing in the repo records why. The runner side of the same rule is 5.3. A mounted
+does not need privileges, such as [BuildKit in rootless mode](https://github.com/moby/buildkit/blob/master/docs/rootless.md)
+or [Buildah](https://buildah.io/) run rootless. Kaniko is not the fallback here: Google archived the upstream project
+in 2025, so it no longer gets fixes, and the lint rejects it. The runner side of the same rule is 5.3. A mounted
 Docker socket is the one line the preflight checklist never signs.
 
 ---
