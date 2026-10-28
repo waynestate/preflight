@@ -1,0 +1,114 @@
+# PHP package CI — the reusable workflow that mirrored packages call.
+#
+# GitLab components only run inside one GitLab instance, so a package that is
+# also mirrored to github.com/waynestate cannot use them there. This workflow
+# is the GitHub-side equivalent: it runs the package's `composer ci` script on
+# every supported PHP version, then a Composer audit on the oldest one.
+#
+# It is committed to this repo (and so to GitLab) but only ever runs on the
+# GitHub mirror; GitLab ignores .github/workflows. A release tag is not done
+# until it is green on both sides.
+name: PHP package CI
+
+on:
+  workflow_call:
+    inputs:
+      php-versions:
+        description: >-
+          PHP versions to test, as a JSON array of strings, lowest first
+          (for example '["8.3","8.4","8.5"]'). The audit job runs on the first
+          (oldest) entry.
+        required: false
+        type: string
+        default: '["8.3","8.4","8.5"]'
+      ci-command:
+        description: >-
+          The command to run in each PHP version job. Defaults to the package's
+          `composer ci` script, which is where a package keeps its checks.
+        required: false
+        type: string
+        default: composer ci
+      working-directory:
+        description: >-
+          Directory to run the command in, relative to the repository root.
+          Use this for monorepos where the package lives in a subdirectory.
+        required: false
+        type: string
+        default: .
+
+# A reusable workflow should ask for the least it can get. It only reads the
+# checkout; it never writes back to the caller's repository.
+permissions:
+  contents: read
+
+# One run per branch at a time. A new push to a branch cancels the old run; a
+# tag run is never cancelled, because a release must finish what it started.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ startsWith(github.ref, 'refs/tags/') != true }}
+
+jobs:
+  test:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-24.04
+    strategy:
+      # Let every PHP version finish so one failure does not hide the others.
+      fail-fast: false
+      matrix:
+        php: ${{ fromJSON(inputs.php-versions) }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set up PHP ${{ matrix.php }}
+        # Composer is pinned to the same release the GitLab components use, so
+        # both sides resolve dependencies the same way.
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: composer:2.10.3
+
+      - name: Cache Composer dependencies
+        # The download cache is keyed per PHP version so the parallel matrix
+        # jobs never race on the same cache entry.
+        uses: actions/cache@2cdf405574d6ef1f33a1d12acccd3ae82f47b3f2 # v4.1.0
+        with:
+          path: ~/.cache/composer
+          key: composer-${{ runner.os }}-${{ matrix.php }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            composer-${{ runner.os }}-${{ matrix.php }}-
+            composer-${{ runner.os }}-
+
+      - name: Install dependencies
+        working-directory: ${{ inputs.working-directory }}
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Run the CI checks
+        working-directory: ${{ inputs.working-directory }}
+        run: ${{ inputs.ci-command }}
+
+  audit:
+    name: Composer audit
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set up PHP ${{ fromJSON(inputs.php-versions)[0] }}
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: ${{ fromJSON(inputs.php-versions)[0] }}
+          coverage: none
+          tools: composer:2.10.3
+
+      - name: Audit the lock file
+        # --locked audits the exact versions in composer.lock; without a lock
+        # file, audit the resolved set instead.
+        working-directory: ${{ inputs.working-directory }}
+        run: |
+          if [ -f composer.lock ]; then
+            composer audit --locked
+          else
+            composer audit
+          fi

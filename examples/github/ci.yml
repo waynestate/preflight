@@ -1,0 +1,15 @@
+# A mirrored package calls the reusable workflow from its own
+# .github/workflows/ci.yml. Copy this file and change the `uses:` ref.
+#
+# @0.1.0 is the first tag and is not cut yet. Until it is, pin a full commit
+# SHA instead — the same rule as the GitLab components.
+name: CI
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v*', '*.*.*']
+
+jobs:
+  ci:
+    uses: waynestate/preflight/.github/workflows/php-package.yml@0.1.0
