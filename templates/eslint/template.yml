@@ -1,0 +1,52 @@
+# eslint: run the app's own ESLint (and Prettier) and fail on lint or format errors.
+#
+# The component installs the app's dependencies and runs ESLint and Prettier
+# against the app's own config. It does not install ESLint or Prettier itself:
+# the app must require @waynestate/pinstripe, eslint and prettier as dev
+# dependencies and ship an eslint.config.js (or point `eslint_args` at its own
+# files).
+---
+spec:
+  version: "1"
+  name: eslint
+  category: "Testing/Validation"
+  description: "Run the app's own ESLint and Prettier and fail on lint or format errors."
+  tags: "javascript,style,eslint,prettier"
+  inputs:
+    stage:
+      type: string
+      default: test
+      description: "Pipeline stage for the eslint job."
+    image:
+      type: string
+      default: "node:22.13-alpine@sha256:e2b39f7b64281324929257d0f8004fb6cb4bf0fdfb9aa8cedb235a766aec31da"
+      description: "Container image used to run ESLint and Prettier."
+    working_dir:
+      type: string
+      default: "."
+      description: "Directory the app lives in, relative to the repository root."
+    eslint_args:
+      type: string
+      default: "."
+      description: "Arguments passed to eslint (for example a directory or file list)."
+    prettier:
+      type: boolean
+      default: true
+      description: "Whether to also run prettier --check."
+---
+eslint:
+  stage: $[[ inputs.stage ]]
+  image: $[[ inputs.image ]]
+  interruptible: true
+  timeout: 15m
+  cache:
+    key:
+      files:
+        - package-lock.json
+    paths:
+      - .npm-cache/
+  script:
+    - cd "$[[ inputs.working_dir ]]"
+    - npm ci --ignore-scripts --cache .npm-cache
+    - npx --no-install eslint $[[ inputs.eslint_args ]]
+    - if [ "$[[ inputs.prettier ]]" = "true" ]; then npx --no-install prettier --check .; fi

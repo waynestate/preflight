@@ -57,6 +57,16 @@
         { "name": "working_dir", "type": "string", "default": "." }
       ],
       "jobs": ["phpstan"]
+    },
+    "eslint": {
+      "inputs": [
+        { "name": "stage", "type": "string", "default": "test" },
+        { "name": "image", "type": "string", "default": "node:22.13-alpine@sha256:e2b39f7b64281324929257d0f8004fb6cb4bf0fdfb9aa8cedb235a766aec31da" },
+        { "name": "working_dir", "type": "string", "default": "." },
+        { "name": "eslint_args", "type": "string", "default": "." },
+        { "name": "prettier", "type": "boolean", "default": true }
+      ],
+      "jobs": ["eslint"]
     }
   }
 }
