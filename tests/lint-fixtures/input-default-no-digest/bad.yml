@@ -1,0 +1,8 @@
+spec:
+  inputs:
+    image:
+      type: string
+      default: php:8.4-cli
+---
+job:
+  image: $[[ inputs.image ]]

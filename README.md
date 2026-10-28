@@ -193,9 +193,33 @@ shows the same index digest.
 
 Pins change only through a reviewed merge request.
 
+## Template lint
+
+`composer ci` runs `bin/lint-templates` before the fixture tests. The lint scans
+`templates/**/*.yml` and `.github/workflows/*.yml` for unsafe CI patterns:
+
+- `privileged` — `privileged: true`
+- `dind-service` — Docker-in-Docker services
+- `docker-sock` — references to `docker.sock`
+- `kaniko-image` — Kaniko images
+- `unpinned-action` — GitHub `uses:` entries that are not pinned to a 40-character SHA
+- `image-no-tag` and `image-latest` — image references with no tag or with `latest`
+- `image-no-digest` — a warning for a tagged image that is not pinned by digest
+
+Known warnings can be allowlisted in `lint-allow.yml`. Each entry needs `file`,
+`rule` and `reason`; the reason is required so an allowlist entry is a reviewed
+decision, not a silence. The preflight checklist checks the checklist.
+
 ## Local checks
 
-Run the fixture tests with Docker:
+Run the template lint and the fixture tests with Docker:
+
+```sh
+docker run --rm -v "$(pwd):/app" -w /app composer:2 composer install
+docker run --rm -v "$(pwd):/app" -w /app composer:2 composer ci
+```
+
+Run the PHP fixture app separately:
 
 ```sh
 docker run --rm -v "$(pwd)/tests/fixture-app:/app" -w /app composer:2 composer install

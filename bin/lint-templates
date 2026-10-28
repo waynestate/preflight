@@ -1,0 +1,20 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+$autoload = dirname(__DIR__) . '/vendor/autoload.php';
+if (!is_file($autoload)) {
+    fwrite(STDERR, 'vendor/autoload.php is missing. Run composer install first.' . PHP_EOL);
+    exit(1);
+}
+
+require $autoload;
+
+$root = dirname(__DIR__);
+
+if (in_array('--test', $argv, true)) {
+    exit((new WayneState\Preflight\LintTestRunner($root))->run());
+}
+
+exit((new WayneState\Preflight\TemplateLinter($root))->run());

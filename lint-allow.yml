@@ -1,0 +1,4 @@
+allow:
+  - file: templates/php-test/template.yml
+    rule: image-no-digest
+    reason: The php-test matrix is tag-pinned on purpose so each job runs the newest PHP patch release (README, "Updating image pins").

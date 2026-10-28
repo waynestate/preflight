@@ -416,6 +416,7 @@ Sources: [GitLab: pipeline security, Docker images](https://docs.gitlab.com/ci/p
 **How the stack holds it: Enforced.** The `proctor` and `composer-audit` image defaults carry a digest
 (`php:8.4-cli@sha256:...` and `composer:2@sha256:...`), and the README's "Updating image pins" says how to move them.
 The exception is `php-test`: its matrix image `php:${PHP_VERSION}-cli` is still a tag, because each version would need its own digest.
+The template lint (`bin/lint-templates`, run by `composer ci`) fails on `latest` or tag-less images and warns on tag-only images, so a new template cannot drift back to an unpinned image without a reviewed `lint-allow.yml` entry.
 
 Second pass: GitLab's pipeline security page says "Always use SHA digests for Docker images". Renovate documents the
 usual way to live with that: keep the tag and add the digest (`image:tag@sha256:...`), and let a bot open a change when the
