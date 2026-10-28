@@ -444,8 +444,8 @@ templates do not switch on the target yet.
 
 Second pass, rate limits re-checked in Docker's docs: unauthenticated pulls are limited to 100 per 6 hours per IPv4
 address or IPv6 /64 subnet, and free authenticated users to 200 per 6 hours. A shared instance runner usually sits behind
-one address. A default pipeline pulls about six images (four PHP versions, `composer:2`, `php:8.4-cli`), so roughly
-sixteen cold pipelines per six hours would use up the unauthenticated limit for the whole runner. That is arithmetic
+one address. A default pipeline pulls about five images (three PHP versions, `composer:2`, `php:8.4-cli`), so
+twenty cold pipelines per six hours would use up the unauthenticated limit for the whole runner. That is arithmetic
 from the documented limit and an assumed single address, not a measured result. GitLab's dependency proxy for container
 images is on all tiers, is enabled by default on self-managed, caches manifests and layers, and supports pulls by digest
 through `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/image@sha256:...`. It can also hold Docker Hub credentials for the group.
