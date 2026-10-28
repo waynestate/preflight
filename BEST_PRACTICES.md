@@ -118,7 +118,7 @@ Why: it decides where PREFLIGHT and the apps that use it must live.
 Sources: [GitLab: components, cross-instance access](https://docs.gitlab.com/ci/components/).
 
 **How the stack holds it: Documented.** The README has a "Same instance only" section. Until git.wayne.edu has an
-instance runner, PREFLIGHT and each app must be on or mirrored to GitLab. See `design/instance-runner-case.md`.
+instance runner, PREFLIGHT and each app must be on or mirrored to the GitLab instance that has a runner.
 
 ### 1.6 Assume a tag can move, and give consumers the SHA
 Publish the commit SHA next to every release tag in the release notes. Tell apps to pin the SHA and use the tag only as a
@@ -180,7 +180,7 @@ Sources: [GitLab: CI/CD inputs](https://docs.gitlab.com/ci/inputs/);
 [GitLab: component examples](https://docs.gitlab.com/ci/components/examples/).
 
 **How the stack holds it: Enforced.** All three templates use `spec:inputs` with types, descriptions and defaults.
-GitLab rejects a wrong type or an unknown input at pipeline creation. The first pipeline on GitLab passed all six jobs
+GitLab rejects a wrong type or an unknown input at pipeline creation. The first pipeline passed all six jobs
 with the array input.
 
 Second pass, limits to design around: GitLab's inputs page says a pipeline can take up to 20 inputs (it does not say
@@ -826,7 +826,7 @@ Why: a constraint of `^8.2` is a promise about 8.2, 8.3, 8.4 and 8.5.
 
 Sources: [GitLab: CI/CD YAML, `parallel:matrix`](https://docs.gitlab.com/ci/yaml/).
 
-**How the stack holds it: Checked.** `php-test` creates one job per entry through `parallel:matrix`. The first GitLab
+**How the stack holds it: Checked.** `php-test` creates one job per entry through `parallel:matrix`. The first
 pipeline ran it on 8.2, 8.3, 8.4 and 8.5.
 
 The matrix limit of 200 permutations was re-checked in the GitLab YAML reference and is correct.

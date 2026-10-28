@@ -241,9 +241,8 @@ Three project settings make the gates harder to skip. All three work on GitLab C
 
 ## Strongly recommended: a git.wayne.edu instance runner.
 
-Until git.wayne.edu has a runner, CI runs on GitLab, and PREFLIGHT and each
-app must live on or be mirrored to GitLab. See
-`design/instance-runner-case.md` in the stack coordination repo.
+Until git.wayne.edu has a runner, CI runs on the GitLab instance that has one, and PREFLIGHT and each
+app must live on or be mirrored to it. A git.wayne.edu instance runner is strongly recommended.
 
 ## Shared conventions
 
