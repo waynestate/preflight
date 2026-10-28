@@ -5,7 +5,7 @@
 # is the GitHub-side equivalent: it runs the package's `composer ci` script on
 # every supported PHP version, then a Composer audit on the oldest one.
 #
-# It is committed to this repo (and so to GitLab) but only ever runs on the
+# It is committed to this repo (and so to the GitLab runners) but only ever runs on the
 # GitHub mirror; GitLab ignores .github/workflows. A release tag is not done
 # until it is green on both sides.
 name: PHP package CI
