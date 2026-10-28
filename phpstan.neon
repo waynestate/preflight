@@ -6,7 +6,7 @@ parameters:
         - bin
         - tests
     excludePaths:
-        - tests[/\\]fixture-app
+        - tests/fixture-app
     reportIgnoresWithoutComments: true
     reportUnmatchedIgnoredErrors: true
     phpVersion:
