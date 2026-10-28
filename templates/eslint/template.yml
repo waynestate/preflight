@@ -7,11 +7,7 @@
 # files).
 ---
 spec:
-  version: "1"
-  name: eslint
-  category: "Testing/Validation"
   description: "Run the app's own ESLint and Prettier and fail on lint or format errors."
-  tags: "javascript,style,eslint,prettier"
   inputs:
     stage:
       type: string
