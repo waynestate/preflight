@@ -1,0 +1,40 @@
+# pint: run the app's own Laravel Pint in test mode and fail on style errors.
+#
+# The component installs the app's dependencies and runs Pint against the
+# app's own config. It does not install Pint itself: the app must require
+# laravel/pint as a dev dependency and ship a pint.json (or point `config`
+# at its own file).
+---
+spec:
+  version: "1"
+  name: pint
+  category: "Testing/Validation"
+  description: "Run the app's own Laravel Pint in test mode and fail on style errors."
+  tags: "php,style,pint"
+  inputs:
+    stage:
+      type: string
+      default: test
+      description: "Pipeline stage for the pint job."
+    image:
+      type: string
+      default: "composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc"
+      description: "Container image used to run Pint."
+    config:
+      type: string
+      default: "pint.json"
+      description: "Path to the app's Pint config file."
+    working_dir:
+      type: string
+      default: "."
+      description: "Directory the app lives in, relative to the repository root."
+---
+pint:
+  stage: $[[ inputs.stage ]]
+  image: $[[ inputs.image ]]
+  interruptible: true
+  timeout: 10m
+  script:
+    - cd "$[[ inputs.working_dir ]]"
+    - composer install --no-interaction --no-progress --prefer-dist
+    - vendor/bin/pint --test --config=$[[ inputs.config ]]

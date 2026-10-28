@@ -1,8 +1,8 @@
 # PREFLIGHT
 
 PREFLIGHT is a set of GitLab CI/CD components that give every WSU app the
-same checks: PROCTOR, PHP tests on each supported version, and Composer
-audit.
+same checks: PROCTOR, PHP tests on each supported version, Composer audit,
+an SBOM, Pint and PHPStan.
 
 Components are GA on the Free tier since GitLab 17.0. They work only within
 the same GitLab instance that hosts this project.
@@ -92,6 +92,48 @@ include:
 | `omit_dev` | boolean | `true` | Whether to omit dev dependencies from the SBOM. |
 | `output` | string | `sbom.cdx.json` | Path of the SBOM file to publish, relative to the project root. |
 
+### pint
+
+Runs the app's own [Laravel Pint](https://laravel.com/docs/12.x/pint) in test mode and fails the pipeline on style errors. The app must require `laravel/pint` as a dev dependency and ship a `pint.json` (or point `config` at its own file).
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@0.1.0
+    inputs:
+      config: pint.json
+```
+
+`@0.1.0` is the first tag and is not cut yet. Until it is, pin a full commit SHA instead.
+
+| Input | Type | Default | What it does |
+|-------|------|---------|--------------|
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `image` | string | `composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. |
+| `config` | string | `pint.json` | Path to the app's Pint config file. |
+| `working_dir` | string | `.` | Directory to run Pint in, relative to the project root. |
+
+### phpstan
+
+Runs the app's own [PHPStan](https://phpstan.org/) and fails the pipeline on static analysis errors, writing a GitLab Code Quality report. The app must require `phpstan/phpstan` as a dev dependency and ship a `phpstan.neon` (or point `config` at its own file).
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@0.1.0
+    inputs:
+      config: phpstan.neon
+      memory_limit: 1G
+```
+
+`@0.1.0` is the first tag and is not cut yet. Until it is, pin a full commit SHA instead.
+
+| Input | Type | Default | What it does |
+|-------|------|---------|--------------|
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `image` | string | `composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. |
+| `config` | string | `phpstan.neon` | Path to the app's PHPStan config file. |
+| `memory_limit` | string | `1G` | Memory limit passed to PHPStan. |
+| `working_dir` | string | `.` | Directory to run PHPStan in, relative to the project root. |
+
 ## Same instance only
 
 Components work only inside the GitLab instance that hosts this project.
@@ -155,6 +197,8 @@ include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.0
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@0.1.0
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@0.1.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@0.1.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@0.1.0
 ```
 
 The `workflow:rules` block must live in the app's own file. A component

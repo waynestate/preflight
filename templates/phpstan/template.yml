@@ -1,0 +1,48 @@
+# phpstan: run the app's own PHPStan and fail on static analysis errors.
+#
+# The component installs the app's dependencies and runs PHPStan against the
+# app's own config, writing a GitLab Code Quality report. It does not install
+# PHPStan itself: the app must require phpstan/phpstan as a dev dependency
+# and ship a phpstan.neon (or point `config` at its own file).
+---
+spec:
+  version: "1"
+  name: phpstan
+  category: "Testing/Validation"
+  description: "Run the app's own PHPStan and fail on static analysis errors."
+  tags: "php,static-analysis,phpstan"
+  inputs:
+    stage:
+      type: string
+      default: test
+      description: "Pipeline stage for the phpstan job."
+    image:
+      type: string
+      default: "composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc"
+      description: "Container image used to run PHPStan."
+    config:
+      type: string
+      default: "phpstan.neon"
+      description: "Path to the app's PHPStan config file."
+    memory_limit:
+      type: string
+      default: "1G"
+      description: "Memory limit passed to PHPStan (for example 1G)."
+    working_dir:
+      type: string
+      default: "."
+      description: "Directory the app lives in, relative to the repository root."
+---
+phpstan:
+  stage: $[[ inputs.stage ]]
+  image: $[[ inputs.image ]]
+  interruptible: true
+  timeout: 10m
+  script:
+    - cd "$[[ inputs.working_dir ]]"
+    - composer install --no-interaction --no-progress --prefer-dist
+    - vendor/bin/phpstan analyse --no-progress --error-format=gitlab --memory-limit=$[[ inputs.memory_limit ]] -c $[[ inputs.config ]] > "$CI_PROJECT_DIR/phpstan-report.json"
+  artifacts:
+    when: always
+    reports:
+      codequality: phpstan-report.json
