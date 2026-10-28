@@ -2,7 +2,7 @@
 
 PREFLIGHT is a set of GitLab CI/CD components that give every WSU app the
 same checks: PROCTOR, PHP tests on each supported version, Composer audit,
-an SBOM, Pint and PHPStan.
+an SBOM, Pint, PHPStan and ESLint.
 
 Components are GA on the Free tier since GitLab 17.0. They work only within
 the same GitLab instance that hosts this project.
@@ -20,8 +20,6 @@ include:
     inputs:
       proctor_command: vendor/bin/proctor check --format=codequality
 ```
-
-`@0.1.0` is the first tag and is not cut yet. Until it is, pin a full commit SHA instead.
 
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
@@ -43,8 +41,6 @@ include:
       test_command: vendor/bin/phpunit
 ```
 
-`@0.1.0` is the first tag and is not cut yet. Until it is, pin a full commit SHA instead.
-
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the jobs. |
@@ -64,8 +60,6 @@ include:
       working_dir: .
 ```
 
-`@0.1.0` is the first tag and is not cut yet. Until it is, pin a full commit SHA instead.
-
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the job. |
@@ -78,12 +72,12 @@ Generates a CycloneDX SBOM with `cyclonedx/cyclonedx-php-composer`, validates it
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@0.1.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@<full-commit-sha>
     inputs:
       output: sbom.cdx.json
 ```
 
-`@0.1.0` is the first tag and is not cut yet. Until it is, pin a full commit SHA instead.
+This component is not in `0.1.0`; it arrives in the next tag. Until then, pin a full commit SHA instead.
 
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
@@ -98,12 +92,12 @@ Runs the app's own [Laravel Pint](https://laravel.com/docs/12.x/pint) in test mo
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@0.1.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@<full-commit-sha>
     inputs:
       config: pint.json
 ```
 
-`@0.1.0` is the first tag and is not cut yet. Until it is, pin a full commit SHA instead.
+This component is not in `0.1.0`; it arrives in the next tag. Until then, pin a full commit SHA instead.
 
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
@@ -118,13 +112,13 @@ Runs the app's own [PHPStan](https://phpstan.org/) and fails the pipeline on sta
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@0.1.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@<full-commit-sha>
     inputs:
       config: phpstan.neon
       memory_limit: 1G
 ```
 
-`@0.1.0` is the first tag and is not cut yet. Until it is, pin a full commit SHA instead.
+This component is not in `0.1.0`; it arrives in the next tag. Until then, pin a full commit SHA instead.
 
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
@@ -133,6 +127,27 @@ include:
 | `config` | string | `phpstan.neon` | Path to the app's PHPStan config file. |
 | `memory_limit` | string | `1G` | Memory limit passed to PHPStan. |
 | `working_dir` | string | `.` | Directory to run PHPStan in, relative to the project root. |
+
+### eslint
+
+Runs the app's own [ESLint](https://eslint.org/) (and [Prettier](https://prettier.io/)) and fails the pipeline on lint or format errors. The app must require `@waynestate/pinstripe`, `eslint` and `prettier` as dev dependencies and ship an `eslint.config.js` (or point `eslint_args` at its own files).
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@<full-commit-sha>
+    inputs:
+      eslint_args: .
+```
+
+This component is not in `0.1.0`; it arrives in the next tag. Until then, pin a full commit SHA instead.
+
+| Input | Type | Default | What it does |
+|-------|------|---------|--------------|
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `image` | string | `node:22.13-alpine@sha256:e2b39f7b64281324929257d0f8004fb6cb4bf0fdfb9aa8cedb235a766aec31da` | Docker image for the job. |
+| `working_dir` | string | `.` | Directory to run the commands in, relative to the project root. |
+| `eslint_args` | string | `.` | Arguments passed to eslint. |
+| `prettier` | boolean | `true` | Whether to also run `prettier --check`. |
 
 ## Same instance only
 
@@ -164,11 +179,11 @@ on:
 
 jobs:
   ci:
-    uses: waynestate/preflight/.github/workflows/php-package.yml@0.1.0
+    uses: waynestate/preflight/.github/workflows/php-package.yml@<full-commit-sha>
 ```
 
-`@0.1.0` is the first tag and is not cut yet. Until it is, pin a full commit
-SHA instead, the same rule as the components above.
+This workflow is not in `0.1.0`; it arrives in the next tag. Until then, pin a
+full commit SHA instead.
 
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
@@ -196,9 +211,10 @@ include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@0.1.0
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.0
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@0.1.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@0.1.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@0.1.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@0.1.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@<full-commit-sha>
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@<full-commit-sha>
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@<full-commit-sha>
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@<full-commit-sha>
 ```
 
 The `workflow:rules` block must live in the app's own file. A component
@@ -234,7 +250,7 @@ app must live on or be mirrored to GitLab. See
 - Composer vendor: `waynestate/`
 - Licence: MIT
 - PHP floor: `^8.3`
-- JavaScript components (none yet) install with `npm ci --ignore-scripts`. A package that needs its install script is named in the component's inputs, and the job carries no token beyond `CI_JOB_TOKEN` (BEST_PRACTICES.md 4.12).
+- JavaScript components install with `npm ci --ignore-scripts`. The job carries no token beyond `CI_JOB_TOKEN` (BEST_PRACTICES.md 4.12).
 
 ## Updating image pins
 

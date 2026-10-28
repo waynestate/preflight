@@ -7,8 +7,8 @@ of the repo on that date (no release tagged yet).
 ## What this covers
 
 PREFLIGHT is a set of GitLab CI/CD components that every stack project and WSU app includes with
-`include: component:`. Today it has six: `php-test` (PHP versions through `parallel:matrix`), `composer-audit`,
-`proctor`, `sbom`, `pint` and `phpstan`. Accessibility and contract suites come later.
+`include: component:`. Today it has seven: `php-test` (PHP versions through `parallel:matrix`), `composer-audit`,
+`proctor`, `sbom`, `pint`, `phpstan` and `eslint`. Accessibility and contract suites come later.
 
 This guide is for two groups:
 
@@ -664,6 +664,19 @@ Sources: [PHPStan](https://phpstan.org/); [GitLab: Code Quality](https://docs.gi
 **How the stack holds it: Enforced.** The `phpstan` component installs the app's dependencies and runs
 `vendor/bin/phpstan analyse --error-format=gitlab` against the app's own `phpstan.neon`, publishing the report. Like
 every component, an app can skip the include, so the enforcement is "when included".
+
+### 4.16 Lint JavaScript with the app's own ESLint and Prettier
+Run the app's own ESLint (and Prettier) and fail the pipeline on lint or format errors.
+
+Why: a shared lint gate keeps every app's JavaScript readable and consistent, and running the app's own config means
+the standard is the one the app already agreed to, not one imposed by the template.
+
+Sources: [ESLint](https://eslint.org/); [Prettier](https://prettier.io/).
+
+**How the stack holds it: Enforced.** The `eslint` component installs the app's dependencies with
+`npm ci --ignore-scripts` and runs `npx --no-install eslint` and `npx --no-install prettier --check` against the
+app's own config. Like every component, an app can skip the include, so the enforcement is "when included". ESLint is
+the preflight checklist for your JavaScript.
 
 ---
 
