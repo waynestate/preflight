@@ -11,14 +11,11 @@
 #   * the cache key prefix stops including the PHP version, so the 8.4 and
 #     8.5 jobs would share a cache and clobber each other's downloads.
 #
-# The cache block lives on a hidden job that the php-test job extends when the
-# cache input is true (docs: Components, "Use boolean inputs to conditionally
-# configure jobs"). Rather than hard-coding that hidden job's name, the check
-# finds whichever job in the template carries a cache: block, so it keeps
-# working if the hidden job is renamed.
-#
-# POSIX sh, so it runs in the mikefarah/yq image and on any Linux or macOS
-# box. Needs yq v4 (mikefarah/yq); it works with yq alone, no jq required.
+# The cache block lives directly on the php-test job. The template is two
+# YAML documents separated by `---`; the jobs live in the second. This script
+# reads the second document with awk and checks the cache block with plain
+# grep/awk/sed, so it needs no yq and runs in the alpine image and on any
+# Linux or macOS box.
 
 set -u
 
@@ -30,11 +27,6 @@ if [ ! -f "$TPL" ]; then
   exit 1
 fi
 
-if ! command -v yq >/dev/null 2>&1; then
-  echo "yq v4 (mikefarah/yq) is required" >&2
-  exit 1
-fi
-
 status=0
 
 fail() {
@@ -42,27 +34,34 @@ fail() {
   status=1
 }
 
-# The job that carries the cache: block. There is exactly one (the hidden job
-# the php-test job extends when cache is true).
-cache_jobs=$(yq eval 'select(document_index == 1) | to_entries | map(select(.value.cache != null)) | length' "$TPL")
-if [ "$cache_jobs" != "1" ]; then
-  fail "expected exactly one job with a cache: block, found $cache_jobs"
+# The jobs document is everything after the first `---` line.
+jobs=$(awk 'BEGIN { d = 0 } /^---[[:blank:]]*$/ { d = 1; next } d == 1 { print }' "$TPL")
+
+# The cache block is a `cache:` key at two-space indent (a direct child of a
+# job); it runs until the next two-space key or a zero-indent line. Capture
+# it so the checks below look only inside the block.
+block=$(printf '%s\n' "$jobs" | awk '
+  /^  cache:[[:blank:]]*$/ { inblock = 1; print; next }
+  inblock {
+    if (/^  [A-Za-z_]/ || /^[^ ]/) { inblock = 0; next }
+    print
+  }')
+
+# There must be exactly one cache block, on the php-test job.
+cache_count=$(printf '%s\n' "$block" | grep -cE '^  cache:')
+if [ "$cache_count" -ne 1 ]; then
+  fail "expected exactly one job with a cache: block, found $cache_count"
 fi
 
 # The cache key must depend on composer.lock, so a lock change invalidates the
 # cache.
-files=$(yq eval 'select(document_index == 1) | .[] | select(.cache != null) | .cache.key.files[]' "$TPL")
-if [ -z "$files" ]; then
-  fail "php-test cache key has no files list (expected composer.lock)"
-else
-  if ! printf '%s\n' "$files" | grep -qx 'composer.lock'; then
-    fail "php-test cache key files do not include composer.lock: $files"
-  fi
+if ! printf '%s\n' "$block" | grep -qE '^[[:blank:]]*-[[:blank:]]*composer\.lock[[:blank:]]*$'; then
+  fail "php-test cache key files do not include composer.lock"
 fi
 
 # The cache key prefix must include the PHP version, so 8.4 and 8.5 jobs do
 # not share a cache.
-prefix=$(yq eval 'select(document_index == 1) | .[] | select(.cache != null) | .cache.key.prefix' "$TPL")
+prefix=$(printf '%s\n' "$block" | grep -E '^[[:blank:]]*prefix:' | sed -E 's/^[[:blank:]]*prefix:[[:blank:]]*//')
 if [ -z "$prefix" ]; then
   fail "php-test cache key has no prefix"
 else

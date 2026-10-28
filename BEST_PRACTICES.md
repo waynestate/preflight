@@ -547,7 +547,7 @@ Why: pipelines run faster, and an unreviewed branch cannot poison the cache that
 
 Sources: [GitLab: caching](https://docs.gitlab.com/ci/caching/).
 
-**How the stack holds it: Checked.** `php-test` caches Composer downloads in `.composer-cache/`, keyed on `composer.lock` and prefixed with the PHP version, so a dependency change invalidates the cache and each PHP version gets its own cache. The cache is on by default and can be turned off with the `cache` input. `tests/check-php-test-cache.sh` (and its `.ps1` twin) fail if the key stops depending on `composer.lock` or the prefix stops including the PHP version. `proctor` and `composer-audit` still define no cache.
+**How the stack holds it: Checked.** `php-test` caches Composer downloads in `.composer-cache/`, keyed on `composer.lock` and prefixed with the PHP version, so a dependency change invalidates the cache and each PHP version gets its own cache. `tests/check-php-test-cache.sh` (and its `.ps1` twin) fail if the key stops depending on `composer.lock` or the prefix stops including the PHP version. `proctor` and `composer-audit` still define no cache.
 
 Second pass: GitLab appends `-protected` or `-non_protected` to every cache key. Pipelines on protected branches or tags,
 and pipelines started by a Maintainer or Owner, get `-protected`. The separation is on by default and GitLab calls it
@@ -939,40 +939,41 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
 13. 3.2: Recommend branch and CI-file protection for app repos.
 14. 3.4: Add a `workflow:rules` example to the README.
 15. 2.5: Build job names from an input so one project can include a component twice.
-16. 5.1: Add secret detection to PREFLIGHT's own pipeline.
-17. 5.2: Write down the job token allowlist rule for projects that use Pantry.
-18. 5.3: State "non-privileged, ephemeral Docker executor" in the runner request.
-19. 5.4: Agree the list of hosts jobs may reach.
-20. 1.4: Add an inputs contract file and a test that catches a renamed input or job.
-21. 2.3 and 2.6: Lint templates for global keys, and explain which components may be weakened.
-22. 3.1: Publish the "components do not force" limit in the README.
-23. 5.3 and 5.4 and 7.3: Close with the git.wayne.edu instance runner (this is still an open question); WayneUI's pipeline cannot run until then.
+16. 4.8: Add a Composer cache keyed on `composer.lock`.
+17. 5.1: Add secret detection to PREFLIGHT's own pipeline.
+18. 5.2: Write down the job token allowlist rule for projects that use Pantry.
+19. 5.3: State "non-privileged, ephemeral Docker executor" in the runner request.
+20. 5.4: Agree the list of hosts jobs may reach.
+21. 1.4: Add an inputs contract file and a test that catches a renamed input or job.
+22. 2.3 and 2.6: Lint templates for global keys, and explain which components may be weakened.
+23. 3.1: Publish the "components do not force" limit in the README.
+24. 5.3 and 5.4 and 7.3: Close with the git.wayne.edu instance runner (this is still an open question); WayneUI's pipeline cannot run until then.
 
 Added in the second pass (2026-10-27):
 
-24. 5.5: Get the GitLab and runner versions and the patch schedule from ops, and record them in the instance runner
+25. 5.5: Get the GitLab and runner versions and the patch schedule from ops, and record them in the instance runner
     request. A critical CI-related GitLab patch shipped on 2026-10-12.
-25. 6.2 (updated): Ship a default list without 8.2 before 2027-01-01, and add 8.6 to the policy path when it is released.
-26. 4.9 and 4.6 (updated): Pin Composer to a named release with a reviewed bump path, and require 2.9.6 or later (2.10.3 is
+26. 6.2 (updated): Ship a default list without 8.2 before 2027-01-01, and add 8.6 to the policy path when it is released.
+27. 4.9 and 4.6 (updated): Pin Composer to a named release with a reviewed bump path, and require 2.9.6 or later (2.10.3 is
     current), because of the April to August 2026 Composer security fixes.
-27. 4.6 and 7.2 (updated): Add fixtures for an advisory, an abandoned package and a malware-flagged version, and record
+28. 4.6 and 7.2 (updated): Add fixtures for an advisory, an abandoned package and a malware-flagged version, and record
     the real audit exit codes. Settle the conflict on abandoned packages.
-28. 1.7: Offer a reviewed bump process (bot or scheduled merge request) for component SHAs and image digests. Test whether
+29. 1.7: Offer a reviewed bump process (bot or scheduled merge request) for component SHAs and image digests. Test whether
     Renovate handles `component:` includes first.
-29. 1.6: Put the commit SHA in every release note and tell apps to pin it.
-30. 4.11: Write the stack's rule for Composer malware, advisory and abandoned policy, and require Composer 2.10 or later.
-31. 4.10: Name the Debian release in image tags, or match the image family of the target you deploy to.
-32. 2.9: Add `timeout` and `interruptible` to each job.
-33. 3.4 (updated): Put the `workflow:rules` example in the README, and say it must live in the app's own file.
-34. 3.5 and 3.6: Tell app owners to restrict pipeline variables and keep fork merge requests away from secrets.
-35. 2.10: Add an `image` input to `php-test`.
-36. 7.4: Add a cross-OS local run (Composer scripts first) and test the README's local commands in PowerShell.
-37. 6.4: Add an advisory job for the next PHP release.
-38. 6.5: Name WCAG 2.2 AA as the floor (it also meets the rule's 2.1 AA) before the accessibility component is written.
-39. 1.8: Write a retirement policy for components, and test whether SHA pins survive a Catalog unpublish.
-40. 4.12: Record the install-scripts rule before a JavaScript component is written.
-41. 2.11: Print the component version in job logs once the instance runs GitLab 18.7 or later.
-42. 5.1 (updated): Test whether GitLab secret detection runs on git.wayne.edu (Community Edition), and add it to PREFLIGHT's
+30. 1.6: Put the commit SHA in every release note and tell apps to pin it.
+31. 4.11: Write the stack's rule for Composer malware, advisory and abandoned policy, and require Composer 2.10 or later.
+32. 4.10: Name the Debian release in image tags, or match the image family of the target you deploy to.
+33. 2.9: Add `timeout` and `interruptible` to each job.
+34. 3.4 (updated): Put the `workflow:rules` example in the README, and say it must live in the app's own file.
+35. 3.5 and 3.6: Tell app owners to restrict pipeline variables and keep fork merge requests away from secrets.
+36. 2.10: Add an `image` input to `php-test`.
+37. 7.4: Add a cross-OS local run (Composer scripts first) and test the README's local commands in PowerShell.
+38. 6.4: Add an advisory job for the next PHP release.
+39. 6.5: Name WCAG 2.2 AA as the floor (it also meets the rule's 2.1 AA) before the accessibility component is written.
+40. 1.8: Write a retirement policy for components, and test whether SHA pins survive a Catalog unpublish.
+41. 4.12: Record the install-scripts rule before a JavaScript component is written.
+42. 2.11: Print the component version in job logs once the instance runs GitLab 18.7 or later.
+43. 5.1 (updated): Test whether GitLab secret detection runs on git.wayne.edu (Community Edition), and add it to PREFLIGHT's
     pipeline if it does.
 
 ## Sources
@@ -1049,10 +1050,10 @@ main checkout. Another worker is changing them on a separate branch, so tags in 
 branch merges.
 
 Added (15 new practices): 1.6, 1.7, 1.8, 2.9, 2.10, 2.11, 3.5, 3.6, 4.10, 4.11, 4.12, 5.5, 6.4, 6.5 and 7.4, plus 19 new
-items in the backlog (24 to 42). All the new practices are tagged `Not yet` except 7.4, which is `Documented`. Practices 1.6, 1.7, 4.11 and 4.12
+items in the backlog (25 to 43). All the new practices are tagged `Not yet` except 7.4, which is `Documented`. Practices 1.6, 1.7, 4.11 and 4.12
 are the most important for the stack's PHP and Vue paths.
 
-Practices that gained new detail but kept their tag: 1.1, 2.1, 2.2, 2.8, 3.1, 3.4, 4.1, 4.2, 4.4, 4.9, 5.1, 5.2, 5.3,
+Practices that gained new detail but kept their tag: 1.1, 2.1, 2.2, 2.8, 3.1, 3.4, 4.1, 4.2, 4.4, 4.8, 4.9, 5.1, 5.2, 5.3,
 6.2, 6.3, 7.2.
 
 Corrected:

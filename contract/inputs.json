@@ -18,10 +18,9 @@
         { "name": "php_versions", "type": "array", "default": ["8.3", "8.4", "8.5"] },
         { "name": "composer_version", "type": "string", "default": "2.10.3" },
         { "name": "test_command", "type": "string", "default": "vendor/bin/phpunit" },
-        { "name": "working_dir", "type": "string", "default": "." },
-        { "name": "cache", "type": "boolean", "default": true }
+        { "name": "working_dir", "type": "string", "default": "." }
       ],
-      "jobs": ["php-test", ".php-test:cache:false", ".php-test:cache:true"]
+      "jobs": ["php-test"]
     },
     "composer-audit": {
       "inputs": [
