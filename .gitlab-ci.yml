@@ -38,3 +38,5 @@ contract:
     entrypoint: [""]
   script:
     - sh tests/check-contract.sh
+    - sh tests/check-php-test-cache.sh
+    - sh tests/check-image-inputs.sh
