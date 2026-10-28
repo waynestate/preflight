@@ -197,8 +197,8 @@ Sources: [GitLab: CI/CD inputs, guidance](https://docs.gitlab.com/ci/inputs/);
 [OWASP CICD-SEC-4 Poisoned Pipeline Execution](https://owasp.org/www-project-top-10-ci-cd-security-risks/).
 
 **How the stack holds it: Not yet.** `working_dir`, `test_command` and `proctor_command` are free strings placed in
-`script`. `cd $[[ inputs.working_dir ]]` is not quoted. The values come from the app's own author, so the risk is low,
-but `proctor_command` is also how an app could drop `--policy` or add `--today`.
+`script`. All three templates quote the path: `cd "$[[ inputs.working_dir ]]"`. The values come from the app's own
+author, so the risk is low, but `proctor_command` is also how an app could drop `--policy` or add `--today`.
 
 Second pass: the GitLab inputs page was re-read and the first pass is right. It says "Do not rely on `posix_escape` for
 security purposes with untrusted input values". It recommends `number` and `boolean` types, `regex` and `options` for
@@ -285,8 +285,8 @@ A job timeout cannot exceed the runner's timeout.
 
 Sources: [GitLab: CI/CD YAML, `timeout` and `interruptible`](https://docs.gitlab.com/ci/yaml/).
 
-**How the stack holds it: Not yet.** None of the three templates sets either keyword. Whether an old pipeline is actually
-cancelled also needs `workflow:auto_cancel` in the app's own file.
+**How the stack holds it: Partially.** All three templates set `interruptible: true` and `timeout: 30 minutes`. Whether
+an old pipeline is actually cancelled also needs `workflow:auto_cancel` in the app's own file.
 
 ### 2.10 Make every job image an input
 `proctor` and `composer-audit` already take `image`. `php-test` builds its image from `php_versions` and has no way to
@@ -798,7 +798,7 @@ Why: a hard-coded list goes stale when a version reaches end of life.
 Sources: [PHP supported versions](https://www.php.net/supported-versions.php);
 [GitLab: CI/CD YAML, `parallel:matrix`](https://docs.gitlab.com/ci/yaml/).
 
-**How the stack holds it: Not yet.** The default list is `["8.2", "8.3", "8.4", "8.5"]`. PHP 8.2 reaches end of life on
+**How the stack holds it: Not yet.** The default list is `["8.3", "8.4", "8.5"]`. PHP 8.2 reaches end of life on
 2026-12-31, and PHP 8.3 is already past active support. The floor in the README (`^8.2`) is also a hard-coded value.
 
 Second pass: php.net's supported versions page was re-read on 2026-10-27 and the first pass is correct.
