@@ -1,0 +1,706 @@
+<!doctype html>
+<html lang="en" data-theme="wsu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PREFLIGHT — Every push is cleared for takeoff.</title>
+<meta name="description" content="PREFLIGHT is the Wayne State app stack's CI: GitLab CI/CD components that run PROCTOR, PHP tests on each supported version, a Composer audit, an SBOM, Pint, PHPStan and ESLint on every push.">
+<meta name="theme-color" content="#0c5449">
+<link rel="icon" href="brand/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="brand/favicon-32.png">
+<link rel="icon" type="image/png" sizes="64x64" href="brand/favicon-64.png">
+<link rel="apple-touch-icon" href="brand/preflight-avatar-256.png">
+<meta property="og:image" content="brand/preflight-avatar-512.png">
+<!--
+  WayneUI 2.0.8, copied from its documented static path
+  (wayne-ui/apps/site/public/v2) so this page works offline: tokens, Lato,
+  container, buttons, tabs, skip link, sr-only. preflight.css re-dresses it.
+-->
+<link rel="stylesheet" href="assets/wayne-ui/wayne-ui.css">
+<link rel="stylesheet" href="assets/preflight.css">
+<script>
+  /* Run the checklist live only for people who are happy with motion.
+     Everyone else boards a page where every item is already ticked,
+     every light is green and the clearance is in hand. */
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: no-preference)").matches) {
+    document.documentElement.classList.add("motion");
+  }
+</script>
+</head>
+<body>
+<a class="wsu-skip-link" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <div class="wsu-container topbar__inner">
+    <a class="brand" href="#main">
+      <img src="brand/preflight-avatar-256.png" width="36" height="36" alt="">
+      <span class="brand__name">PREFLIGHT</span>
+      <span class="brand__tail" title="Latest tag">0.1.0</span>
+    </a>
+    <nav class="topnav" aria-label="On this page">
+      <a href="#checklist">Checklist</a>
+      <a href="#components">Components</a>
+      <a href="#flight-plan">Flight plan</a>
+      <a href="#stack">Stack</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ================================================================ hero -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="wsu-container hero__grid">
+
+      <div class="hero__copy">
+        <p class="eyebrow">Wayne State app stack · CI templates</p>
+        <h1 class="hero__title" id="hero-title">
+          <span class="wsu-sr-only">PREFLIGHT</span>
+          <span class="hero__letters" aria-hidden="true"><span style="--i:0">P</span><span style="--i:1">R</span><span style="--i:2">E</span><span style="--i:3">F</span><span style="--i:4">L</span><span style="--i:5">I</span><span style="--i:6">G</span><span style="--i:7">H</span><span style="--i:8">T</span></span>
+        </h1>
+        <p class="hero__tagline">Every push is cleared for takeoff.</p>
+        <p class="definition"><span class="definition__word">pre·flight</span> <span class="definition__pos">noun</span> The checklist a pilot runs before takeoff. Every push runs this one before Citadel.</p>
+        <p class="hero__blurb">GitLab CI/CD components that every stack project and starter includes: PROCTOR, PHP tests on each supported version, a Composer audit, an SBOM, Pint, PHPStan and ESLint. One <code>include:</code> block, the same checks on every app.</p>
+
+        <div class="quickstart">
+          <p class="quickstart__label" id="qs-label">.gitlab-ci.yml</p>
+<pre class="quickstart__code" id="quickstart-cmd" aria-labelledby="qs-label"><code>include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.0</code></pre>
+          <button class="copy-btn" type="button" data-copy-from="#quickstart-cmd">
+            <span class="copy-btn__label">Copy</span>
+          </button>
+        </div>
+
+        <p class="hero__cta">
+          <a class="wsu-btn wsu-btn--primary wsu-btn--lg" href="#checklist">Run the checklist</a>
+          <a class="hero__link" href="#flight-plan">File a flight plan</a>
+        </p>
+      </div>
+
+      <!-- The instrument: a heading indicator with the mark at its hub. With
+           motion on, the compass card swings round and settles on the gold
+           heading bug, and the PAPI lights below settle from "too low" (all
+           red) to "on glidepath" (two white, two red). -->
+      <div class="hero__art">
+        <div class="instrument">
+          <span class="instrument__screw" style="--x:0;--y:0" aria-hidden="true"></span>
+          <span class="instrument__screw" style="--x:1;--y:0" aria-hidden="true"></span>
+          <span class="instrument__screw" style="--x:0;--y:1" aria-hidden="true"></span>
+          <span class="instrument__screw" style="--x:1;--y:1" aria-hidden="true"></span>
+          <div class="dial">
+            <div class="dial__card" aria-hidden="true">
+              <span class="dial__label" style="--a:0">N</span>
+              <span class="dial__label" style="--a:30">3</span>
+              <span class="dial__label" style="--a:60">6</span>
+              <span class="dial__label" style="--a:90">E</span>
+              <span class="dial__label" style="--a:120">12</span>
+              <span class="dial__label" style="--a:150">15</span>
+              <span class="dial__label" style="--a:180">S</span>
+              <span class="dial__label" style="--a:210">21</span>
+              <span class="dial__label" style="--a:240">24</span>
+              <span class="dial__label" style="--a:270">W</span>
+              <span class="dial__label" style="--a:300">30</span>
+              <span class="dial__label" style="--a:330">33</span>
+            </div>
+            <span class="dial__bug" aria-hidden="true"></span>
+            <span class="dial__lubber" aria-hidden="true"></span>
+            <img class="dial__mark" src="brand/preflight-avatar-512.png" width="512" height="512" alt="PREFLIGHT mark: a runway in perspective with a gold centreline">
+          </div>
+          <p class="instrument__readout" aria-hidden="true"><span>HDG</span> 360 <span>→</span> CITADEL</p>
+        </div>
+
+        <div class="papi" role="img" aria-label="Approach lights: two white, two red, on the glidepath">
+          <span class="papi__lights" aria-hidden="true">
+            <span class="papi__light" style="--i:0"></span><span class="papi__light" style="--i:1"></span><span class="papi__light" style="--i:2"></span><span class="papi__light" style="--i:3"></span>
+          </span>
+          <span class="papi__label" aria-hidden="true">PAPI · on glidepath</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================== checklist -->
+  <!-- The magic: a laminated checklist that runs itself as you scroll. Each
+       item is a real PREFLIGHT job. As an item passes the reading line, it is
+       ticked, its annunciator goes green, and the aircraft on the taxi strip
+       rolls past the next hold-short line. The last item gets the clearance. -->
+  <section class="section section--checklist" id="checklist" aria-labelledby="checklist-title">
+    <div class="wsu-container">
+      <div class="section__head">
+        <p class="eyebrow">Normal procedures</p>
+        <h2 id="checklist-title">Before takeoff</h2>
+        <p>Every push runs the same list, in the app's own pipeline, before anything reaches Citadel. Scroll, and it runs itself.</p>
+      </div>
+
+      <div class="preflight" data-preflight>
+
+        <div class="card" data-card>
+          <span class="card__punch" aria-hidden="true"></span>
+          <div class="card__head">
+            <p class="card__kicker">WSU app stack · normal checklist</p>
+            <p class="card__title">Before takeoff <span>· every push</span></p>
+          </div>
+          <ol class="card__items">
+            <li class="item" data-step="0" data-lights="proctor">
+              <p class="item__row"><span class="item__name">PROCTOR</span><span class="item__dots" aria-hidden="true"></span><span class="item__resp">Checked</span><span class="item__tick" aria-hidden="true"></span></p>
+              <p class="item__why">Checks the app against the stack's standards and publishes the result as a GitLab Code Quality report.</p>
+              <code class="item__cmd">vendor/bin/proctor check --format=codequality</code>
+            </li>
+            <li class="item" data-step="1" data-lights="php83 php84 php85">
+              <p class="item__row"><span class="item__name">PHP tests</span><span class="item__dots" aria-hidden="true"></span><span class="item__resp">8.3 · 8.4 · 8.5 pass</span><span class="item__tick" aria-hidden="true"></span></p>
+              <p class="item__why">One job per supported PHP version, through <code>parallel:matrix</code>. End-of-life PHP is not on the list.</p>
+              <code class="item__cmd">vendor/bin/phpunit</code>
+            </li>
+            <li class="item" data-step="2" data-lights="audit" data-hold="1">
+              <p class="item__row"><span class="item__name">Composer audit</span><span class="item__dots" aria-hidden="true"></span><span class="item__resp">No advisories</span><span class="item__tick" aria-hidden="true"></span></p>
+              <p class="item__why">Audits the lock file, not a fresh resolve, and fails the pipeline on a known advisory.</p>
+              <code class="item__cmd">composer audit --locked</code>
+            </li>
+            <li class="item" data-step="3" data-lights="sbom">
+              <p class="item__row"><span class="item__name">SBOM</span><span class="item__dots" aria-hidden="true"></span><span class="item__resp">Validated</span><span class="item__tick" aria-hidden="true"></span></p>
+              <p class="item__why">A CycloneDX bill of materials, validated and kept as a job artifact. The app's <code>composer.json</code> is never touched.</p>
+              <code class="item__cmd">composer CycloneDX:make-sbom --output-format=JSON --validate</code>
+            </li>
+            <li class="item" data-step="4" data-lights="pint">
+              <p class="item__row"><span class="item__name">Pint</span><span class="item__dots" aria-hidden="true"></span><span class="item__resp">Clean</span><span class="item__tick" aria-hidden="true"></span></p>
+              <p class="item__why">The app's own Laravel Pint, in test mode, with the app's own <code>pint.json</code>.</p>
+              <code class="item__cmd">vendor/bin/pint --test --config=pint.json</code>
+            </li>
+            <li class="item" data-step="5" data-lights="phpstan">
+              <p class="item__row"><span class="item__name">PHPStan</span><span class="item__dots" aria-hidden="true"></span><span class="item__resp">No errors</span><span class="item__tick" aria-hidden="true"></span></p>
+              <p class="item__why">The app's own PHPStan, writing its findings as a Code Quality report.</p>
+              <code class="item__cmd">vendor/bin/phpstan analyse --error-format=gitlab</code>
+            </li>
+            <li class="item" data-step="6" data-lights="eslint">
+              <p class="item__row"><span class="item__name">ESLint · Prettier</span><span class="item__dots" aria-hidden="true"></span><span class="item__resp">Clean</span><span class="item__tick" aria-hidden="true"></span></p>
+              <p class="item__why">The app's own ESLint and <code>prettier --check</code>, installed from the lock with scripts off.</p>
+              <code class="item__cmd">npx --no-install eslint .</code>
+            </li>
+            <li class="item item--final" data-step="7" data-lights="cleared">
+              <p class="item__row"><span class="item__name">Clearance</span><span class="item__dots" aria-hidden="true"></span><span class="item__resp">Cleared for takeoff</span><span class="item__tick" aria-hidden="true"></span></p>
+              <p class="item__why">Every gate green. The release is free to leave for Citadel.</p>
+            </li>
+          </ol>
+          <p class="card__foot">Checklist complete. Tray tables up, tests green.</p>
+        </div>
+
+        <!-- The cockpit stays in view while the card scrolls past it. -->
+        <div class="cockpit" data-cockpit>
+          <div class="panel">
+            <p class="panel__title" aria-hidden="true">Annunciators</p>
+            <ul class="annun" aria-label="Annunciator panel">
+              <li class="lamp" data-lamp="proctor"><span class="lamp__face">PROCTOR</span></li>
+              <li class="lamp" data-lamp="php83"><span class="lamp__face">PHP 8.3</span></li>
+              <li class="lamp" data-lamp="php84"><span class="lamp__face">PHP 8.4</span></li>
+              <li class="lamp" data-lamp="php85"><span class="lamp__face">PHP 8.5</span></li>
+              <li class="lamp" data-lamp="audit"><span class="lamp__face">AUDIT</span></li>
+              <li class="lamp" data-lamp="sbom"><span class="lamp__face">SBOM</span></li>
+              <li class="lamp" data-lamp="pint"><span class="lamp__face">PINT</span></li>
+              <li class="lamp" data-lamp="phpstan"><span class="lamp__face">PHPSTAN</span></li>
+              <li class="lamp" data-lamp="eslint"><span class="lamp__face">ESLINT</span></li>
+              <li class="lamp lamp--soon"><span class="lamp__face">A11Y<small>coming soon</small></span></li>
+              <li class="lamp lamp--soon"><span class="lamp__face">CONTRACT<small>coming soon</small></span></li>
+              <li class="lamp lamp--soon"><span class="lamp__face">FRESHNESS<small>coming soon</small></span></li>
+              <li class="lamp lamp--wide" data-lamp="cleared"><span class="lamp__face" data-clearance>CLEARED FOR TAKEOFF</span></li>
+            </ul>
+
+            <!-- Taxi strip: from the gate where the push lands, along the gold
+                 centreline, across three hold-short lines, onto the runway. -->
+            <div class="taxi" aria-hidden="true">
+              <svg class="taxi__svg" viewBox="0 0 520 96" preserveAspectRatio="xMidYMid meet" focusable="false">
+                <rect class="taxi__grass" x="0" y="0" width="520" height="96" rx="10"/>
+                <rect class="taxi__apron" x="6" y="24" width="54" height="48" rx="6"/>
+                <text class="taxi__txt" x="33" y="52" text-anchor="middle">PUSH</text>
+                <rect class="taxi__way" x="60" y="38" width="336" height="20"/>
+                <line class="taxi__centre" x1="62" y1="48" x2="394" y2="48"/>
+                <g class="taxi__hold" data-hold-line="0" transform="translate(150 0)">
+                  <rect x="0" y="38" width="2" height="20"/><rect x="5" y="38" width="2" height="20"/>
+                  <rect x="11" y="38" width="2" height="5"/><rect x="11" y="46" width="2" height="5"/><rect x="11" y="54" width="2" height="4"/>
+                  <rect x="16" y="38" width="2" height="5"/><rect x="16" y="46" width="2" height="5"/><rect x="16" y="54" width="2" height="4"/>
+                </g>
+                <text class="taxi__txt taxi__txt--sign" x="159" y="30" text-anchor="middle">TEST</text>
+                <g class="taxi__hold" data-hold-line="1" transform="translate(250 0)">
+                  <rect x="0" y="38" width="2" height="20"/><rect x="5" y="38" width="2" height="20"/>
+                  <rect x="11" y="38" width="2" height="5"/><rect x="11" y="46" width="2" height="5"/><rect x="11" y="54" width="2" height="4"/>
+                  <rect x="16" y="38" width="2" height="5"/><rect x="16" y="46" width="2" height="5"/><rect x="16" y="54" width="2" height="4"/>
+                </g>
+                <text class="taxi__txt taxi__txt--sign" x="259" y="30" text-anchor="middle">AUDIT</text>
+                <g class="taxi__hold" data-hold-line="2" transform="translate(350 0)">
+                  <rect x="0" y="38" width="2" height="20"/><rect x="5" y="38" width="2" height="20"/>
+                  <rect x="11" y="38" width="2" height="5"/><rect x="11" y="46" width="2" height="5"/><rect x="11" y="54" width="2" height="4"/>
+                  <rect x="16" y="38" width="2" height="5"/><rect x="16" y="46" width="2" height="5"/><rect x="16" y="54" width="2" height="4"/>
+                </g>
+                <text class="taxi__txt taxi__txt--sign" x="359" y="30" text-anchor="middle">STYLE</text>
+                <rect class="taxi__runway" x="396" y="6" width="118" height="84" rx="4"/>
+                <g class="taxi__threshold">
+                  <rect x="404" y="14" width="18" height="4"/><rect x="404" y="24" width="18" height="4"/><rect x="404" y="34" width="18" height="4"/>
+                  <rect x="404" y="58" width="18" height="4"/><rect x="404" y="68" width="18" height="4"/><rect x="404" y="78" width="18" height="4"/>
+                </g>
+                <line class="taxi__rwy-centre" x1="430" y1="48" x2="512" y2="48"/>
+                <text class="taxi__txt taxi__txt--rwy" x="472" y="80" text-anchor="middle">CITADEL</text>
+                <g class="taxi__plane" data-plane>
+                  <path d="M0 -15c1.3 0 2.1 1.6 2.1 3.6V-3l13.6 7.2v3.2L2.1 3.8v7.6l4 2.8V16L0 14.4-6.1 16v-1.8l4-2.8V3.8L-15.7 7.4V4.2L-2.1-3v-8.4C-2.1-13.4-1.3-15 0-15z"/>
+                </g>
+              </svg>
+            </div>
+
+            <div class="panel__controls">
+              <button class="ctl" type="button" data-run>
+                <span class="ctl__cap" aria-hidden="true"></span>
+                <span class="ctl__label">Run<span class="ctl__more"> the checklist</span></span>
+              </button>
+              <!-- A guarded switch: the first press lifts the cover, the second
+                   throws it. Nobody fails a check by accident. -->
+              <button class="guard" type="button" data-guard aria-pressed="false" aria-describedby="guard-hint">
+                <span class="guard__cover" aria-hidden="true"></span>
+                <span class="guard__toggle" aria-hidden="true"></span>
+                <span class="guard__label">Inject<span class="ctl__more"> an</span> advisory</span>
+              </button>
+              <span class="wsu-sr-only" id="guard-hint">Makes the Composer audit fail, to show the pipeline holding short.</span>
+            </div>
+            <p class="panel__status" role="status" aria-live="polite" data-status></p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================= components -->
+  <section class="section section--placards" id="components" aria-labelledby="components-title">
+    <div class="wsu-container">
+      <div class="section__head">
+        <p class="eyebrow">Cockpit placards</p>
+        <h2 id="components-title">Seven components, one include each</h2>
+        <p>Each one is an ordinary GitLab job with typed inputs and a sensible default. <code>proctor</code>, <code>php-test</code> and <code>composer-audit</code> are in the 0.1.0 tag; the rest arrive in the next tag, so pin a full commit SHA for them until then.</p>
+      </div>
+
+      <div class="placards">
+
+        <article class="placard">
+          <span class="placard__screws" aria-hidden="true"></span>
+          <p class="placard__tag placard__tag--tagged">in 0.1.0</p>
+          <h3 class="placard__name">proctor</h3>
+          <p class="placard__aside">Watches the cabin.</p>
+          <p class="placard__line">Runs PROCTOR's checks and publishes them as a Code Quality report.</p>
+<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@0.1.0</code></pre>
+          <details class="placard__inputs">
+            <summary>6 inputs</summary>
+            <dl>
+              <dt>stage</dt><dd><code>test</code></dd>
+              <dt>image</dt><dd><code>php:8.4-cli@sha256:…</code></dd>
+              <dt>composer_version</dt><dd><code>2.10.3</code></dd>
+              <dt>allow_failure</dt><dd><code>false</code></dd>
+              <dt>proctor_command</dt><dd><code>vendor/bin/proctor check --format=codequality</code></dd>
+              <dt>working_dir</dt><dd><code>.</code></dd>
+            </dl>
+          </details>
+        </article>
+
+        <article class="placard">
+          <span class="placard__screws" aria-hidden="true"></span>
+          <p class="placard__tag placard__tag--tagged">in 0.1.0</p>
+          <h3 class="placard__name">php-test</h3>
+          <p class="placard__aside">Three engines, all running.</p>
+          <p class="placard__line">The test command on each supported PHP version, one job per version.</p>
+<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.0</code></pre>
+          <details class="placard__inputs">
+            <summary>5 inputs</summary>
+            <dl>
+              <dt>stage</dt><dd><code>test</code></dd>
+              <dt>php_versions</dt><dd><code>["8.3", "8.4", "8.5"]</code></dd>
+              <dt>composer_version</dt><dd><code>2.10.3</code></dd>
+              <dt>test_command</dt><dd><code>vendor/bin/phpunit</code></dd>
+              <dt>working_dir</dt><dd><code>.</code></dd>
+            </dl>
+          </details>
+        </article>
+
+        <article class="placard">
+          <span class="placard__screws" aria-hidden="true"></span>
+          <p class="placard__tag placard__tag--tagged">in 0.1.0</p>
+          <h3 class="placard__name">composer-audit</h3>
+          <p class="placard__aside">Checks the passenger list.</p>
+          <p class="placard__line"><code>composer audit --locked</code>, failing on any advisory.</p>
+<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@0.1.0</code></pre>
+          <details class="placard__inputs">
+            <summary>3 inputs</summary>
+            <dl>
+              <dt>stage</dt><dd><code>test</code></dd>
+              <dt>image</dt><dd><code>composer:2@sha256:…</code></dd>
+              <dt>working_dir</dt><dd><code>.</code></dd>
+            </dl>
+          </details>
+        </article>
+
+        <article class="placard">
+          <span class="placard__screws" aria-hidden="true"></span>
+          <p class="placard__tag">next tag · pin a SHA</p>
+          <h3 class="placard__name">sbom</h3>
+          <p class="placard__aside">The cargo manifest.</p>
+          <p class="placard__line">A validated CycloneDX SBOM, published as an artifact. The plugin installs globally, so the app's files stay as they are.</p>
+<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@&lt;full-commit-sha&gt;</code></pre>
+          <details class="placard__inputs">
+            <summary>4 inputs</summary>
+            <dl>
+              <dt>stage</dt><dd><code>test</code></dd>
+              <dt>image</dt><dd><code>composer:2.10.3@sha256:…</code></dd>
+              <dt>omit_dev</dt><dd><code>true</code></dd>
+              <dt>output</dt><dd><code>sbom.cdx.json</code></dd>
+            </dl>
+          </details>
+        </article>
+
+        <article class="placard">
+          <span class="placard__screws" aria-hidden="true"></span>
+          <p class="placard__tag">next tag · pin a SHA</p>
+          <h3 class="placard__name">pint</h3>
+          <p class="placard__aside">Uniform pressed.</p>
+          <p class="placard__line">The app's own Laravel Pint in test mode. The app requires <code>laravel/pint</code> and ships a <code>pint.json</code>.</p>
+<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@&lt;full-commit-sha&gt;</code></pre>
+          <details class="placard__inputs">
+            <summary>4 inputs</summary>
+            <dl>
+              <dt>stage</dt><dd><code>test</code></dd>
+              <dt>image</dt><dd><code>composer:2.10.3@sha256:…</code></dd>
+              <dt>config</dt><dd><code>pint.json</code></dd>
+              <dt>working_dir</dt><dd><code>.</code></dd>
+            </dl>
+          </details>
+        </article>
+
+        <article class="placard">
+          <span class="placard__screws" aria-hidden="true"></span>
+          <p class="placard__tag">next tag · pin a SHA</p>
+          <h3 class="placard__name">phpstan</h3>
+          <p class="placard__aside">Instruments cross-checked.</p>
+          <p class="placard__line">The app's own PHPStan, with a Code Quality report. The app requires <code>phpstan/phpstan</code> and ships a <code>phpstan.neon</code>.</p>
+<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@&lt;full-commit-sha&gt;</code></pre>
+          <details class="placard__inputs">
+            <summary>5 inputs</summary>
+            <dl>
+              <dt>stage</dt><dd><code>test</code></dd>
+              <dt>image</dt><dd><code>composer:2.10.3@sha256:…</code></dd>
+              <dt>config</dt><dd><code>phpstan.neon</code></dd>
+              <dt>memory_limit</dt><dd><code>1G</code></dd>
+              <dt>working_dir</dt><dd><code>.</code></dd>
+            </dl>
+          </details>
+        </article>
+
+        <article class="placard">
+          <span class="placard__screws" aria-hidden="true"></span>
+          <p class="placard__tag">next tag · pin a SHA</p>
+          <h3 class="placard__name">eslint</h3>
+          <p class="placard__aside">The front cabin, too.</p>
+          <p class="placard__line">The app's own ESLint and Prettier. The app requires <code>@waynestate/pinstripe</code>, <code>eslint</code> and <code>prettier</code>.</p>
+<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@&lt;full-commit-sha&gt;</code></pre>
+          <details class="placard__inputs">
+            <summary>5 inputs</summary>
+            <dl>
+              <dt>stage</dt><dd><code>test</code></dd>
+              <dt>image</dt><dd><code>node:22.13-alpine@sha256:…</code></dd>
+              <dt>working_dir</dt><dd><code>.</code></dd>
+              <dt>eslint_args</dt><dd><code>.</code></dd>
+              <dt>prettier</dt><dd><code>true</code></dd>
+            </dl>
+          </details>
+        </article>
+
+        <!-- Not a component: the reusable workflow for GitHub mirrors. -->
+        <article class="placard placard--alt">
+          <span class="placard__screws" aria-hidden="true"></span>
+          <p class="placard__tag">next tag · pin a SHA</p>
+          <h3 class="placard__name">php-package.yml</h3>
+          <p class="placard__aside">Two cockpits, one checklist.</p>
+          <p class="placard__line">Components stay inside one GitLab instance, so GitHub mirrors call this reusable workflow instead: <code>composer ci</code> on each PHP version, then a Composer audit.</p>
+<pre class="placard__code"><code>uses: waynestate/preflight/.github/workflows/php-package.yml@&lt;full-commit-sha&gt;</code></pre>
+          <details class="placard__inputs">
+            <summary>3 inputs</summary>
+            <dl>
+              <dt>php-versions</dt><dd><code>'["8.3","8.4","8.5"]'</code></dd>
+              <dt>ci-command</dt><dd><code>composer ci</code></dd>
+              <dt>working-directory</dt><dd><code>.</code></dd>
+            </dl>
+          </details>
+        </article>
+      </div>
+
+      <div class="deferred">
+        <h3 class="deferred__title">Deferred items</h3>
+        <p class="deferred__note">On the list, not yet on board. Nothing to include until they land.</p>
+        <ul class="deferred__list">
+          <li class="inop"><span class="inop__sticker">Coming soon</span><span class="inop__name">Accessibility suite</span><span class="inop__line">Aimed at WCAG 2.2 Level AA, the floor WayneUI's own gate uses, with a manual review step kept.</span></li>
+          <li class="inop"><span class="inop__sticker">Coming soon</span><span class="inop__name">Contract suite</span><span class="inop__line">Named in the best practices as coming later. Not built yet.</span></li>
+          <li class="inop"><span class="inop__sticker">Coming soon</span><span class="inop__name">Site freshness</span><span class="inop__line">Planned. Not in this repo yet.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================== flight plan -->
+  <section class="section section--plan" id="flight-plan" aria-labelledby="plan-title">
+    <div class="wsu-container">
+      <div class="section__head">
+        <p class="eyebrow">Quick start</p>
+        <h2 id="plan-title">File a flight plan</h2>
+        <p>Four boxes. Fill them in once, and every merge request and every push to the default branch runs the checklist.</p>
+      </div>
+
+      <div class="plan">
+
+        <article class="plan__box plan__box--route">
+          <p class="plan__field"><span class="plan__num">1</span> Route · <code>.gitlab-ci.yml</code></p>
+          <h3>Include the components</h3>
+          <p>The <code>workflow:rules</code> block has to live in the app's own file: a component cannot set when the pipeline runs.</p>
+          <div class="codebox">
+<pre id="route-yaml" tabindex="0" aria-label=".gitlab-ci.yml for an app"><code>workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@0.1.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@0.1.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@&lt;full-commit-sha&gt;
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@&lt;full-commit-sha&gt;
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@&lt;full-commit-sha&gt;
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@&lt;full-commit-sha&gt;</code></pre>
+            <button class="copy-btn copy-btn--box" type="button" data-copy-from="#route-yaml"><span class="copy-btn__label">Copy</span></button>
+          </div>
+        </article>
+
+        <article class="plan__box plan__box--switches">
+          <p class="plan__field"><span class="plan__num">2</span> Switches · project settings</p>
+          <h3>Three settings that make gates harder to skip</h3>
+          <p>All three work on GitLab Community Edition. Flip each one as you set it.</p>
+          <ul class="switches">
+            <li>
+              <label class="switch">
+                <input type="checkbox" data-arm>
+                <span class="switch__bat" aria-hidden="true"></span>
+                <span class="switch__text"><b>Protect the default branch</b> and require a merge request to change it, so every change to <code>.gitlab-ci.yml</code> gets a reviewer.</span>
+              </label>
+            </li>
+            <li>
+              <label class="switch">
+                <input type="checkbox" data-arm>
+                <span class="switch__bat" aria-hidden="true"></span>
+                <span class="switch__text"><b>Set "Minimum role to use pipeline variables" to <code>no_one_allowed</code></b> unless the project needs them. Inputs are fixed and type checked for the whole run.</span>
+              </label>
+            </li>
+            <li>
+              <label class="switch">
+                <input type="checkbox" data-arm>
+                <span class="switch__bat" aria-hidden="true"></span>
+                <span class="switch__text"><b>Keep secrets away from fork merge requests.</b> Review a fork's <code>.gitlab-ci.yml</code> before running its pipeline, and never give it protected variables.</span>
+              </label>
+            </li>
+          </ul>
+          <p class="armed" data-armed><span class="armed__lamp" aria-hidden="true"></span><span data-armed-text>0 of 3 set</span></p>
+        </article>
+
+        <article class="plan__box">
+          <p class="plan__field"><span class="plan__num">3</span> Alternate · GitHub mirror</p>
+          <h3>Mirrored to GitHub? Same checks there</h3>
+          <p>A package mirrored to <code>github.com/waynestate</code> keeps its checks in a <code>ci</code> script in <code>composer.json</code> and calls the reusable workflow from <code>.github/workflows/ci.yml</code>. A release tag is not done until it is green on both sides.</p>
+          <div class="codebox">
+<pre id="gh-yaml" tabindex="0" aria-label=".github/workflows/ci.yml for a mirror"><code>name: CI
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v*', '*.*.*']
+
+jobs:
+  ci:
+    uses: waynestate/preflight/.github/workflows/php-package.yml@&lt;full-commit-sha&gt;</code></pre>
+            <button class="copy-btn copy-btn--box" type="button" data-copy-from="#gh-yaml"><span class="copy-btn__label">Copy</span></button>
+          </div>
+        </article>
+
+        <article class="plan__box">
+          <p class="plan__field"><span class="plan__num">4</span> Ground check · your machine</p>
+          <h3>Run PREFLIGHT's own checks locally</h3>
+          <p>From a clone of this repo: the template lint, its fixture tests, Pint and PHPStan through <code>composer ci</code>, then the inputs contract.</p>
+          <div class="wsu-tabs os-tabs" data-tabs>
+            <div class="wsu-tabs__list" role="tablist" aria-label="Operating system">
+              <button class="wsu-tabs__tab" role="tab" type="button" id="tab-win" aria-controls="panel-win" aria-selected="true">Windows</button>
+              <button class="wsu-tabs__tab" role="tab" type="button" id="tab-nix" aria-controls="panel-nix" aria-selected="false" tabindex="-1">macOS · Linux</button>
+            </div>
+            <div class="wsu-tabs__panel" role="tabpanel" id="panel-win" aria-labelledby="tab-win" tabindex="0">
+              <p class="os-note">PowerShell 7. <code>composer ci</code> needs PHP 8.3+ and Composer; the contract check runs yq in Docker.</p>
+<pre class="term"><code><span class="t-dim">PS&gt;</span> composer install
+<span class="t-dim">PS&gt;</span> composer ci
+<span class="t-dim">PS&gt;</span> pwsh -File tests/check-contract.ps1</code></pre>
+              <p class="os-note">No PHP on the machine? Docker does it:</p>
+<pre class="term"><code><span class="t-dim">PS&gt;</span> docker run --rm -v "${PWD}:/app" -w /app composer:2 composer install
+<span class="t-dim">PS&gt;</span> docker run --rm -v "${PWD}:/app" -w /app composer:2 composer ci</code></pre>
+            </div>
+            <div class="wsu-tabs__panel" role="tabpanel" id="panel-nix" aria-labelledby="tab-nix" tabindex="0" hidden>
+              <p class="os-note"><code>composer ci</code> needs PHP 8.3+ and Composer; the contract check needs yq v4.</p>
+<pre class="term"><code><span class="t-dim">$</span> composer install
+<span class="t-dim">$</span> composer ci
+<span class="t-dim">$</span> sh tests/check-contract.sh</code></pre>
+              <p class="os-note">No PHP on the machine? Docker does it:</p>
+<pre class="term"><code><span class="t-dim">$</span> docker run --rm -v "$(pwd):/app" -w /app composer:2 composer install
+<span class="t-dim">$</span> docker run --rm -v "$(pwd):/app" -w /app composer:2 composer ci</code></pre>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== flight manual -->
+  <section class="section section--manual" id="manual" aria-labelledby="manual-title">
+    <div class="wsu-container">
+      <div class="section__head">
+        <p class="eyebrow">From the flight manual</p>
+        <h2 id="manual-title">Read before flight</h2>
+        <p>What a shared template can do, what it cannot, and how PREFLIGHT keeps its own house in order.</p>
+      </div>
+
+      <div class="manual">
+        <div class="manual__notes">
+          <div role="note" class="poh poh--warning" aria-labelledby="poh-w">
+            <p class="poh__head" id="poh-w">Warning</p>
+            <p><strong>A component is not a lock.</strong> An app's own <code>.gitlab-ci.yml</code> is merged over the included jobs, so it can override a job's keys, skip it with <code>rules</code>, or delete the <code>include:</code> line. PREFLIGHT makes the safe pipeline the easy one; ROLLCALL is where skipped or weakened gates show up.</p>
+            <p class="poh__aside">A preflight checklist only works if the pilot reads it.</p>
+          </div>
+          <div role="note" class="poh poh--caution" aria-labelledby="poh-c">
+            <p class="poh__head" id="poh-c">Caution</p>
+            <p><strong>Same instance only.</strong> Components work only inside the GitLab instance that hosts PREFLIGHT; across instances, only by mirroring. Until git.wayne.edu has one, CI runs on the instance that has a runner. <strong>A git.wayne.edu instance runner is strongly recommended.</strong></p>
+          </div>
+          <div role="note" class="poh poh--note" aria-labelledby="poh-n">
+            <p class="poh__head" id="poh-n">Note</p>
+            <p><strong>Every image is pinned by digest</strong> (<code>name:tag@sha256:…</code>), so a repointed tag cannot quietly change what a pipeline runs. The <code>php-test</code> matrix is the one exception, tag-pinned on purpose so each job gets the newest PHP patch. Pins change only through a reviewed merge request.</p>
+<pre class="term term--light"><code><span class="t-dim">$</span> docker buildx imagetools inspect &lt;image&gt;:&lt;tag&gt;</code></pre>
+          </div>
+        </div>
+
+        <div class="selfcheck">
+          <p class="selfcheck__kicker">Preflight's own preflight</p>
+          <h3 class="selfcheck__title">The checklist checks the checklist</h3>
+          <p><code>composer ci</code> lints every template and workflow for unsafe CI patterns before the fixture tests run.</p>
+          <ul class="selfcheck__rules">
+            <li><code>privileged</code> <span><code>privileged: true</code></span></li>
+            <li><code>dind-service</code> <span>Docker-in-Docker services</span></li>
+            <li><code>docker-sock</code> <span>references to <code>docker.sock</code></span></li>
+            <li><code>kaniko-image</code> <span>Kaniko images</span></li>
+            <li><code>unpinned-action</code> <span>GitHub <code>uses:</code> not pinned to a 40-character SHA</span></li>
+            <li><code>image-no-tag</code> <span>an image with no tag</span></li>
+            <li><code>image-latest</code> <span>an image on <code>latest</code></span></li>
+            <li class="is-warn"><code>image-no-digest</code> <span>a warning: tagged, but not pinned by digest</span></li>
+          </ul>
+          <p class="selfcheck__foot">A known warning goes in <code>lint-allow.yml</code> with a required <code>reason</code>, so an allowlist entry is a reviewed decision, not a silence. And on every pipeline, <code>contract/inputs.json</code> holds each input's name, type and default, and each job's name, steady inside a major version.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================= departures -->
+  <section class="section section--stack" id="stack" aria-labelledby="stack-title">
+    <div class="wsu-container">
+      <div class="section__head">
+        <p class="eyebrow">Wayne State app stack</p>
+        <h2 id="stack-title">Departures</h2>
+        <p>PREFLIGHT is one stop on the way to Citadel. Here is everyone else on the board.</p>
+      </div>
+
+      <div class="board" data-board>
+        <div class="board__head" aria-hidden="true">
+          <span>Flight</span><span>Role</span>
+        </div>
+        <ul class="board__rows">
+          <li class="flight">
+            <span class="flight__mark flight__mark--tile"><img src="assets/marks/wayneui.svg" width="40" height="40" alt=""></span>
+            <span class="flight__name" data-flap>WayneUI</span>
+            <span class="flight__role">The interface. Its a11y floor is the one PREFLIGHT's accessibility suite will aim at.</span>
+          </li>
+          <li class="flight">
+            <span class="flight__mark"><img src="assets/marks/creed.png" width="40" height="40" alt=""></span>
+            <span class="flight__name" data-flap>CREED</span>
+            <span class="flight__role">The written standards, and the policy every other part reads.</span>
+          </li>
+          <li class="flight">
+            <span class="flight__mark"><img src="assets/marks/pinstripe.png" width="40" height="40" alt=""></span>
+            <span class="flight__name" data-flap>Pinstripe</span>
+            <span class="flight__role">The coding standard behind the Pint, PHPStan and ESLint jobs.</span>
+          </li>
+          <li class="flight">
+            <span class="flight__mark"><img src="assets/marks/proctor.png" width="40" height="40" alt=""></span>
+            <span class="flight__name" data-flap>PROCTOR</span>
+            <span class="flight__role">One command that checks an app. First item on the checklist.</span>
+          </li>
+          <li class="flight flight--here">
+            <span class="flight__mark"><img src="brand/preflight-avatar-256.png" width="40" height="40" alt=""></span>
+            <span class="flight__name" data-flap>PREFLIGHT</span>
+            <span class="flight__role">Shared CI on every push. <b>You are here.</b></span>
+          </li>
+          <li class="flight">
+            <span class="flight__mark"><img src="assets/marks/squire.png" width="40" height="40" alt=""></span>
+            <span class="flight__name" data-flap>SQUIRE</span>
+            <span class="flight__role">Carries the cleared release to Citadel.</span>
+          </li>
+          <li class="flight">
+            <span class="flight__mark"><img src="assets/marks/rollcall.png" width="40" height="40" alt=""></span>
+            <span class="flight__name" data-flap>ROLLCALL</span>
+            <span class="flight__role">Every app answers "present". Skipped gates show up here.</span>
+          </li>
+          <li class="flight">
+            <span class="flight__mark"><img src="assets/marks/booster.png" width="40" height="40" alt=""></span>
+            <span class="flight__name" data-flap>BOOSTER</span>
+            <span class="flight__role">Keeps an app's PHP current, so it stays on the test matrix.</span>
+          </li>
+          <li class="flight">
+            <span class="flight__mark"><img src="assets/marks/helmet.png" width="40" height="40" alt=""></span>
+            <span class="flight__name" data-flap>HELMET</span>
+            <span class="flight__role">Security headers and runtime hardening.</span>
+          </li>
+          <li class="flight">
+            <span class="flight__mark"><img src="assets/marks/sesame.png" width="40" height="40" alt=""></span>
+            <span class="flight__name" data-flap>SESAME</span>
+            <span class="flight__role">Sign-in for the app.</span>
+          </li>
+          <li class="flight">
+            <span class="flight__mark"><img src="assets/marks/drawbridge.png" width="40" height="40" alt=""></span>
+            <span class="flight__name" data-flap>DRAWBRIDGE</span>
+            <span class="flight__role">The Citadel sign-in gateway, lowered on request.</span>
+          </li>
+          <li class="flight">
+            <span class="flight__mark"><img src="assets/marks/advisor.png" width="40" height="40" alt=""></span>
+            <span class="flight__name" data-flap>ADVISOR</span>
+            <span class="flight__role">Ask what applies to your app, and what to do next.</span>
+          </li>
+          <li class="flight">
+            <span class="flight__mark"><img src="assets/marks/sourdough.png" width="40" height="40" alt=""></span>
+            <span class="flight__name" data-flap>Sourdough</span>
+            <span class="flight__role">Starters you feed, with PREFLIGHT already in the pipeline.</span>
+          </li>
+          <li class="flight">
+            <span class="flight__mark"><img src="assets/marks/weld.png" width="40" height="40" alt=""></span>
+            <span class="flight__name" data-flap>WELD</span>
+            <span class="flight__role">One app with every part already joined.</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="wsu-container foot__inner">
+    <p class="foot__tag">Every push is cleared for takeoff.</p>
+    <p class="foot__joke">Please keep your tests green until the pipeline has come to a complete stop.</p>
+    <p class="foot__org">Wayne State University · Enterprise Applications · MIT licence</p>
+  </div>
+</footer>
+
+<script src="assets/preflight.js" defer></script>
+</body>
+</html>
