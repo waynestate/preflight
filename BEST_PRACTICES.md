@@ -792,8 +792,8 @@ Sources: [Docker Official Image: php](https://github.com/docker-library/docs/blo
 
 **How the stack holds it: Not yet.** `php-test` has no input for an advisory version.
 
-### 6.5 Aim the future accessibility component at WCAG 2.1 AA
-When PREFLIGHT gets an accessibility suite, use WCAG 2.1 Level AA as the floor, and keep a manual review step.
+### 6.5 Aim the future accessibility component at WCAG 2.2 AA
+When PREFLIGHT gets an accessibility suite, use WCAG 2.2 Level AA as the floor, and keep a manual review step.
 
 Why: on 2026-04-20 the US Department of Justice published an interim final rule that moved the Title II web accessibility
 compliance dates by one year, to 2027-04-26 for public entities with a population of 50,000 or more and 2028-04-26 for
@@ -801,6 +801,9 @@ smaller ones. It did not change the standard, WCAG 2.1 Level AA. A trade press r
 public educational institutions' portals, forms, learning management content and websites. Which date applies to WSU
 depends on how the university is classified, so ask counsel. One search summary said the extension is being challenged in
 federal court. That is unverified. Automated checks find only some failures, so a green job does not prove conformance.
+
+The stack's floor is WCAG 2.2 Level AA, the same floor WayneUI's accessibility gate uses. W3C states that content
+that conforms to WCAG 2.2 also conforms to WCAG 2.1, so meeting the 2.2 floor also meets the rule's 2.1 Level AA.
 
 Sources: [Campus Technology: DOJ extends Title II deadline](https://campustechnology.com/articles/2026/04/27/doj-extends-deadline-for-ada-title-ii-compliance.aspx).
 The Federal Register text itself was not read in this pass.
@@ -915,7 +918,7 @@ Added in the second pass (2026-10-27):
 36. 2.10: Add an `image` input to `php-test`.
 37. 7.4: Add a cross-OS local run (Composer scripts first) and test the README's local commands in PowerShell.
 38. 6.4: Add an advisory job for the next PHP release.
-39. 6.5: Name WCAG 2.1 AA as the floor before the accessibility component is written.
+39. 6.5: Name WCAG 2.2 AA as the floor (it also meets the rule's 2.1 AA) before the accessibility component is written.
 40. 1.8: Write a retirement policy for components, and test whether SHA pins survive a Catalog unpublish.
 41. 4.12: Record the install-scripts rule before a JavaScript component is written.
 42. 2.11: Print the component version in job logs once the instance runs GitLab 18.7 or later.
