@@ -1,4 +1,4 @@
-# PHP package CI — the reusable workflow that mirrored packages call.
+# PHP package CI: the reusable workflow that mirrored packages call.
 #
 # GitLab components only run inside one GitLab instance, so a package that is
 # also mirrored to github.com/waynestate cannot use them there. This workflow

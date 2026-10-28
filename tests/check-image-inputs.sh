@@ -4,10 +4,10 @@
 #
 # Two practices from BEST_PRACTICES.md, checked in one pass:
 #
-#   * 2.10 — every job's image: is an input. A hard-coded image means the
+#   * 2.10: every job's image: is an input. A hard-coded image means the
 #     component cannot move to WSU-controlled or Citadel-matching images
 #     without a new major version.
-#   * 4.10 — a default php: tag names the Debian release (for example
+#   * 4.10: a default php: tag names the Debian release (for example
 #     -cli-trixie). The bare cli tag silently follows whichever Debian
 #     release the image maintainers choose.
 #
