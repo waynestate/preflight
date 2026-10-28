@@ -2,13 +2,13 @@
 
 Status: draft, checked against sources on 2026-10-27, with a second research pass the same day (see "Second pass
 (2026-10-27)" near the end). Applies to the PREFLIGHT components `proctor`, `php-test` and `composer-audit` at the state
-of the repo on that date (no release tagged yet).
+of the repo on that date (tag 0.1.0 exists; the components added after it arrive in the next tag).
 
 ## What this covers
 
 PREFLIGHT is a set of GitLab CI/CD components that every stack project and WSU app includes with
-`include: component:`. Today it has six: `php-test` (PHP versions through `parallel:matrix`), `composer-audit`,
-`proctor`, `sbom`, `pint` and `phpstan`. Accessibility and contract suites come later.
+`include: component:`. Today it has seven: `php-test` (PHP versions through `parallel:matrix`), `composer-audit`,
+`proctor`, `sbom`, `pint`, `phpstan` and `eslint`. Accessibility and contract suites come later.
 
 This guide is for two groups:
 
@@ -65,7 +65,7 @@ Sources: [GitLab: CI/CD components, versions](https://docs.gitlab.com/ci/compone
 [GitLab: pipeline security, includes](https://docs.gitlab.com/ci/pipeline_security/);
 [OpenSSF Scorecard: Pinned-Dependencies](https://github.com/ossf/scorecard/blob/main/docs/checks.md).
 
-**How the stack holds it: Documented.** The README says to pin a SHA until `0.1.0` is cut. PROCTOR's own
+**How the stack holds it: Documented.** The README pins `proctor` to `0.1.0`, the first tag. PROCTOR's own
 `.gitlab-ci.yml` pins a full SHA, with a comment against `~latest`. Nothing checks an app's includes.
 
 ### 1.2 Protect the component project's default branch and release tags
@@ -95,8 +95,8 @@ Why: the catalog gives typed discovery and lets consumers pin an exact or partia
 
 Sources: [GitLab: components, publishing](https://docs.gitlab.com/ci/components/).
 
-**How the stack holds it: Not yet.** The layout is right (`templates/<name>/template.yml`, a README). There is no
-`release` job in `.gitlab-ci.yml` and no tag. The README examples use `@0.1.0`, which does not resolve yet.
+**How the stack holds it: Not yet.** The layout is right (`templates/<name>/template.yml`, a README). Tag `0.1.0` exists; the `release` job is still to be confirmed.
+The README examples pin `@0.1.0` for the components in that tag and a full commit SHA for the rest.
 
 ### 1.4 Keep inputs and job names stable inside a major version
 Do not rename an input, change its type, or rename a job in a minor release.
@@ -136,8 +136,8 @@ Sources: [StepSecurity: tj-actions breach](https://www.stepsecurity.io/blog/when
 The tj-actions details above come from search summaries of these pages and the NVD record could not be read in this
 pass, so treat the exact counts and dates as unverified.
 
-**How the stack holds it: Not yet.** The README says to pin a SHA until `0.1.0` exists, but no release note format
-records the SHA, and nothing says what to do after `0.1.0` is cut.
+**How the stack holds it: Not yet.** Tag `0.1.0` exists, but no release note format records the SHA a consumer pins,
+and nothing yet says what to do when the next tag is cut.
 
 ### 1.7 Give consumers a reviewed way to bump their pins
 A pin that nobody updates freezes security fixes. Offer a scheduled merge request or a bot that proposes new SHAs and new
@@ -665,6 +665,19 @@ Sources: [PHPStan](https://phpstan.org/); [GitLab: Code Quality](https://docs.gi
 `vendor/bin/phpstan analyse --error-format=gitlab` against the app's own `phpstan.neon`, publishing the report. Like
 every component, an app can skip the include, so the enforcement is "when included".
 
+### 4.16 Lint JavaScript with the app's own ESLint and Prettier
+Run the app's own ESLint (and Prettier) and fail the pipeline on lint or format errors.
+
+Why: a shared lint gate keeps every app's JavaScript readable and consistent, and running the app's own config means
+the standard is the one the app already agreed to, not one imposed by the template.
+
+Sources: [ESLint](https://eslint.org/); [Prettier](https://prettier.io/).
+
+**How the stack holds it: Enforced.** The `eslint` component installs the app's dependencies with
+`npm ci --ignore-scripts` and runs `npx --no-install eslint` and `npx --no-install prettier --check` against the
+app's own config. Like every component, an app can skip the include, so the enforcement is "when included". ESLint is
+the preflight checklist for your JavaScript.
+
 ---
 
 ## 5. Secrets, tokens and runners
@@ -916,7 +929,7 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
 3. 3.3: Add a check or ROLLCALL report for apps that skip, unpin or weaken PREFLIGHT.
 4. 4.1: Pin images by digest and update the pins through reviewed merge requests.
 5. 4.4: Run PROCTOR without installing the app, and pass `--no-plugins --no-scripts` where jobs only inspect.
-6. 1.3: Add the `release` job, tag `0.1.0`, publish to the Catalog, and fix README examples.
+6. 1.3: Confirm the `release` job, publish the Catalog entry for `0.1.0`, and tag the next release with the components added after it.
 7. 1.2: Record and check the project's branch and tag protection.
 8. 6.2: Derive the PHP matrix from the policy, and drop 8.2 by 2027-01-01.
 9. 4.9: Pin the Composer version the installer fetches and the `composer-audit` image.
