@@ -7,8 +7,8 @@ of the repo on that date (no release tagged yet).
 ## What this covers
 
 PREFLIGHT is a set of GitLab CI/CD components that every stack project and WSU app includes with
-`include: component:`. Today it has three: `php-test` (PHP versions through `parallel:matrix`), `composer-audit` and
-`proctor`. Accessibility and contract suites come later.
+`include: component:`. Today it has four: `php-test` (PHP versions through `parallel:matrix`), `composer-audit`,
+`proctor` and `sbom`. Accessibility and contract suites come later.
 
 This guide is for two groups:
 
@@ -627,6 +627,19 @@ Sources: [Semgrep: Shai-Hulud second wave](https://semgrep.dev/blog/2025/digging
 search summaries only, so details are unverified.
 
 **How the stack holds it: Documented.** README.md "Shared conventions" records the rule. PREFLIGHT has no JavaScript component yet, so nothing runs it.
+
+### 4.13 Generate a CycloneDX SBOM and validate it
+Produce a software bill of materials for every release, and fail the build on an invalid one.
+
+Why: an SBOM is the manifest of what your app ships. Without it, a dependency audit is a guess, and a supply chain
+incident is a surprise.
+
+Sources: [CycloneDX: Composer generator](https://github.com/CycloneDX/cyclonedx-php-composer);
+[OWASP: Software Bill of Materials](https://owasp.org/www-project-software-bill-of-materials/).
+
+**How the stack holds it: Enforced.** The `sbom` component runs `composer CycloneDX:make-sbom --validate`, which fails
+the job on an invalid SBOM, and publishes the file as an artifact. Like every component, an app can skip the include,
+so the enforcement is "when included". The SBOM is the passenger manifest; without it, a stowaway is a mystery.
 
 ---
 

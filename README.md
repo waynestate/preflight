@@ -72,6 +72,26 @@ include:
 | `image` | string | `composer:2@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. |
 | `working_dir` | string | `.` | Directory to run composer audit in, relative to the project root. |
 
+### sbom
+
+Generates a CycloneDX SBOM with `cyclonedx/cyclonedx-php-composer`, validates it, and publishes it as an artifact. The plugin is installed globally, so the app's `composer.json` is never touched.
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@0.1.0
+    inputs:
+      output: sbom.cdx.json
+```
+
+`@0.1.0` is the first tag and is not cut yet. Until it is, pin a full commit SHA instead.
+
+| Input | Type | Default | What it does |
+|-------|------|---------|--------------|
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `image` | string | `composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. |
+| `omit_dev` | boolean | `true` | Whether to omit dev dependencies from the SBOM. |
+| `output` | string | `sbom.cdx.json` | Path of the SBOM file to publish, relative to the project root. |
+
 ## Same instance only
 
 Components work only inside the GitLab instance that hosts this project.
@@ -134,6 +154,7 @@ include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@0.1.0
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.0
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@0.1.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@0.1.0
 ```
 
 The `workflow:rules` block must live in the app's own file. A component
