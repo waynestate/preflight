@@ -28,6 +28,7 @@ spec:
       type: string
       default: "."
       description: "Directory the app lives in, relative to the repository root."
+      regex: '^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$'
 ---
 pint:
   stage: $[[ inputs.stage ]]

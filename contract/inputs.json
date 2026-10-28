@@ -8,7 +8,7 @@
         { "name": "composer_version", "type": "string", "default": "2.10.3" },
         { "name": "allow_failure", "type": "boolean", "default": false },
         { "name": "proctor_command", "type": "string", "default": "vendor/bin/proctor check --format=codequality" },
-        { "name": "working_dir", "type": "string", "default": "." }
+        { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" }
       ],
       "jobs": ["proctor"]
     },
@@ -19,7 +19,7 @@
         { "name": "php_versions", "type": "array", "default": ["8.3", "8.4", "8.5"] },
         { "name": "composer_version", "type": "string", "default": "2.10.3" },
         { "name": "test_command", "type": "string", "default": "vendor/bin/phpunit" },
-        { "name": "working_dir", "type": "string", "default": "." }
+        { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" }
       ],
       "jobs": ["php-test"]
     },
@@ -27,7 +27,7 @@
       "inputs": [
         { "name": "stage", "type": "string", "default": "test" },
         { "name": "image", "type": "string", "default": "composer:2@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc" },
-        { "name": "working_dir", "type": "string", "default": "." }
+        { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" }
       ],
       "jobs": ["composer-audit"]
     },
@@ -45,7 +45,7 @@
         { "name": "stage", "type": "string", "default": "test" },
         { "name": "image", "type": "string", "default": "composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc" },
         { "name": "config", "type": "string", "default": "pint.json" },
-        { "name": "working_dir", "type": "string", "default": "." }
+        { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" }
       ],
       "jobs": ["pint"]
     },
@@ -55,7 +55,7 @@
         { "name": "image", "type": "string", "default": "composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc" },
         { "name": "config", "type": "string", "default": "phpstan.neon" },
         { "name": "memory_limit", "type": "string", "default": "1G" },
-        { "name": "working_dir", "type": "string", "default": "." }
+        { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" }
       ],
       "jobs": ["phpstan"]
     },
@@ -63,7 +63,7 @@
       "inputs": [
         { "name": "stage", "type": "string", "default": "test" },
         { "name": "image", "type": "string", "default": "node:22.13-alpine@sha256:e2b39f7b64281324929257d0f8004fb6cb4bf0fdfb9aa8cedb235a766aec31da" },
-        { "name": "working_dir", "type": "string", "default": "." },
+        { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" },
         { "name": "eslint_args", "type": "string", "default": "." },
         { "name": "prettier", "type": "boolean", "default": true }
       ],
