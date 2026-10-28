@@ -1,0 +1,3 @@
+job:
+  services:
+    - docker:dind

@@ -1,0 +1,3 @@
+allow:
+  - file: bad.yml
+    rule: image-no-digest

@@ -1,0 +1,2 @@
+job:
+  image: kaniko/example:1.0

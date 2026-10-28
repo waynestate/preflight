@@ -1,0 +1,4 @@
+allow:
+  - file: bad.yml
+    rule: image-no-digest
+    reason: Fixture warning is allowed on purpose.
