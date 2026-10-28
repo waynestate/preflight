@@ -12,7 +12,8 @@ spec:
       description: Composer version to install.
       type: string
       default: 2.10.3
-      regex: /^2\.\d+\.\d+$/
+      # GitLab reads this as a raw RE2 pattern: no slashes around it.
+      regex: ^2\.\d+\.\d+$
     allow_failure:
       description: Whether the proctor job can fail without failing the pipeline.
       type: boolean
