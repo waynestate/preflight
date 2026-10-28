@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 
 final class ExampleTest extends TestCase
 {
-    public function testOnePlusOne(): void
+    public function test_one_plus_one(): void
     {
         $this->assertSame(2, 1 + 1);
     }
