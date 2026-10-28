@@ -947,7 +947,7 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
 21. 1.4: Add an inputs contract file and a test that catches a renamed input or job.
 22. 2.3 and 2.6: Lint templates for global keys, and explain which components may be weakened.
 23. 3.1: Publish the "components do not force" limit in the README.
-24. 5.3 and 5.4 and 7.3: Close with the git.wayne.edu instance runner (D-007); WayneUI's pipeline cannot run until then.
+24. 5.3 and 5.4 and 7.3: Close with the git.wayne.edu instance runner (this is still an open question); WayneUI's pipeline cannot run until then.
 
 Added in the second pass (2026-10-27):
 
