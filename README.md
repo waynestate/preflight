@@ -77,6 +77,47 @@ include:
 Components work only inside the GitLab instance that hosts this project.
 Components cannot be used across instances except by mirroring.
 
+## GitHub mirrors
+
+Components work only inside one GitLab instance, so a package that is also
+mirrored to `github.com/waynestate` cannot include them there. For those
+mirrors, PREFLIGHT ships a reusable GitHub Actions workflow that runs the same
+checks: the package's `composer ci` script on each supported PHP version, plus
+a Composer audit.
+
+Each package keeps its checks in a `ci` script in its `composer.json`; the
+workflow just calls `composer ci`, so the mirror runs whatever the package
+already runs on GitLab.
+
+The workflow lives at `.github/workflows/php-package.yml` in this repo. A
+mirrored package calls it from its own `.github/workflows/ci.yml`:
+
+```yaml
+name: CI
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v*', '*.*.*']
+
+jobs:
+  ci:
+    uses: waynestate/preflight/.github/workflows/php-package.yml@0.1.0
+```
+
+`@0.1.0` is the first tag and is not cut yet. Until it is, pin a full commit
+SHA instead, the same rule as the components above.
+
+| Input | Type | Default | What it does |
+|-------|------|---------|--------------|
+| `php-versions` | string (JSON array) | `'["8.3","8.4","8.5"]'` | PHP versions to test, lowest first. The audit job runs on the first entry. |
+| `ci-command` | string | `composer ci` | The command to run in each PHP version job. |
+| `working-directory` | string | `.` | Directory to run the command in, relative to the repository root. |
+
+The workflow is committed to this repo (and so to GitLab) but only runs on the
+GitHub mirror; GitLab ignores `.github/workflows`. A release tag is not done
+until it is green on both sides. Two cockpits, one checklist.
+
 ## When the components run
 
 The components are ordinary jobs, so they run whenever the app's pipeline
