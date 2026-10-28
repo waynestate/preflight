@@ -455,7 +455,7 @@
           <h3>Include the components</h3>
           <p>The <code>workflow:rules</code> block has to live in the app's own file: a component cannot set when the pipeline runs.</p>
           <div class="codebox">
-<pre id="route-yaml"><code>workflow:
+<pre id="route-yaml" tabindex="0" aria-label=".gitlab-ci.yml for an app"><code>workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
@@ -507,7 +507,7 @@ include:
           <h3>Mirrored to GitHub? Same checks there</h3>
           <p>A package mirrored to <code>github.com/waynestate</code> keeps its checks in a <code>ci</code> script in <code>composer.json</code> and calls the reusable workflow from <code>.github/workflows/ci.yml</code>. A release tag is not done until it is green on both sides.</p>
           <div class="codebox">
-<pre id="gh-yaml"><code>name: CI
+<pre id="gh-yaml" tabindex="0" aria-label=".github/workflows/ci.yml for a mirror"><code>name: CI
 
 on:
   push:
@@ -566,20 +566,20 @@ jobs:
 
       <div class="manual">
         <div class="manual__notes">
-          <aside class="poh poh--warning" aria-labelledby="poh-w">
+          <div role="note" class="poh poh--warning" aria-labelledby="poh-w">
             <p class="poh__head" id="poh-w">Warning</p>
             <p><strong>A component is not a lock.</strong> An app's own <code>.gitlab-ci.yml</code> is merged over the included jobs, so it can override a job's keys, skip it with <code>rules</code>, or delete the <code>include:</code> line. PREFLIGHT makes the safe pipeline the easy one; ROLLCALL is where skipped or weakened gates show up.</p>
             <p class="poh__aside">A preflight checklist only works if the pilot reads it.</p>
-          </aside>
-          <aside class="poh poh--caution" aria-labelledby="poh-c">
+          </div>
+          <div role="note" class="poh poh--caution" aria-labelledby="poh-c">
             <p class="poh__head" id="poh-c">Caution</p>
             <p><strong>Same instance only.</strong> Components work only inside the GitLab instance that hosts PREFLIGHT; across instances, only by mirroring. Until git.wayne.edu has one, CI runs on the instance that has a runner. <strong>A git.wayne.edu instance runner is strongly recommended.</strong></p>
-          </aside>
-          <aside class="poh poh--note" aria-labelledby="poh-n">
+          </div>
+          <div role="note" class="poh poh--note" aria-labelledby="poh-n">
             <p class="poh__head" id="poh-n">Note</p>
             <p><strong>Every image is pinned by digest</strong> (<code>name:tag@sha256:…</code>), so a repointed tag cannot quietly change what a pipeline runs. The <code>php-test</code> matrix is the one exception, tag-pinned on purpose so each job gets the newest PHP patch. Pins change only through a reviewed merge request.</p>
 <pre class="term term--light"><code><span class="t-dim">$</span> docker buildx imagetools inspect &lt;image&gt;:&lt;tag&gt;</code></pre>
-          </aside>
+          </div>
         </div>
 
         <div class="selfcheck">

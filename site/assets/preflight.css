@@ -1231,3 +1231,23 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
 .foot__tag { margin: 0; font-family: var(--display); font-weight: 700; font-size: clamp(1.3rem, 3vw, 1.8rem); }
 .foot__joke { margin: .5rem 0 0; font-family: var(--display); font-style: italic; color: var(--gold); }
 .foot__org { margin: 1.2rem 0 0; font-size: .9rem; color: #CFE3DD; }
+
+/* wrapped code blocks may break long paths anywhere rather than push the page sideways */
+.placard__code code, .term code, .quickstart__code code { overflow-wrap: anywhere; }
+@media (max-width: 399px) {
+  .item__name { white-space: normal; }
+  .item__row { gap: .35rem; }
+  .item { padding-inline: 1.1rem .9rem; }
+}
+.plan__box > p.armed { color: var(--glass-text); font-size: .78rem; }
+.plan__box > p.armed.is-armed { color: var(--lit); }
+.placard__name { color: #fff; }
+.placard__tag, .inop__sticker { font-family: var(--display); }
+.plan__box > p.plan__field { margin: 0; font-size: .72rem; color: var(--blue-deep); display: flex; align-items: center; min-height: 2.2rem; }
+.plan__box { padding-top: 3.3rem; }
+.selfcheck__kicker, .card__kicker { font-family: var(--display); }
+.flight__name { letter-spacing: 0; font-size: 1.1rem; }
+.flap { gap: 3px; }
+.flap__c { width: 1.3em; height: 1.7em; box-shadow: inset 0 0 0 1px #1E3E4E; }
+@media (max-width: 639px) { .flap__c { width: 1.15em; } .flight__name { font-size: 1rem; } }
+@media (max-width: 359px) { .flight__name { font-size: .86rem; } }

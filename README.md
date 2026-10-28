@@ -4,6 +4,8 @@ PREFLIGHT is a set of GitLab CI/CD components that give every WSU app the
 same checks: PROCTOR, PHP tests on each supported version, Composer audit,
 an SBOM, Pint, PHPStan and ESLint.
 
+Front page: [`site/index.html`](site/index.html), a static page; see [`site/README.md`](site/README.md).
+
 Components are GA on the Free tier since GitLab 17.0. They work only within
 the same GitLab instance that hosts this project.
 
