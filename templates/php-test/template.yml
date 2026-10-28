@@ -7,7 +7,7 @@ spec:
     php_versions:
       description: PHP versions to test against, one job per entry (for example "8.3"). Jobs use the official php:<version>-cli tag, so they test the newest patch release.
       type: array
-      default: ["8.2", "8.3", "8.4", "8.5"]
+      default: ["8.3", "8.4", "8.5"]
     composer_version:
       description: Composer version to install.
       type: string
@@ -33,6 +33,8 @@ php-test:
     matrix:
       - PHP_VERSION: $[[ inputs.php_versions ]]
   image: php:${PHP_VERSION}-cli
+  interruptible: true
+  timeout: 30 minutes
   script:
     # php:*-cli images do not ship Composer, unzip or git. The images are
     # Debian-based, so apt is used.
@@ -49,6 +51,6 @@ php-test:
     - php -r "if (hash_file('sha384', 'composer-setup.php') !== trim(file_get_contents('https://composer.github.io/installer.sig'))) { unlink('composer-setup.php'); exit(1); }"
     - php composer-setup.php --quiet --install-dir=/usr/local/bin --filename=composer --version=$[[ inputs.composer_version ]]
     - rm composer-setup.php
-    - cd $[[ inputs.working_dir ]]
+    - cd "$[[ inputs.working_dir ]]"
     - composer install --no-interaction --no-progress
     - $[[ inputs.test_command ]]

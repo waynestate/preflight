@@ -48,7 +48,7 @@ include:
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the jobs. |
-| `php_versions` | array | `["8.2", "8.3", "8.4", "8.5"]` | PHP versions to test against. |
+| `php_versions` | array | `["8.3", "8.4", "8.5"]` | PHP versions to test against. |
 | `composer_version` | string | `2.10.3` | Composer version to install. |
 | `test_command` | string | `vendor/bin/phpunit` | The test command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
@@ -127,7 +127,7 @@ app must live on or be mirrored to GitLab. See
 
 - Composer vendor: `waynestate/`
 - Licence: MIT
-- PHP floor: `^8.2`
+- PHP floor: `^8.3`
 
 ## Updating image pins
 

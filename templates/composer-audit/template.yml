@@ -19,6 +19,8 @@ composer-audit:
   # needed. composer audit --locked exits non-zero when it finds advisories,
   # which fails the job. No allow_failure input: advisories must fail.
   image: $[[ inputs.image ]]
+  interruptible: true
+  timeout: 30 minutes
   script:
-    - cd $[[ inputs.working_dir ]]
+    - cd "$[[ inputs.working_dir ]]"
     - composer audit --locked

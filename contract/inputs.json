@@ -15,7 +15,7 @@
     "php-test": {
       "inputs": [
         { "name": "stage", "type": "string", "default": "test" },
-        { "name": "php_versions", "type": "array", "default": ["8.2", "8.3", "8.4", "8.5"] },
+        { "name": "php_versions", "type": "array", "default": ["8.3", "8.4", "8.5"] },
         { "name": "composer_version", "type": "string", "default": "2.10.3" },
         { "name": "test_command", "type": "string", "default": "vendor/bin/phpunit" },
         { "name": "working_dir", "type": "string", "default": "." }
