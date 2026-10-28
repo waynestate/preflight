@@ -7,7 +7,7 @@ spec:
     image:
       description: Docker image for the proctor job.
       type: string
-      default: php:8.4-cli@sha256:debadc2e36b857657846e2e952cbaf52702e55482dd3c2c43806f68d8c534a70
+      default: php:8.4-cli-trixie@sha256:9cf851bc2c1b37c3e59dfd677a3c3e56d485af5a47c93f629424bb039eafcb69
     composer_version:
       description: Composer version to install.
       type: string
@@ -36,7 +36,7 @@ proctor:
   interruptible: true
   timeout: 30 minutes
   script:
-    # php:8.4-cli does not ship Composer, unzip or git. The image is
+    # php:8.4-cli-trixie does not ship Composer, unzip or git. The image is
     # Debian-based, so apt is used.
     # Composer is installed with the official getcomposer.org installer;
     # its SHA-384 is fetched at runtime from

@@ -4,8 +4,12 @@ spec:
       description: Pipeline stage for the php-test jobs.
       type: string
       default: test
+    image:
+      description: Docker image for each php-test job. The default carries the literal ${PHP_VERSION}, which GitLab expands in the image at job time, so the matrix keeps working.
+      type: string
+      default: php:${PHP_VERSION}-cli-trixie
     php_versions:
-      description: PHP versions to test against, one job per entry (for example "8.3"). Jobs use the official php:<version>-cli tag, so they test the newest patch release.
+      description: PHP versions to test against, one job per entry (for example "8.3"). Each job runs the newest patch release of that version.
       type: array
       default: ["8.3", "8.4", "8.5"]
     composer_version:
@@ -28,12 +32,13 @@ php-test:
   # An array input that replaces an entire YAML value is interpolated as its
   # specified type (docs: Input types), so the array feeds parallel:matrix
   # directly. One job is created per PHP version; PHP_VERSION becomes a
-  # CI/CD variable in each job, which the image line expands. The PHP images
-  # are deliberately tag-pinned (see README, "Updating image pins").
+  # CI/CD variable in each job, which the image input's default expands. The
+  # default image is deliberately tag-pinned (see README, "Updating image
+  # pins").
   parallel:
     matrix:
       - PHP_VERSION: $[[ inputs.php_versions ]]
-  image: php:${PHP_VERSION}-cli
+  image: $[[ inputs.image ]]
   interruptible: true
   timeout: 30 minutes
   # The cache is always on. COMPOSER_CACHE_DIR points Composer at a path

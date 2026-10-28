@@ -26,7 +26,7 @@ include:
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the job. |
-| `image` | string | `php:8.4-cli@sha256:debadc2e36b857657846e2e952cbaf52702e55482dd3c2c43806f68d8c534a70` | Docker image for the job. |
+| `image` | string | `php:8.4-cli-trixie@sha256:9cf851bc2c1b37c3e59dfd677a3c3e56d485af5a47c93f629424bb039eafcb69` | Docker image for the job. |
 | `composer_version` | string | `2.10.3` | Composer version to install. |
 | `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline. |
 | `proctor_command` | string | `vendor/bin/proctor check --format=codequality` | The proctor command to run. |
@@ -46,6 +46,7 @@ include:
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the jobs. |
+| `image` | string | `php:${PHP_VERSION}-cli-trixie` | Docker image for the jobs. The default carries the literal `${PHP_VERSION}`, which GitLab expands in the image at job time. |
 | `php_versions` | array | `["8.3", "8.4", "8.5"]` | PHP versions to test against. |
 | `composer_version` | string | `2.10.3` | Composer version to install. |
 | `test_command` | string | `vendor/bin/phpunit` | The test command to run. |
