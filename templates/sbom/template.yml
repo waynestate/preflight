@@ -1,0 +1,36 @@
+spec:
+  inputs:
+    stage:
+      description: Pipeline stage for the sbom job.
+      type: string
+      default: test
+    image:
+      description: Docker image for the sbom job.
+      type: string
+      default: composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc
+    omit_dev:
+      description: Whether to omit dev dependencies from the SBOM.
+      type: boolean
+      default: true
+    output:
+      description: Path of the SBOM file to publish, relative to the project root.
+      type: string
+      default: sbom.cdx.json
+---
+sbom:
+  stage: $[[ inputs.stage ]]
+  # The composer image already ships Composer, so no install step is needed.
+  # The CycloneDX plugin is installed globally so the app's composer.json is
+  # never touched. --validate fails the job on an invalid SBOM.
+  image: $[[ inputs.image ]]
+  interruptible: true
+  timeout: 30 minutes
+  script:
+    - composer install --no-interaction --no-progress --prefer-dist
+    - composer global config --no-plugins allow-plugins.cyclonedx/cyclonedx-php-composer true
+    - composer global require cyclonedx/cyclonedx-php-composer:^6.2
+    - if [ "$[[ inputs.omit_dev ]]" = "true" ]; then composer CycloneDX:make-sbom --output-format=JSON --output-reproducible --validate --omit=dev --output-file=$[[ inputs.output ]]; else composer CycloneDX:make-sbom --output-format=JSON --output-reproducible --validate --output-file=$[[ inputs.output ]]; fi
+  artifacts:
+    paths:
+      - $[[ inputs.output ]]
+    expire_in: 30 days

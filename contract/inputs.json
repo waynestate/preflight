@@ -29,6 +29,15 @@
         { "name": "working_dir", "type": "string", "default": "." }
       ],
       "jobs": ["composer-audit"]
+    },
+    "sbom": {
+      "inputs": [
+        { "name": "stage", "type": "string", "default": "test" },
+        { "name": "image", "type": "string", "default": "composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc" },
+        { "name": "omit_dev", "type": "boolean", "default": true },
+        { "name": "output", "type": "string", "default": "sbom.cdx.json" }
+      ],
+      "jobs": ["sbom"]
     }
   }
 }
