@@ -625,7 +625,7 @@ Sources: [Semgrep: Shai-Hulud second wave](https://semgrep.dev/blog/2025/digging
 [Better Stack: Shai-Hulud](https://betterstack.com/community/guides/scaling-nodejs/shai-hulud-attack/). These were read as
 search summaries only, so details are unverified.
 
-**How the stack holds it: Not yet.** PREFLIGHT has no JavaScript component. Record the rule before one is written.
+**How the stack holds it: Documented.** README.md "Shared conventions" records the rule. PREFLIGHT has no JavaScript component yet, so nothing runs it.
 
 ---
 

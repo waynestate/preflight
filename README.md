@@ -128,6 +128,7 @@ app must live on or be mirrored to GitLab. See
 - Composer vendor: `waynestate/`
 - Licence: MIT
 - PHP floor: `^8.3`
+- JavaScript components (none yet) install with `npm ci --ignore-scripts`. A package that needs its install script is named in the component's inputs, and the job carries no token beyond `CI_JOB_TOKEN` (BEST_PRACTICES.md 4.12).
 
 ## Updating image pins
 
