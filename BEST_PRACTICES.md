@@ -324,7 +324,7 @@ Why: the main `.gitlab-ci.yml` is merged over included jobs, and an app can simp
 Sources: [GitLab: includes, merge behaviour](https://docs.gitlab.com/ci/yaml/includes/);
 [GitLab: pipeline execution policies (Ultimate)](https://docs.gitlab.com/user/application_security/policies/pipeline_execution_policies/).
 
-**How the stack holds it: Documented.** ADR-0002 names the CI gate as point (c) and Fleet as point (e), which shows
+**How the stack holds it: Documented.** The stack's enforcement-points decision names the CI gate as point (c) and Fleet as point (e), which shows
 who skips CI. ROLLCALL is not built, so nothing reports skipped or weakened pipelines today.
 
 Prior art (second pass): Drupal's shared GitLab templates, used by more than 2,000 contributed projects at the time of
@@ -732,7 +732,7 @@ Why: any Developer can run code on a shared runner, and a non-ephemeral one can 
 Sources: [GitLab Runner: security](https://docs.gitlab.com/runner/security/);
 [CISA and NSA: Defending CI/CD environments](https://cisa.gov/news-events/alerts/2023/06/28/cisa-and-nsa-release-joint-guidance-defending-continuous-integrationcontinuous-delivery-cicd).
 
-**How the stack holds it: Documented.** `design/instance-runner-case.md` expects a Docker executor and leaves capacity,
+**How the stack holds it: Documented.** The stack's instance-runner case expects a Docker executor and leaves capacity,
 maintenance and limits to ops. Nothing states "non-privileged" or "ephemeral".
 
 Second pass, concrete settings from the GitLab Runner security page, to put in the runner request:
@@ -1040,8 +1040,8 @@ CLI and the Packagist Composer 2.10 post. The GitLab includes page shows example
 advice, which is why 1.1 relies on the pipeline security and components pages instead. Not read: the NVD records for the
 Composer and tj-actions CVEs, the Federal Register text of the DOJ rule, and any GitLab Runner release notes.
 
-Internal design documents used for tagging: ADR-0002, `design/instance-runner-case.md`, `design/objectives.md`,
-`design/first-repos.md`, `research/gitlab-ci-components.md`, the PREFLIGHT repo and the PROCTOR repo.
+Stack design decisions and notes used for tagging: the enforcement-points decision, the instance-runner case, the stack
+objectives, the first-repos plan, the GitLab CI components research, the PREFLIGHT repo and the PROCTOR repo.
 
 ## Second pass (2026-10-27)
 
