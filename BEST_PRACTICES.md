@@ -297,7 +297,11 @@ Citadel-matching images later (see 4.2) without a new major version.
 
 Sources: [GitLab: component examples, inputs for image versions](https://docs.gitlab.com/ci/components/examples/).
 
-**How the stack holds it: Not yet.** Two of three components comply. `php-test` hard-codes `php:${PHP_VERSION}-cli`.
+**How the stack holds it: Checked.** Every component takes `image` as an input, and every job's `image:` is
+`$[[ inputs.image ]]`. `php-test`'s default is `php:${PHP_VERSION}-cli-trixie`: the literal `${PHP_VERSION}`
+survives input interpolation, and GitLab expands it in the image at job time, so the matrix keeps working.
+`tests/check-image-inputs.sh` (and its `.ps1` twin) fail if a job's `image:` stops being an input or a default
+`php:` tag loses its Debian release name.
 
 ### 2.11 Print which component version ran
 Use `spec:component` and `$[[ component.sha ]]` or `$[[ component.version ]]` to write the component's own version into
@@ -590,9 +594,11 @@ image family of the target you deploy to.
 
 Sources: [Docker Official Image: php](https://github.com/docker-library/docs/blob/master/php/README.md).
 
-**How the stack holds it: Not yet.** The defaults use the bare `cli` tag of the official `php` images, the default for
-raw Docker, OpenShift and Coolify. For the `citadel` target, the jobs should run on Citadel's own images; which Debian
-release those use is not stated in the documents read for this guide.
+**How the stack holds it: Checked.** The `php:` defaults name the Debian release: `php-test` defaults to
+`php:${PHP_VERSION}-cli-trixie` and `proctor` to `php:8.4-cli-trixie@sha256:...` (Debian 13, the release the
+bare `cli` tags point at as of 2026-10-28). `tests/check-image-inputs.sh` (and its `.ps1` twin) fail if a
+default `php:` tag loses its Debian release name. For the `citadel` target, the jobs should run on Citadel's
+own images; which Debian release those use is not stated in the documents read for this guide.
 
 ### 4.11 Use Composer's malware and advisory blocking, and review lock changes
 Run Composer 2.10 or later so flagged versions are refused at install and audit. Review `composer.lock` diffs after any
