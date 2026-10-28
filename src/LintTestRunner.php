@@ -11,9 +11,7 @@ namespace WayneState\Preflight;
  */
 final class LintTestRunner
 {
-    public function __construct(private readonly string $root)
-    {
-    }
+    public function __construct(private readonly string $root) {}
 
     public function run(): int
     {

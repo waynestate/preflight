@@ -23,9 +23,7 @@ final class TemplateLinter
     /** @var array<string, true> */
     private array $seen = [];
 
-    public function __construct(private readonly string $root)
-    {
-    }
+    public function __construct(private readonly string $root) {}
 
     public function run(): int
     {
@@ -124,6 +122,7 @@ final class TemplateLinter
     }
 
     /**
+     * @param list<array{file: string, severity: string, rule: string, message: string}> $findings
      */
     private function report(array $findings): int
     {
@@ -142,7 +141,7 @@ final class TemplateLinter
     }
 
     /**
-     * @param array{file: string, severity: string, rule: string, message: string}[] $findings
+     * @param list<array{file: string, severity: string, rule: string, message: string}> $findings
      * @return list<mixed>
      */
     private function parseYaml(string $path, string $relative, array &$findings): array
@@ -203,7 +202,7 @@ final class TemplateLinter
 
         return array_values(array_filter(
             $documents,
-            static fn (string $document): bool => self::hasYamlContent($document),
+            static fn(string $document): bool => self::hasYamlContent($document),
         ));
     }
 
@@ -304,6 +303,9 @@ final class TemplateLinter
         return [$allowed, $findings];
     }
 
+    /**
+     * @param list<array{file: string, severity: string, rule: string, message: string}> $findings
+     */
     private function checkComponentInputDefaults(mixed $document, string $file, array &$findings): void
     {
         if (!is_array($document)) {
@@ -326,14 +328,14 @@ final class TemplateLinter
 
     /**
      * @param list<string> $path
-     * @param array{file: string, severity: string, rule: string, message: string}[] $findings
+     * @param list<array{file: string, severity: string, rule: string, message: string}> $findings
      */
     private function visit(mixed $node, string $file, array $path, array &$findings): void
     {
         if (is_array($node)) {
             if (array_is_list($node)) {
                 foreach ($node as $index => $value) {
-                    $this->visit($value, $file, [...$path, $index], $findings);
+                    $this->visit($value, $file, [...$path, (string) $index], $findings);
                 }
                 return;
             }
@@ -351,7 +353,7 @@ final class TemplateLinter
     }
 
     /**
-     * @param array{file: string, severity: string, rule: string, message: string}[] $findings
+     * @param list<array{file: string, severity: string, rule: string, message: string}> $findings
      */
     private function checkKey(string $key, mixed $value, string $file, array &$findings): void
     {
@@ -373,7 +375,7 @@ final class TemplateLinter
     }
 
     /**
-     * @param array{file: string, severity: string, rule: string, message: string}[] $findings
+     * @param list<array{file: string, severity: string, rule: string, message: string}> $findings
      */
     private function checkImageValue(mixed $value, string $file, array &$findings): void
     {
@@ -388,7 +390,7 @@ final class TemplateLinter
     }
 
     /**
-     * @param array{file: string, severity: string, rule: string, message: string}[] $findings
+     * @param list<array{file: string, severity: string, rule: string, message: string}> $findings
      */
     private function checkActionRef(string $uses, string $file, array &$findings): void
     {
@@ -422,7 +424,7 @@ final class TemplateLinter
     }
 
     /**
-     * @param array{file: string, severity: string, rule: string, message: string}[] $findings
+     * @param list<array{file: string, severity: string, rule: string, message: string}> $findings
      */
     private function checkImageRef(string $ref, string $file, array &$findings): void
     {
@@ -473,7 +475,7 @@ final class TemplateLinter
                 "Image reference uses the latest tag: $ref",
                 $findings,
             );
-        } elseif ($digest === null && $tag !== null) {
+        } elseif ($digest === null) {
             $this->addFinding(
                 $file,
                 'warning',
@@ -485,7 +487,7 @@ final class TemplateLinter
     }
 
     /**
-     * @param array{file: string, severity: string, rule: string, message: string}[] $findings
+     * @param list<array{file: string, severity: string, rule: string, message: string}> $findings
      */
     private function visitServiceValue(mixed $node, string $file, array &$findings): void
     {
@@ -512,7 +514,7 @@ final class TemplateLinter
     }
 
     /**
-     * @param array{file: string, severity: string, rule: string, message: string}[] $findings
+     * @param list<array{file: string, severity: string, rule: string, message: string}> $findings
      */
     private function checkServiceRef(string $ref, string $file, array &$findings): void
     {
@@ -537,7 +539,7 @@ final class TemplateLinter
     }
 
     /**
-     * @param array{file: string, severity: string, rule: string, message: string}[] $findings
+     * @param list<array{file: string, severity: string, rule: string, message: string}> $findings
      */
     private function checkScalar(mixed $node, string $file, array &$findings): void
     {
@@ -547,7 +549,7 @@ final class TemplateLinter
     }
 
     /**
-     * @param array{file: string, severity: string, rule: string, message: string}[] $findings
+     * @param list<array{file: string, severity: string, rule: string, message: string}> $findings
      */
     private function addFinding(string $file, string $severity, string $rule, string $message, array &$findings): void
     {

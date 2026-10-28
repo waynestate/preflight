@@ -11,6 +11,10 @@
         "php": "^8.3",
         "symfony/yaml": "^7.0"
     },
+    "require-dev": {
+        "laravel/pint": "^1.32",
+        "phpstan/phpstan": "^2.3"
+    },
     "autoload": {
         "psr-4": {
             "WayneState\\Preflight\\": "src/"
@@ -25,7 +29,12 @@
     "scripts": {
         "ci": [
             "php bin/lint-templates",
-            "php bin/lint-templates --test"
-        ]
+            "php bin/lint-templates --test",
+            "@lint",
+            "@analyse"
+        ],
+        "lint": "pint --test",
+        "fix": "pint",
+        "analyse": "phpstan analyse --memory-limit=1G"
     }
 }
