@@ -1251,3 +1251,17 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
 .flap__c { width: 1.3em; height: 1.7em; box-shadow: inset 0 0 0 1px #1E3E4E; }
 @media (max-width: 639px) { .flap__c { width: 1.15em; } .flight__name { font-size: 1rem; } }
 @media (max-width: 359px) { .flight__name { font-size: .86rem; } }
+
+/* Part names in the stack list link to each part's own front page. They keep
+   this page's colours; the underline is the only new thing. */
+.part-link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: .18em;
+}
+.part-link:hover { text-decoration-thickness: 2px; }
+/* On the departures board an underline peeks between the flap cells, so the
+   cells brighten on hover instead. */
+.flight__name .part-link { display: inline-block; text-decoration: none; }
+.flight__name .part-link:hover .flap { filter: brightness(1.3); }
