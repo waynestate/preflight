@@ -6,11 +6,7 @@
 # and ship a phpstan.neon (or point `config` at its own file).
 ---
 spec:
-  version: "1"
-  name: phpstan
-  category: "Testing/Validation"
   description: "Run the app's own PHPStan and fail on static analysis errors."
-  tags: "php,static-analysis,phpstan"
   inputs:
     stage:
       type: string

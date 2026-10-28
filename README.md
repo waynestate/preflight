@@ -98,6 +98,8 @@ This component is not in `0.1.0`; it arrives in the next tag. Until then, pin a 
 
 ### pint
 
+Version 1 · Category: Testing/Validation · Tags: php,style,pint
+
 Runs the app's own [Laravel Pint](https://laravel.com/docs/12.x/pint) in test mode and fails the pipeline on style errors. The app must require `laravel/pint` as a dev dependency and ship a `pint.json` (or point `config` at its own file).
 
 ```yaml
@@ -117,6 +119,8 @@ This component is not in `0.1.0`; it arrives in the next tag. Until then, pin a 
 | `working_dir` | string | `.` | Directory to run Pint in, relative to the project root. |
 
 ### phpstan
+
+Version 1 · Category: Testing/Validation · Tags: php,static-analysis,phpstan
 
 Runs the app's own [PHPStan](https://phpstan.org/) and fails the pipeline on static analysis errors, writing a GitLab Code Quality report. The app must require `phpstan/phpstan` as a dev dependency and ship a `phpstan.neon` (or point `config` at its own file).
 
@@ -139,6 +143,8 @@ This component is not in `0.1.0`; it arrives in the next tag. Until then, pin a 
 | `working_dir` | string | `.` | Directory to run PHPStan in, relative to the project root. |
 
 ### eslint
+
+Version 1 · Category: Testing/Validation · Tags: javascript,style,eslint,prettier
 
 Runs the app's own [ESLint](https://eslint.org/) (and [Prettier](https://prettier.io/)) and fails the pipeline on lint or format errors. The app must require `@waynestate/pinstripe`, `eslint` and `prettier` as dev dependencies and ship an `eslint.config.js` (or point `eslint_args` at its own files).
 

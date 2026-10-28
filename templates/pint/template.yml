@@ -6,11 +6,7 @@
 # at its own file).
 ---
 spec:
-  version: "1"
-  name: pint
-  category: "Testing/Validation"
   description: "Run the app's own Laravel Pint in test mode and fail on style errors."
-  tags: "php,style,pint"
   inputs:
     stage:
       type: string
