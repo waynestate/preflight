@@ -1,0 +1,19 @@
+# PREFLIGHT's own checks on the GitHub mirror: it calls the reusable workflow in
+# this same repository, so what the packages run is what PREFLIGHT runs on itself.
+# Every check lives in the `ci` script in composer.json.
+name: CI
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v*', '*.*.*']
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    uses: ./.github/workflows/php-package.yml
+    with:
+      php-versions: '["8.3","8.4","8.5"]'
+      ci-command: composer ci

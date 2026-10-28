@@ -1,6 +1,11 @@
 {
     "name": "waynestate/preflight",
     "description": "GitLab CI/CD components and a reusable GitHub Actions workflow for WSU PHP packages.",
+    "type": "project",
+    "homepage": "https://preflight.apps.wayne.edu/",
+    "support": {
+        "source": "https://github.com/waynestate/preflight"
+    },
     "license": "MIT",
     "authors": [
         {

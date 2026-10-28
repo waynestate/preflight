@@ -18,6 +18,8 @@ an SBOM, Pint, PHPStan and ESLint.
 
 Front page: [`site/index.html`](site/index.html), a static page; see [`site/README.md`](site/README.md).
 
+Development happens on Wayne State's GitLab; this repository is a release mirror. Changes land there first.
+
 <details>
 <summary><b>Walk round the aircraft</b>: the placards, the flight plan and the flight manual from the front page</summary>
 <br>
