@@ -95,7 +95,7 @@ Why: the catalog gives typed discovery and lets consumers pin an exact or partia
 
 Sources: [GitLab: components, publishing](https://docs.gitlab.com/ci/components/).
 
-**How the stack holds it: Not yet.** The layout is right (`templates/<name>/template.yml`, a README). Tag `0.1.0` exists; the `release` job is still to be confirmed.
+**How the stack holds it: Not yet.** The layout is right (`templates/<name>/template.yml`, a README). Tags `0.1.0` and `0.1.1` exist; the `release` job is still to be confirmed.
 The README examples pin `@0.1.0` for the components in that tag and a full commit SHA for the rest.
 
 ### 1.4 Keep inputs and job names stable inside a major version
@@ -136,7 +136,7 @@ Sources: [StepSecurity: tj-actions breach](https://www.stepsecurity.io/blog/when
 The tj-actions details above come from search summaries of these pages and the NVD record could not be read in this
 pass, so treat the exact counts and dates as unverified.
 
-**How the stack holds it: Not yet.** Tag `0.1.0` exists, but no release note format records the SHA a consumer pins,
+**How the stack holds it: Not yet.** Tags `0.1.0` and `0.1.1` exist, but no release note format records the SHA a consumer pins,
 and nothing yet says what to do when the next tag is cut.
 
 ### 1.7 Give consumers a reviewed way to bump their pins
@@ -496,7 +496,7 @@ Why: the template alone would not notice a missing lock.
 Sources: [Composer basic usage: the lock file](https://getcomposer.org/doc/01-basic-usage.md).
 
 **How the stack holds it: Checked.** PROCTOR's `lock-committed` fails when the lock is missing. It runs only if the app
-includes the `proctor` component, which cannot run yet (see 6.1).
+includes the `proctor` component, whose default command now runs on a fresh app (see 6.1).
 
 ### 4.6 Audit the lock and fail the job
 Run `composer audit --locked`. A non-zero exit fails the job. Give the audit no `allow_failure`.
@@ -816,9 +816,9 @@ Why: a default that errors teaches developers to ignore the job.
 
 Sources: [GitLab: component examples, defaults](https://docs.gitlab.com/ci/components/examples/).
 
-**How the stack holds it: Not yet.** The default `vendor/bin/proctor check --format=codequality` omits `--policy`, which
-PROCTOR requires, so it exits 2. PROCTOR will default to CREED's bundled policy once CREED v0.1.0 is tagged. PROCTOR
-and CREED pipelines include only `php-test` and `composer-audit` until then.
+**How the stack holds it: Documented.** The default `vendor/bin/proctor check --format=codequality` omits `--policy`,
+which used to make it exit 2. Since PROCTOR 0.2.1 the policy resolves without the option: `PROCTOR_POLICY`, then the
+app's installed CREED policy, then the copy bundled with PROCTOR. No test in this repo runs the component yet.
 
 ### 6.2 Derive the PHP matrix from the policy, and drop end-of-life versions
 The tested versions should be those the policy lists as supported, intersected with what the app declares.
