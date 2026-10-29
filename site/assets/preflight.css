@@ -1270,3 +1270,83 @@ li.flight:has(.part-link:hover) img { filter: brightness(1.12) saturate(1.1); }
 li.flight img { transition: transform 160ms ease, filter 160ms ease; }
 li.flight:has(.part-link:hover) img { transform: translateY(-2px); }
 }
+
+/* ===================================================== agent-ready kit */
+/* Squire's agent-ready.css lays out the prompt blocks and the page menu; this
+   maps its tokens onto the flight deck. Each prompt is a clearance filed on a
+   flight-plan form: white stock in a blue frame, and the clearance itself read
+   off the green glass of a display. The command panel is the deck. Read it
+   back before you taxi. */
+:root {
+  --ar-bg: #fff;
+  --ar-ink: var(--ink);
+  --ar-muted: var(--ink-muted);
+  --ar-rule: var(--rule);
+  --ar-accent: var(--green);
+  --ar-on-accent: #fff;
+  --ar-focus: var(--blue);
+  --ar-code-bg: var(--green-ink);
+  --ar-code-ink: var(--cream);
+  --ar-term-bg: var(--deck);
+  --ar-term-ink: var(--cream);
+  --ar-display: var(--display);
+  --ar-body: var(--wsu-font-family-body, "Lato", system-ui, sans-serif);
+  --ar-mono: var(--code);
+  --ar-radius: 4px;
+  --ar-shadow: 0 1px 0 rgba(10, 63, 88, .06), 0 18px 30px -26px rgba(10, 63, 88, .55);
+}
+
+.ar-prompt { border: 2px solid var(--blue); }
+.ar-prompt__glyph {
+  width: 1.9rem; height: 1.9rem; border: 0; border-radius: 50%;
+  font-family: var(--mono); font-weight: 700; font-size: .85rem; letter-spacing: 0;
+  color: #fff; background: var(--blue);
+}
+/* The kicker is the form's field label, in the cockpit face. */
+.ar-prompt__kicker { font-family: var(--mono); font-weight: 700; letter-spacing: .1em; color: var(--blue-deep); }
+.ar-prompt__title { font-family: var(--display); color: var(--green); font-size: clamp(1.2rem, 2.4vw, 1.45rem); }
+.ar-prompt__desc code { font-size: .9em; }
+.ar-prompt__text { border: 0; border-radius: 10px; font-size: .82rem; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .06), inset 0 10px 24px -18px rgba(0, 0, 0, .8); }
+.ar-prompt__more { color: var(--blue); }
+.ar-btn--primary { font-family: var(--display); letter-spacing: .03em; }
+.ar-btn--primary:hover { background: var(--green-deep); }
+.ar-chip { font-family: var(--mono); font-size: .82rem; letter-spacing: .02em; }
+.ar-chip:hover { border-color: var(--blue); }
+.ar-chip[aria-expanded="true"] { border-color: var(--blue); box-shadow: inset 0 -3px 0 var(--gold); }
+.ar-run__label { color: var(--blue-deep); font-family: var(--mono); font-weight: 700; }
+.ar-cmd { border: 2px solid var(--deck-edge); }
+.ar-cmd__code { background: var(--glass); border-color: rgba(108, 242, 166, .2); }
+.ar-cmd .ar-btn { border-color: var(--gold); color: var(--gold); }
+.ar-cmd .ar-seg__btn[aria-pressed="true"] { background: var(--gold); color: var(--ink); }
+.ar-cmd .ar-seg { border-color: rgba(244, 241, 234, .55); }
+.ar-cmd :focus-visible { outline-color: var(--gold); }
+
+/* The radio panel under the hero's buttons: frequencies to tune an agent to. */
+.radio { margin-top: 1.4rem; padding-top: .7rem; border-top: 1px solid var(--rule); gap: .1rem 1.1rem; }
+.radio .ar-page__label { font-family: var(--mono); font-weight: 700; color: var(--blue); }
+.radio .ar-page__list { gap: 0 1.1rem; }
+.radio .ar-page__link, .radio .ar-page__btn { color: var(--blue); font-family: var(--mono); font-size: .85rem; letter-spacing: .02em; text-underline-offset: 4px; }
+.radio .ar-page__link:hover, .radio .ar-page__btn:hover { text-decoration-color: var(--gold); text-decoration-thickness: 3px; }
+.radio .ar-status { flex-basis: 100%; font-family: var(--mono); font-size: .8rem; color: var(--ink-muted); }
+
+/* Crew resource management: a chart grid behind three clearances. */
+.section--copilot {
+  background:
+    linear-gradient(90deg, rgba(14, 90, 125, .045) 1px, transparent 1px) 0 0 / 28px 100%,
+    linear-gradient(rgba(14, 90, 125, .045) 1px, transparent 1px) 0 0 / 100% 28px,
+    var(--cream);
+  border-bottom: 1px solid var(--rule);
+}
+.clearances { display: grid; gap: 1.4rem; }
+.clearances > * { min-width: 0; }
+.clearances__title { margin: .8rem 0 0; font-family: var(--mono); font-weight: 700; font-size: .8rem; letter-spacing: .14em; text-transform: uppercase; color: var(--blue); }
+.clearances .ar-prompt:not(.ar-prompt--lead) { --ar-preview-lines: 7; }
+.clearances__fine { margin: 0; max-width: 46rem; font-size: .95rem; color: var(--ink-muted); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .motion .ar-btn--primary:active { transform: translateY(2px); }
+}
+@media print {
+  .ar-prompt__actions, .ar-cmd, .ar-prompt__more, .radio { display: none; }
+  .ar-prompt.is-collapsed .ar-prompt__text { max-height: none; -webkit-mask-image: none; mask-image: none; }
+}

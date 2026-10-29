@@ -1,0 +1,39 @@
+# Preflight
+
+> Preflight is the Wayne State app stack's CI: GitLab CI/CD components that run PROCTOR, PHP tests on each supported version, a Composer audit, an SBOM, Pint, PHPStan and ESLint on every push.
+
+**Every push is cleared for takeoff.**
+
+Preflight is a set of GitLab CI/CD components that give every WSU app the
+same checks: PROCTOR, PHP tests on each supported version, Composer audit,
+an SBOM, Pint, PHPStan and ESLint.
+
+Front page: [`site/index.html`](https://github.com/waynestate/preflight/blob/HEAD/site/index.html), a static page; see [`site/README.md`](https://github.com/waynestate/preflight/blob/HEAD/site/README.md).
+On Citadel it is served by the raw-PHP deploy layer in [`deploy/`](https://github.com/waynestate/preflight/blob/HEAD/deploy/): a Squire kit whose front controller serves `site/` behind HELMET's security headers. For local development, keep serving `site/` directly.
+
+Development happens on Wayne State's GitLab; this repository is a release mirror. Changes land there first.
+
+Components are GA on the Free tier since GitLab 17.0. They work only within
+the same GitLab instance that hosts this project.
+
+Every page below is Markdown. The HTML pages send the same Markdown to a client that asks for `text/markdown`. Written by Squire's agent-ready kit from the README and the pages; do not edit.
+
+## Pages
+
+- [Preflight: Every push is cleared for takeoff.](https://preflight.apps.wayne.edu/index.md): Preflight is the Wayne State app stack's CI: GitLab CI/CD components that run PROCTOR, PHP tests on each supported version, a Composer audit, an SBOM, Pint, PHPStan and ESLint on every push.
+
+## Prompts
+
+- [Get started with Preflight](https://preflight.apps.wayne.edu/#prompt-get-started): The app's own .gitlab-ci.yml, with the components that fit it: raw PHP, Laravel with Blade, or Laravel with Inertia and Vue. The prompt itself is in https://preflight.apps.wayne.edu/index.md.
+- [Preflight on a package's GitHub mirror](https://preflight.apps.wayne.edu/#prompt-github-mirror): Components stop at the instance boundary, so a waynestate/ package mirrored to GitHub calls Preflight's reusable workflow instead. The prompt itself is in https://preflight.apps.wayne.edu/index.md.
+- [Version upkeep with Preflight's Renovate preset](https://preflight.apps.wayne.edu/#prompt-renovate): One renovate.json that extends the shared preset, so patches and minors land green and majors wait for a person. The prompt itself is in https://preflight.apps.wayne.edu/index.md.
+
+## Source
+
+- [README](https://github.com/waynestate/preflight/blob/HEAD/README.md): the project's README, with install, commands and checks
+- [Everything in one file](https://preflight.apps.wayne.edu/llms-full.txt): the README and every page above, as one Markdown file
+
+## Optional
+
+- [ADVISOR](https://advisor.apps.wayne.edu/llms.txt): the stack's MCP server: read-only tools that answer from CREED's policy and the parts' docs instead of from memory
+- [WELD](https://weld.apps.wayne.edu/llms.txt): the Wayne State application stack: every part, and the reference app

@@ -15,12 +15,17 @@
 <link rel="icon" type="image/png" sizes="64x64" href="brand/favicon-64.png">
 <link rel="apple-touch-icon" href="brand/preflight-avatar-256.png">
 <meta property="og:image" content="brand/preflight-avatar-512.png">
+<link rel="canonical" href="https://preflight.apps.wayne.edu/">
+<!-- For agents (ADR-0019): this page as Markdown, beside it. bin/agent-ready.php writes it from
+     Squire's kit, and the front controller also sends it to any client that asks for text/markdown. -->
+<link rel="alternate" type="text/markdown" href="index.md">
 <!--
   WayneUI 2.0.8, copied from its documented static path
   (wayne-ui/apps/site/public/v2) so this page works offline: tokens, Lato,
   container, buttons, tabs, skip link, sr-only. preflight.css re-dresses it.
 -->
 <link rel="stylesheet" href="assets/wayne-ui/wayne-ui.css">
+<link rel="stylesheet" href="assets/agent-ready.css">
 <link rel="stylesheet" href="assets/preflight.css">
 <script>
   /* Run the checklist live only for people who are happy with motion.
@@ -45,6 +50,7 @@
       <a href="#checklist">Checklist</a>
       <a href="#components">Components</a>
       <a href="#flight-plan">Flight plan</a>
+      <a href="#copilot">Agents</a>
       <a href="#stack">Stack</a>
       <a href="https://proof.apps.wayne.edu/preflight/">Proof</a>
     </nav>
@@ -80,6 +86,17 @@
           <a class="wsu-btn wsu-btn--primary wsu-btn--lg" href="#checklist">Run the checklist</a>
           <a class="hero__link" href="#flight-plan">File a flight plan</a>
         </p>
+
+        <!-- The radio panel: where an agent reads this page. The script adds Copy page as Markdown
+             and Open in ChatGPT; without it, the plain links still work. -->
+        <nav class="ar-page radio" aria-labelledby="radio-label" data-ar-page>
+          <p class="ar-page__label" id="radio-label">For your copilot</p>
+          <ul class="ar-page__list">
+            <li><a class="ar-page__link" href="#copilot">Hand it to an agent</a></li>
+            <li><a class="ar-page__link" href="index.md" type="text/markdown">This page as Markdown</a></li>
+            <li><a class="ar-page__link" href="llms.txt">llms.txt</a></li>
+          </ul>
+        </nav>
       </div>
 
       <!-- The instrument: a heading indicator with the mark at its hub. With
@@ -560,6 +577,118 @@ jobs:
     </div>
   </section>
 
+  <!-- ============================================================ copilot -->
+  <!-- The prompts. Each is a clearance the reader reads back to their own agent: role, task, the
+       app's constraints, the output wanted, and a standing order to ask before guessing. The text
+       is plain HTML, so an agent reading this page (or index.md) gets it without the script;
+       agent-ready.js only adds the buttons. Keep the commands in step with the README:
+       bin/agent-ready.php --check fails a prompt that runs a command the docs do not. -->
+  <section class="section section--copilot" id="copilot" aria-labelledby="copilot-title">
+    <div class="wsu-container">
+      <div class="section__head">
+        <p class="eyebrow">Crew resource management</p>
+        <h2 id="copilot-title">Hand it to your copilot</h2>
+        <p>Three clearances, ready for the coding agent you already fly with. Copy one, or run it straight in OpenCode, Claude Code, Codex or ChatGPT. Each one tells the agent where the charts are, what it may not assume, and to ask the tower before it guesses.</p>
+      </div>
+
+      <div class="clearances">
+        <section class="ar-prompt ar-prompt--lead" id="prompt-get-started" aria-labelledby="prompt-get-started-title" data-ar-prompt>
+          <header class="ar-prompt__head">
+            <span class="ar-prompt__glyph" aria-hidden="true">1</span>
+            <div>
+              <p class="ar-prompt__kicker">Clearance 1 · Any stack app on GitLab</p>
+              <h3 class="ar-prompt__title" id="prompt-get-started-title">Get started with Preflight</h3>
+              <p class="ar-prompt__desc">The app's own <code>.gitlab-ci.yml</code>, with the components that fit it: raw PHP, Laravel with Blade, or Laravel with Inertia and Vue.</p>
+            </div>
+          </header>
+          <pre class="ar-prompt__text"><code>You are a coding agent adding Preflight to the GitLab pipeline of the app in this folder, at Wayne State University. Preflight is the CI of WELD, the Wayne State application stack: GitLab CI/CD components (proctor, php-test, composer-audit, sbom, pint, phpstan, eslint) that give every app the same checks, one include line each.
+
+Read first:
+- https://preflight.apps.wayne.edu/llms.txt, the index of Preflight's pages, each one as Markdown. Fetch the pages you need; do not work from memory.
+- This app's .gitlab-ci.yml if there is one, composer.json and composer.lock, and package.json with its lock file if there is one.
+- ADVISOR, the stack's MCP server, if it is connected: read_project_docs for preflight, and run_proctor_check to see what the proctor job will report. If it is not connected, say so and work from the pages. How to add it: https://advisor.apps.wayne.edu/llms.txt
+
+Task:
+1. Say which kind of app this is: raw PHP, raw PHP with Vue, Laravel with Blade, or Laravel with Inertia and Vue.
+2. Pick the components that fit, and say why for each one left out. Each has a precondition: proctor needs waynestate/proctor as a dev dependency; pint needs laravel/pint and a pint.json; phpstan needs phpstan/phpstan and a phpstan.neon; eslint needs a package.json with @waynestate/pinstripe, eslint and prettier.
+3. Write the include block, every component pinned to the release Preflight's page gives today, and the workflow:rules block (merge request pipelines, and pushes to the default branch) in the app's own .gitlab-ci.yml.
+4. Keep every job the file already has. Show me the whole diff before you write it.
+
+Constraints:
+- Components work only inside the GitLab instance that hosts Preflight. If this app lives on another instance, stop and say so.
+- Pin every component to a released version, never a branch. Never override a component's image with an unpinned one.
+- A component is not a lock: never skip or weaken a job with rules or allow_failure to get a green pipeline. Fix the finding, or ask me.
+- Strongly recommended: a git.wayne.edu instance runner. Say whether this project has one, or that you cannot tell.
+- Ask me before you guess, and before you push anything.
+
+Output: the app kind, the components with a reason each, the diff, then your questions.</code></pre>
+        </section>
+
+        <h3 class="clearances__title">Or file for another route</h3>
+        <section class="ar-prompt" id="prompt-github-mirror" aria-labelledby="prompt-github-mirror-title" data-ar-prompt>
+          <header class="ar-prompt__head">
+            <span class="ar-prompt__glyph" aria-hidden="true">2</span>
+            <div>
+              <p class="ar-prompt__kicker">Clearance 2 · Alternate · GitHub mirror</p>
+              <h3 class="ar-prompt__title" id="prompt-github-mirror-title">Preflight on a package's GitHub mirror</h3>
+              <p class="ar-prompt__desc">Components stop at the instance boundary, so a <code>waynestate/</code> package mirrored to GitHub calls Preflight's reusable workflow instead.</p>
+            </div>
+          </header>
+          <pre class="ar-prompt__text"><code>You are a coding agent wiring the GitHub mirror of the Composer package in this folder into Preflight, the CI of WELD, the Wayne State application stack. GitLab is the primary; the GitHub copy is a release mirror, and GitLab components cannot run there, so Preflight ships a reusable GitHub Actions workflow that runs the same checks.
+
+Read first:
+- https://preflight.apps.wayne.edu/llms.txt, then the GitHub mirrors section of Preflight's README (llms-full.txt carries it).
+- This package's composer.json (its scripts, above all ci), .gitlab-ci.yml and .github/workflows/ if they exist.
+- ADVISOR, the stack's MCP server, if it is connected: read_project_docs for preflight. If it is not connected, say so and work from the pages.
+
+Task:
+1. Check that composer.json has a ci script that runs every check the GitLab pipeline runs. The workflow only calls `composer ci`, so anything missing from the script is missing on GitHub.
+2. Write .github/workflows/ci.yml that calls waynestate/preflight/.github/workflows/php-package.yml at the release Preflight's page gives today, on pushes to every branch and on release tags.
+3. Set php-versions only if the package needs something other than the default. Show me the whole file before you write it.
+
+Constraints:
+- Pin the workflow to the release's full commit SHA, with the tag in a comment: PROCTOR's ci-pipelines check warns on any other uses: ref. If you cannot find the SHA, use the tag and say so.
+- Never push to GitHub directly: the mirror fills from GitLab. Commit on GitLab only.
+- A release tag is not done until it is green on both sides.
+- Ask me before you guess, and before you push anything.
+
+Output: the ci script as it stands and anything it lacks, the workflow file, then your questions.</code></pre>
+        </section>
+
+        <section class="ar-prompt" id="prompt-renovate" aria-labelledby="prompt-renovate-title" data-ar-prompt>
+          <header class="ar-prompt__head">
+            <span class="ar-prompt__glyph" aria-hidden="true">3</span>
+            <div>
+              <p class="ar-prompt__kicker">Clearance 3 · Maintenance · Renovate</p>
+              <h3 class="ar-prompt__title" id="prompt-renovate-title">Version upkeep with Preflight's Renovate preset</h3>
+              <p class="ar-prompt__desc">One <code>renovate.json</code> that extends the shared preset, so patches and minors land green and majors wait for a person.</p>
+            </div>
+          </header>
+          <pre class="ar-prompt__text"><code>You are a coding agent putting the repository in this folder on Preflight's shared Renovate preset. Preflight owns the version automation of WELD, the Wayne State application stack: one preset, renovate/default.json in Preflight, and a renovate component that a private runner project runs on a schedule.
+
+Read first:
+- https://preflight.apps.wayne.edu/llms.txt, then the Renovate section of Preflight's README (llms-full.txt carries it): what auto-merges, what waits, and why MySQL and HA-Proxy get digests only.
+- This repository's renovate.json if there is one, and its .gitlab-ci.yml.
+- ADVISOR, the stack's MCP server, if it is connected: read_project_docs for preflight. If it is not connected, say so and work from the pages.
+
+Task:
+1. Add or replace renovate.json with the one the README gives: the Renovate schema, and extends set to local&gt;enterprise-apps/preflight//renovate/default.
+2. If the existing file has rules of its own, list them and ask me which to keep. Keep none silently.
+3. Say what will auto-merge here and what will wait, from the preset's rules and this repository's dependencies.
+
+Constraints:
+- Change only renovate.json. Never set up a runner project, a schedule or a token: the runner project is private and holds a group-wide token. Ask me whether this group already runs one.
+- Auto-merge needs a pipeline that really tests the change. If this repository has no pipeline, say so first.
+- Ask me before you guess, and before you push anything.
+
+Output: the renovate.json, what auto-merges and what waits, then your questions.</code></pre>
+        </section>
+
+        <p class="clearances__fine">The agent reads the same pages you do: <a href="llms.txt">llms.txt</a> lists them, <a href="llms-full.txt">llms-full.txt</a> holds them in one file, and this page has a <a href="index.md" type="text/markdown">Markdown twin</a>. Nothing here phones home; the buttons only copy text or open the tool you picked. You have control.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- ===================================================== flight manual -->
   <section class="section section--manual" id="manual" aria-labelledby="manual-title">
     <div class="wsu-container">
@@ -706,6 +835,7 @@ jobs:
   </div>
 </footer>
 
+<script src="assets/agent-ready.js" defer></script>
 <script src="assets/preflight.js" defer></script>
 </body>
 </html>
