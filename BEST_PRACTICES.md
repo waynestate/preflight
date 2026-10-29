@@ -743,7 +743,7 @@ Why: a leaked job token acts with the triggering user's access.
 
 Sources: [GitLab: CI/CD job token](https://docs.gitlab.com/ci/jobs/ci_job_token/).
 
-**How the stack holds it: Not yet.** It matters when private packages (the planned Pantry registry) need a token. No
+**How the stack holds it: Not yet.** It matters when private packages (served from GitLab's own package registry) need a token. No
 document sets the rule.
 
 Second pass: the GitLab docs say the allowlist is on by default and a project's list starts with only itself. The option to
@@ -971,7 +971,7 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
 15. 2.5: Build job names from an input so one project can include a component twice.
 16. 4.8: Add a Composer cache keyed on `composer.lock`.
 17. 5.1: Add secret detection to PREFLIGHT's own pipeline.
-18. 5.2: Write down the job token allowlist rule for projects that use Pantry.
+18. 5.2: Write down the job token allowlist rule for projects that install private packages from GitLab's registry.
 19. 5.3: State "non-privileged, ephemeral Docker executor" in the runner request.
 20. 5.4: Agree the list of hosts jobs may reach.
 21. 1.4: Add an inputs contract file and a test that catches a renamed input or job.
