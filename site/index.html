@@ -39,7 +39,7 @@
     <a class="brand" href="#main">
       <img src="brand/preflight-avatar-256.png" width="36" height="36" alt="">
       <span class="brand__name">PREFLIGHT</span>
-      <span class="brand__tail" title="Latest tag">0.1.0</span>
+      <span class="brand__tail" title="Latest tag">0.1.1</span>
     </a>
     <nav class="topnav" aria-label="On this page">
       <a href="#checklist">Checklist</a>
@@ -70,7 +70,7 @@
         <div class="quickstart">
           <p class="quickstart__label" id="qs-label">.gitlab-ci.yml</p>
 <pre class="quickstart__code" id="quickstart-cmd" aria-labelledby="qs-label"><code>include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.0</code></pre>
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.1</code></pre>
           <button class="copy-btn" type="button" data-copy-from="#quickstart-cmd">
             <span class="copy-btn__label">Copy</span>
           </button>
@@ -278,18 +278,18 @@
       <div class="section__head">
         <p class="eyebrow">Cockpit placards</p>
         <h2 id="components-title">Seven components, one include each</h2>
-        <p>Each one is an ordinary GitLab job with typed inputs and a sensible default. <code>proctor</code>, <code>php-test</code> and <code>composer-audit</code> are in the 0.1.0 tag; the rest arrive in the next tag, so pin a full commit SHA for them until then.</p>
+        <p>Each one is an ordinary GitLab job with typed inputs and a sensible default. Every one is in the 0.1.1 tag, so pin it there.</p>
       </div>
 
       <div class="placards">
 
         <article class="placard">
           <span class="placard__screws" aria-hidden="true"></span>
-          <p class="placard__tag placard__tag--tagged">in 0.1.0</p>
+          <p class="placard__tag placard__tag--tagged">in 0.1.1</p>
           <h3 class="placard__name">proctor</h3>
           <p class="placard__aside">Watches the cabin.</p>
           <p class="placard__line">Runs PROCTOR's checks and publishes them as a Code Quality report.</p>
-<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@0.1.0</code></pre>
+<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@0.1.1</code></pre>
           <details class="placard__inputs">
             <summary>6 inputs</summary>
             <dl>
@@ -305,11 +305,11 @@
 
         <article class="placard">
           <span class="placard__screws" aria-hidden="true"></span>
-          <p class="placard__tag placard__tag--tagged">in 0.1.0</p>
+          <p class="placard__tag placard__tag--tagged">in 0.1.1</p>
           <h3 class="placard__name">php-test</h3>
           <p class="placard__aside">Three engines, all running.</p>
           <p class="placard__line">The test command on each supported PHP version, one job per version.</p>
-<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.0</code></pre>
+<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.1</code></pre>
           <details class="placard__inputs">
             <summary>5 inputs</summary>
             <dl>
@@ -324,11 +324,11 @@
 
         <article class="placard">
           <span class="placard__screws" aria-hidden="true"></span>
-          <p class="placard__tag placard__tag--tagged">in 0.1.0</p>
+          <p class="placard__tag placard__tag--tagged">in 0.1.1</p>
           <h3 class="placard__name">composer-audit</h3>
           <p class="placard__aside">Checks the passenger list.</p>
           <p class="placard__line"><code>composer audit --locked</code>, failing on any advisory.</p>
-<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@0.1.0</code></pre>
+<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@0.1.1</code></pre>
           <details class="placard__inputs">
             <summary>3 inputs</summary>
             <dl>
@@ -341,11 +341,11 @@
 
         <article class="placard">
           <span class="placard__screws" aria-hidden="true"></span>
-          <p class="placard__tag">next tag · pin a SHA</p>
+          <p class="placard__tag">in 0.1.1</p>
           <h3 class="placard__name">sbom</h3>
           <p class="placard__aside">The cargo manifest.</p>
           <p class="placard__line">A validated CycloneDX SBOM, published as an artifact. The plugin installs globally, so the app's files stay as they are.</p>
-<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@&lt;full-commit-sha&gt;</code></pre>
+<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@0.1.1</code></pre>
           <details class="placard__inputs">
             <summary>4 inputs</summary>
             <dl>
@@ -359,11 +359,11 @@
 
         <article class="placard">
           <span class="placard__screws" aria-hidden="true"></span>
-          <p class="placard__tag">next tag · pin a SHA</p>
+          <p class="placard__tag">in 0.1.1</p>
           <h3 class="placard__name">pint</h3>
           <p class="placard__aside">Uniform pressed.</p>
           <p class="placard__line">The app's own Laravel Pint in test mode. The app requires <code>laravel/pint</code> and ships a <code>pint.json</code>.</p>
-<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@&lt;full-commit-sha&gt;</code></pre>
+<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@0.1.1</code></pre>
           <details class="placard__inputs">
             <summary>4 inputs</summary>
             <dl>
@@ -377,11 +377,11 @@
 
         <article class="placard">
           <span class="placard__screws" aria-hidden="true"></span>
-          <p class="placard__tag">next tag · pin a SHA</p>
+          <p class="placard__tag">in 0.1.1</p>
           <h3 class="placard__name">phpstan</h3>
           <p class="placard__aside">Instruments cross-checked.</p>
           <p class="placard__line">The app's own PHPStan, with a Code Quality report. The app requires <code>phpstan/phpstan</code> and ships a <code>phpstan.neon</code>.</p>
-<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@&lt;full-commit-sha&gt;</code></pre>
+<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@0.1.1</code></pre>
           <details class="placard__inputs">
             <summary>5 inputs</summary>
             <dl>
@@ -396,11 +396,11 @@
 
         <article class="placard">
           <span class="placard__screws" aria-hidden="true"></span>
-          <p class="placard__tag">next tag · pin a SHA</p>
+          <p class="placard__tag">in 0.1.1</p>
           <h3 class="placard__name">eslint</h3>
           <p class="placard__aside">The front cabin, too.</p>
           <p class="placard__line">The app's own ESLint and Prettier. The app requires <code>@waynestate/pinstripe</code>, <code>eslint</code> and <code>prettier</code>.</p>
-<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@&lt;full-commit-sha&gt;</code></pre>
+<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@0.1.1</code></pre>
           <details class="placard__inputs">
             <summary>5 inputs</summary>
             <dl>
@@ -416,11 +416,11 @@
         <!-- Not a component: the reusable workflow for GitHub mirrors. -->
         <article class="placard placard--alt">
           <span class="placard__screws" aria-hidden="true"></span>
-          <p class="placard__tag">next tag · pin a SHA</p>
+          <p class="placard__tag">in 0.1.1</p>
           <h3 class="placard__name">php-package.yml</h3>
           <p class="placard__aside">Two cockpits, one checklist.</p>
           <p class="placard__line">Components stay inside one GitLab instance, so GitHub mirrors call this reusable workflow instead: <code>composer ci</code> on each PHP version, then a Composer audit.</p>
-<pre class="placard__code"><code>uses: waynestate/preflight/.github/workflows/php-package.yml@&lt;full-commit-sha&gt;</code></pre>
+<pre class="placard__code"><code>uses: waynestate/preflight/.github/workflows/php-package.yml@0.1.1</code></pre>
           <details class="placard__inputs">
             <summary>3 inputs</summary>
             <dl>
@@ -466,13 +466,13 @@
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@0.1.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@0.1.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@&lt;full-commit-sha&gt;
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@&lt;full-commit-sha&gt;
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@&lt;full-commit-sha&gt;
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@&lt;full-commit-sha&gt;</code></pre>
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@0.1.1</code></pre>
             <button class="copy-btn copy-btn--box" type="button" data-copy-from="#route-yaml"><span class="copy-btn__label">Copy</span></button>
           </div>
         </article>
@@ -521,7 +521,7 @@ on:
 
 jobs:
   ci:
-    uses: waynestate/preflight/.github/workflows/php-package.yml@&lt;full-commit-sha&gt;</code></pre>
+    uses: waynestate/preflight/.github/workflows/php-package.yml@0.1.1</code></pre>
             <button class="copy-btn copy-btn--box" type="button" data-copy-from="#gh-yaml"><span class="copy-btn__label">Copy</span></button>
           </div>
         </article>
