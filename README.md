@@ -365,6 +365,29 @@ Known warnings can be allowlisted in `lint-allow.yml`. Each entry needs `file`,
 `rule` and `reason`; the reason is required so an allowlist entry is a reviewed
 decision, not a silence. The preflight checklist checks the checklist.
 
+## Proof
+
+**82 Wayne State applications run through PREFLIGHT on 2026-10-28: 0 cleared, 81 held at the gate, 1 tool error.**
+
+Each app was copied with `.git`, `auth.json` and every `.env` removed, then run inside `php:8.4-cli` with Wayne
+State's servers out of reach through the commands the 0.1.0 components run. Held means a component ended with the
+exit code that fails the pipeline: PREFLIGHT doing its job, not a verdict on the app.
+
+| Check | Apps |
+|---|---:|
+| The three-component include an app would add lints clean with PREFLIGHT's template lint | 82 of 82 |
+| `proctor`: a valid GitLab Code Quality report, PROCTOR found something to fix | 81 |
+| `composer-audit`: passed / advisories or abandoned packages / no `composer.lock` | 27 / 24 / 31 |
+| `php-test` (17 apps with tests): dependencies would not install on 8.4 with the default image / tests failed | 15 / 2 |
+| Tool error: PROCTOR ran out of PHP's default 128 MB on one very large tree | 1 |
+
+Of the 15 installs that stopped, 12 had a lock written for an older PHP and 11 needed an extension the default image
+lacks (mostly `oci8`); the `image` input is there for that. The PROCTOR memory fix is queued with a test. The apps
+are counted, never named. The breakdown, the command and what the run does not prove:
+[`site/proof.html`](site/proof.html).
+
+Zero cleared for takeoff. Nobody left with the fuel cap off.
+
 ## Local checks
 
 Maintainers: how to build, test and release this project, and where its data comes from, is in [MAINTAINING.md](MAINTAINING.md).
