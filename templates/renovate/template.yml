@@ -1,0 +1,48 @@
+spec:
+  inputs:
+    image:
+      description: Docker image for the renovate job.
+      type: string
+      default: renovate/renovate:44.192.2@sha256:37960a62ba1faa9079a7c4eead9b3f4470748a64ecd207e06c09fd8858673e17
+    autodiscover_filter:
+      description: Glob limiting which projects Renovate discovers, relative to the runner project's namespace.
+      type: string
+      default: $CI_PROJECT_NAMESPACE/*
+    dry_run:
+      description: "Dry run mode for the run: null (disabled), lookup or full."
+      type: string
+      default: "null"
+      # GitLab reads this as a raw RE2 pattern: no slashes around it.
+      regex: ^(null|lookup|full)$
+    git_author:
+      description: Author of the commits and merge requests Renovate creates, in the form Name <email>. Required; the runner project sets it.
+      type: string
+---
+renovate:
+  image: $[[ inputs.image ]]
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "web"
+  interruptible: true
+  timeout: 1 hour
+  variables:
+    RENOVATE_CONFIG_FILE: $CI_PROJECT_DIR/config.js
+    RENOVATE_PLATFORM: gitlab
+    RENOVATE_ENDPOINT: $CI_API_V4_URL
+    RENOVATE_TOKEN: $RENOVATE_TOKEN
+    RENOVATE_AUTODISCOVER: "true"
+    RENOVATE_AUTODISCOVER_FILTER: $[[ inputs.autodiscover_filter ]]
+    RENOVATE_GIT_AUTHOR: $[[ inputs.git_author ]]
+    RENOVATE_DRY_RUN: $[[ inputs.dry_run ]]
+    GITHUB_COM_TOKEN: $GITHUB_COM_TOKEN
+  script:
+    # The registry alias for the GitLab instance is built at job time from
+    # the predefined CI_SERVER_FQDN variable: GitLab expands the key before
+    # the shell runs, and Node resolves the value when Renovate loads
+    # config.js. No hostname is stored in this file, so the public mirror
+    # stays clean.
+    - |
+      cat > config.js <<'EOF'
+      module.exports = { registryAliases: { "$CI_SERVER_FQDN": process.env.CI_SERVER_FQDN } };
+      EOF
+    - renovate

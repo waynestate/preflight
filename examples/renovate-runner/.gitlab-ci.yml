@@ -1,0 +1,12 @@
+# The include a private runner project uses. The runner project must stay
+# private: it holds the RENOVATE_TOKEN, and a token that can open and merge
+# merge requests across the group does not belong in a public mirror. Give
+# the token to a group bot account, never to a person's account.
+#
+# @0.2.0 is the next tag and is not cut yet. Until it is, pin a full commit
+# SHA instead, the same rule as the other components.
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@0.2.0
+    inputs:
+      git_author: "Preflight Bot <preflight-bot@example.com>"
+      dry_run: "null"

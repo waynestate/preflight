@@ -13,6 +13,11 @@ are Git tags.
   before publishing, so republishing from the same commit is a no-op and
   republishing from a different commit fails instead of overwriting the
   version.
+- `renovate` component and shared preset `renovate/default.json`: Renovate
+  runs as a scheduled GitLab pipeline in a private runner project and bumps
+  image tags, CI component pins, GitHub action SHAs and package versions
+  across the stack. Digest, pin and patch/minor updates auto-merge when CI
+  is green; majors open a merge request and wait for a person.
 
 ### Changed
 
