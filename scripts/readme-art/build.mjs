@@ -40,10 +40,6 @@ const castDir = path.join(outDir, "cast");
 const MAX_BYTES = 300 * 1024; // every file in docs/readme/ stays at or under this
 const FORBIDDEN = /noug[a]t|snu[.]gs|citadel/i; // internal names never ship in art
 
-// Shown for a component whose template sets no stage at all (renovate runs on
-// a schedule, outside the pipeline's stage list).
-const NO_STAGE = "no stage";
-
 // The tag every component ships in. The page's placards must agree with it.
 const COMPONENT_TAG = "0.1.1";
 
@@ -200,6 +196,17 @@ function templateStage(text, job) {
   return body.match(/^\s{2}stage:\s*"?([A-Za-z0-9_-]+)"?\s*$/m)?.[1] ?? null;
 }
 
+// A template without a resolvable stage still says when its job runs, in its
+// own rules: a schedule source reads "scheduled", a tag reads "on tag", and
+// anything else reads "per pipeline" (renovate runs on a schedule or from
+// the web UI, outside the pipeline's stage list).
+function ruleStage(body) {
+  const rules = body.match(/^\s{2}rules:\s*\r?\n(?:[ \t]{4,}.*(?:\r?\n|$))*/m)?.[0] ?? "";
+  if (rules.includes('$CI_PIPELINE_SOURCE == "schedule"')) return "scheduled";
+  if (rules.includes("$CI_COMMIT_TAG")) return "on tag";
+  return "per pipeline";
+}
+
 // Each component's job name, timeout and stage, read from its template. A
 // template is "spec, ---, job" (sometimes behind a header comment and a
 // leading ---); the job is the one top-level key that is not `spec`.
@@ -218,8 +225,8 @@ function readTemplates() {
     const matrix = /^\s+parallel:\s*$/m.test(body) && /^\s+matrix:\s*$/m.test(body);
     // The stage, in the order a template can set it: the spec's `stage` input
     // default, then a literal `stage:` on the job. A template with neither
-    // really has no stage, and the panel says so plainly.
-    const stage = templateStage(text, job) ?? NO_STAGE;
+    // gets its label from its own rules, which say when the job runs.
+    const stage = templateStage(text, job) ?? ruleStage(body);
     const t = { job, timeout, matrix, stage };
     assertTextClean(JSON.stringify(t), `templates/${d.name}`);
     return t;
