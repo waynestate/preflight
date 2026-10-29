@@ -8,7 +8,8 @@ are Git tags.
 
 ### Fixed
 
-- Fixed: stale 0.1.0 and next-tag wording in the best practices and the GitHub example.
+- Fixed: stale 0.1.0 and next-tag wording in the best practices, the GitHub example and the checklist art.
+- Fixed: the readme art script handles all nine components, including package-publish and renovate.
 
 ## 0.1.2 (2026-10-29)
 
