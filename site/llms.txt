@@ -1,6 +1,6 @@
 # Preflight
 
-> Preflight is the Wayne State app stack's CI: GitLab CI/CD components that run PROCTOR, PHP tests on each supported version, a Composer audit, an SBOM, Pint, PHPStan and ESLint on every push.
+> Preflight is a set of GitLab CI/CD components for Wayne State apps. Include them and your pipeline runs PROCTOR, PHP tests on each supported version, a Composer audit, an SBOM, Pint, PHPStan and ESLint.
 
 **Every push is cleared for takeoff.**
 
@@ -22,13 +22,13 @@ Every page below is Markdown. The HTML pages send the same Markdown to a client 
 
 ## Pages
 
-- [Preflight: Every push is cleared for takeoff.](https://preflight.apps.wayne.edu/index.md): Preflight is the Wayne State app stack's CI: GitLab CI/CD components that run PROCTOR, PHP tests on each supported version, a Composer audit, an SBOM, Pint, PHPStan and ESLint on every push.
+- [Preflight: Every push is cleared for takeoff.](https://preflight.apps.wayne.edu/index.md): Preflight is a set of GitLab CI/CD components for Wayne State apps. Include them and your pipeline runs PROCTOR, PHP tests on each supported version, a Composer audit, an SBOM, Pint, PHPStan and ESLint.
 
 ## Prompts
 
-- [Get started with Preflight](https://preflight.apps.wayne.edu/#prompt-get-started): The app's own .gitlab-ci.yml, with the components that fit it: raw PHP, Laravel with Blade, or Laravel with Inertia and Vue. The prompt itself is in https://preflight.apps.wayne.edu/index.md.
-- [Preflight on a package's GitHub mirror](https://preflight.apps.wayne.edu/#prompt-github-mirror): Components stop at the instance boundary, so a waynestate/ package mirrored to GitHub calls Preflight's reusable workflow instead. The prompt itself is in https://preflight.apps.wayne.edu/index.md.
-- [Version upkeep with Preflight's Renovate preset](https://preflight.apps.wayne.edu/#prompt-renovate): One renovate.json that extends the shared preset, so patches and minors land green and majors wait for a person. The prompt itself is in https://preflight.apps.wayne.edu/index.md.
+- [Get started with Preflight](https://preflight.apps.wayne.edu/#prompt-get-started): The agent writes your app's .gitlab-ci.yml with the components that fit it, whether it's raw PHP, Laravel with Blade, or Laravel with Inertia and Vue. The prompt itself is in https://preflight.apps.wayne.edu/index.md.
+- [Preflight on a package's GitHub mirror](https://preflight.apps.wayne.edu/#prompt-github-mirror): Components can't leave their GitLab instance, so a waynestate/ package mirrored to GitHub calls Preflight's reusable workflow instead. The prompt itself is in https://preflight.apps.wayne.edu/index.md.
+- [Version upkeep with Preflight's Renovate preset](https://preflight.apps.wayne.edu/#prompt-renovate): One renovate.json that extends the shared preset. Patch and minor updates merge themselves when the pipeline is green; majors wait for a person. The prompt itself is in https://preflight.apps.wayne.edu/index.md.
 
 ## Source
 
