@@ -2,13 +2,13 @@
 
 Status: draft, checked against sources on 2026-10-27, with a second research pass the same day (see "Second pass
 (2026-10-27)" near the end). Applies to the Preflight components `proctor`, `php-test` and `composer-audit` at the state
-of the repo on that date (tag 0.1.0 exists; the components added after it arrive in the next tag).
+of the repo on that date (tag 0.1.0 existed; the components added after it shipped in 0.1.1).
 
 ## What this covers
 
 Preflight is a set of GitLab CI/CD components that every stack project and WSU app includes with
-`include: component:`. Today it has seven: `php-test` (PHP versions through `parallel:matrix`), `composer-audit`,
-`proctor`, `sbom`, `pint`, `phpstan` and `eslint`. Accessibility and contract suites come later.
+`include: component:`. Today it has nine: `php-test` (PHP versions through `parallel:matrix`), `composer-audit`,
+`proctor`, `sbom`, `pint`, `phpstan`, `eslint`, `package-publish` and `renovate`. Accessibility and contract suites come later.
 
 This guide is for two groups:
 
@@ -65,7 +65,7 @@ Sources: [GitLab: CI/CD components, versions](https://docs.gitlab.com/ci/compone
 [GitLab: pipeline security, includes](https://docs.gitlab.com/ci/pipeline_security/);
 [OpenSSF Scorecard: Pinned-Dependencies](https://github.com/ossf/scorecard/blob/main/docs/checks.md).
 
-**How the stack holds it: Documented.** The README pins `proctor` to `0.1.0`, the first tag. PROCTOR's own
+**How the stack holds it: Documented.** The README pins `proctor` to `0.1.1`, the latest tag. PROCTOR's own
 `.gitlab-ci.yml` pins a full SHA, with a comment against `~latest`. Nothing checks an app's includes.
 
 ### 1.2 Protect the component project's default branch and release tags
@@ -329,7 +329,7 @@ Sources: [GitLab: includes, merge behaviour](https://docs.gitlab.com/ci/yaml/inc
 [GitLab: pipeline execution policies (Ultimate)](https://docs.gitlab.com/user/application_security/policies/pipeline_execution_policies/).
 
 **How the stack holds it: Documented.** The stack's enforcement-points decision names the CI gate as point (c) and Fleet as point (e), which shows
-who skips CI. Rollcall is not built, so nothing reports skipped or weakened pipelines today.
+who skips CI. Rollcall does not read pipelines yet, so nothing reports skipped or weakened pipelines today.
 
 Prior art (second pass): Drupal's shared GitLab templates, used by more than 2,000 contributed projects at the time of
 a December 2025 post, do not force anything. Most jobs are turned off by setting a variable to 0, and projects keep
@@ -632,7 +632,7 @@ Sources: [Semgrep: Shai-Hulud second wave](https://semgrep.dev/blog/2025/digging
 [Better Stack: Shai-Hulud](https://betterstack.com/community/guides/scaling-nodejs/shai-hulud-attack/). These were read as
 search summaries only, so details are unverified.
 
-**How the stack holds it: Documented.** README.md "Shared conventions" records the rule. Preflight has no JavaScript component yet, so nothing runs it.
+**How the stack holds it: Documented.** README.md "Shared conventions" records the rule. The `eslint` component runs `npm ci --ignore-scripts`.
 
 ### 4.13 Generate a CycloneDX SBOM and validate it
 Produce a software bill of materials for every release, and fail the build on an invalid one.
