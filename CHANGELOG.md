@@ -26,3 +26,7 @@ are Git tags.
   copy of its settings. The repo keeps only its own paths, excluded fixture
   app and PHP version range. Strict rules stay off as before, and
   deprecation checks now run on every analysis.
+
+## 0.1.0 (2026-10-27)
+
+- First tagged release.
