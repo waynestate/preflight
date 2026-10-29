@@ -7,7 +7,7 @@
 <div align="center">
   <img src="docs/readme/badges/php.svg" alt="php ^8.3">
   <img src="docs/readme/badges/license.svg" alt="licence MIT">
-  <img src="docs/readme/badges/components.svg" alt="gitlab ci components: 7">
+  <img src="docs/readme/badges/components.svg" alt="gitlab ci components: 9">
 </div>
 
 **Every push is cleared for takeoff.**
@@ -33,7 +33,7 @@ the same GitLab instance that hosts this project.
 ## Components
 
 <div align="center">
-  <img src="docs/readme/checklist.svg" width="100%" alt="Preflight's before-takeoff checklist card. 1 PROCTOR, checked; 2 PHP tests, 8.3, 8.4 and 8.5 pass; 3 Composer audit, no advisories; 4 SBOM, validated; 5 Pint, clean; 6 PHPStan, no errors; 7 ESLint and Prettier, clean; 8 clearance, cleared for takeoff. Beside it the annunciator panel lights a green lamp per check, with a11y, contract and freshness marked coming soon, and lists the seven components, all in the 0.1.1 tag.">
+  <img src="docs/readme/checklist.svg" width="100%" alt="Preflight's before-takeoff checklist card. 1 PROCTOR, checked; 2 PHP tests, 8.3, 8.4 and 8.5 pass; 3 Composer audit, no advisories; 4 SBOM, validated; 5 Pint, clean; 6 PHPStan, no errors; 7 ESLint and Prettier, clean; 8 clearance, cleared for takeoff. Beside it the annunciator panel lights a green lamp per check, with a11y, contract and freshness marked coming soon, and lists the seven checks, all in the 0.1.1 tag.">
 </div>
 
 <div align="center"><sub>The checklist, item by item, with each item's job and timeout read from <code>templates/</code>.</sub></div>

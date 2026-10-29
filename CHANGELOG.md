@@ -6,6 +6,10 @@ are Git tags.
 
 ## Unreleased
 
+### Fixed
+
+- Fixed: stale capability claims in the site and README.
+
 ### Changed
 
 - Docs: README.md, MAINTAINING.md and site/index.html pin components at
