@@ -6,6 +6,8 @@ are Git tags.
 
 ## Unreleased
 
+## 0.1.1 (2026-10-29)
+
 ### Added
 
 - `package-publish` component: publishes a semantic version tag to the
