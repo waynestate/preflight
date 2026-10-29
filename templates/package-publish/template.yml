@@ -1,0 +1,146 @@
+spec:
+  inputs:
+    stage:
+      description: Pipeline stage for the package-publish job.
+      type: string
+      default: deploy
+    image:
+      description: Docker image for the package-publish job. The default ships curl and PHP, which the job uses for the registry round trip.
+      type: string
+      default: composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc
+    group_id:
+      description: Numeric id of the GitLab group whose built-in Composer registry hosts the package.
+      type: string
+    read_token_variable:
+      description: Name of the masked CI variable holding a token with the read_package_registry scope, used to read the registry before publishing.
+      type: string
+      default: PACKAGE_READ_TOKEN
+---
+package-publish:
+  stage: $[[ inputs.stage ]]
+  # GitLab overwrites a version quietly when the same tag is published again
+  # with different contents, so the job checks the registry first and refuses
+  # a moved version. Once a version is on the manifest, it stays on the
+  # manifest: no go-arounds.
+  image: $[[ inputs.image ]]
+  interruptible: true
+  timeout: 30 minutes
+  rules:
+    - if: $CI_COMMIT_TAG
+  script:
+    - |
+      set -eu
+
+      tag="$CI_COMMIT_TAG"
+
+      # Only semantic versions may be published: 1.2.3 or v1.2.3, with an
+      # optional pre-release.
+      if ! printf '%s\n' "$tag" | grep -Eq '^v?[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$'; then
+        echo "Tag $tag is not a semantic version (expected 1.2.3 or v1.2.3, optional pre-release)." >&2
+        exit 1
+      fi
+      version="${tag#v}"
+    - |
+      # The package name comes from composer.json, the file the registry serves.
+      if [ ! -f composer.json ]; then
+        echo "composer.json not found in the project root." >&2
+        exit 1
+      fi
+      if ! name=$(php -r '
+        $d = json_decode(file_get_contents("composer.json"), true);
+        if (!is_array($d) || !isset($d["name"]) || !is_string($d["name"]) || $d["name"] === "") {
+          exit(1);
+        }
+        fwrite(STDOUT, $d["name"]);
+      '); then
+        echo "composer.json has no usable name field." >&2
+        exit 1
+      fi
+    - |
+      token_var="$[[ inputs.read_token_variable ]]"
+      if ! read_token=$(printenv "$token_var") || [ -z "$read_token" ]; then
+        echo "CI variable $token_var is not set. Define it as a masked variable holding a token with the read_package_registry scope." >&2
+        exit 1
+      fi
+
+      group_id="$[[ inputs.group_id ]]"
+      case "$group_id" in
+        ''|*[!0-9]*)
+          echo "group_id must be the numeric id of the GitLab group." >&2
+          exit 1
+          ;;
+      esac
+    - |
+      api="${CI_API_V4_URL%/}"
+      index_url="$api/group/$group_id/-/packages/composer/packages.json"
+      publish_url="$api/projects/$CI_PROJECT_ID/packages/composer"
+
+      tmp=$(mktemp -d)
+      trap 'rm -rf "$tmp"' EXIT INT TERM
+
+      existing_ref=""
+      curl_rc=0
+      http_code=$(curl --silent --show-error --header "Deploy-Token: $read_token" -o "$tmp/packages.json" -w '%{http_code}' "$index_url") || curl_rc=$?
+      if [ "$curl_rc" -ne 0 ]; then
+        echo "Could not reach the Composer registry index at $index_url." >&2
+        exit 1
+      fi
+      case "$http_code" in
+        200)
+          p2_link=$(php -r '
+            $d = json_decode(file_get_contents($argv[1]), true);
+            $entries = (is_array($d) && isset($d["packages"][$argv[2]])) ? $d["packages"][$argv[2]] : [];
+            foreach ($entries as $e) {
+              if (is_array($e) && isset($e["link"]) && is_string($e["link"])) {
+                fwrite(STDOUT, $e["link"]);
+                break;
+              }
+            }
+          ' "$tmp/packages.json" "$name")
+          if [ -n "$p2_link" ]; then
+            curl_rc=0
+            http_code=$(curl --silent --show-error --header "Deploy-Token: $read_token" -o "$tmp/p2.json" -w '%{http_code}' "$p2_link") || curl_rc=$?
+            if [ "$curl_rc" -ne 0 ] || [ "$http_code" != "200" ]; then
+              echo "Could not read the package metadata for $name (HTTP $http_code)." >&2
+              exit 1
+            fi
+            existing_ref=$(php -r '
+              $d = json_decode(file_get_contents($argv[1]), true);
+              $wanted = ltrim($argv[2], "v");
+              $versions = (is_array($d) && isset($d["versions"])) ? $d["versions"] : [];
+              foreach ($versions as $key => $entry) {
+                if (ltrim((string) $key, "v") === $wanted) {
+                  if (is_array($entry) && isset($entry["source"]["reference"]) && is_string($entry["source"]["reference"])) {
+                    fwrite(STDOUT, $entry["source"]["reference"]);
+                  }
+                  break;
+                }
+              }
+            ' "$tmp/p2.json" "$version")
+          fi
+          ;;
+        404)
+          echo "Group $group_id has no published Composer packages yet."
+          ;;
+        *)
+          echo "Reading the Composer registry failed with HTTP $http_code." >&2
+          exit 1
+          ;;
+      esac
+    - |
+      if [ -n "$existing_ref" ] && [ "$existing_ref" = "$CI_COMMIT_SHA" ]; then
+        echo "Version $version already published at this commit ($CI_COMMIT_SHA); nothing to do."
+        exit 0
+      fi
+      if [ -n "$existing_ref" ]; then
+        echo "Version $version already published at a different commit ($existing_ref); refusing to overwrite it." >&2
+        exit 1
+      fi
+    - |
+      echo "Publishing tag $tag as version $version to group $group_id."
+      curl --silent --show-error --fail \
+        --request POST \
+        --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+        --data-urlencode "tag=$tag" \
+        "$publish_url"
+      echo "Version $version published."
