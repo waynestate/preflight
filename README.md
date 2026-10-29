@@ -191,6 +191,35 @@ This component is not in `0.1.0`; it arrives in the next tag. Until then, pin a 
 | `eslint_args` | string | `.` | Arguments passed to eslint. |
 | `prettier` | boolean | `true` | Whether to also run `prettier --check`. |
 
+### package-publish
+
+Version 1 · Category: Release/Publishing · Tags: composer,publish,release
+
+Publishes a semantic version tag to the GitLab group's built-in Composer
+registry. The job runs only on tags, reads the registry first, and refuses a
+moved version: a version already published from this commit passes quietly,
+and a version published from a different commit fails the pipeline, because
+GitLab would otherwise overwrite it without a word. The default image ships
+curl and PHP, which the job uses for the registry round trip.
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@<full-commit-sha>
+    inputs:
+      group_id: "<your group id>"
+```
+
+This component is not in `0.1.0`; it arrives in the next tag. Until then, pin a full commit SHA instead.
+
+| Input | Type | Default | What it does |
+|-------|------|---------|--------------|
+| `stage` | string | `deploy` | Pipeline stage for the job. |
+| `image` | string | `composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. The default ships curl and PHP, which the job uses for the registry round trip. |
+| `group_id` | string | none | Numeric id of the GitLab group whose built-in Composer registry hosts the package. Required. |
+| `read_token_variable` | string | `PACKAGE_READ_TOKEN` | Name of the masked CI variable holding a token with the `read_package_registry` scope, used to read the registry before publishing. |
+
+Protect your release tags.
+
 ## Same instance only
 
 Components work only inside the GitLab instance that hosts this project.
