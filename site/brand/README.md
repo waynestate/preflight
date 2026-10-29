@@ -1,4 +1,4 @@
-# PREFLIGHT brand files
+# Preflight brand files
 
 **The mark is a runway seen in perspective:** the white threshold stripes and edge lines converging
 toward a vanishing point, with the gold centreline dashes running ahead, on a Wayne State green
