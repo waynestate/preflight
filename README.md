@@ -349,10 +349,10 @@ include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@0.1.1
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.1
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@0.1.1
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@<full-commit-sha>
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@<full-commit-sha>
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@<full-commit-sha>
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@<full-commit-sha>
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@0.1.1
 ```
 
 The `workflow:rules` block must live in the app's own file. A component
