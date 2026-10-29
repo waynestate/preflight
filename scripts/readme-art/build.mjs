@@ -40,6 +40,10 @@ const castDir = path.join(outDir, "cast");
 const MAX_BYTES = 300 * 1024; // every file in docs/readme/ stays at or under this
 const FORBIDDEN = /noug[a]t|snu[.]gs|citadel/i; // internal names never ship in art
 
+// Shown for a component whose template sets no stage at all (renovate runs on
+// a schedule, outside the pipeline's stage list).
+const NO_STAGE = "no stage";
+
 // Preflight's own palette, as declared in site/assets/preflight.css.
 const C = {
   green: "#0C5449",
@@ -183,9 +187,19 @@ function buildBadges(templates) {
 
 /* -------------------------------------------------------------- 3. templates */
 
-// Each component's job name and timeout, read from its template. A template
-// is "spec, ---, job" (sometimes behind a header comment and a leading ---);
-// the job is the one top-level key that is not `spec`.
+// A template can fix its stage two ways: a `stage` input in the spec with a
+// default, or a literal `stage:` on the job itself. A `$[[ inputs.stage ]]`
+// reference is not a value, so it does not count.
+function templateStage(text, job) {
+  const fromSpec = text.match(/^ {4}stage:\s*\r?\n(?: {6}.*\r?\n)*? {6}default:\s*"?([A-Za-z0-9_-]+)"?/m)?.[1];
+  if (fromSpec) return fromSpec;
+  const body = text.slice(text.indexOf(`\n${job}:`));
+  return body.match(/^\s{2}stage:\s*"?([A-Za-z0-9_-]+)"?\s*$/m)?.[1] ?? null;
+}
+
+// Each component's job name, timeout and stage, read from its template. A
+// template is "spec, ---, job" (sometimes behind a header comment and a
+// leading ---); the job is the one top-level key that is not `spec`.
 function readTemplates() {
   const dirs = readdirSync(templatesDir, { withFileTypes: true }).filter((d) => d.isDirectory());
   return dirs.map((d) => {
@@ -199,9 +213,10 @@ function readTemplates() {
     const timeout = body.match(/^\s+timeout:\s*(.+?)\s*$/m)?.[1];
     if (!timeout) fail(`templates/${d.name}: job ${job} has no timeout`);
     const matrix = /^\s+parallel:\s*$/m.test(body) && /^\s+matrix:\s*$/m.test(body);
-    // The default stage, from the spec's `stage` input.
-    const stage = text.match(/^ {4}stage:\s*\r?\n(?: {6}.*\r?\n)*? {6}default:\s*"?([A-Za-z0-9_-]+)"?/m)?.[1];
-    if (!stage) fail(`templates/${d.name}: no default stage`);
+    // The stage, in the order a template can set it: the spec's `stage` input
+    // default, then a literal `stage:` on the job. A template with neither
+    // really has no stage, and the panel says so plainly.
+    const stage = templateStage(text, job) ?? NO_STAGE;
     const t = { job, timeout, matrix, stage };
     assertTextClean(JSON.stringify(t), `templates/${d.name}`);
     return t;
