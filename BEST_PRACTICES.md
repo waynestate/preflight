@@ -65,7 +65,7 @@ Sources: [GitLab: CI/CD components, versions](https://docs.gitlab.com/ci/compone
 [GitLab: pipeline security, includes](https://docs.gitlab.com/ci/pipeline_security/);
 [OpenSSF Scorecard: Pinned-Dependencies](https://github.com/ossf/scorecard/blob/main/docs/checks.md).
 
-**How the stack holds it: Documented.** The README pins `proctor` to `0.1.1`, the latest tag. PROCTOR's own
+**How the stack holds it: Documented.** The README pins `proctor` to `0.1.1`, the newest tag that changed a component. PROCTOR's own
 `.gitlab-ci.yml` pins a full SHA, with a comment against `~latest`. Nothing checks an app's includes.
 
 ### 1.2 Protect the component project's default branch and release tags
@@ -95,8 +95,8 @@ Why: the catalog gives typed discovery and lets consumers pin an exact or partia
 
 Sources: [GitLab: components, publishing](https://docs.gitlab.com/ci/components/).
 
-**How the stack holds it: Not yet.** The layout is right (`templates/<name>/template.yml`, a README). Tags `0.1.0` and `0.1.1` exist; the `release` job is still to be confirmed.
-The README examples pin `@0.1.0` for the components in that tag and a full commit SHA for the rest.
+**How the stack holds it: Not yet.** The layout is right (`templates/<name>/template.yml`, a README). Tags `0.1.0`, `0.1.1` and `0.1.2` exist; the `release` job is still to be confirmed.
+The README examples pin `@0.1.1` for every component and the GitHub workflow.
 
 ### 1.4 Keep inputs and job names stable inside a major version
 Do not rename an input, change its type, or rename a job in a minor release.
@@ -136,7 +136,7 @@ Sources: [StepSecurity: tj-actions breach](https://www.stepsecurity.io/blog/when
 The tj-actions details above come from search summaries of these pages and the NVD record could not be read in this
 pass, so treat the exact counts and dates as unverified.
 
-**How the stack holds it: Not yet.** Tags `0.1.0` and `0.1.1` exist, but no release note format records the SHA a consumer pins,
+**How the stack holds it: Not yet.** Tags `0.1.0`, `0.1.1` and `0.1.2` exist, but no release note format records the SHA a consumer pins,
 and nothing yet says what to do when the next tag is cut.
 
 ### 1.7 Give consumers a reviewed way to bump their pins
@@ -959,7 +959,7 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
 3. 3.3: Add a check or Rollcall report for apps that skip, unpin or weaken Preflight.
 4. 4.1: Pin images by digest and update the pins through reviewed merge requests.
 5. 4.4: Run PROCTOR without installing the app, and pass `--no-plugins --no-scripts` where jobs only inspect.
-6. 1.3: Confirm the `release` job, publish the Catalog entry for `0.1.0`, and tag the next release with the components added after it.
+6. 1.3: Confirm the `release` job and publish the Catalog entry for the current tag (`0.1.2`); the components added after `0.1.0` already shipped in `0.1.1`.
 7. 1.2: Record and check the project's branch and tag protection.
 8. 6.2: Derive the PHP matrix from the policy, and drop 8.2 by 2027-01-01.
 9. 4.9: Pin the Composer version the installer fetches and the `composer-audit` image.
