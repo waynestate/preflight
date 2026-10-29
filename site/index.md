@@ -23,6 +23,8 @@ include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.1
 ```
 
+Already included in [WELD](https://weld.apps.wayne.edu/) and in every [Sourdough](https://sourdough.apps.wayne.edu/) app. Use Preflight on its own to give a GitLab project you already have the stack's CI checks.
+
 [Run the checklist](https://preflight.apps.wayne.edu/#checklist) [File a flight plan](https://preflight.apps.wayne.edu/#flight-plan)
 
 ![Preflight mark: a runway in perspective with a gold centreline](https://preflight.apps.wayne.edu/brand/preflight-avatar-512.png)
