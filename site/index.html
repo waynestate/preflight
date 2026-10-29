@@ -8,7 +8,7 @@
 <meta name="stack-env" content="auto">
 <script src="assets/stack-env.js" defer></script>
 <title>Preflight: Every push is cleared for takeoff.</title>
-<meta name="description" content="Preflight is the Wayne State app stack's CI: GitLab CI/CD components that run PROCTOR, PHP tests on each supported version, a Composer audit, an SBOM, Pint, PHPStan and ESLint on every push.">
+<meta name="description" content="Preflight is a set of GitLab CI/CD components for Wayne State apps. Include them and your pipeline runs PROCTOR, PHP tests on each supported version, a Composer audit, an SBOM, Pint, PHPStan and ESLint.">
 <meta name="theme-color" content="#0c5449">
 <link rel="icon" href="brand/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="brand/favicon-32.png">
@@ -71,7 +71,7 @@
         </h1>
         <p class="hero__tagline">Every push is cleared for takeoff.</p>
         <p class="definition"><span class="definition__word">pre·flight</span> <span class="definition__pos">noun</span> The checklist a pilot runs before takeoff. Every push runs this one before Citadel.</p>
-        <p class="hero__blurb">GitLab CI/CD components that every stack project and starter includes: PROCTOR, PHP tests on each supported version, a Composer audit, an SBOM, Pint, PHPStan and ESLint. One <code>include:</code> block, the same checks on every app.</p>
+        <p class="hero__blurb">Preflight is a set of GitLab CI/CD components. Add them to the <code>include:</code> block in your <code>.gitlab-ci.yml</code> and your pipeline runs PROCTOR, PHP tests on each supported version, a Composer audit, an SBOM, Pint, PHPStan and ESLint, the same way the other stack apps do.</p>
 
         <div class="quickstart">
           <p class="quickstart__label" id="qs-label">.gitlab-ci.yml</p>
@@ -153,7 +153,7 @@
       <div class="section__head">
         <p class="eyebrow">Normal procedures</p>
         <h2 id="checklist-title">Before takeoff</h2>
-        <p>Every push runs the same list, in the app's own pipeline, before anything reaches Citadel. Scroll, and it runs itself.</p>
+        <p>These are the jobs the components add to your app's own pipeline, in the order the card lists them. Scroll, and it runs itself.</p>
       </div>
 
       <div class="preflight" data-preflight>
@@ -177,7 +177,7 @@
             </li>
             <li class="item" data-step="2" data-lights="audit" data-hold="1">
               <p class="item__row"><span class="item__name">Composer audit</span><span class="item__dots" aria-hidden="true"></span><span class="item__resp">No advisories</span><span class="item__tick" aria-hidden="true"></span></p>
-              <p class="item__why">Audits the lock file, not a fresh resolve, and fails the pipeline on a known advisory.</p>
+              <p class="item__why">Audits the exact versions in <code>composer.lock</code> and fails the pipeline on a known advisory.</p>
               <code class="item__cmd">composer audit --locked</code>
             </li>
             <li class="item" data-step="3" data-lights="sbom">
@@ -296,7 +296,7 @@
       <div class="section__head">
         <p class="eyebrow">Cockpit placards</p>
         <h2 id="components-title">Seven checks, one include each</h2>
-        <p>Each one is an ordinary GitLab job with typed inputs and a sensible default. Every one is in the 0.1.1 tag, so pin it there. Two more components, <code>package-publish</code> and <code>renovate</code>, ship in the same tag; the README documents them.</p>
+        <p>Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All seven are in the 0.1.1 tag, so pin them there. Two more components, <code>package-publish</code> and <code>renovate</code>, ship in the same tag; the README documents them.</p>
       </div>
 
       <div class="placards">
@@ -312,7 +312,7 @@
             <summary>6 inputs</summary>
             <dl>
               <dt>stage</dt><dd><code>test</code></dd>
-              <dt>image</dt><dd><code>php:8.4-cli@sha256:…</code></dd>
+              <dt>image</dt><dd><code>php:8.4-cli-trixie@sha256:…</code></dd>
               <dt>composer_version</dt><dd><code>2.10.3</code></dd>
               <dt>allow_failure</dt><dd><code>false</code></dd>
               <dt>proctor_command</dt><dd><code>vendor/bin/proctor check --format=codequality</code></dd>
@@ -329,9 +329,10 @@
           <p class="placard__line">The test command on each supported PHP version, one job per version.</p>
 <pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.1</code></pre>
           <details class="placard__inputs">
-            <summary>5 inputs</summary>
+            <summary>6 inputs</summary>
             <dl>
               <dt>stage</dt><dd><code>test</code></dd>
+              <dt>image</dt><dd><code>php:${PHP_VERSION}-cli-trixie</code></dd>
               <dt>php_versions</dt><dd><code>["8.3", "8.4", "8.5"]</code></dd>
               <dt>composer_version</dt><dd><code>2.10.3</code></dd>
               <dt>test_command</dt><dd><code>vendor/bin/phpunit</code></dd>
@@ -468,7 +469,7 @@
       <div class="section__head">
         <p class="eyebrow">Quick start</p>
         <h2 id="plan-title">File a flight plan</h2>
-        <p>Four boxes. Fill them in once, and every merge request and every push to the default branch runs the checklist.</p>
+        <p>Box 1 is the one every app needs: after it, merge requests and pushes to the default branch run the checklist. The other three cover project settings, GitHub mirrors and running Preflight's own checks.</p>
       </div>
 
       <div class="plan">
@@ -589,7 +590,7 @@ jobs:
       <div class="section__head">
         <p class="eyebrow">Crew resource management</p>
         <h2 id="copilot-title">Hand it to your copilot</h2>
-        <p>Three clearances, ready for the coding agent you already fly with. Copy one, or run it straight in OpenCode, Claude Code, Codex or ChatGPT. Each one tells the agent where the charts are, what it may not assume, and to ask the tower before it guesses.</p>
+        <p>Three prompts for the coding agent you already fly with. Copy one, or run it straight in OpenCode, Claude Code, Codex or ChatGPT. Each one points the agent at Preflight's docs, lists what it must not assume, and tells it to ask you before it guesses.</p>
       </div>
 
       <div class="clearances">
@@ -599,7 +600,7 @@ jobs:
             <div>
               <p class="ar-prompt__kicker">Clearance 1 · Any stack app on GitLab</p>
               <h3 class="ar-prompt__title" id="prompt-get-started-title">Get started with Preflight</h3>
-              <p class="ar-prompt__desc">The app's own <code>.gitlab-ci.yml</code>, with the components that fit it: raw PHP, Laravel with Blade, or Laravel with Inertia and Vue.</p>
+              <p class="ar-prompt__desc">The agent writes your app's <code>.gitlab-ci.yml</code> with the components that fit it, whether it's raw PHP, Laravel with Blade, or Laravel with Inertia and Vue.</p>
             </div>
           </header>
           <pre class="ar-prompt__text"><code>You are a coding agent adding Preflight to the GitLab pipeline of the app in this folder, at Wayne State University. Preflight is the CI of WELD, the Wayne State application stack: GitLab CI/CD components (proctor, php-test, composer-audit, sbom, pint, phpstan, eslint) that give every app the same checks, one include line each.
@@ -632,7 +633,7 @@ Output: the app kind, the components with a reason each, the diff, then your que
             <div>
               <p class="ar-prompt__kicker">Clearance 2 · Alternate · GitHub mirror</p>
               <h3 class="ar-prompt__title" id="prompt-github-mirror-title">Preflight on a package's GitHub mirror</h3>
-              <p class="ar-prompt__desc">Components stop at the instance boundary, so a <code>waynestate/</code> package mirrored to GitHub calls Preflight's reusable workflow instead.</p>
+              <p class="ar-prompt__desc">Components can't leave their GitLab instance, so a <code>waynestate/</code> package mirrored to GitHub calls Preflight's reusable workflow instead.</p>
             </div>
           </header>
           <pre class="ar-prompt__text"><code>You are a coding agent wiring the GitHub mirror of the Composer package in this folder into Preflight, the CI of WELD, the Wayne State application stack. GitLab is the primary; the GitHub copy is a release mirror, and GitLab components cannot run there, so Preflight ships a reusable GitHub Actions workflow that runs the same checks.
@@ -662,7 +663,7 @@ Output: the ci script as it stands and anything it lacks, the workflow file, the
             <div>
               <p class="ar-prompt__kicker">Clearance 3 · Maintenance · Renovate</p>
               <h3 class="ar-prompt__title" id="prompt-renovate-title">Version upkeep with Preflight's Renovate preset</h3>
-              <p class="ar-prompt__desc">One <code>renovate.json</code> that extends the shared preset, so patches and minors land green and majors wait for a person.</p>
+              <p class="ar-prompt__desc">One <code>renovate.json</code> that extends the shared preset. Patch and minor updates merge themselves when the pipeline is green; majors wait for a person.</p>
             </div>
           </header>
           <pre class="ar-prompt__text"><code>You are a coding agent putting the repository in this folder on Preflight's shared Renovate preset. Preflight owns the version automation of WELD, the Wayne State application stack: one preset, renovate/default.json in Preflight, and a renovate component that a private runner project runs on a schedule.
@@ -696,7 +697,7 @@ Output: the renovate.json, what auto-merges and what waits, then your questions.
       <div class="section__head">
         <p class="eyebrow">From the flight manual</p>
         <h2 id="manual-title">Read before flight</h2>
-        <p>What a shared template can do, what it cannot, and how Preflight keeps its own house in order.</p>
+        <p>The limits of a shared CI template, and how Preflight checks its own.</p>
       </div>
 
       <div class="manual">
@@ -708,7 +709,7 @@ Output: the renovate.json, what auto-merges and what waits, then your questions.
           </div>
           <div role="note" class="poh poh--caution" aria-labelledby="poh-c">
             <p class="poh__head" id="poh-c">Caution</p>
-            <p><strong>Same instance only.</strong> Components work only inside the GitLab instance that hosts Preflight; across instances, only by mirroring. Until git.wayne.edu has one, CI runs on the instance that has a runner. <strong>A git.wayne.edu instance runner is strongly recommended.</strong></p>
+            <p><strong>Same instance only.</strong> Components work only inside the GitLab instance that hosts Preflight, so another instance needs a mirror. git.wayne.edu has no runner yet, so for now CI runs on the instance that has one. <strong>A git.wayne.edu instance runner is strongly recommended.</strong></p>
           </div>
           <div role="note" class="poh poh--note" aria-labelledby="poh-n">
             <p class="poh__head" id="poh-n">Note</p>
@@ -731,7 +732,7 @@ Output: the renovate.json, what auto-merges and what waits, then your questions.
             <li><code>image-latest</code> <span>an image on <code>latest</code></span></li>
             <li class="is-warn"><code>image-no-digest</code> <span>a warning: tagged, but not pinned by digest</span></li>
           </ul>
-          <p class="selfcheck__foot">A known warning goes in <code>lint-allow.yml</code> with a required <code>reason</code>, so an allowlist entry is a reviewed decision, not a silence. And on every pipeline, <code>contract/inputs.json</code> holds each input's name, type and default, and each job's name, steady inside a major version.</p>
+          <p class="selfcheck__foot">A known warning goes in <code>lint-allow.yml</code>, and every entry needs a <code>reason</code>, so someone has to write down why. On every pipeline, <code>contract/inputs.json</code> also holds each input's name, type and default, and each job's name, steady within a major version.</p>
         </div>
       </div>
     </div>
@@ -804,7 +805,7 @@ Output: the renovate.json, what auto-merges and what waits, then your questions.
           <li class="flight">
             <span class="flight__mark"><img src="assets/marks/drawbridge.png" width="40" height="40" alt=""></span>
             <span class="flight__name"><a class="part-link" href="https://drawbridge.apps.wayne.edu/" data-flap>Drawbridge</a></span>
-            <span class="flight__role">The Citadel sign-in gateway, lowered on request.</span>
+            <span class="flight__role">Signs people in through Entra ID before they reach a Citadel app.</span>
           </li>
           <li class="flight">
             <span class="flight__mark"><img src="assets/marks/advisor.png" width="40" height="40" alt=""></span>
@@ -819,7 +820,7 @@ Output: the renovate.json, what auto-merges and what waits, then your questions.
           <li class="flight">
             <span class="flight__mark"><img src="assets/marks/weld.png" width="40" height="40" alt=""></span>
             <span class="flight__name"><a class="part-link" href="https://weld.apps.wayne.edu/" data-flap>WELD</a></span>
-            <span class="flight__role">One app with every part already joined.</span>
+            <span class="flight__role">A Laravel app with Inertia and Vue, with every part already installed.</span>
           </li>
         </ul>
       </div>

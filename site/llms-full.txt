@@ -1,6 +1,6 @@
 # Preflight: everything in one file
 
-> Preflight is the Wayne State app stack's CI: GitLab CI/CD components that run PROCTOR, PHP tests on each supported version, a Composer audit, an SBOM, Pint, PHPStan and ESLint on every push.
+> Preflight is a set of GitLab CI/CD components for Wayne State apps. Include them and your pipeline runs PROCTOR, PHP tests on each supported version, a Composer audit, an SBOM, Pint, PHPStan and ESLint.
 
 The README and the Markdown twin of every page, joined. The index is https://preflight.apps.wayne.edu/llms.txt. Written by Squire's agent-ready kit; do not edit.
 
@@ -458,7 +458,7 @@ Every push is cleared for takeoff.
 
 pre·flight noun The checklist a pilot runs before takeoff. Every push runs this one before Citadel.
 
-GitLab CI/CD components that every stack project and starter includes: PROCTOR, PHP tests on each supported version, a Composer audit, an SBOM, Pint, PHPStan and ESLint. One `include:` block, the same checks on every app.
+Preflight is a set of GitLab CI/CD components. Add them to the `include:` block in your `.gitlab-ci.yml` and your pipeline runs PROCTOR, PHP tests on each supported version, a Composer audit, an SBOM, Pint, PHPStan and ESLint, the same way the other stack apps do.
 
 .gitlab-ci.yml
 
@@ -477,7 +477,7 @@ Normal procedures
 
 ### Before takeoff
 
-Every push runs the same list, in the app's own pipeline, before anything reaches Citadel. Scroll, and it runs itself.
+These are the jobs the components add to your app's own pipeline, in the order the card lists them. Scroll, and it runs itself.
 
 WSU app stack · normal checklist
 
@@ -490,7 +490,7 @@ Before takeoff · every push
    One job per supported PHP version, through `parallel:matrix`. End-of-life PHP is not on the list.
    `vendor/bin/phpunit`
 3. Composer audit No advisories
-   Audits the lock file, not a fresh resolve, and fails the pipeline on a known advisory.
+   Audits the exact versions in `composer.lock` and fails the pipeline on a known advisory.
    `composer audit --locked`
 4. SBOM Validated
    A CycloneDX bill of materials, validated and kept as a job artifact. The app's `composer.json` is never touched.
@@ -529,7 +529,7 @@ Cockpit placards
 
 ### Seven checks, one include each
 
-Each one is an ordinary GitLab job with typed inputs and a sensible default. Every one is in the 0.1.1 tag, so pin it there. Two more components, `package-publish` and `renovate`, ship in the same tag; the README documents them.
+Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All seven are in the 0.1.1 tag, so pin them there. Two more components, `package-publish` and `renovate`, ship in the same tag; the README documents them.
 
 in 0.1.1
 
@@ -546,7 +546,7 @@ Runs PROCTOR's checks and publishes them as a Code Quality report.
 **6 inputs**
 
 - **stage**: `test`
-- **image**: `php:8.4-cli@sha256:…`
+- **image**: `php:8.4-cli-trixie@sha256:…`
 - **composer_version**: `2.10.3`
 - **allow_failure**: `false`
 - **proctor_command**: `vendor/bin/proctor check --format=codequality`
@@ -564,9 +564,10 @@ The test command on each supported PHP version, one job per version.
 - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.1
 ```
 
-**5 inputs**
+**6 inputs**
 
 - **stage**: `test`
+- **image**: `php:${PHP_VERSION}-cli-trixie`
 - **php_versions**: `["8.3", "8.4", "8.5"]`
 - **composer_version**: `2.10.3`
 - **test_command**: `vendor/bin/phpunit`
@@ -698,7 +699,7 @@ Quick start
 
 ### File a flight plan
 
-Four boxes. Fill them in once, and every merge request and every push to the default branch runs the checklist.
+Box 1 is the one every app needs: after it, merge requests and pushes to the default branch run the checklist. The other three cover project settings, GitHub mirrors and running Preflight's own checks.
 
 1 Route · `.gitlab-ci.yml`
 
@@ -793,11 +794,11 @@ Crew resource management
 
 ### Hand it to your copilot
 
-Three clearances, ready for the coding agent you already fly with. Copy one, or run it straight in OpenCode, Claude Code, Codex or ChatGPT. Each one tells the agent where the charts are, what it may not assume, and to ask the tower before it guesses.
+Three prompts for the coding agent you already fly with. Copy one, or run it straight in OpenCode, Claude Code, Codex or ChatGPT. Each one points the agent at Preflight's docs, lists what it must not assume, and tells it to ask you before it guesses.
 
 #### Get started with Preflight
 
-The app's own `.gitlab-ci.yml`, with the components that fit it: raw PHP, Laravel with Blade, or Laravel with Inertia and Vue.
+The agent writes your app's `.gitlab-ci.yml` with the components that fit it, whether it's raw PHP, Laravel with Blade, or Laravel with Inertia and Vue.
 
 A prompt for your coding agent. Copy it as it stands:
 
@@ -829,7 +830,7 @@ Output: the app kind, the components with a reason each, the diff, then your que
 
 #### Preflight on a package's GitHub mirror
 
-Components stop at the instance boundary, so a `waynestate/` package mirrored to GitHub calls Preflight's reusable workflow instead.
+Components can't leave their GitLab instance, so a `waynestate/` package mirrored to GitHub calls Preflight's reusable workflow instead.
 
 A prompt for your coding agent. Copy it as it stands:
 
@@ -857,7 +858,7 @@ Output: the ci script as it stands and anything it lacks, the workflow file, the
 
 #### Version upkeep with Preflight's Renovate preset
 
-One `renovate.json` that extends the shared preset, so patches and minors land green and majors wait for a person.
+One `renovate.json` that extends the shared preset. Patch and minor updates merge themselves when the pipeline is green; majors wait for a person.
 
 A prompt for your coding agent. Copy it as it stands:
 
@@ -888,7 +889,7 @@ From the flight manual
 
 ### Read before flight
 
-What a shared template can do, what it cannot, and how Preflight keeps its own house in order.
+The limits of a shared CI template, and how Preflight checks its own.
 
 Warning
 
@@ -898,7 +899,7 @@ A preflight checklist only works if the pilot reads it.
 
 Caution
 
-**Same instance only.** Components work only inside the GitLab instance that hosts Preflight; across instances, only by mirroring. Until git.wayne.edu has one, CI runs on the instance that has a runner. **A git.wayne.edu instance runner is strongly recommended.**
+**Same instance only.** Components work only inside the GitLab instance that hosts Preflight, so another instance needs a mirror. git.wayne.edu has no runner yet, so for now CI runs on the instance that has one. **A git.wayne.edu instance runner is strongly recommended.**
 
 Note
 
@@ -923,7 +924,7 @@ Preflight's own preflight
 - `image-latest` an image on `latest`
 - `image-no-digest` a warning: tagged, but not pinned by digest
 
-A known warning goes in `lint-allow.yml` with a required `reason`, so an allowlist entry is a reviewed decision, not a silence. And on every pipeline, `contract/inputs.json` holds each input's name, type and default, and each job's name, steady inside a major version.
+A known warning goes in `lint-allow.yml`, and every entry needs a `reason`, so someone has to write down why. On every pipeline, `contract/inputs.json` also holds each input's name, type and default, and each job's name, steady within a major version.
 
 Wayne State app stack
 
@@ -941,7 +942,7 @@ Preflight is one stop on the way to Citadel. Here is everyone else on the board.
 - [Booster](https://booster.apps.wayne.edu/) Keeps an app's PHP current, so it stays on the test matrix.
 - [HELMET](https://helmet.apps.wayne.edu/) Security headers and runtime hardening.
 - [SESAME](https://sesame.apps.wayne.edu/) Sign-in for the app.
-- [Drawbridge](https://drawbridge.apps.wayne.edu/) The Citadel sign-in gateway, lowered on request.
+- [Drawbridge](https://drawbridge.apps.wayne.edu/) Signs people in through Entra ID before they reach a Citadel app.
 - [ADVISOR](https://advisor.apps.wayne.edu/) Ask what applies to your app, and what to do next.
 - [Sourdough](https://sourdough.apps.wayne.edu/) Starters you feed, with Preflight already in the pipeline.
-- [WELD](https://weld.apps.wayne.edu/) One app with every part already joined.
+- [WELD](https://weld.apps.wayne.edu/) A Laravel app with Inertia and Vue, with every part already installed.
