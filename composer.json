@@ -40,10 +40,18 @@
             "php bin/lint-templates",
             "php bin/lint-templates --test",
             "@lint",
-            "@analyse"
+            "@analyse",
+            "@site:agent-ready-check"
         ],
         "lint": "pint --test",
         "fix": "pint",
-        "analyse": "phpstan analyse --memory-limit=1G"
+        "analyse": "phpstan analyse --memory-limit=1G",
+        "site:agent-ready": "php bin/agent-ready.php",
+        "site:agent-ready-check": "php bin/agent-ready.php --check"
+    },
+    "scripts-descriptions": {
+        "ci": "The full CI gate: template lint, fixture tests, Pint, PHPStan, agent-ready files.",
+        "site:agent-ready": "Rewrite the Markdown twins, llms.txt, llms-full.txt, robots.txt and sitemap.xml in site/ (Squire's agent-ready kit).",
+        "site:agent-ready-check": "Fail when the agent-ready files are stale, a page lacks its Markdown link, a prompt drifts from the docs, or the kit was edited here."
     }
 }
