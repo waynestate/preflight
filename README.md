@@ -16,6 +16,8 @@ Preflight is a set of GitLab CI/CD components that give every WSU app the
 same checks: PROCTOR, PHP tests on each supported version, Composer audit,
 an SBOM, Pint, PHPStan and ESLint.
 
+**Not to be confused with:** Preflight is the CI pipeline; it runs Pinstripe's style checks and PROCTOR but sets neither.
+
 Front page: [`site/index.html`](site/index.html), a static page; see [`site/README.md`](site/README.md).
 On Citadel it is served by the raw-PHP deploy layer in [`deploy/`](deploy/): a Squire kit whose front controller serves `site/` behind HELMET's security headers. For local development, keep serving `site/` directly.
 
