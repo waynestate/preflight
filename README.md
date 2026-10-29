@@ -431,6 +431,10 @@ Known warnings can be allowlisted in `lint-allow.yml`. Each entry needs `file`,
 `rule` and `reason`; the reason is required so an allowlist entry is a reviewed
 decision, not a silence. The preflight checklist checks the checklist.
 
+## Proof
+
+Proof runs against real Wayne State applications are on a private site, [proof.apps.wayne.edu/preflight](https://proof.apps.wayne.edu/preflight/), behind a Wayne State employee sign-in.
+
 ## Local checks
 
 Maintainers: how to build, test and release this project, and where its data comes from, is in [MAINTAINING.md](MAINTAINING.md).

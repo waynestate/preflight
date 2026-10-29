@@ -11,10 +11,7 @@ are Git tags.
 - Docs: README.md, MAINTAINING.md and site/index.html pin components at
   `@0.1.1`, and the notes about components arriving in a later tag are gone,
   because 0.1.1 contains every component.
-
-### Removed
-
-- Removed: the public proof page; proof results move to a private site.
+- Changed: the proof page moves to a private site that needs a Wayne State sign-in.
 
 ## 0.1.1 (2026-10-29)
 
