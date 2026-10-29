@@ -6,6 +6,12 @@ are Git tags.
 
 ## Unreleased
 
+### Changed
+
+- Docs: README.md, MAINTAINING.md and site/index.html pin components at
+  `@0.1.1`, and the notes about components arriving in a later tag are gone,
+  because 0.1.1 contains every component.
+
 ## 0.1.1 (2026-10-29)
 
 ### Added
