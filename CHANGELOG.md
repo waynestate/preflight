@@ -6,6 +6,10 @@ are Git tags.
 
 ## Unreleased
 
+### Changed
+
+- Changed: the deploy layer's Squire kit is refreshed to 0.3.3 (release options can now live in ./.env.squire).
+
 ### Fixed
 
 - Fixed: stale 0.1.0 and next-tag wording in the best practices, the GitHub example and the checklist art.
