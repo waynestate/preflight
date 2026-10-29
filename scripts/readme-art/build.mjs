@@ -44,6 +44,9 @@ const FORBIDDEN = /noug[a]t|snu[.]gs|citadel/i; // internal names never ship in 
 // a schedule, outside the pipeline's stage list).
 const NO_STAGE = "no stage";
 
+// The tag every component ships in. The page's placards must agree with it.
+const COMPONENT_TAG = "0.1.1";
+
 // Preflight's own palette, as declared in site/assets/preflight.css.
 const C = {
   green: "#0C5449",
@@ -302,10 +305,12 @@ async function readChecklist(page, templates) {
     JSON.stringify([data.kicker, data.title, data.foot, data.panelTitle, data.items, data.lamps, data.placards]),
     "checklist",
   );
+  // Not every component runs on every push: package-publish waits for a tag
+  // and renovate for a schedule, so the card carries fewer rows than
+  // templates/. Each row still must name exactly one component, checked
+  // below, and the panel footer lists the ones without a row.
   const checks = data.items.filter((i) => !i.final);
-  if (checks.length !== templates.length) {
-    fail(`checklist has ${checks.length} checks but templates/ has ${templates.length} components`);
-  }
+  if (checks.length === 0) fail("checklist has no component rows");
   // Pair each checklist line with the job that runs it: "Composer audit" is
   // composer-audit, "PHP tests" is php-test, "ESLint · Prettier" is eslint.
   const norm = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -315,7 +320,10 @@ async function readChecklist(page, templates) {
     item.tpl = hit[0];
     const card = data.placards.find((p) => p.name === hit[0].job);
     if (!card) fail(`no component placard on the page for ${hit[0].job}`);
-    item.tag = card.tag;
+    // The art labels every component from COMPONENT_TAG; the placard must agree.
+    if (card.tag.toLowerCase() !== `in ${COMPONENT_TAG}`) {
+      fail(`placard for ${hit[0].job} reads "${card.tag}", expected "in ${COMPONENT_TAG}"`);
+    }
   }
   if (!data.items.at(-1)?.final) fail("checklist has no final clearance item");
   return data;
@@ -500,20 +508,26 @@ async function buildChecklist(page, templates) {
     .join("\n");
   const lampsBottom = lampTop + Math.ceil(slot / cols) * (lampH + gap) + 6 + 66;
 
-  // ---- panel footer: the components in checklist order, by job name from
-  // templates/, each with the tag it ships in (from the page's placards)
+  // ---- panel footer: every component in templates/, by job name, each with
+  // the tag it ships in. Checklist components come first, in the card's own
+  // order; the ones without a card row follow.
   const jobsY = lampsBottom + 44;
-  const listed = items.filter((it) => it.tpl);
-  const stages = [...new Set(listed.map((it) => it.tpl.stage))].join(" · ");
+  const paired = items.filter((it) => it.tpl);
+  const unpaired = templates.filter((tp) => !paired.some((it) => it.tpl === tp));
+  const listed = [
+    ...paired.map((it) => ({ job: it.tpl.job, stage: it.tpl.stage })),
+    ...unpaired.map((tp) => ({ job: tp.job, stage: tp.stage })),
+  ];
+  const stages = [...new Set(listed.map((it) => it.stage))].join(" · ");
   const rowGap = 23;
+  const tagLabel = `IN ${COMPONENT_TAG}`.toUpperCase();
   const jobsSvg = [
     `<text x="${panelX + lampPadX}" y="${jobsY}" font-family="${MONO}" font-weight="700" font-size="12" letter-spacing="1.2" fill="${C.glassText}">INCLUDE: ${listed.length} COMPONENTS · STAGE ${esc(stages.toUpperCase())}</text>`,
     ...listed.map((it, i) => {
       const y = jobsY + 30 + i * rowGap;
-      const tagged = !/next tag/i.test(it.tag);
       return (
-        `<text x="${panelX + lampPadX}" y="${y}" font-family="${MONO}" font-size="14" fill="${C.cream}"><tspan fill="${C.gold}">- </tspan>${esc(it.tpl.job)}</text>` +
-        `<text x="${panelX + panelW - lampPadX}" y="${y}" text-anchor="end" font-family="${MONO}" font-size="12" letter-spacing="0.6" fill="${tagged ? C.lit : C.glassText}">${esc(it.tag.toUpperCase())}</text>`
+        `<text x="${panelX + lampPadX}" y="${y}" font-family="${MONO}" font-size="14" fill="${C.cream}"><tspan fill="${C.gold}">- </tspan>${esc(it.job)}</text>` +
+        `<text x="${panelX + panelW - lampPadX}" y="${y}" text-anchor="end" font-family="${MONO}" font-size="12" letter-spacing="0.6" fill="${C.lit}">${esc(tagLabel)}</text>`
       );
     }),
   ].join("\n  ");
