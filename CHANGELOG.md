@@ -12,6 +12,10 @@ are Git tags.
   `@0.1.1`, and the notes about components arriving in a later tag are gone,
   because 0.1.1 contains every component.
 
+### Removed
+
+- Removed: the public proof page; proof results move to a private site.
+
 ## 0.1.1 (2026-10-29)
 
 ### Added
