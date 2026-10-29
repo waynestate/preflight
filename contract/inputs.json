@@ -68,6 +68,15 @@
         { "name": "prettier", "type": "boolean", "default": true }
       ],
       "jobs": ["eslint"]
+    },
+    "package-publish": {
+      "inputs": [
+        { "name": "stage", "type": "string", "default": "deploy" },
+        { "name": "image", "type": "string", "default": "composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc" },
+        { "name": "group_id", "type": "string" },
+        { "name": "read_token_variable", "type": "string", "default": "PACKAGE_READ_TOKEN" }
+      ],
+      "jobs": ["package-publish"]
     }
   }
 }
