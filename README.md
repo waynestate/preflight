@@ -367,6 +367,8 @@ decision, not a silence. The preflight checklist checks the checklist.
 
 ## Local checks
 
+Maintainers: how to build, test and release this project, and where its data comes from, is in [MAINTAINING.md](MAINTAINING.md).
+
 Run the template lint and the fixture tests with Docker:
 
 ```sh
