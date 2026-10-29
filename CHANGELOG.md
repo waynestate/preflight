@@ -13,3 +13,11 @@ are Git tags.
   before publishing, so republishing from the same commit is a no-op and
   republishing from a different commit fails instead of overwriting the
   version.
+
+### Changed
+
+- PHPStan: `phpstan.neon` now includes Pinstripe's `raw.neon` preset from
+  the new `waynestate/pinstripe` dev dependency instead of carrying a hand
+  copy of its settings. The repo keeps only its own paths, excluded fixture
+  app and PHP version range. Strict rules stay off as before, and
+  deprecation checks now run on every analysis.
