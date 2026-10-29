@@ -1,0 +1,76 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    "docker:pinDigests",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "platformAutomerge": true,
+  "labels": ["auto-deps"],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["digest", "pin", "pinDigest", "patch", "minor"],
+      "automerge": true
+    },
+    {
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "labels": ["auto-deps", "major"]
+    },
+    {
+      "matchDatasources": ["npm", "packagist"],
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "matchDepNames": ["mysql", "haproxy"],
+      "matchDatasources": ["docker"],
+      "matchUpdateTypes": ["pin", "pinDigest", "replacement", "bump", "rollback", "patch", "minor", "major"],
+      "enabled": false
+    },
+    {
+      "matchDepNames": ["citadel/php-apache"],
+      "enabled": false
+    },
+    {
+      "matchPackageNames": ["waynestate/*", "@waynestate/*"],
+      "minimumReleaseAge": "0"
+    },
+    {
+      "matchPackageNames": ["waynestate/*", "@waynestate/*"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "automerge": true
+    }
+  ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["on monday"],
+    "automerge": true
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["**/docker-compose*.yml"],
+      "matchStrings": [
+        "\\$\\{[A-Za-z_][A-Za-z0-9_]*:-(?<depName>[a-z0-9][a-z0-9._/-]*):(?<currentValue>[^:@{}\\n]+)@(?<currentDigest>sha256:[a-f0-9]{64})\\}"
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["templates/**/template.yml"],
+      "matchStrings": [
+        "default:\\s+(?<depName>[a-z0-9][a-z0-9._/-]*):(?<currentValue>[^:@{}\\n]+)@(?<currentDigest>sha256:[a-f0-9]{64})"
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["contract/inputs.json"],
+      "matchStrings": [
+        "\"default\"\\s*:\\s*\"(?<depName>[a-z0-9][a-z0-9._/-]*):(?<currentValue>[^:@{}\\n]+)@(?<currentDigest>sha256:[a-f0-9]{64})\""
+      ],
+      "datasourceTemplate": "docker"
+    }
+  ]
+}
