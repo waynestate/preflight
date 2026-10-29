@@ -1,4 +1,4 @@
-# PREFLIGHT front page
+# Preflight front page
 
 A static page: `index.html`, `assets/preflight.css`, `assets/preflight.js`. No build step. Serve the `site/` folder
 from anywhere (Citadel, any web server, or `python -m http.server` inside `site/` for a look; some browsers block
@@ -14,7 +14,7 @@ fonts over `file://`).
   family tie; deep blue `#0E5A7D` (the board's site-only accent) does the chart grid and the form rules.
 - base: WayneUI 2.0.8, copied from its static path into `assets/wayne-ui/` (tokens, Lato, buttons, tabs, skip link,
   sr-only), then re-dressed in `assets/preflight.css`.
-- magic: **the checklist runs itself as you scroll.** Each item on the card is a real PREFLIGHT job with its real
+- magic: **the checklist runs itself as you scroll.** Each item on the card is a real Preflight job with its real
   command. As an item crosses the reading line it is ticked, its annunciator goes green and the aircraft on the taxi
   strip rolls past the next hold-short line (TEST, AUDIT, STYLE). The last item lights CLEARED FOR TAKEOFF and the
   aircraft rolls down runway Citadel and lifts off. **Run the checklist** plays it without scrolling. The guarded
@@ -24,7 +24,7 @@ fonts over `file://`).
   backlighting, and the PAPI lights settle from all red to two white, two red: on the glidepath.
 - coming soon: the accessibility suite, a contract suite and site freshness sit on the panel as dim, hatched lamps
   and in "Deferred items"; none has a command, because none exists yet.
-- marks: `brand/` is PREFLIGHT's (generated with ChatGPT, never redrawn). `assets/marks/` holds the other stack parts'
+- marks: `brand/` is Preflight's (generated with ChatGPT, never redrawn). `assets/marks/` holds the other stack parts'
   marks, copied from the sibling sites; WayneUI uses its own reversed mark on green.
 - reduced motion: the page is the finished flight, every word present at first paint: every box ticked, every lamp
   green, the aircraft lined up on the runway with its clearance. The buttons still work, instantly, and the status

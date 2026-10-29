@@ -1,6 +1,6 @@
-# PREFLIGHT fixture app
+# Preflight fixture app
 
-This is a minimal fixture app used to test the PREFLIGHT CI/CD components.
+This is a minimal fixture app used to test the Preflight CI/CD components.
 
 ## Fake proctor
 

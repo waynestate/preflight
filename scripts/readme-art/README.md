@@ -1,4 +1,4 @@
-# PREFLIGHT README art kit
+# Preflight README art kit
 
 Regenerates every image under `docs/readme/` from this repo's own front page (`site/`), its CI
 templates (`templates/<name>/template.yml`) and its brand files (`site/brand/`). Nothing is drawn

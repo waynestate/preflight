@@ -12,6 +12,7 @@ are Git tags.
   `@0.1.1`, and the notes about components arriving in a later tag are gone,
   because 0.1.1 contains every component.
 - Changed: the proof page moves to a private site that needs a Wayne State sign-in.
+- Changed: project names written as words except acronyms.
 
 ## 0.1.1 (2026-10-29)
 

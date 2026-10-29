@@ -1,24 +1,24 @@
-# PREFLIGHT best practices
+# Preflight best practices
 
 Status: draft, checked against sources on 2026-10-27, with a second research pass the same day (see "Second pass
-(2026-10-27)" near the end). Applies to the PREFLIGHT components `proctor`, `php-test` and `composer-audit` at the state
+(2026-10-27)" near the end). Applies to the Preflight components `proctor`, `php-test` and `composer-audit` at the state
 of the repo on that date (tag 0.1.0 exists; the components added after it arrive in the next tag).
 
 ## What this covers
 
-PREFLIGHT is a set of GitLab CI/CD components that every stack project and WSU app includes with
+Preflight is a set of GitLab CI/CD components that every stack project and WSU app includes with
 `include: component:`. Today it has seven: `php-test` (PHP versions through `parallel:matrix`), `composer-audit`,
 `proctor`, `sbom`, `pint`, `phpstan` and `eslint`. Accessibility and contract suites come later.
 
 This guide is for two groups:
 
-- **WSU developers** who add PREFLIGHT to an app's `.gitlab-ci.yml`.
-- **PREFLIGHT maintainers** who write, test and release the components.
+- **WSU developers** who add Preflight to an app's `.gitlab-ci.yml`.
+- **Preflight maintainers** who write, test and release the components.
 
 It covers how to write and release components, how to keep a pipeline safe, and where a shared template can and cannot
 force a standard. Each practice says what to do, why, where the idea comes from, and how the stack holds it today.
 
-PHP that has reached end of life is not supported, and PREFLIGHT does not test it.
+PHP that has reached end of life is not supported, and Preflight does not test it.
 
 ### The four tags
 
@@ -29,7 +29,7 @@ PHP that has reached end of life is not supported, and PREFLIGHT does not test i
 | `Documented` | Written down only. Nothing fails if it is ignored. |
 | `Not yet` | A gap. Neither code nor text covers it today. |
 
-Tags come from the PREFLIGHT and PROCTOR repos and the stack design documents as read on 2026-10-27. Where a design
+Tags come from the Preflight and PROCTOR repos and the stack design documents as read on 2026-10-27. Where a design
 document describes something that is not built, the tag is `Documented` or `Not yet`.
 
 ### One limit to know first
@@ -113,12 +113,12 @@ so a renamed input or job, a changed type or a changed default fails the `contra
 ### 1.5 Know that components work only inside one GitLab instance
 A component can be used only by projects on the same instance. Another instance needs a mirror.
 
-Why: it decides where PREFLIGHT and the apps that use it must live.
+Why: it decides where Preflight and the apps that use it must live.
 
 Sources: [GitLab: components, cross-instance access](https://docs.gitlab.com/ci/components/).
 
 **How the stack holds it: Documented.** The README has a "Same instance only" section. Until git.wayne.edu has an
-instance runner, PREFLIGHT and each app must be on or mirrored to the GitLab instance that has a runner.
+instance runner, Preflight and each app must be on or mirrored to the GitLab instance that has a runner.
 
 ### 1.6 Assume a tag can move, and give consumers the SHA
 Publish the commit SHA next to every release tag in the release notes. Tell apps to pin the SHA and use the tag only as a
@@ -152,7 +152,7 @@ Renovate's Docker docs confirm it can pin a digest, keep the tag for readability
 changes. Its GitLab include page lists only the `gitlab-tags` datasource and does not say whether it updates
 `component:` includes or SHA pins. That is unverified, so test it against a sample app before promising it.
 
-**How the stack holds it: Not yet.** No bump process or tool is documented for PREFLIGHT or for the apps that include it.
+**How the stack holds it: Not yet.** No bump process or tool is documented for Preflight or for the apps that include it.
 
 ### 1.8 Say how a component is retired
 Before removing a component or turning off its Catalog toggle, announce it and keep the old tag working for a stated period.
@@ -271,7 +271,7 @@ Sources: [GitLab: Code Quality](https://docs.gitlab.com/ci/testing/code_quality/
 tier; the pipeline tab needs Premium and the diff view needs Ultimate.
 
 Second pass: tiers re-checked and correct. One addition: GitLab deprecated its built-in CodeClimate-based Code Quality
-template in 17.3 and plans to remove it in 19.0, and prefers importing a tool's own report. PREFLIGHT uses the report
+template in 17.3 and plans to remove it in 19.0, and prefers importing a tool's own report. Preflight uses the report
 artifact, not the template, so it is not affected. The report must be a single JSON array with no byte order mark, and
 each entry needs `description`, `check_name`, `fingerprint`, `location.path` (no leading `./`), a line number and a
 `severity` of `info`, `minor`, `major`, `critical` or `blocker`. PROCTOR's output should be tested against those rules.
@@ -307,7 +307,7 @@ survives input interpolation, and GitLab expands it in the image at job time, so
 Use `spec:component` and `$[[ component.sha ]]` or `$[[ component.version ]]` to write the component's own version into
 the job log.
 
-Why: when a job misbehaves, the log should say which release of PREFLIGHT produced it. GitLab's docs say `spec:component`
+Why: when a job misbehaves, the log should say which release of Preflight produced it. GitLab's docs say `spec:component`
 exposes `name`, `sha`, `version` and `reference`, was beta in 18.6 and became GA in 18.7.
 
 Sources: [GitLab: components, `spec:component`](https://docs.gitlab.com/ci/components/);
@@ -323,13 +323,13 @@ git.wayne.edu.
 ### 3.1 Say plainly that an app can override, skip or delete an included job
 State it in the docs, and measure adoption instead of assuming it.
 
-Why: the main `.gitlab-ci.yml` is merged over included jobs, and an app can simply not include PREFLIGHT.
+Why: the main `.gitlab-ci.yml` is merged over included jobs, and an app can simply not include Preflight.
 
 Sources: [GitLab: includes, merge behaviour](https://docs.gitlab.com/ci/yaml/includes/);
 [GitLab: pipeline execution policies (Ultimate)](https://docs.gitlab.com/user/application_security/policies/pipeline_execution_policies/).
 
 **How the stack holds it: Documented.** The stack's enforcement-points decision names the CI gate as point (c) and Fleet as point (e), which shows
-who skips CI. ROLLCALL is not built, so nothing reports skipped or weakened pipelines today.
+who skips CI. Rollcall is not built, so nothing reports skipped or weakened pipelines today.
 
 Prior art (second pass): Drupal's shared GitLab templates, used by more than 2,000 contributed projects at the time of
 a December 2025 post, do not force anything. Most jobs are turned off by setting a variable to 0, and projects keep
@@ -346,11 +346,11 @@ Sources: [GitLab: CI/CD variables, risks](https://docs.gitlab.com/ci/variables/)
 [GitLab: protected branches](https://docs.gitlab.com/user/project/repository/branches/protected/).
 
 **How the stack holds it: Not yet.** Protected branches with required merge requests are available on every tier. Code
-owner approval is Premium or Ultimate, so it is not available on Community Edition. No PREFLIGHT text recommends
+owner approval is Premium or Ultimate, so it is not available on Community Edition. No Preflight text recommends
 settings for app repos.
 
-### 3.3 Detect pipelines that skip or weaken PREFLIGHT
-A check or a fleet report should flag an app with no PREFLIGHT include, an unpinned include, `allow_failure: true` on a
+### 3.3 Detect pipelines that skip or weaken Preflight
+A check or a fleet report should flag an app with no Preflight include, an unpinned include, `allow_failure: true` on a
 gate, or a missing `proctor` job.
 
 Why: a standard that nobody can see being skipped is not a standard.
@@ -359,7 +359,7 @@ Sources: [OWASP CICD-SEC-1 Insufficient Flow Control Mechanisms](https://owasp.o
 [OpenSSF Scorecard: SAST](https://github.com/ossf/scorecard/blob/main/docs/checks.md) (a check for whether analysis
 runs at all).
 
-**How the stack holds it: Not yet.** PROCTOR does not read `.gitlab-ci.yml`. ROLLCALL's "apps with CI" number is a plan.
+**How the stack holds it: Not yet.** PROCTOR does not read `.gitlab-ci.yml`. Rollcall's "apps with CI" number is a plan.
 
 ### 3.4 Control when pipelines run, once, in the app
 Set `workflow:rules` so a branch with an open merge request does not run twice, and so merge request pipelines exist.
@@ -577,7 +577,7 @@ shipped security releases on 2026-04 (2.9.6), 2026-06-04 (2.10.1), 2026-07-01 (2
 stated minimum maintenance date of 2026-12-31. So pin a version, and move the pin through a reviewed change (see 1.7). Do
 not pin and forget. Composer's download page publishes a SHA-256 file and a PGP signature for each versioned `composer.phar`.
 The page's own installer example now shows a fixed SHA-384 value and points to `composer.github.io/pubkeys.html` for
-cross-checking, while PREFLIGHT fetches `installer.sig` at runtime. The runtime fetch is acceptable (it comes from a
+cross-checking, while Preflight fetches `installer.sig` at runtime. The runtime fetch is acceptable (it comes from a
 different host than the installer), but it is not what the page shows today. A versioned phar plus its published checksum
 is the stricter choice.
 
@@ -620,7 +620,7 @@ Sources: [Packagist: supply chain security update](https://blog.packagist.com/an
 by accident, and `composer-audit` depends on what `composer:2` points at. Nothing records the rule or tests it.
 
 ### 4.12 When a JavaScript component arrives, install from the lock with scripts off
-For the Vue paths, a future PREFLIGHT job should use `npm ci`, turn off install scripts by default and allow them only
+For the Vue paths, a future Preflight job should use `npm ci`, turn off install scripts by default and allow them only
 for named packages, and keep tokens out of the job.
 
 Why: the Shai-Hulud npm worm (second wave, November 2025) moved its payload to `preinstall`, stole CI and cloud
@@ -632,7 +632,7 @@ Sources: [Semgrep: Shai-Hulud second wave](https://semgrep.dev/blog/2025/digging
 [Better Stack: Shai-Hulud](https://betterstack.com/community/guides/scaling-nodejs/shai-hulud-attack/). These were read as
 search summaries only, so details are unverified.
 
-**How the stack holds it: Documented.** README.md "Shared conventions" records the rule. PREFLIGHT has no JavaScript component yet, so nothing runs it.
+**How the stack holds it: Documented.** README.md "Shared conventions" records the rule. Preflight has no JavaScript component yet, so nothing runs it.
 
 ### 4.13 Generate a CycloneDX SBOM and validate it
 Produce a software bill of materials for every release, and fail the build on an invalid one.
@@ -723,7 +723,7 @@ Sources: [GitLab: CI/CD variables](https://docs.gitlab.com/ci/variables/);
 [OWASP CICD-SEC-6 Insufficient Credential Hygiene](https://owasp.org/www-project-top-10-ci-cd-security-risks/).
 
 **How the stack holds it: Not yet.** The three templates use no secrets, which is good. Nothing fails if a later
-template adds one, and no secret scan runs on the PREFLIGHT repo.
+template adds one, and no secret scan runs on the Preflight repo.
 
 Second pass: GitLab's pipeline secret detection is available on Free, Premium and Ultimate. Its docs show
 `include: template: Jobs/Secret-Detection.gitlab-ci.yml`, and the error messages reference gitleaks. Limits: it needs a
@@ -797,12 +797,12 @@ The same release fixed CVE-2026-16301 (High, 8.5: a Developer could run pipeline
 authorization) and CVE-2026-14814 (High, 8.2: cache poisoning of raw repository file responses that could expose protected
 environment variables). GitLab's page does not tell self-managed owners to rotate runner tokens. Some secondary reports
 do, and they disagree on dates, so check GitLab's own advisory and ops' judgement before acting on that advice. Every
-PREFLIGHT job depends on this instance being sound, and the guide cannot tell whether git.wayne.edu is patched because its
+Preflight job depends on this instance being sound, and the guide cannot tell whether git.wayne.edu is patched because its
 help page shows no version.
 
 Sources: [GitLab patch release 19.4.2, 19.3.5, 19.2.8](https://docs.gitlab.com/releases/patches/patch-release-gitlab-19-4-2-released/).
 
-**How the stack holds it: Not yet.** Instance patching is outside the PREFLIGHT repo. Record the owner and the schedule in
+**How the stack holds it: Not yet.** Instance patching is outside the Preflight repo. Record the owner and the schedule in
 the instance runner request.
 
 ---
@@ -874,7 +874,7 @@ Sources: [Docker Official Image: php](https://github.com/docker-library/docs/blo
 **How the stack holds it: Not yet.** `php-test` has no input for an advisory version.
 
 ### 6.5 Aim the future accessibility component at WCAG 2.2 AA
-When PREFLIGHT gets an accessibility suite, use WCAG 2.2 Level AA as the floor, and keep a manual review step.
+When Preflight gets an accessibility suite, use WCAG 2.2 Level AA as the floor, and keep a manual review step.
 
 Why: on 2026-04-20 the US Department of Justice published an interim final rule that moved the Title II web accessibility
 compliance dates by one year, to 2027-04-26 for public entities with a population of 50,000 or more and 2028-04-26 for
@@ -922,7 +922,7 @@ the fixture's `composer.json` requires only `php ^8.2` and `phpunit ^11.0`. Add 
 package and a malware-flagged version too (see 4.6 and 4.11), so each Composer policy result is recorded as a real exit code.
 
 ### 7.3 Use the stack's own projects as the first users
-Each stack repo includes PREFLIGHT, pinned.
+Each stack repo includes Preflight, pinned.
 
 Why: the people who write the components feel their faults first.
 
@@ -956,7 +956,7 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
 
 1. 6.1: Make the `proctor` default command work (bundled policy), then add it to PROCTOR's and CREED's pipelines.
 2. 7.2: Add failing fixtures for each component and replace the stub `bin/proctor` with the real tool.
-3. 3.3: Add a check or ROLLCALL report for apps that skip, unpin or weaken PREFLIGHT.
+3. 3.3: Add a check or Rollcall report for apps that skip, unpin or weaken Preflight.
 4. 4.1: Pin images by digest and update the pins through reviewed merge requests.
 5. 4.4: Run PROCTOR without installing the app, and pass `--no-plugins --no-scripts` where jobs only inspect.
 6. 1.3: Confirm the `release` job, publish the Catalog entry for `0.1.0`, and tag the next release with the components added after it.
@@ -970,7 +970,7 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
 14. 3.4: Add a `workflow:rules` example to the README.
 15. 2.5: Build job names from an input so one project can include a component twice.
 16. 4.8: Add a Composer cache keyed on `composer.lock`.
-17. 5.1: Add secret detection to PREFLIGHT's own pipeline.
+17. 5.1: Add secret detection to Preflight's own pipeline.
 18. 5.2: Write down the job token allowlist rule for projects that install private packages from GitLab's registry.
 19. 5.3: State "non-privileged, ephemeral Docker executor" in the runner request.
 20. 5.4: Agree the list of hosts jobs may reach.
@@ -1003,7 +1003,7 @@ Added in the second pass (2026-10-27):
 40. 1.8: Write a retirement policy for components, and test whether SHA pins survive a Catalog unpublish.
 41. 4.12: Record the install-scripts rule before a JavaScript component is written.
 42. 2.11: Print the component version in job logs once the instance runs GitLab 18.7 or later.
-43. 5.1 (updated): Test whether GitLab secret detection runs on git.wayne.edu (Community Edition), and add it to PREFLIGHT's
+43. 5.1 (updated): Test whether GitLab secret detection runs on git.wayne.edu (Community Edition), and add it to Preflight's
     pipeline if it does.
 
 ## Sources
@@ -1071,7 +1071,7 @@ advice, which is why 1.1 relies on the pipeline security and components pages in
 Composer and tj-actions CVEs, the Federal Register text of the DOJ rule, and any GitLab Runner release notes.
 
 Stack design decisions and notes used for tagging: the enforcement-points decision, the instance-runner case, the stack
-objectives, the first-repos plan, the GitLab CI components research, the PREFLIGHT repo and the PROCTOR repo.
+objectives, the first-repos plan, the GitLab CI components research, the Preflight repo and the PROCTOR repo.
 
 ## Second pass (2026-10-27)
 

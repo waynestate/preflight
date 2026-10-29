@@ -1,8 +1,8 @@
 <div align="center">
-  <a href="site/index.html"><img src="docs/readme/hero.jpg" width="100%" alt="PREFLIGHT's front page: the headline PREFLIGHT, 'Every push is cleared for takeoff.', the include block for the php-test component, and the runway mark set in a heading-indicator instrument."></a>
+  <a href="site/index.html"><img src="docs/readme/hero.jpg" width="100%" alt="Preflight's front page: the headline Preflight, 'Every push is cleared for takeoff.', the include block for the php-test component, and the runway mark set in a heading-indicator instrument."></a>
 </div>
 
-# PREFLIGHT
+# Preflight
 
 <div align="center">
   <img src="docs/readme/badges/php.svg" alt="php ^8.3">
@@ -12,12 +12,12 @@
 
 **Every push is cleared for takeoff.**
 
-PREFLIGHT is a set of GitLab CI/CD components that give every WSU app the
+Preflight is a set of GitLab CI/CD components that give every WSU app the
 same checks: PROCTOR, PHP tests on each supported version, Composer audit,
 an SBOM, Pint, PHPStan and ESLint.
 
 Front page: [`site/index.html`](site/index.html), a static page; see [`site/README.md`](site/README.md).
-On Citadel it is served by the raw-PHP deploy layer in [`deploy/`](deploy/): a SQUIRE kit whose front controller serves `site/` behind HELMET's security headers. For local development, keep serving `site/` directly.
+On Citadel it is served by the raw-PHP deploy layer in [`deploy/`](deploy/): a Squire kit whose front controller serves `site/` behind HELMET's security headers. For local development, keep serving `site/` directly.
 
 Development happens on Wayne State's GitLab; this repository is a release mirror. Changes land there first.
 
@@ -33,7 +33,7 @@ the same GitLab instance that hosts this project.
 ## Components
 
 <div align="center">
-  <img src="docs/readme/checklist.svg" width="100%" alt="PREFLIGHT's before-takeoff checklist card. 1 PROCTOR, checked; 2 PHP tests, 8.3, 8.4 and 8.5 pass; 3 Composer audit, no advisories; 4 SBOM, validated; 5 Pint, clean; 6 PHPStan, no errors; 7 ESLint and Prettier, clean; 8 clearance, cleared for takeoff. Beside it the annunciator panel lights a green lamp per check, with a11y, contract and freshness marked coming soon, and lists the seven components, all in the 0.1.1 tag.">
+  <img src="docs/readme/checklist.svg" width="100%" alt="Preflight's before-takeoff checklist card. 1 PROCTOR, checked; 2 PHP tests, 8.3, 8.4 and 8.5 pass; 3 Composer audit, no advisories; 4 SBOM, validated; 5 Pint, clean; 6 PHPStan, no errors; 7 ESLint and Prettier, clean; 8 clearance, cleared for takeoff. Beside it the annunciator panel lights a green lamp per check, with a11y, contract and freshness marked coming soon, and lists the seven components, all in the 0.1.1 tag.">
 </div>
 
 <div align="center"><sub>The checklist, item by item, with each item's job and timeout read from <code>templates/</code>.</sub></div>
@@ -242,7 +242,7 @@ Components cannot be used across instances except by mirroring.
 
 Components work only inside one GitLab instance, so a package that is also
 mirrored to `github.com/waynestate` cannot include them there. For those
-mirrors, PREFLIGHT ships a reusable GitHub Actions workflow that runs the same
+mirrors, Preflight ships a reusable GitHub Actions workflow that runs the same
 checks: the package's `composer ci` script on each supported PHP version, plus
 a Composer audit.
 
@@ -280,7 +280,7 @@ until it is green on both sides. Two cockpits, one checklist.
 
 ## Renovate
 
-PREFLIGHT owns the stack's version automation (ADR-0015): the shared preset
+Preflight owns the stack's version automation (ADR-0015): the shared preset
 [`renovate/default.json`](renovate/default.json) and the
 [`renovate` component](#renovate) that runs it. A private runner project
 includes the component on a schedule; Renovate discovers every repository in
@@ -314,7 +314,7 @@ The `mysql` and `haproxy` images mirror the versions Citadel actually runs,
 not the newest releases in the world. Bumping their tags would drift the apps
 away from production, so only digest updates are enabled for them: the same
 tag, the exact image. `citadel/php-apache` is disabled entirely, because
-SQUIRE's own data owns that image.
+Squire's own data owns that image.
 
 ### The runner project
 
@@ -362,8 +362,8 @@ so the `merge_request_event` rule goes in the app's `.gitlab-ci.yml`.
 ## What the components cannot force
 
 An included component is a set of ordinary jobs. The app's own `.gitlab-ci.yml` is merged over them, so an app can
-override a job's keys, skip it with `rules`, or delete the `include:` line. PREFLIGHT makes the safe pipeline the easy
-one; it does not lock it. ROLLCALL is where skipped or weakened gates will show up. A preflight checklist only works
+override a job's keys, skip it with `rules`, or delete the `include:` line. Preflight makes the safe pipeline the easy
+one; it does not lock it. Rollcall is where skipped or weakened gates will show up. A preflight checklist only works
 if the pilot reads it.
 
 Three project settings make the gates harder to skip. All three work on GitLab Community Edition:
@@ -379,7 +379,7 @@ Three project settings make the gates harder to skip. All three work on GitLab C
 
 ## Strongly recommended: a git.wayne.edu instance runner.
 
-Until git.wayne.edu has a runner, CI runs on the GitLab instance that has one, and PREFLIGHT and each
+Until git.wayne.edu has a runner, CI runs on the GitLab instance that has one, and Preflight and each
 app must live on or be mirrored to it. A git.wayne.edu instance runner is strongly recommended.
 
 ## Shared conventions
@@ -457,7 +457,7 @@ docker run --rm -v "$(pwd)/tests/fixture-app:/app" -w /app php:8.4-cli vendor/bi
 <details>
 <summary><b>The brand board</b>: the runway mark, lockups, palette and type</summary>
 <br>
-<div align="center"><img src="docs/readme/board.jpg" width="100%" alt="PREFLIGHT's brand board: the runway mark on a green tile, the app icon, horizontal and stacked lockups, the mark on light and dark, the palette of Wayne State green, gold, cream and deep blue, Lato type, favicon sizes, clear space, do and don't, and a product usage example."></div>
+<div align="center"><img src="docs/readme/board.jpg" width="100%" alt="Preflight's brand board: the runway mark on a green tile, the app icon, horizontal and stacked lockups, the mark on light and dark, the palette of Wayne State green, gold, cream and deep blue, Lato type, favicon sizes, clear space, do and don't, and a product usage example."></div>
 </details>
 
 ## The cast
@@ -469,12 +469,12 @@ docker run --rm -v "$(pwd)/tests/fixture-app:/app" -w /app php:8.4-cli vendor/bi
   <a href="https://github.com/waynestate/sesame" title="SESAME"><img src="docs/readme/cast/sesame.png" width="48" alt="SESAME"></a>
   <a href="https://github.com/waynestate/helmet" title="HELMET"><img src="docs/readme/cast/helmet.png" width="48" alt="HELMET"></a>
   <a href="https://github.com/waynestate/sourdough" title="Sourdough"><img src="docs/readme/cast/sourdough.png" width="48" alt="Sourdough"></a>
-  <a href="https://github.com/waynestate/squire" title="SQUIRE"><img src="docs/readme/cast/squire.png" width="48" alt="SQUIRE"></a>
-  <a href="https://github.com/waynestate/preflight" title="PREFLIGHT"><img src="docs/readme/cast/preflight.png" width="48" alt="PREFLIGHT"></a>
+  <a href="https://github.com/waynestate/squire" title="Squire"><img src="docs/readme/cast/squire.png" width="48" alt="Squire"></a>
+  <a href="https://github.com/waynestate/preflight" title="Preflight"><img src="docs/readme/cast/preflight.png" width="48" alt="Preflight"></a>
   <a href="https://github.com/waynestate/pinstripe" title="Pinstripe"><img src="docs/readme/cast/pinstripe.png" width="48" alt="Pinstripe"></a>
-  <a href="https://github.com/waynestate/booster" title="BOOSTER"><img src="docs/readme/cast/booster.png" width="48" alt="BOOSTER"></a>
-  <a href="https://github.com/waynestate/rollcall" title="ROLLCALL"><img src="docs/readme/cast/rollcall.png" width="48" alt="ROLLCALL"></a>
-  <a href="https://github.com/waynestate/drawbridge" title="DRAWBRIDGE"><img src="docs/readme/cast/drawbridge.png" width="48" alt="DRAWBRIDGE"></a>
+  <a href="https://github.com/waynestate/booster" title="Booster"><img src="docs/readme/cast/booster.png" width="48" alt="Booster"></a>
+  <a href="https://github.com/waynestate/rollcall" title="Rollcall"><img src="docs/readme/cast/rollcall.png" width="48" alt="Rollcall"></a>
+  <a href="https://github.com/waynestate/drawbridge" title="Drawbridge"><img src="docs/readme/cast/drawbridge.png" width="48" alt="Drawbridge"></a>
   <a href="https://github.com/waynestate/advisor" title="ADVISOR"><img src="docs/readme/cast/advisor.png" width="48" alt="ADVISOR"></a>
   <a href="https://github.com/waynestate/weld" title="WELD"><img src="docs/readme/cast/weld.png" width="48" alt="WELD"></a>
 </div>

@@ -1,9 +1,9 @@
 # MAINTAINING: checklists for the checklist
 
-How to build, test and release PREFLIGHT. PREFLIGHT is the CI that every other stack project runs, so a change here
+How to build, test and release Preflight. Preflight is the CI that every other stack project runs, so a change here
 lands on every runway at once. Walk around the plane before you push.
 
-## What PREFLIGHT is and what it depends on
+## What Preflight is and what it depends on
 
 - GitLab CI/CD components in `templates/` (one folder per component, each with a `template.yml`), and a reusable
   GitHub Actions workflow, `.github/workflows/php-package.yml`.
@@ -44,7 +44,7 @@ and run PHPUnit inside it the same way.
 
 ## CI
 
-- **GitLab:** the pipeline runs PREFLIGHT's own components against `tests/fixture-app` at the current commit (so a
+- **GitLab:** the pipeline runs Preflight's own components against `tests/fixture-app` at the current commit (so a
   broken component fails here first), plus a `contract` job running the `tests/check-*.sh` scripts.
 - **GitHub:** `.github/workflows/ci.yml` runs the local reusable workflow with `composer ci`.
 - Green means both pass. The fixture-app jobs run on GitLab only.
@@ -73,7 +73,7 @@ and run PHPUnit inside it the same way.
 ## The front page
 
 `site/` is the static front page, for `https://preflight.apps.wayne.edu/` on Citadel, served through a small raw-PHP
-`deploy/` layer generated with SQUIRE.
+`deploy/` layer generated with Squire.
 
 ## Who maintains it
 
