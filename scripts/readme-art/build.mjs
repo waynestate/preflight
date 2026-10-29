@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* ============================================================================
-   PREFLIGHT README art kit.
+   Preflight README art kit.
 
    Renders the README images from this repo's own static front page (site/),
    its CI templates (each templates/<name>/template.yml) and its brand files, and writes
@@ -40,7 +40,7 @@ const castDir = path.join(outDir, "cast");
 const MAX_BYTES = 300 * 1024; // every file in docs/readme/ stays at or under this
 const FORBIDDEN = /noug[a]t|snu[.]gs|citadel/i; // internal names never ship in art
 
-// PREFLIGHT's own palette, as declared in site/assets/preflight.css.
+// Preflight's own palette, as declared in site/assets/preflight.css.
 const C = {
   green: "#0C5449",
   greenDeep: "#083B33",

@@ -1,5 +1,5 @@
-# PREFLIGHT's own checks on the GitHub mirror: it calls the reusable workflow in
-# this same repository, so what the packages run is what PREFLIGHT runs on itself.
+# Preflight's own checks on the GitHub mirror: it calls the reusable workflow in
+# this same repository, so what the packages run is what Preflight runs on itself.
 # Every check lives in the `ci` script in composer.json.
 name: CI
 

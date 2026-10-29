@@ -1,5 +1,5 @@
 /*
- * PREFLIGHT front page. Small, vanilla, no build.
+ * Preflight front page. Small, vanilla, no build.
  *
  * - copy buttons
  * - OS tabs (WayneUI's tab pattern: arrow keys, Home, End)
