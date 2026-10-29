@@ -10,7 +10,7 @@ lands on every runway at once. Walk around the plane before you push.
 - It is **not** a Composer library. `composer.json` is type `project` and exists only for its own tooling (template
   lint, Pint, PHPStan, `symfony/yaml`). It is not on Packagist.
 - `contract/inputs.json` is the contract every component's inputs must match.
-- **Who uses it:** every stack repo's `.gitlab-ci.yml` (components pinned at a tag, `@0.1.0` today) and
+- **Who uses it:** every stack repo's `.gitlab-ci.yml` (components pinned at a tag, `@0.1.1` today) and
   `.github/workflows/ci.yml` (the reusable workflow pinned by commit SHA).
 
 ## Where it lives
@@ -66,8 +66,8 @@ and run PHPUnit inside it the same way.
 4. Tag `X.Y.Z` (no `v`) on GitLab, and protect the tag pattern so a release tag cannot move. The mirror carries the tag
    to GitHub. Record the tag's commit SHA in the CHANGELOG, because GitHub consumers pin the reusable workflow by SHA.
 5. **Then bump the pins in every consumer:** the `@X.Y.Z` on each component include in their `.gitlab-ci.yml`, and the
-   SHA in their `.github/workflows/ci.yml`. Components added after 0.1.0 (for example `sbom`, `pint`, `phpstan`,
-   `eslint`, `package-publish`) are pinned by SHA until a tag contains them.
+    SHA in their `.github/workflows/ci.yml`. Every component ships in each tag from 0.1.1 on, so a new consumer pins
+    the latest tag on every include.
 6. A release needs a maintainer's approval.
 
 ## The front page

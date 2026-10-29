@@ -33,7 +33,7 @@ the same GitLab instance that hosts this project.
 ## Components
 
 <div align="center">
-  <img src="docs/readme/checklist.svg" width="100%" alt="PREFLIGHT's before-takeoff checklist card. 1 PROCTOR, checked; 2 PHP tests, 8.3, 8.4 and 8.5 pass; 3 Composer audit, no advisories; 4 SBOM, validated; 5 Pint, clean; 6 PHPStan, no errors; 7 ESLint and Prettier, clean; 8 clearance, cleared for takeoff. Beside it the annunciator panel lights a green lamp per check, with a11y, contract and freshness marked coming soon, and lists the seven components: proctor, php-test and composer-audit in 0.1.0, the rest in the next tag.">
+  <img src="docs/readme/checklist.svg" width="100%" alt="PREFLIGHT's before-takeoff checklist card. 1 PROCTOR, checked; 2 PHP tests, 8.3, 8.4 and 8.5 pass; 3 Composer audit, no advisories; 4 SBOM, validated; 5 Pint, clean; 6 PHPStan, no errors; 7 ESLint and Prettier, clean; 8 clearance, cleared for takeoff. Beside it the annunciator panel lights a green lamp per check, with a11y, contract and freshness marked coming soon, and lists the seven components, all in the 0.1.1 tag.">
 </div>
 
 <div align="center"><sub>The checklist, item by item, with each item's job and timeout read from <code>templates/</code>.</sub></div>
@@ -45,7 +45,7 @@ result as a GitLab Code Quality report.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@0.1.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@0.1.1
     inputs:
       proctor_command: vendor/bin/proctor check --format=codequality
 ```
@@ -65,7 +65,7 @@ Runs the test command on each supported PHP version through `parallel:matrix`.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.1
     inputs:
       test_command: vendor/bin/phpunit
 ```
@@ -92,7 +92,7 @@ Runs `composer audit --locked` and fails on advisories.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@0.1.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@0.1.1
     inputs:
       working_dir: .
 ```
@@ -109,12 +109,10 @@ Generates a CycloneDX SBOM with `cyclonedx/cyclonedx-php-composer`, validates it
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@<full-commit-sha>
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@0.1.1
     inputs:
       output: sbom.cdx.json
 ```
-
-This component is not in `0.1.0`; it arrives in the next tag. Until then, pin a full commit SHA instead.
 
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
@@ -131,12 +129,10 @@ Runs the app's own [Laravel Pint](https://laravel.com/docs/12.x/pint) in test mo
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@<full-commit-sha>
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@0.1.1
     inputs:
       config: pint.json
 ```
-
-This component is not in `0.1.0`; it arrives in the next tag. Until then, pin a full commit SHA instead.
 
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
@@ -153,13 +149,11 @@ Runs the app's own [PHPStan](https://phpstan.org/) and fails the pipeline on sta
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@<full-commit-sha>
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@0.1.1
     inputs:
       config: phpstan.neon
       memory_limit: 1G
 ```
-
-This component is not in `0.1.0`; it arrives in the next tag. Until then, pin a full commit SHA instead.
 
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
@@ -177,12 +171,10 @@ Runs the app's own [ESLint](https://eslint.org/) (and [Prettier](https://prettie
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@<full-commit-sha>
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@0.1.1
     inputs:
       eslint_args: .
 ```
-
-This component is not in `0.1.0`; it arrives in the next tag. Until then, pin a full commit SHA instead.
 
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
@@ -205,12 +197,10 @@ curl and PHP, which the job uses for the registry round trip.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@<full-commit-sha>
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@0.1.1
     inputs:
       group_id: "<your group id>"
 ```
-
-This component is not in `0.1.0`; it arrives in the next tag. Until then, pin a full commit SHA instead.
 
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
@@ -231,13 +221,10 @@ Majors open a merge request and wait for a person. See
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@<full-commit-sha>
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@0.1.1
     inputs:
       git_author: "Preflight Bot <preflight-bot@example.com>"
 ```
-
-This component is not in `0.1.0`; it arrives in the next tag. Until then, pin a
-full commit SHA instead.
 
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
@@ -276,11 +263,10 @@ on:
 
 jobs:
   ci:
-    uses: waynestate/preflight/.github/workflows/php-package.yml@<full-commit-sha>
+    uses: waynestate/preflight/.github/workflows/php-package.yml@0.1.1
 ```
 
-This workflow is not in `0.1.0`; it arrives in the next tag. Until then, pin a
-full commit SHA instead.
+This workflow ships in the `0.1.1` tag, so pin the tag or the tag's commit SHA.
 
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
@@ -360,9 +346,9 @@ workflow:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@0.1.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@0.1.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@0.1.1
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@<full-commit-sha>
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@<full-commit-sha>
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@<full-commit-sha>
