@@ -53,5 +53,10 @@
         "ci": "The full CI gate: template lint, fixture tests, Pint, PHPStan, agent-ready files.",
         "site:agent-ready": "Rewrite the Markdown twins, llms.txt, llms-full.txt, robots.txt and sitemap.xml in site/ (Squire's agent-ready kit).",
         "site:agent-ready-check": "Fail when the agent-ready files are stale, a page lacks its Markdown link, a prompt drifts from the docs, or the kit was edited here."
+    },
+    "extra": {
+        "proctor": {
+            "wayneui.copies": "fail"
+        }
     }
 }
