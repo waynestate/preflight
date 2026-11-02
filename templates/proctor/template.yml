@@ -53,7 +53,9 @@ proctor:
     - php composer-setup.php --quiet --install-dir=/usr/local/bin --filename=composer --version=$[[ inputs.composer_version ]]
     - rm composer-setup.php
     - cd "$[[ inputs.working_dir ]]"
-    - composer install --no-interaction --no-progress
+    # The job only inspects the app, so the app's plugins and scripts must not
+    # run with the job's access.
+    - composer install --no-interaction --no-progress --no-plugins --no-scripts
     # A plain redirect (not tee) keeps proctor's exit code as the job result.
     # The report is written at the project root so the artifact path is the
     # same for every working_dir, including ".".

@@ -30,8 +30,8 @@ copy (see "Same instance only" in the README).
 | Contract tests, Linux and macOS | `sh tests/check-contract.sh`, and the other `tests/check-*.sh` |
 
 Each contract test comes as a `.sh` and `.ps1` pair that check the same thing (`check-contract`, `check-spec-keys`,
-`check-image-inputs`, `check-php-test-cache`, `check-working-dir-regex`, `check-github-workflow`). CI runs the `.sh`
-ones. Keep both in step when you change one.
+`check-image-inputs`, `check-php-test-cache`, `check-working-dir-regex`, `check-github-workflow`,
+`check-proctor-install-flags`). CI runs the `.sh` ones. Keep both in step when you change one.
 
 With only Docker:
 

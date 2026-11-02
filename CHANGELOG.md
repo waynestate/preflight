@@ -13,6 +13,7 @@ are Git tags.
 - Documented: running the composer-audit component on a weekly pipeline schedule.
 - Documented: the job token allowlist rule and the runner request wording (non-privileged, ephemeral Docker executor).
 - Changed: the repository's own pipeline pulls Docker Hub images through the GitLab Dependency Proxy (component defaults are unchanged).
+- Changed: the proctor component installs the app with --no-plugins --no-scripts.
 
 ### Fixed
 

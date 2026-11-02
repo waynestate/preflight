@@ -43,7 +43,9 @@ the same GitLab instance that hosts this project.
 ### proctor
 
 Runs `vendor/bin/proctor check --format=codequality` and publishes the
-result as a GitLab Code Quality report.
+result as a GitLab Code Quality report. The job installs the app's
+dependencies with `composer install --no-plugins --no-scripts`, so the
+app's plugins and scripts never run inside the job.
 
 ```yaml
 include:

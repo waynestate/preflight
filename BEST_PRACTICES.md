@@ -481,10 +481,11 @@ Why: install runs the app's scripts and plugins with the job's access.
 Sources: [Composer CLI: `install`, `--no-plugins`, `--no-scripts`](https://getcomposer.org/doc/03-cli.md);
 [OWASP CICD-SEC-4](https://owasp.org/www-project-top-10-ci-cd-security-risks/).
 
-**How the stack holds it: Not yet.** The templates use `composer install`, which is right. They do not pass
-`--no-plugins` or `--no-scripts`, and the `proctor` job runs the app's install before the check. An app on an
-old PHP floor cannot be installed on `php:8.4-cli`, so the check may never run for it. The stack's plan is to run
-PROCTOR on the source tree without installing the app.
+**How the stack holds it: Partially.** The templates use `composer install`, which is right, and the `proctor`
+job now installs with `--no-plugins --no-scripts`, because the job only inspects the app; a contract test
+(`tests/check-proctor-install-flags.sh` and its `.ps1` twin) pins those flags. What remains is running PROCTOR
+without installing the app at all (gap item 5 option B), which is behind the PROCTOR PHAR work. An app on an
+old PHP floor cannot be installed on `php:8.4-cli`, so the check may never run for it.
 
 Second pass, why this matters more now: in April 2026 two Composer flaws (CVE-2026-40176, CVSS 7.8, and CVE-2026-40261,
 CVSS 8.8) allowed arbitrary command execution as the user running Composer. One is triggered by a `composer.json` that
@@ -979,7 +980,7 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
 2. 7.2: Add failing fixtures for each component and replace the stub `bin/proctor` with the real tool.
 3. 3.3: Add a check or Rollcall report for apps that skip, unpin or weaken Preflight.
 4. 4.1: Pin images by digest and update the pins through reviewed merge requests.
-5. 4.4: Run PROCTOR without installing the app, and pass `--no-plugins --no-scripts` where jobs only inspect.
+5. Done (option A): 4.4: the `proctor` job installs with `--no-plugins --no-scripts`, pinned by a contract test. Option B remains: run PROCTOR without installing the app at all (behind the PROCTOR PHAR work).
 6. 1.3: Confirm the `release` job and publish the Catalog entry for the current tag (`0.1.2`); the components added after `0.1.0` already shipped in `0.1.1`.
 7. 1.2: Record and check the project's branch and tag protection.
 8. 6.2: Derive the PHP matrix from the policy, and drop 8.2 by 2027-01-01.
