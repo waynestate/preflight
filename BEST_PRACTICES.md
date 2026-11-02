@@ -196,9 +196,12 @@ Why: GitLab calls `posix_escape` best effort and says to use `type`, `regex` or 
 Sources: [GitLab: CI/CD inputs, guidance](https://docs.gitlab.com/ci/inputs/);
 [OWASP CICD-SEC-4 Poisoned Pipeline Execution](https://owasp.org/www-project-top-10-ci-cd-security-risks/).
 
-**How the stack holds it: Not yet.** `working_dir`, `test_command` and `proctor_command` are free strings placed in
-`script`. All three templates quote the path: `cd "$[[ inputs.working_dir ]]"`. The values come from the app's own
-author, so the risk is low, but `proctor_command` is also how an app could drop `--policy` or add `--today`.
+**How the stack holds it: Partially.** Every `working_dir` input (six components carry one) is constrained by
+`regex: '^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$'` and quoted at its only use, `cd "$[[ inputs.working_dir ]]"`. The two
+`composer_version` inputs match `^2\.\d+\.\d+$`, and `renovate`'s `dry_run` matches `^(null|lookup|full)$`. Still free
+are `test_command` (php-test) and `proctor_command` (proctor), each placed unquoted in a `script` line, along with a
+few path-like inputs (`config`, `memory_limit`, `output`, `eslint_args`). The values come from the app's own author, so
+the risk is low, but `proctor_command` is also how an app could drop `--policy` or add `--today`.
 
 Second pass: the GitLab inputs page was re-read and the first pass is right. It says "Do not rely on `posix_escape` for
 security purposes with untrusted input values". It recommends `number` and `boolean` types, `regex` and `options` for
