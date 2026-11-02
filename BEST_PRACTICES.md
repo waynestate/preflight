@@ -554,7 +554,7 @@ Why: advisories are published after code is merged.
 
 Sources: [OpenSSF Scorecard: Vulnerabilities](https://github.com/ossf/scorecard/blob/main/docs/checks.md).
 
-**How the stack holds it: Not yet.** No schedule is documented or provided.
+**How the stack holds it: Documented.** The README's "Run it on a schedule" note under `composer-audit` says to create a weekly pipeline schedule on the default branch (project settings, Build, Pipeline schedules), and the component carries no `rules:` block, so it runs in scheduled pipelines. The schedule itself is a project setting that Preflight cannot create or check.
 
 ### 4.8 Cache dependencies by lock hash and keep protected and unprotected caches apart
 Key the Composer cache on `composer.lock`. Leave GitLab's separation of protected and unprotected caches on.
@@ -983,7 +983,7 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
 9. 4.9: Pin the Composer version the installer fetches and the `composer-audit` image.
 10. 2.2 (updated): Constrain the inputs that are still free: `test_command`, `proctor_command` and the path-like
     `config`, `memory_limit`, `output` and `eslint_args`.
-11. 4.7: Provide a scheduled audit pipeline.
+11. Done: 4.7: Documented the scheduled audit in the README: a weekly pipeline schedule on the default branch (project settings, Build, Pipeline schedules); the component has no `rules:` and runs in scheduled pipelines, and the schedule itself is a project setting Preflight cannot create or check.
 12. 4.2: Use a dependency proxy or Citadel images for job images.
 13. 3.2: Recommend branch and CI-file protection for app repos.
 14. 3.4: Add a `workflow:rules` example to the README.

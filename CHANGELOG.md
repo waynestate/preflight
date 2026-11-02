@@ -10,6 +10,7 @@ are Git tags.
 
 - Changed: the deploy layer's Squire kit is refreshed to 0.3.3 (release options can now live in ./.env.squire).
 - Changed: the deploy layer's Squire kit is refreshed to 0.3.4 (the local .env.squire file is now git-ignored).
+- Documented: running the composer-audit component on a weekly pipeline schedule.
 
 ### Fixed
 
