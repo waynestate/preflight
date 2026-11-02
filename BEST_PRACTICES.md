@@ -855,7 +855,7 @@ Second pass: php.net's supported versions page was re-read on 2026-10-27 and the
 | 8.4 | 2024-11-21 | 2026-12-31 | 2028-12-31 |
 | 8.5 | 2025-11-20 | 2027-12-31 | 2029-12-31 |
 
-Two consequences. First, 8.2 is still supported today, but only for security fixes and only for another 65 days. The
+Two consequences. First, 8.2 is still supported today, but only for security fixes, until 2026-12-31. The
 default list had to drop it in a release that ships before 2027-01-01, so apps have time to see it; the default has
 since dropped it. Second, 8.4 moves to
 security-only on the same day, so the "newest actively supported" version changes to 8.5 in 2027. The Docker Official
@@ -905,8 +905,9 @@ that conforms to WCAG 2.2 also conforms to WCAG 2.1, so meeting the 2.2 floor al
 Sources: [Campus Technology: DOJ extends Title II deadline](https://campustechnology.com/articles/2026/04/27/doj-extends-deadline-for-ada-title-ii-compliance.aspx).
 The Federal Register text itself was not read in this pass.
 
-**How the stack holds it: Not yet.** The scope note at the top of this guide says accessibility and contract suites come
-later. No component, input or text names the standard.
+**How the stack holds it: Documented.** The scope note at the top of this guide says accessibility and contract suites
+come later, and no component exists yet. The front page (`site/index.md`) names WCAG 2.2 Level AA as the floor the
+suite will aim at, with a manual review step kept.
 
 ---
 
@@ -934,8 +935,9 @@ Sources: [GitLab: components, testing](https://docs.gitlab.com/ci/components/).
 `proctor` self-test cannot fail. The fixture has no advisory and no failing test.
 
 Second pass, checked in the main checkout: the stub is still a short shell script that prints `[]` and exits 0, and
-the fixture's `composer.json` requires only `php ^8.2` and `phpunit ^11.0`. Add fixtures for an advisory, an abandoned
-package and a malware-flagged version too (see 4.6 and 4.11), so each Composer policy result is recorded as a real exit code.
+the fixture's `composer.json` requires `php ^8.3`, with `phpunit ^11.0`, `laravel/pint ^1.32` and `phpstan/phpstan ^2.3`
+in require-dev. Add fixtures for an advisory, an abandoned package and a malware-flagged version too (see 4.6 and 4.11),
+so each Composer policy result is recorded as a real exit code.
 
 ### 7.3 Use the stack's own projects as the first users
 Each stack repo includes Preflight, pinned.
