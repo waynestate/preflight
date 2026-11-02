@@ -32,6 +32,7 @@ include:
     inputs:
       working_dir: tests/fixture-app
       image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
 
 stages:
   - test
@@ -52,3 +53,9 @@ contract:
     - sh tests/check-working-dir-regex.sh
     - sh tests/check-spec-keys.sh
     - sh tests/check-proctor-install-flags.sh
+    - sh tests/check-secret-detection.sh
+
+# Advisory for now: secret detection is new here. Dated 2026-11-02: make this
+# job blocking (remove allow_failure) after one week of green pipelines.
+secret_detection:
+  allow_failure: true
