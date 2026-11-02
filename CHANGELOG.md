@@ -16,6 +16,7 @@ are Git tags.
 - Fixed: stale 0.1.0 and next-tag wording in the best practices, the GitHub example and the checklist art.
 - Fixed: the readme art script handles all nine components, including package-publish and renovate.
 - Fixed: BEST_PRACTICES 2.2, 2.9 and 6.2 match the templates.
+- Fixed: BEST_PRACTICES statements match the repo; README no longer claims Renovate bumps component pins.
 
 ## 0.1.2 (2026-10-29)
 
@@ -46,8 +47,9 @@ are Git tags.
   version.
 - `renovate` component and shared preset `renovate/default.json`: Renovate
   runs as a scheduled GitLab pipeline in a private runner project and bumps
-  image tags, CI component pins, GitHub action SHAs and package versions
-  across the stack. Digest, pin and patch/minor updates auto-merge when CI
+  image digests, GitHub action SHAs and package versions across the stack.
+  Bumps of `component:` include pins are not covered yet: the preset carries
+  no manager for them. Digest, pin and patch/minor updates auto-merge when CI
   is green; majors open a merge request and wait for a person.
 
 ### Changed

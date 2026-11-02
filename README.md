@@ -216,8 +216,9 @@ Protect your release tags.
 ### renovate
 
 Runs [Renovate](https://docs.renovatebot.com/) as a scheduled or manual job
-that bumps image tags, CI component pins, GitHub action SHAs and package
-versions across the group's repositories, and merges the green ones itself.
+that bumps image digests, GitHub action SHAs and package versions across the
+group's repositories, and merges the green ones itself. Bumps of `component:`
+include pins are not covered yet: the preset carries no manager for them.
 Majors open a merge request and wait for a person. See
 [Renovate](#renovate) for what auto-merges and what waits.
 
