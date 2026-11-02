@@ -1,28 +1,37 @@
 # Tests the components of this project against the fixture app.
 # Note: $CI_COMMIT_SHA testing requires this project to be on the same
 # GitLab instance as the runner. Components cannot be used across instances.
+# Docker Hub images in this repo's own pipeline go through the GitLab
+# Dependency Proxy to avoid the anonymous pull limit. Component defaults
+# stay unprefixed because other GitLab instances may have no proxy.
 include:
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/proctor@$CI_COMMIT_SHA
     inputs:
       working_dir: tests/fixture-app
       proctor_command: bin/proctor check --format=codequality
+      image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/php:8.4-cli-trixie@sha256:9cf851bc2c1b37c3e59dfd677a3c3e56d485af5a47c93f629424bb039eafcb69
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/php-test@$CI_COMMIT_SHA
     inputs:
       working_dir: tests/fixture-app
       test_command: vendor/bin/phpunit
+      image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/php:${PHP_VERSION}-cli-trixie
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/composer-audit@$CI_COMMIT_SHA
     inputs:
       stage: audit
       working_dir: tests/fixture-app
+      image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/sbom@$CI_COMMIT_SHA
     inputs:
       stage: audit
+      image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/pint@$CI_COMMIT_SHA
     inputs:
       working_dir: tests/fixture-app
+      image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/phpstan@$CI_COMMIT_SHA
     inputs:
       working_dir: tests/fixture-app
+      image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc
 
 stages:
   - test
@@ -34,7 +43,7 @@ stages:
 contract:
   stage: test
   image:
-    name: mikefarah/yq@sha256:4b3d9475d65571d28cbb19544d3820ec2945e4c8b2f18279394282b8dc3a592e
+    name: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/mikefarah/yq@sha256:4b3d9475d65571d28cbb19544d3820ec2945e4c8b2f18279394282b8dc3a592e
     entrypoint: [""]
   script:
     - sh tests/check-contract.sh
