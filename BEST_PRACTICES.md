@@ -757,8 +757,9 @@ Why: a leaked job token acts with the triggering user's access.
 
 Sources: [GitLab: CI/CD job token](https://docs.gitlab.com/ci/jobs/ci_job_token/).
 
-**How the stack holds it: Not yet.** It matters when private packages (served from GitLab's own package registry) need a token. No
-document sets the rule.
+**How the stack holds it: Documented.** It matters when private packages (served from GitLab's own package registry) need a
+token. The README's "Keep the job token allowlist short" section now sets the rule, and says plainly that the
+allowlist is a project setting Preflight cannot create or check.
 
 Second pass: the GitLab docs say the allowlist is on by default and a project's list starts with only itself. The option to
 allow all groups and projects shows only on self-managed or Dedicated instances, and only when enforcement is off. GitLab
@@ -777,7 +778,9 @@ Sources: [GitLab Runner: security](https://docs.gitlab.com/runner/security/);
 [CISA and NSA: Defending CI/CD environments](https://cisa.gov/news-events/alerts/2023/06/28/cisa-and-nsa-release-joint-guidance-defending-continuous-integrationcontinuous-delivery-cicd).
 
 **How the stack holds it: Documented.** The stack's instance-runner case expects a Docker executor and leaves capacity,
-maintenance and limits to ops. Nothing states "non-privileged" or "ephemeral".
+maintenance and limits to ops. The README's "Strongly recommended: a git.wayne.edu instance runner" section now
+states the request wording: a non-privileged Docker executor (no privileged mode, no Docker socket mount), a
+fresh ephemeral environment for every job, and no shell executor shared between projects.
 
 Second pass, concrete settings from the GitLab Runner security page, to put in the runner request:
 
@@ -990,8 +993,12 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
 15. 2.5: Build job names from an input so one project can include a component twice.
 16. 4.8: Add a Composer cache keyed on `composer.lock`.
 17. 5.1: Add secret detection to Preflight's own pipeline.
-18. 5.2: Write down the job token allowlist rule for projects that install private packages from GitLab's registry.
-19. 5.3: State "non-privileged, ephemeral Docker executor" in the runner request.
+18. Done: 5.2: Documented the job token allowlist rule in the README: list only the projects a private-package install
+    really needs, use the fine-grained permissions where they fit, and review the list when a dependency is
+    dropped; the allowlist is a project setting Preflight cannot create or check.
+19. Done: 5.3: Stated the runner request wording in the README: a non-privileged Docker executor (no privileged mode,
+    no Docker socket mount), a fresh ephemeral environment for every job, and no shell executor shared between
+    projects.
 20. 5.4: Agree the list of hosts jobs may reach.
 21. 1.4: Add an inputs contract file and a test that catches a renamed input or job.
 22. 2.3 and 2.6: Lint templates for global keys, and explain which components may be weakened.
