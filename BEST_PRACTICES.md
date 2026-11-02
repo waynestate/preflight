@@ -288,8 +288,10 @@ A job timeout cannot exceed the runner's timeout.
 
 Sources: [GitLab: CI/CD YAML, `timeout` and `interruptible`](https://docs.gitlab.com/ci/yaml/).
 
-**How the stack holds it: Partially.** All three templates set `interruptible: true` and `timeout: 30 minutes`. Whether
-an old pipeline is actually cancelled also needs `workflow:auto_cancel` in the app's own file.
+**How the stack holds it: Partially.** All nine templates set `interruptible: true` and a `timeout` of their own:
+`10m` for pint and phpstan, `15m` for eslint, `30 minutes` for composer-audit, package-publish, php-test, proctor and
+sbom, and `1 hour` for renovate. What stays open is the cancellation half: whether a superseded pipeline is actually
+cancelled still needs `workflow:auto_cancel` in the app's own file, which a component cannot force (see 3.1).
 
 ### 2.10 Make every job image an input
 `proctor` and `composer-audit` already take `image`. `php-test` builds its image from `php_versions` and has no way to
@@ -831,8 +833,9 @@ Why: a hard-coded list goes stale when a version reaches end of life.
 Sources: [PHP supported versions](https://www.php.net/supported-versions.php);
 [GitLab: CI/CD YAML, `parallel:matrix`](https://docs.gitlab.com/ci/yaml/).
 
-**How the stack holds it: Not yet.** The default list is `["8.3", "8.4", "8.5"]`. PHP 8.2 reaches end of life on
-2026-12-31, and PHP 8.3 is already past active support. The floor in the README (`^8.2`) is also a hard-coded value.
+**How the stack holds it: Partially.** The default list is `["8.3", "8.4", "8.5"]`, so 8.2 is already out, and the
+floor in the README is `^8.3`. Both are still hard-coded values rather than derived from CREED's policy, and 8.6 has
+not been added anywhere. PHP 8.2 reaches end of life on 2026-12-31, and PHP 8.3 is already past active support.
 
 Second pass: php.net's supported versions page was re-read on 2026-10-27 and the first pass is correct.
 
@@ -844,7 +847,8 @@ Second pass: php.net's supported versions page was re-read on 2026-10-27 and the
 | 8.5 | 2025-11-20 | 2027-12-31 | 2029-12-31 |
 
 Two consequences. First, 8.2 is still supported today, but only for security fixes and only for another 65 days. The
-default list must drop it in a release that ships before 2027-01-01, so apps have time to see it. Second, 8.4 moves to
+default list had to drop it in a release that ships before 2027-01-01, so apps have time to see it; the default has
+since dropped it. Second, 8.4 moves to
 security-only on the same day, so the "newest actively supported" version changes to 8.5 in 2027. The Docker Official
 Image README still lists 8.2 (8.2.35), 8.3 (8.3.36), 8.4 (8.4.27) and 8.5 (8.5.12), and also lists 8.6 release
 candidates. The 8.6 release date was not verified in this pass. An image existing on Docker Hub is not evidence that a
