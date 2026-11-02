@@ -196,9 +196,12 @@ Why: GitLab calls `posix_escape` best effort and says to use `type`, `regex` or 
 Sources: [GitLab: CI/CD inputs, guidance](https://docs.gitlab.com/ci/inputs/);
 [OWASP CICD-SEC-4 Poisoned Pipeline Execution](https://owasp.org/www-project-top-10-ci-cd-security-risks/).
 
-**How the stack holds it: Not yet.** `working_dir`, `test_command` and `proctor_command` are free strings placed in
-`script`. All three templates quote the path: `cd "$[[ inputs.working_dir ]]"`. The values come from the app's own
-author, so the risk is low, but `proctor_command` is also how an app could drop `--policy` or add `--today`.
+**How the stack holds it: Partially.** Every `working_dir` input (six components carry one) is constrained by
+`regex: '^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$'` and quoted at its only use, `cd "$[[ inputs.working_dir ]]"`. The two
+`composer_version` inputs match `^2\.\d+\.\d+$`, and `renovate`'s `dry_run` matches `^(null|lookup|full)$`. Still free
+are `test_command` (php-test) and `proctor_command` (proctor), each placed unquoted in a `script` line, along with a
+few path-like inputs (`config`, `memory_limit`, `output`, `eslint_args`). The values come from the app's own author, so
+the risk is low, but `proctor_command` is also how an app could drop `--policy` or add `--today`.
 
 Second pass: the GitLab inputs page was re-read and the first pass is right. It says "Do not rely on `posix_escape` for
 security purposes with untrusted input values". It recommends `number` and `boolean` types, `regex` and `options` for
@@ -285,8 +288,10 @@ A job timeout cannot exceed the runner's timeout.
 
 Sources: [GitLab: CI/CD YAML, `timeout` and `interruptible`](https://docs.gitlab.com/ci/yaml/).
 
-**How the stack holds it: Partially.** All three templates set `interruptible: true` and `timeout: 30 minutes`. Whether
-an old pipeline is actually cancelled also needs `workflow:auto_cancel` in the app's own file.
+**How the stack holds it: Partially.** All nine templates set `interruptible: true` and a `timeout` of their own:
+`10m` for pint and phpstan, `15m` for eslint, `30 minutes` for composer-audit, package-publish, php-test, proctor and
+sbom, and `1 hour` for renovate. What stays open is the cancellation half: whether a superseded pipeline is actually
+cancelled still needs `workflow:auto_cancel` in the app's own file, which a component cannot force (see 3.1).
 
 ### 2.10 Make every job image an input
 `proctor` and `composer-audit` already take `image`. `php-test` builds its image from `php_versions` and has no way to
@@ -828,8 +833,9 @@ Why: a hard-coded list goes stale when a version reaches end of life.
 Sources: [PHP supported versions](https://www.php.net/supported-versions.php);
 [GitLab: CI/CD YAML, `parallel:matrix`](https://docs.gitlab.com/ci/yaml/).
 
-**How the stack holds it: Not yet.** The default list is `["8.3", "8.4", "8.5"]`. PHP 8.2 reaches end of life on
-2026-12-31, and PHP 8.3 is already past active support. The floor in the README (`^8.2`) is also a hard-coded value.
+**How the stack holds it: Partially.** The default list is `["8.3", "8.4", "8.5"]`, so 8.2 is already out, and the
+floor in the README is `^8.3`. Both are still hard-coded values rather than derived from CREED's policy, and 8.6 has
+not been added anywhere. PHP 8.2 reaches end of life on 2026-12-31, and PHP 8.3 is already past active support.
 
 Second pass: php.net's supported versions page was re-read on 2026-10-27 and the first pass is correct.
 
@@ -841,7 +847,8 @@ Second pass: php.net's supported versions page was re-read on 2026-10-27 and the
 | 8.5 | 2025-11-20 | 2027-12-31 | 2029-12-31 |
 
 Two consequences. First, 8.2 is still supported today, but only for security fixes and only for another 65 days. The
-default list must drop it in a release that ships before 2027-01-01, so apps have time to see it. Second, 8.4 moves to
+default list had to drop it in a release that ships before 2027-01-01, so apps have time to see it; the default has
+since dropped it. Second, 8.4 moves to
 security-only on the same day, so the "newest actively supported" version changes to 8.5 in 2027. The Docker Official
 Image README still lists 8.2 (8.2.35), 8.3 (8.3.36), 8.4 (8.4.27) and 8.5 (8.5.12), and also lists 8.6 release
 candidates. The 8.6 release date was not verified in this pass. An image existing on Docker Hub is not evidence that a
@@ -963,7 +970,8 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
 7. 1.2: Record and check the project's branch and tag protection.
 8. 6.2: Derive the PHP matrix from the policy, and drop 8.2 by 2027-01-01.
 9. 4.9: Pin the Composer version the installer fetches and the `composer-audit` image.
-10. 2.2: Add `regex` or `options` to shell-bound inputs and quote `working_dir`.
+10. 2.2 (updated): Constrain the inputs that are still free: `test_command`, `proctor_command` and the path-like
+    `config`, `memory_limit`, `output` and `eslint_args`.
 11. 4.7: Provide a scheduled audit pipeline.
 12. 4.2: Use a dependency proxy or Citadel images for job images.
 13. 3.2: Recommend branch and CI-file protection for app repos.
@@ -983,7 +991,8 @@ Added in the second pass (2026-10-27):
 
 25. 5.5: Get the GitLab and runner versions and the patch schedule from ops, and record them in the instance runner
     request. A critical CI-related GitLab patch shipped on 2026-10-12.
-26. 6.2 (updated): Ship a default list without 8.2 before 2027-01-01, and add 8.6 to the policy path when it is released.
+26. 6.2 (updated): Derive the PHP matrix from the policy, and add 8.6 to the policy path when it is released. The
+    default list has already dropped 8.2.
 27. 4.9 and 4.6 (updated): Pin Composer to a named release with a reviewed bump path, and require 2.9.6 or later (2.10.3 is
     current), because of the April to August 2026 Composer security fixes.
 28. 4.6 and 7.2 (updated): Add fixtures for an advisory, an abandoned package and a malware-flagged version, and record
@@ -993,7 +1002,7 @@ Added in the second pass (2026-10-27):
 30. 1.6: Put the commit SHA in every release note and tell apps to pin it.
 31. 4.11: Write the stack's rule for Composer malware, advisory and abandoned policy, and require Composer 2.10 or later.
 32. 4.10: Name the Debian release in image tags, or match the image family of the target you deploy to.
-33. 2.9: Add `timeout` and `interruptible` to each job.
+33. 2.9 (done): Add `timeout` and `interruptible` to each job.
 34. 3.4 (updated): Put the `workflow:rules` example in the README, and say it must live in the app's own file.
 35. 3.5 and 3.6: Tell app owners to restrict pipeline variables and keep fork merge requests away from secrets.
 36. 2.10: Add an `image` input to `php-test`.

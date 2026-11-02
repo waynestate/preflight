@@ -15,6 +15,7 @@ are Git tags.
 
 - Fixed: stale 0.1.0 and next-tag wording in the best practices, the GitHub example and the checklist art.
 - Fixed: the readme art script handles all nine components, including package-publish and renovate.
+- Fixed: BEST_PRACTICES 2.2, 2.9 and 6.2 match the templates.
 
 ## 0.1.2 (2026-10-29)
 
