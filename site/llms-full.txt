@@ -95,6 +95,16 @@ include:
 | `image` | string | `composer:2@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. |
 | `working_dir` | string | `.` | Directory to run composer audit in, relative to the project root. |
 
+##### Run it on a schedule
+
+New advisories are published after code is merged, so a green pipeline today
+can be stale tomorrow. Create a weekly pipeline schedule on the default
+branch: project settings, Build, Pipeline schedules. The component needs
+nothing extra; it carries no `rules:` block, so it runs in scheduled
+pipelines like any other. Creating the schedule is a project setting, not a
+file in the app's repo, and someone with Maintainer rights on the app must
+do it. It is the one preflight check that books its own flight time.
+
 #### sbom
 
 Generates a CycloneDX SBOM with `cyclonedx/cyclonedx-php-composer`, validates it, and publishes it as an artifact. The plugin is installed globally, so the app's `composer.json` is never touched.
