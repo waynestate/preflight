@@ -212,7 +212,7 @@ untrusted values. New point: from GitLab 19.0 an array input with `options` make
 array item is not in the list. That would let `php_versions` accept only versions the policy lists (see 6.2), but it
 depends on the instance running 19.0 or later, which is unknown. GitLab's pipeline security page also says to avoid
 variables in container references because they can be changed to point at a malicious image. `php-test` builds its image
-from the matrix variable (`php:${PHP_VERSION}-cli`). The value comes from the `php_versions` input, so the risk is low,
+from the matrix variable (`php:${PHP_VERSION}-cli-trixie`). The value comes from the `php_versions` input, so the risk is low,
 but constraining that input closes it.
 
 ### 2.3 Keep settings in the job, and give each component one job purpose
@@ -242,7 +242,8 @@ Why: two jobs with the same name merge into one.
 
 Sources: [GitLab: component examples, dynamic job names](https://docs.gitlab.com/ci/components/examples/).
 
-**How the stack holds it: Not yet.** The jobs are named `proctor`, `php-test` and `composer-audit`, fixed.
+**How the stack holds it: Not yet.** The jobs are named `proctor`, `php-test`, `composer-audit`, `sbom`, `pint`,
+`phpstan`, `eslint`, `package-publish` and `renovate`, fixed.
 
 ### 2.6 Offer a way to weaken a gate only where it is meant
 `composer-audit` has no `allow_failure` input, on purpose. `proctor` has one.
@@ -353,9 +354,10 @@ Sources: [GitLab: CI/CD variables, risks](https://docs.gitlab.com/ci/variables/)
 [OWASP CICD-SEC-4 and CICD-SEC-1](https://owasp.org/www-project-top-10-ci-cd-security-risks/);
 [GitLab: protected branches](https://docs.gitlab.com/user/project/repository/branches/protected/).
 
-**How the stack holds it: Not yet.** Protected branches with required merge requests are available on every tier. Code
-owner approval is Premium or Ultimate, so it is not available on Community Edition. No Preflight text recommends
-settings for app repos.
+**How the stack holds it: Documented.** Protected branches with required merge requests are available on every tier.
+Code owner approval is Premium or Ultimate, so it is not available on Community Edition. The README's "What the
+components cannot force" section recommends the settings for app repos: protect the default branch and require a
+merge request to change it.
 
 ### 3.3 Detect pipelines that skip or weaken Preflight
 A check or a fleet report should flag an app with no Preflight include, an unpinned include, `allow_failure: true` on a
@@ -395,8 +397,9 @@ On GitLab.com new projects default to `no_one_allowed`. On self-managed GitLab t
 Sources: [GitLab: CI/CD variables, pipeline variable restrictions](https://docs.gitlab.com/ci/variables/);
 [GitLab: CI/CD inputs](https://docs.gitlab.com/ci/inputs/).
 
-**How the stack holds it: Not yet.** The components use inputs, which is right. No text tells app owners to restrict
-pipeline variables.
+**How the stack holds it: Documented.** The components use inputs, which is right, and the README's "What the
+components cannot force" section tells app owners to set "Minimum role to use pipeline variables" to `no_one_allowed`
+unless the project needs pipeline variables.
 
 ### 3.6 Keep untrusted code away from secrets and from the install step
 Do not run fork merge request pipelines with protected variables. Review a fork's `.gitlab-ci.yml` before running it.
@@ -427,14 +430,14 @@ Sources: [GitLab: pipeline security, Docker images](https://docs.gitlab.com/ci/p
 [OpenSSF Scorecard: Pinned-Dependencies](https://github.com/ossf/scorecard/blob/main/docs/checks.md).
 
 **How the stack holds it: Enforced.** The `proctor` and `composer-audit` image defaults carry a digest
-(`php:8.4-cli@sha256:...` and `composer:2@sha256:...`), and the README's "Updating image pins" says how to move them.
-The exception is `php-test`: its matrix image `php:${PHP_VERSION}-cli` is still a tag, because each version would need its own digest.
+(`php:8.4-cli-trixie@sha256:...` and `composer:2@sha256:...`), and the README's "Updating image pins" says how to move them.
+The exception is `php-test`: its matrix image `php:${PHP_VERSION}-cli-trixie` is still a tag, because each version would need its own digest.
 The template lint (`bin/lint-templates`, run by `composer ci`) fails on `latest` or tag-less images and warns on tag-only images, so a new template cannot drift back to an unpinned image without a reviewed `lint-allow.yml` entry.
 
 Second pass: GitLab's pipeline security page says "Always use SHA digests for Docker images". Renovate documents the
 usual way to live with that: keep the tag and add the digest (`image:tag@sha256:...`), and let a bot open a change when the
 digest moves. Be careful with automerge settings that skip review (see 1.7). A digest on a matrix image
-(`php:${PHP_VERSION}-cli`) needs one digest per version, so the matrix would need to carry the digest too.
+(`php:${PHP_VERSION}-cli-trixie`) needs one digest per version, so the matrix would need to carry the digest too.
 
 ### 4.2 Use images the instance controls, and test on the image family of the target you deploy to
 Pull through a registry or proxy under WSU's control, and test on the image family of the target you deploy to.
@@ -517,8 +520,8 @@ Sources: [Composer CLI: audit](https://getcomposer.org/doc/03-cli.md);
 
 **How the stack holds it: Checked.** The `composer-audit` job fails on Composer's exit code. Composer also fails on
 malware and, by its configured default, on abandoned packages, and PROCTOR's own audit check reads only advisories.
-The two can disagree. The job uses `composer:2`, a moving tag, so the rules depend on which Composer release the tag
-points at.
+The two can disagree. The job's image is digest-pinned (`composer:2@sha256:...`, see the README's "Updating image
+pins"), so the rules depend on the pinned digest, not on where the `composer:2` tag points.
 
 Second pass, corrections and detail from Composer's current docs:
 
@@ -625,8 +628,10 @@ images need `git` today (see the apt line in the templates), so check whether an
 Sources: [Packagist: supply chain security update](https://blog.packagist.com/an-update-on-composer-packagist-supply-chain-security);
 [Packagist: Composer 2.10 release](https://blog.packagist.com/composer-2-10-release/).
 
-**How the stack holds it: Not yet.** `php-test` and `proctor` install the latest Composer, so they pick up 2.10 behaviour
-by accident, and `composer-audit` depends on what `composer:2` points at. Nothing records the rule or tests it.
+**How the stack holds it: Checked.** `php-test` and `proctor` install the Composer release named by the `composer_version`
+input (default `2.10.3`), and `composer-audit` runs on a digest-pinned `composer:2` image, so the 2.10 behaviour is chosen,
+not picked up by accident. The `contract` job keeps the defaults matched to `contract/inputs.json`; reviewing lock
+changes after an `update` or `require` stays a human step.
 
 ### 4.12 When a JavaScript component arrives, install from the lock with scripts off
 For the Vue paths, a future Preflight job should use `npm ci`, turn off install scripts by default and allow them only
