@@ -970,7 +970,8 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
 7. 1.2: Record and check the project's branch and tag protection.
 8. 6.2: Derive the PHP matrix from the policy, and drop 8.2 by 2027-01-01.
 9. 4.9: Pin the Composer version the installer fetches and the `composer-audit` image.
-10. 2.2: Add `regex` or `options` to shell-bound inputs and quote `working_dir`.
+10. 2.2 (updated): Constrain the inputs that are still free: `test_command`, `proctor_command` and the path-like
+    `config`, `memory_limit`, `output` and `eslint_args`.
 11. 4.7: Provide a scheduled audit pipeline.
 12. 4.2: Use a dependency proxy or Citadel images for job images.
 13. 3.2: Recommend branch and CI-file protection for app repos.
@@ -990,7 +991,8 @@ Added in the second pass (2026-10-27):
 
 25. 5.5: Get the GitLab and runner versions and the patch schedule from ops, and record them in the instance runner
     request. A critical CI-related GitLab patch shipped on 2026-10-12.
-26. 6.2 (updated): Ship a default list without 8.2 before 2027-01-01, and add 8.6 to the policy path when it is released.
+26. 6.2 (updated): Derive the PHP matrix from the policy, and add 8.6 to the policy path when it is released. The
+    default list has already dropped 8.2.
 27. 4.9 and 4.6 (updated): Pin Composer to a named release with a reviewed bump path, and require 2.9.6 or later (2.10.3 is
     current), because of the April to August 2026 Composer security fixes.
 28. 4.6 and 7.2 (updated): Add fixtures for an advisory, an abandoned package and a malware-flagged version, and record
@@ -1000,7 +1002,7 @@ Added in the second pass (2026-10-27):
 30. 1.6: Put the commit SHA in every release note and tell apps to pin it.
 31. 4.11: Write the stack's rule for Composer malware, advisory and abandoned policy, and require Composer 2.10 or later.
 32. 4.10: Name the Debian release in image tags, or match the image family of the target you deploy to.
-33. 2.9: Add `timeout` and `interruptible` to each job.
+33. 2.9 (done): Add `timeout` and `interruptible` to each job.
 34. 3.4 (updated): Put the `workflow:rules` example in the README, and say it must live in the app's own file.
 35. 3.5 and 3.6: Tell app owners to restrict pipeline variables and keep fork merge requests away from secrets.
 36. 2.10: Add an `image` input to `php-test`.
