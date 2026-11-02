@@ -283,7 +283,7 @@ artifact, not the template, so it is not affected. The report must be a single J
 each entry needs `description`, `check_name`, `fingerprint`, `location.path` (no leading `./`), a line number and a
 `severity` of `info`, `minor`, `major`, `critical` or `blocker`. PROCTOR's output should be tested against those rules.
 
-### 2.9 Set a timeout, and let superseded pipelines be cancelled
+### 2.9 Set a timeout, and let superseded pipelines be canceled
 Give each job a `timeout` and `interruptible: true` where a newer push makes the old run pointless.
 
 Why: a hung `apt-get` or `composer install` holds a runner, and runners are the scarce part of a shared instance.
@@ -295,7 +295,7 @@ Sources: [GitLab: CI/CD YAML, `timeout` and `interruptible`](https://docs.gitlab
 **How the stack holds it: Partially.** All nine templates set `interruptible: true` and a `timeout` of their own:
 `10m` for pint and phpstan, `15m` for eslint, `30 minutes` for composer-audit, package-publish, php-test, proctor and
 sbom, and `1 hour` for renovate. What stays open is the cancellation half: whether a superseded pipeline is actually
-cancelled still needs `workflow:auto_cancel` in the app's own file, which a component cannot force (see 3.1).
+canceled still needs `workflow:auto_cancel` in the app's own file, which a component cannot force (see 3.1).
 
 ### 2.10 Make every job image an input
 `proctor` and `composer-audit` already take `image`. `php-test` builds its image from `php_versions` and has no way to
@@ -334,7 +334,7 @@ State it in the docs, and measure adoption instead of assuming it.
 
 Why: the main `.gitlab-ci.yml` is merged over included jobs, and an app can simply not include Preflight.
 
-Sources: [GitLab: includes, merge behaviour](https://docs.gitlab.com/ci/yaml/includes/);
+Sources: [GitLab: includes, merge behavior](https://docs.gitlab.com/ci/yaml/includes/);
 [GitLab: pipeline execution policies (Ultimate)](https://docs.gitlab.com/user/application_security/policies/pipeline_execution_policies/).
 
 **How the stack holds it: Documented.** The stack's enforcement-points decision names the CI gate as point (c) and Fleet as point (e), which shows
@@ -574,7 +574,7 @@ release. GitLab's page has no PHP or Composer example, so the Composer cache dir
 ### 4.9 Name the version of every tool you download
 Install a named Composer release, not whatever is newest.
 
-Why: pinned tools make a run repeatable, and Composer's audit behaviour has changed between releases.
+Why: pinned tools make a run repeatable, and Composer's audit behavior has changed between releases.
 
 Sources: [GitLab: pipeline security, shell tools](https://docs.gitlab.com/ci/pipeline_security/);
 [Composer: download, versioned releases with checksums](https://getcomposer.org/download/).
@@ -629,7 +629,7 @@ Sources: [Packagist: supply chain security update](https://blog.packagist.com/an
 [Packagist: Composer 2.10 release](https://blog.packagist.com/composer-2-10-release/).
 
 **How the stack holds it: Checked.** `php-test` and `proctor` install the Composer release named by the `composer_version`
-input (default `2.10.3`), and `composer-audit` runs on a digest-pinned `composer:2` image, so the 2.10 behaviour is chosen,
+input (default `2.10.3`), and `composer-audit` runs on a digest-pinned `composer:2` image, so the 2.10 behavior is chosen,
 not picked up by accident. The `contract` job keeps the defaults matched to `contract/inputs.json`; reviewing lock
 changes after an `update` or `require` stays a human step.
 
@@ -813,7 +813,7 @@ unauthenticated user could run arbitrary code on the server using a crafted regu
 The same release fixed CVE-2026-16301 (High, 8.5: a Developer could run pipelines on protected branches without
 authorization) and CVE-2026-14814 (High, 8.2: cache poisoning of raw repository file responses that could expose protected
 environment variables). GitLab's page does not tell self-managed owners to rotate runner tokens. Some secondary reports
-do, and they disagree on dates, so check GitLab's own advisory and ops' judgement before acting on that advice. Every
+do, and they disagree on dates, so check GitLab's own advisory and ops' judgment before acting on that advice. Every
 Preflight job depends on this instance being sound, and the guide cannot tell whether git.wayne.edu is patched because its
 help page shows no version.
 

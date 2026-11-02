@@ -5,7 +5,7 @@ from anywhere (Citadel, any web server, or `python -m http.server` inside `site/
 fonts over `file://`).
 
 - type: **B612** 400/700 and **B612 Mono** 400/700 (SIL OFL 1.1, self-hosted in `assets/fonts/` from `@fontsource`,
-  licence in `OFL-b612.txt`). B612 is the typeface Airbus commissioned for cockpit displays, so the placards and
+  license in `OFL-b612.txt`). B612 is the typeface Airbus commissioned for cockpit displays, so the placards and
   annunciators are set in the real thing. Lato from WayneUI for body text; the system monospace for code, because
   B612 Mono sets a full cell after every full stop and `0.1.0` would read as `0. 1. 0`.
 - world: a flight deck on a cream chart page. A heading indicator with the mark at its hub, a laminated

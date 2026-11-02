@@ -31,7 +31,7 @@ aborted.
   `site/screenshots/sections/` (placards, flight plan, flight manual).
 - `docs/readme/board.jpg`: the brand board, re-encoded.
 - `docs/readme/cast/*.png`: one 96×96 mark per stack part, WayneUI on its green tile.
-- `docs/readme/badges/*.svg`: `php`, `licence` and `components`, made locally by `badge-maker`.
+- `docs/readme/badges/*.svg`: `php`, `license` and `components`, made locally by `badge-maker`.
 
 The build exits 1 if any file grows past 300 KB, or if captured text names an internal host.
 Same inputs, same outputs.

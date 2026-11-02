@@ -27,7 +27,7 @@ Already included in [WELD](https://weld.apps.wayne.edu/) and in every [Sourdough
 
 [Run the checklist](https://preflight.apps.wayne.edu/#checklist) [File a flight plan](https://preflight.apps.wayne.edu/#flight-plan)
 
-![Preflight mark: a runway in perspective with a gold centreline](https://preflight.apps.wayne.edu/brand/preflight-avatar-512.png)
+![Preflight mark: a runway in perspective with a gold centerline](https://preflight.apps.wayne.edu/brand/preflight-avatar-512.png)
 
 Normal procedures
 

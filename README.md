@@ -6,7 +6,7 @@
 
 <div align="center">
   <img src="docs/readme/badges/php.svg" alt="php ^8.3">
-  <img src="docs/readme/badges/license.svg" alt="licence MIT">
+  <img src="docs/readme/badges/license.svg" alt="license MIT">
   <img src="docs/readme/badges/components.svg" alt="gitlab ci components: 9">
 </div>
 
@@ -410,7 +410,7 @@ stay with ops. A job that needs the host's Docker socket to take off has skipped
 ## Shared conventions
 
 - Composer vendor: `waynestate/`
-- Licence: MIT
+- License: MIT
 - PHP floor: `^8.3`
 - JavaScript components install with `npm ci --ignore-scripts`. The job carries no token beyond `CI_JOB_TOKEN` (BEST_PRACTICES.md 4.12).
 
