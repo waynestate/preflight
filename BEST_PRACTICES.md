@@ -1,8 +1,8 @@
 # Preflight best practices
 
 Status: draft, checked against sources on 2026-10-27, with a second research pass the same day (see "Second pass
-(2026-10-27)" near the end). Applies to the Preflight components `proctor`, `php-test` and `composer-audit` at the state
-of the repo on that date (tag 0.1.0 existed; the components added after it shipped in 0.1.1).
+(2026-10-27)" near the end). Applies to the Preflight components at the state of the repo today: the latest tag is
+0.1.2, and the six components added after 0.1.0 shipped in 0.1.1.
 
 ## What this covers
 
@@ -136,8 +136,9 @@ Sources: [StepSecurity: tj-actions breach](https://www.stepsecurity.io/blog/when
 The tj-actions details above come from search summaries of these pages and the NVD record could not be read in this
 pass, so treat the exact counts and dates as unverified.
 
-**How the stack holds it: Not yet.** Tags `0.1.0`, `0.1.1` and `0.1.2` exist, but no release note format records the SHA a consumer pins,
-and nothing yet says what to do when the next tag is cut.
+**How the stack holds it: Documented.** Tags `0.1.0`, `0.1.1` and `0.1.2` exist, and MAINTAINING.md documents the release process,
+including recording the tag's commit SHA in the CHANGELOG when a tag is cut. Apps still pin the tag in their component includes,
+and nothing checks an app's includes.
 
 ### 1.7 Give consumers a reviewed way to bump their pins
 A pin that nobody updates freezes security fixes. Offer a scheduled merge request or a bot that proposes new SHAs and new
@@ -152,7 +153,9 @@ Renovate's Docker docs confirm it can pin a digest, keep the tag for readability
 changes. Its GitLab include page lists only the `gitlab-tags` datasource and does not say whether it updates
 `component:` includes or SHA pins. That is unverified, so test it against a sample app before promising it.
 
-**How the stack holds it: Not yet.** No bump process or tool is documented for Preflight or for the apps that include it.
+**How the stack holds it: Documented.** The README's "Updating image pins" section says pins change only through a reviewed merge request,
+and the shared preset `renovate/default.json` provides the tooling for image digests, GitHub action SHAs and packages. Whether Renovate
+bumps `component:` includes is unverified: the preset carries no manager for them.
 
 ### 1.8 Say how a component is retired
 Before removing a component or turning off its Catalog toggle, announce it and keep the old tag working for a stated period.
@@ -179,9 +182,9 @@ the run.
 Sources: [GitLab: CI/CD inputs](https://docs.gitlab.com/ci/inputs/);
 [GitLab: component examples](https://docs.gitlab.com/ci/components/examples/).
 
-**How the stack holds it: Enforced.** All three templates use `spec:inputs` with types, descriptions and defaults.
-GitLab rejects a wrong type or an unknown input at pipeline creation. The first pipeline passed all six jobs
-with the array input.
+**How the stack holds it: Enforced.** All nine templates use `spec:inputs` with types, descriptions and defaults.
+GitLab rejects a wrong type or an unknown input at pipeline creation. The first pipeline, back when Preflight had
+three components, passed all six jobs with the array input.
 
 Second pass, limits to design around: GitLab's inputs page says a pipeline can take up to 20 inputs (it does not say
 whether that counts per include, so check on the real instance before adding many), a string that uses an input must be
@@ -219,7 +222,7 @@ Why: global keys leak into the consuming pipeline.
 
 Sources: [GitLab: component examples](https://docs.gitlab.com/ci/components/examples/).
 
-**How the stack holds it: Documented.** All three templates follow it, by convention. No lint fails if a template adds
+**How the stack holds it: Documented.** All nine templates follow it, by convention. No lint fails if a template adds
 a global key.
 
 ### 2.4 Make the stage an input
@@ -407,7 +410,8 @@ by a hostile `composer.json`, which is exactly what a contributed branch can car
 Sources: [GitLab: merge request pipelines](https://docs.gitlab.com/ci/pipelines/merge_request_pipelines/);
 [GitLab: CI/CD variables](https://docs.gitlab.com/ci/variables/).
 
-**How the stack holds it: Not yet.** The three templates use no secrets, which limits the harm. Nothing documents the rule.
+**How the stack holds it: Documented.** All nine templates use no secrets, which limits the harm, and the README
+documents the rule: review a fork's `.gitlab-ci.yml` before running its pipeline, and never give it protected variables.
 
 ---
 
@@ -727,7 +731,7 @@ Sources: [GitLab: CI/CD variables](https://docs.gitlab.com/ci/variables/);
 [GitLab: pipeline security, secrets](https://docs.gitlab.com/ci/pipeline_security/);
 [OWASP CICD-SEC-6 Insufficient Credential Hygiene](https://owasp.org/www-project-top-10-ci-cd-security-risks/).
 
-**How the stack holds it: Not yet.** The three templates use no secrets, which is good. Nothing fails if a later
+**How the stack holds it: Not yet.** The nine templates use no secrets, which is good. Nothing fails if a later
 template adds one, and no secret scan runs on the Preflight repo.
 
 Second pass: GitLab's pipeline secret detection is available on Free, Premium and Ultimate. Its docs show
@@ -910,8 +914,8 @@ Why: it exercises exactly what will be released.
 
 Sources: [GitLab: components, testing](https://docs.gitlab.com/ci/components/).
 
-**How the stack holds it: Checked.** `.gitlab-ci.yml` includes all three components at `$CI_COMMIT_SHA` against
-`tests/fixture-app`.
+**How the stack holds it: Checked.** `.gitlab-ci.yml` includes six components at `$CI_COMMIT_SHA` against
+`tests/fixture-app`, plus a `contract` job running the `tests/check-*.sh` scripts.
 
 ### 7.2 Test the failing cases, and that the expected jobs exist
 Each component needs a fixture that must fail it: a failing test, an advisory, a policy violation. A test can also
