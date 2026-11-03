@@ -3,8 +3,135 @@
   "tagline": "Every push is cleared for takeoff.",
   "items": [
     {
-      "title": "Overview",
-      "path": "index"
+      "title": "Getting Started",
+      "items": [
+        {
+          "title": "Overview",
+          "path": "index"
+        },
+        {
+          "title": "Install",
+          "path": "install"
+        },
+        {
+          "title": "Quick start",
+          "path": "guides/quick-start"
+        }
+      ]
+    },
+    {
+      "title": "Guides",
+      "items": [
+        {
+          "title": "The proctor component",
+          "path": "guides/component-proctor"
+        },
+        {
+          "title": "The php-test component",
+          "path": "guides/component-php-test"
+        },
+        {
+          "title": "The composer-audit component",
+          "path": "guides/component-composer-audit"
+        },
+        {
+          "title": "The sbom component",
+          "path": "guides/component-sbom"
+        },
+        {
+          "title": "The pint component",
+          "path": "guides/component-pint"
+        },
+        {
+          "title": "The phpstan component",
+          "path": "guides/component-phpstan"
+        },
+        {
+          "title": "The eslint component",
+          "path": "guides/component-eslint"
+        },
+        {
+          "title": "The package-publish component",
+          "path": "guides/component-package-publish"
+        },
+        {
+          "title": "The renovate component",
+          "path": "guides/component-renovate"
+        },
+        {
+          "title": "The portability component",
+          "path": "guides/component-portability"
+        },
+        {
+          "title": "Include a component twice",
+          "path": "guides/include-twice"
+        },
+        {
+          "title": "Same instance only",
+          "path": "guides/same-instance-only"
+        },
+        {
+          "title": "GitHub mirrors",
+          "path": "guides/github-mirrors"
+        },
+        {
+          "title": "Keep the job token allowlist short",
+          "path": "guides/job-token-allowlist"
+        },
+        {
+          "title": "Strongly recommended: a git.wayne.edu instance runner",
+          "path": "guides/instance-runner"
+        },
+        {
+          "title": "Renovate",
+          "path": "guides/renovate"
+        },
+        {
+          "title": "When the components run",
+          "path": "guides/when-components-run"
+        },
+        {
+          "title": "What the components cannot force",
+          "path": "guides/what-components-cannot-force"
+        },
+        {
+          "title": "Updating image pins",
+          "path": "guides/image-pins"
+        },
+        {
+          "title": "Template lint",
+          "path": "guides/template-lint"
+        }
+      ]
+    },
+    {
+      "title": "Reference",
+      "items": [
+        {
+          "title": "Components",
+          "path": "reference/components"
+        },
+        {
+          "title": "Shared conventions",
+          "path": "reference/conventions"
+        },
+        {
+          "title": "Local checks",
+          "path": "reference/local-checks"
+        }
+      ]
+    },
+    {
+      "title": "Troubleshooting",
+      "path": "troubleshooting"
+    },
+    {
+      "title": "Upgrading",
+      "path": "upgrading"
+    },
+    {
+      "title": "Changelog",
+      "path": "changelog"
     }
   ],
   "source": "https://nougat.snu.gs/enterprise-apps/preflight",
