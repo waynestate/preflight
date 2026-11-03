@@ -10,6 +10,7 @@ are Git tags.
 - Docs: component pins in the README and site examples now point at 0.1.4.
 - Changed: the front-page deploy layer pins HELMET ^0.3, PROCTOR ^0.4 and CREED ^0.1 (lock: HELMET 0.3.0, PROCTOR 0.4.0, CREED 0.1.6).
 - Changed: the deploy layer sets minimum-stability to stable.
+- Changed: phpstan config and memory_limit, pint config and sbom output now carry an input regex (relative paths and PHP sizes only); a value outside it stops the pipeline at creation. New test tests/check-path-input-regex.
 
 ## 0.1.4 (2026-11-03)
 

@@ -25,6 +25,7 @@ spec:
       type: string
       default: "pint.json"
       description: "Path to the app's Pint config file."
+      regex: '^[A-Za-z0-9_-][A-Za-z0-9._/-]*$'
     working_dir:
       type: string
       default: "."

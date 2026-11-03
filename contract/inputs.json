@@ -40,7 +40,7 @@
         { "name": "job_name", "type": "string", "default": "sbom", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
         { "name": "image", "type": "string", "default": "composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc" },
         { "name": "omit_dev", "type": "boolean", "default": true },
-        { "name": "output", "type": "string", "default": "sbom.cdx.json" }
+        { "name": "output", "type": "string", "default": "sbom.cdx.json", "regex": "^[A-Za-z0-9_-][A-Za-z0-9._/-]*$" }
       ],
       "jobs": ["sbom"]
     },
@@ -49,7 +49,7 @@
         { "name": "stage", "type": "string", "default": "test" },
         { "name": "job_name", "type": "string", "default": "pint", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
         { "name": "image", "type": "string", "default": "composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc" },
-        { "name": "config", "type": "string", "default": "pint.json" },
+        { "name": "config", "type": "string", "default": "pint.json", "regex": "^[A-Za-z0-9_-][A-Za-z0-9._/-]*$" },
         { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" }
       ],
       "jobs": ["pint"]
@@ -59,8 +59,8 @@
         { "name": "stage", "type": "string", "default": "test" },
         { "name": "job_name", "type": "string", "default": "phpstan", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
         { "name": "image", "type": "string", "default": "composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc" },
-        { "name": "config", "type": "string", "default": "phpstan.neon" },
-        { "name": "memory_limit", "type": "string", "default": "1G" },
+        { "name": "config", "type": "string", "default": "phpstan.neon", "regex": "^[A-Za-z0-9_-][A-Za-z0-9._/-]*$" },
+        { "name": "memory_limit", "type": "string", "default": "1G", "regex": "^(-1|[0-9]+[KkMmGg]?)$" },
         { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" }
       ],
       "jobs": ["phpstan"]
