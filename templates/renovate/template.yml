@@ -29,12 +29,14 @@ renovate:
     RENOVATE_CONFIG_FILE: $CI_PROJECT_DIR/config.js
     RENOVATE_PLATFORM: gitlab
     RENOVATE_ENDPOINT: $CI_API_V4_URL
-    RENOVATE_TOKEN: $RENOVATE_TOKEN
+    # RENOVATE_TOKEN and GITHUB_COM_TOKEN are not set here on purpose: a
+    # self-reference such as X: $X shadows the project CI/CD variable with
+    # the literal text on GitLab 19.5, so the masked project variables reach
+    # the job unchanged.
     RENOVATE_AUTODISCOVER: "true"
     RENOVATE_AUTODISCOVER_FILTER: $[[ inputs.autodiscover_filter ]]
     RENOVATE_GIT_AUTHOR: $[[ inputs.git_author ]]
     RENOVATE_DRY_RUN: $[[ inputs.dry_run ]]
-    GITHUB_COM_TOKEN: $GITHUB_COM_TOKEN
   script:
     # The registry alias for the GitLab instance is built at job time from
     # the predefined CI_SERVER_FQDN variable: GitLab expands the key before
