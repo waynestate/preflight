@@ -20,6 +20,8 @@ are Git tags.
 ### Fixed
 
 - Fixed: the component-rule manager name in `renovate/default.json` (`gitlabci`, matching repository deps), so component version bumps really wait for review instead of auto-merging; the contract test now checks the new rule and the Squire kit rule.
+- Fixed: the portability goss health check uses `method: GET`; goss sends the method as written, and a lower-case one makes the server close the connection, so the good fixture failed with EOF.
+- Fixed: the portability fixtures make their temp dir mode 0777 and the goss files in it mode 0644, because the app user is not the host user that owns the dir and goss is downloaded into it.
 
 ## 0.1.3 (2026-11-03)
 

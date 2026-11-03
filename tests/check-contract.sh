@@ -143,6 +143,14 @@ for tpl in "$ROOT"/templates/*/template.yml; do
   fi
 done
 
+# goss sends the HTTP method as written, so the portability template must use
+# the upper-case method: a lower-case one makes the server close the
+# connection, and the good fixture fails with EOF.
+if grep -rq 'method: get' "$ROOT/templates/portability"; then
+  echo "templates/portability: lower-case 'method: get' found; goss needs 'method: GET'"
+  status=1
+fi
+
 if [ "$status" -eq 0 ]; then
   echo "contract: all components match contract/inputs.json"
 fi

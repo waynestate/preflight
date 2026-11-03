@@ -12,7 +12,8 @@
 
 http:
   http://127.0.0.1:{{PORT}}{{HEALTH_PATH}}:
-    method: get
+    # goss sends the method as written, so it must be upper case.
+    method: GET
     status: 200
     request-headers:
       - "Host: portability-check.invalid"

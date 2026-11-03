@@ -130,6 +130,10 @@ check_fixture() {
   tmpdir=$(mktemp -d)
   new_goss_file "$tmpdir/goss.yaml"
   write_goss_run_script "$tmpdir/goss-run.sh"
+  # The app user (uid 100123, group 0) is not the host user that owns this
+  # directory, and goss is downloaded into it, so it must read and write it.
+  chmod 0777 "$tmpdir"
+  chmod 0644 "$tmpdir/goss.yaml" "$tmpdir/goss-run.sh"
 
   # The strict run flags: a non-root user in group 0, a read-only root
   # filesystem, /tmp as a tmpfs, one anonymous volume per writable path (each
