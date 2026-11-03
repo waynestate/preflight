@@ -25,10 +25,12 @@ spec:
       type: string
       default: "phpstan.neon"
       description: "Path to the app's PHPStan config file."
+      regex: '^[A-Za-z0-9_-][A-Za-z0-9._/-]*$'
     memory_limit:
       type: string
       default: "1G"
       description: "Memory limit passed to PHPStan (for example 1G)."
+      regex: '^(-1|[0-9]+[KkMmGg]?)$'
     working_dir:
       type: string
       default: "."
