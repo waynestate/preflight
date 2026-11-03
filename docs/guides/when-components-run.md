@@ -5,4 +5,41 @@ description: The components are ordinary jobs, so they run whenever the app's pi
 
 # When the components run
 
-STUB: this page is written in a later batch.
+The components are ordinary jobs, so they run whenever the app's pipeline
+runs. This page shows the `workflow:rules` block that runs them on every merge
+request and on pushes to the default branch, and why that block must live in
+the app's own file.
+
+## The workflow:rules block
+
+To run the components on every merge request and on pushes to the default
+branch, put a `workflow:rules` block in the app's own `.gitlab-ci.yml`:
+
+```yaml
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+```
+
+> [!NOTE]
+> The `workflow:rules` block must live in the app's own file. A component
+> cannot set the pipeline's `workflow:rules` for the project that includes it,
+> so the `merge_request_event` rule goes in the app's `.gitlab-ci.yml`.
+
+## Related
+
+- [Install](../install.md)
+- [Quick start](./quick-start.md)
+- [Include a component twice](./include-twice.md)
+- [What the components cannot force](./what-components-cannot-force.md)
+
