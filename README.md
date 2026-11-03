@@ -20,6 +20,7 @@ an SBOM, Pint, PHPStan and ESLint.
 
 Front page: [`site/index.html`](site/index.html), a static page; see [`site/README.md`](site/README.md).
 On Citadel it is served by the raw-PHP deploy layer in [`deploy/`](deploy/): a Squire kit whose front controller serves `site/` behind HELMET's security headers. For local development, keep serving `site/` directly.
+Documentation: the full manual lives at [preflight.apps.wayne.edu/docs/](https://preflight.apps.wayne.edu/docs/).
 
 ## Where the code lives
 
@@ -611,6 +612,15 @@ decision, not a silence. The preflight checklist checks the checklist.
 ## Proof
 
 Proof runs against real Wayne State applications are on a private site, [proof.apps.wayne.edu/preflight](https://proof.apps.wayne.edu/preflight/), behind a Wayne State employee sign-in.
+
+## Docs
+
+The full documentation lives at [preflight.apps.wayne.edu/docs/](https://preflight.apps.wayne.edu/docs/) on the project site, built from `docs/` by Squire's docs builder. It starts with the overview page; the rest of the manual follows as the pages are written.
+
+- `composer docs` rebuilds `site/docs/` from `docs/`; run it after editing a page.
+- `composer docs:check` fails when the built site is stale; `composer ci` runs it.
+
+The pages are committed because the deploy server serves `site/` without building. Every page links back to its Markdown, and the footer stamps the version the docs describe. Cleared for takeoff: the flight manual flies with the aircraft.
 
 ## Local checks
 

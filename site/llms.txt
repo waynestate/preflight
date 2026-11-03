@@ -12,12 +12,14 @@ an SBOM, Pint, PHPStan and ESLint.
 
 Front page: [`site/index.html`](https://nougat.snu.gs/enterprise-apps/preflight/blob/HEAD/site/index.html), a static page; see [`site/README.md`](https://nougat.snu.gs/enterprise-apps/preflight/blob/HEAD/site/README.md).
 On Citadel it is served by the raw-PHP deploy layer in [`deploy/`](https://nougat.snu.gs/enterprise-apps/preflight/blob/HEAD/deploy/): a Squire kit whose front controller serves `site/` behind HELMET's security headers. For local development, keep serving `site/` directly.
+Documentation: the full manual lives at [preflight.apps.wayne.edu/docs/](https://preflight.apps.wayne.edu/docs/).
 
 Every page below is Markdown. The HTML pages send the same Markdown to a client that asks for `text/markdown`. Written by Squire's agent-ready kit from the README and the pages; do not edit.
 
 ## Pages
 
 - [Preflight: Every push is cleared for takeoff.](https://preflight.apps.wayne.edu/index.md): Preflight is a set of GitLab CI/CD components for Wayne State apps. Include them and your pipeline runs PROCTOR, PHP tests on each supported version, a Composer audit, an SBOM, Pint, PHPStan and ESLint.
+- [Preflight | Preflight docs](https://preflight.apps.wayne.edu/docs/index.md): Preflight is a set of GitLab CI/CD components that give every WSU app the same checks.
 
 ## Prompts
 
