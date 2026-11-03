@@ -33,11 +33,13 @@ the same GitLab instance that hosts this project.
 #### proctor
 
 Runs `vendor/bin/proctor check --format=codequality` and publishes the
-result as a GitLab Code Quality report.
+result as a GitLab Code Quality report. The job installs the app's
+dependencies with `composer install --no-plugins --no-scripts`, so the
+app's plugins and scripts never run inside the job.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
     inputs:
       proctor_command: vendor/bin/proctor check --format=codequality
 ```
@@ -57,7 +59,7 @@ Runs the test command on each supported PHP version through `parallel:matrix`.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
     inputs:
       test_command: vendor/bin/phpunit
 ```
@@ -84,7 +86,7 @@ Runs `composer audit --locked` and fails on advisories.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
     inputs:
       working_dir: .
 ```
@@ -111,7 +113,7 @@ Generates a CycloneDX SBOM with `cyclonedx/cyclonedx-php-composer`, validates it
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
     inputs:
       output: sbom.cdx.json
 ```
@@ -131,7 +133,7 @@ Runs the app's own [Laravel Pint](https://laravel.com/docs/12.x/pint) in test mo
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
     inputs:
       config: pint.json
 ```
@@ -151,7 +153,7 @@ Runs the app's own [PHPStan](https://phpstan.org/) and fails the pipeline on sta
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
     inputs:
       config: phpstan.neon
       memory_limit: 1G
@@ -173,7 +175,7 @@ Runs the app's own [ESLint](https://eslint.org/) (and [Prettier](https://prettie
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
     inputs:
       eslint_args: .
 ```
@@ -199,7 +201,7 @@ curl and PHP, which the job uses for the registry round trip.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
     inputs:
       group_id: "<your group id>"
 ```
@@ -224,7 +226,7 @@ Majors open a merge request and wait for a person. See
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
     inputs:
       git_author: "Preflight Bot <preflight-bot@example.com>"
 ```
@@ -266,10 +268,13 @@ on:
 
 jobs:
   ci:
-    uses: waynestate/preflight/.github/workflows/php-package.yml@0.1.1
+    uses: waynestate/preflight/.github/workflows/php-package.yml@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
 ```
 
-This workflow ships in the `0.1.1` tag, so pin the tag or the tag's commit SHA.
+This workflow ships in the `0.1.1` tag, so pin the full commit SHA of the
+release tag and keep the tag in a trailing comment. A tag or branch can move;
+a SHA cannot. The Renovate preset (see the Renovate section) proposes the
+bumps, and they wait for review (the `needs-review` label).
 
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
@@ -305,11 +310,23 @@ preset, so the rules change in one place:
 Digest updates, pin and pinDigest updates, and patch and minor version bumps
 auto-merge when the pipeline is green. Lock file maintenance runs weekly and
 auto-merges the same way. Every merge request carries the `auto-deps` label.
+The exception is Preflight's own pins: an update that touches the templates,
+the contract or this repository's own pipeline, and a bump of a component
+include version, never auto-merges (see What waits for review).
 
 #### What waits
 
 Major version bumps never auto-merge. The merge request carries the `major`
 label and waits for a person.
+
+#### What waits for review
+
+Updates that change an image digest inside the templates, the contract, or
+this repository's own pipeline, and bumps of a Preflight component version in
+an app's `component:` include, carry the `needs-review` label and never
+auto-merge. They wait for a person because those pins are what every app
+pipeline runs: a changed digest here changes what every consuming pipeline
+executes, so it earns a human eye even when its own pipeline is green.
 
 #### Why MySQL and HA-Proxy get digests only
 
@@ -318,6 +335,18 @@ not the newest releases in the world. Bumping their tags would drift the apps
 away from production, so only digest updates are enabled for them: the same
 tag, the exact image. `citadel/php-apache` is disabled entirely, because
 Squire's own data owns that image.
+
+#### Set up (the user does this)
+
+This repository ships the preset and the component, and creates nothing else.
+A person must set up:
+
+- A private runner project that includes the `renovate` component on a
+  schedule (see The runner project).
+- The `RENOVATE_TOKEN` masked CI variable in that project, and optionally
+  `GITHUB_COM_TOKEN`.
+- A pipeline schedule on that project so the job runs regularly; weekly on
+  Monday is a sensible default.
 
 #### The runner project
 
@@ -329,8 +358,10 @@ stable author.
 
 | Variable | Required | What it does |
 |----------|----------|--------------|
-| `RENOVATE_TOKEN` | yes | Masked CI variable the component passes through as `RENOVATE_TOKEN`. A project access token with Developer, or Maintainer where only Maintainers may merge. |
-| `GITHUB_COM_TOKEN` | no | Masked CI variable passed through as `GITHUB_COM_TOKEN`, so lookups against github.com do not hit anonymous rate limits. |
+| `RENOVATE_TOKEN` | yes | Masked CI variable in the runner project; the job reads it straight from the project, the component does not map it. A project access token with Developer, or Maintainer where only Maintainers may merge. |
+| `GITHUB_COM_TOKEN` | no | Masked CI variable in the runner project; the job reads it straight from the project, the component does not map it. Lookups against github.com do not hit anonymous rate limits. |
+
+Do not add `RENOVATE_TOKEN: $RENOVATE_TOKEN` to your own `variables:`; that self-reference arrives as literal text.
 
 The component writes its `config.js` at job time, so the `registryAliases`
 entry for the GitLab instance comes from the predefined `CI_SERVER_FQDN`
@@ -358,13 +389,13 @@ workflow:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@0.1.1
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.1
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@0.1.1
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@0.1.1
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@0.1.1
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@0.1.1
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
 ```
 
 The `workflow:rules` block must live in the app's own file. A component
@@ -378,15 +409,26 @@ override a job's keys, skip it with `rules`, or delete the `include:` line. Pref
 one; it does not lock it. Rollcall is where skipped or weakened gates will show up. A preflight checklist only works
 if the pilot reads it.
 
-Three project settings make the gates harder to skip. All three work on GitLab Community Edition:
+#### Protection checklist
 
-- **Protect the default branch** and require a merge request to change it. Every change to `.gitlab-ci.yml` then
+A pilot signs each line of the checklist; the plane does not sign for you. Five project settings make the gates
+harder to skip, and every one of them works on GitLab Community Edition:
+
+- [ ] **Protect the default branch** and require a merge request to change it. Every change to `.gitlab-ci.yml` then
   gets a reviewer. (Code owner approval needs Premium, so on Community Edition the reviewer is whoever merges.)
-- **Set "Minimum role to use pipeline variables" to `no_one_allowed`** unless the project needs pipeline variables.
+- [ ] **Protect the release tags.** Protect `*` or the release tag pattern so only maintainers can create or move a
+  tag. A component ref is a tag, so whoever can move it controls every pipeline that pins it.
+- [ ] **Set merge request approvals to at least one** for changes to the default branch. Approvals are available on
+  every tier, but code owner rules within them need Premium, so on Community Edition the approval rests with whoever
+  has merge rights: rely on the merger as the reviewer.
+- [ ] **Set "Minimum role to use pipeline variables" to `no_one_allowed`** unless the project needs pipeline variables.
   The components take inputs, which are fixed and type checked for the whole run. Self-managed GitLab defaults this
   setting to `maintainer`.
-- **Keep secrets away from fork merge requests.** A fork's merge request pipeline runs the fork's configuration.
+- [ ] **Keep secrets away from fork merge requests.** A fork's merge request pipeline runs the fork's configuration.
   Review a fork's `.gitlab-ci.yml` before running its pipeline, and never give it protected variables.
+
+These are project settings Preflight cannot create or check, and a read-only token drift report was considered and
+left out on purpose: it would trade a token for a warning, and the checklist costs nothing to keep.
 
 ### Strongly recommended: a git.wayne.edu instance runner.
 
@@ -487,7 +529,7 @@ Preflight is a set of GitLab CI/CD components. Add them to the `include:` block 
 
 ```
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
 ```
 
 Already included in [WELD](https://weld.apps.wayne.edu/) and in every [Sourdough](https://sourdough.apps.wayne.edu/) app. Use Preflight on its own to give a GitLab project you already have the stack's CI checks.
@@ -552,7 +594,7 @@ Cockpit placards
 
 ### Seven checks, one include each
 
-Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All seven are in the 0.1.1 tag, so pin them there. Two more components, `package-publish` and `renovate`, ship in the same tag; the README documents them.
+Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All seven are in the 0.1.1 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Two more components, `package-publish` and `renovate`, ship in the same tag; the README documents them.
 
 in 0.1.1
 
@@ -563,7 +605,7 @@ Watches the cabin.
 Runs PROCTOR's checks and publishes them as a Code Quality report.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@0.1.1
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
 ```
 
 **6 inputs**
@@ -584,7 +626,7 @@ Three engines, all running.
 The test command on each supported PHP version, one job per version.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.1
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
 ```
 
 **6 inputs**
@@ -605,7 +647,7 @@ Checks the passenger list.
 `composer audit --locked`, failing on any advisory.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@0.1.1
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
 ```
 
 **3 inputs**
@@ -623,7 +665,7 @@ The cargo manifest.
 A validated CycloneDX SBOM, published as an artifact. The plugin installs globally, so the app's files stay as they are.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@0.1.1
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
 ```
 
 **4 inputs**
@@ -642,7 +684,7 @@ Uniform pressed.
 The app's own Laravel Pint in test mode. The app requires `laravel/pint` and ships a `pint.json`.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@0.1.1
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
 ```
 
 **4 inputs**
@@ -661,7 +703,7 @@ Instruments cross-checked.
 The app's own PHPStan, with a Code Quality report. The app requires `phpstan/phpstan` and ships a `phpstan.neon`.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@0.1.1
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
 ```
 
 **5 inputs**
@@ -681,7 +723,7 @@ The front cabin, too.
 The app's own ESLint and Prettier. The app requires `@waynestate/pinstripe`, `eslint` and `prettier`.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@0.1.1
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
 ```
 
 **5 inputs**
@@ -701,7 +743,7 @@ Two cockpits, one checklist.
 Components stay inside one GitLab instance, so GitHub mirrors call this reusable workflow instead: `composer ci` on each PHP version, then a Composer audit.
 
 ```
-uses: waynestate/preflight/.github/workflows/php-package.yml@0.1.1
+uses: waynestate/preflight/.github/workflows/php-package.yml@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
 ```
 
 **3 inputs**
@@ -737,13 +779,13 @@ workflow:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@0.1.1
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.1
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@0.1.1
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@0.1.1
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@0.1.1
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@0.1.1
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
 ```
 
 2 Switches · project settings
@@ -770,7 +812,7 @@ on:
 
 jobs:
   ci:
-    uses: waynestate/preflight/.github/workflows/php-package.yml@0.1.1
+    uses: waynestate/preflight/.github/workflows/php-package.yml@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
 ```
 
 4 Ground check · your machine
