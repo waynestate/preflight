@@ -317,11 +317,23 @@ preset, so the rules change in one place:
 Digest updates, pin and pinDigest updates, and patch and minor version bumps
 auto-merge when the pipeline is green. Lock file maintenance runs weekly and
 auto-merges the same way. Every merge request carries the `auto-deps` label.
+The exception is Preflight's own pins: an update that touches the templates,
+the contract or this repository's own pipeline, and a bump of a component
+include version, never auto-merges (see What waits for review).
 
 ### What waits
 
 Major version bumps never auto-merge. The merge request carries the `major`
 label and waits for a person.
+
+### What waits for review
+
+Updates that change an image digest inside the templates, the contract, or
+this repository's own pipeline, and bumps of a Preflight component version in
+an app's `component:` include, carry the `needs-review` label and never
+auto-merge. They wait for a person because those pins are what every app
+pipeline runs: a changed digest here changes what every consuming pipeline
+executes, so it earns a human eye even when its own pipeline is green.
 
 ### Why MySQL and HA-Proxy get digests only
 
@@ -330,6 +342,18 @@ not the newest releases in the world. Bumping their tags would drift the apps
 away from production, so only digest updates are enabled for them: the same
 tag, the exact image. `citadel/php-apache` is disabled entirely, because
 Squire's own data owns that image.
+
+### Set up (the user does this)
+
+This repository ships the preset and the component, and creates nothing else.
+A person must set up:
+
+- A private runner project that includes the `renovate` component on a
+  schedule (see The runner project).
+- The `RENOVATE_TOKEN` masked CI variable in that project, and optionally
+  `GITHUB_COM_TOKEN`.
+- A pipeline schedule on that project so the job runs regularly; weekly on
+  Monday is a sensible default.
 
 ### The runner project
 
@@ -390,15 +414,26 @@ override a job's keys, skip it with `rules`, or delete the `include:` line. Pref
 one; it does not lock it. Rollcall is where skipped or weakened gates will show up. A preflight checklist only works
 if the pilot reads it.
 
-Three project settings make the gates harder to skip. All three work on GitLab Community Edition:
+### Protection checklist
 
-- **Protect the default branch** and require a merge request to change it. Every change to `.gitlab-ci.yml` then
+A pilot signs each line of the checklist; the plane does not sign for you. Five project settings make the gates
+harder to skip, and every one of them works on GitLab Community Edition:
+
+- [ ] **Protect the default branch** and require a merge request to change it. Every change to `.gitlab-ci.yml` then
   gets a reviewer. (Code owner approval needs Premium, so on Community Edition the reviewer is whoever merges.)
-- **Set "Minimum role to use pipeline variables" to `no_one_allowed`** unless the project needs pipeline variables.
+- [ ] **Protect the release tags.** Protect `*` or the release tag pattern so only maintainers can create or move a
+  tag. A component ref is a tag, so whoever can move it controls every pipeline that pins it.
+- [ ] **Set merge request approvals to at least one** for changes to the default branch. Approvals are available on
+  every tier, but code owner rules within them need Premium, so on Community Edition the approval rests with whoever
+  has merge rights: rely on the merger as the reviewer.
+- [ ] **Set "Minimum role to use pipeline variables" to `no_one_allowed`** unless the project needs pipeline variables.
   The components take inputs, which are fixed and type checked for the whole run. Self-managed GitLab defaults this
   setting to `maintainer`.
-- **Keep secrets away from fork merge requests.** A fork's merge request pipeline runs the fork's configuration.
+- [ ] **Keep secrets away from fork merge requests.** A fork's merge request pipeline runs the fork's configuration.
   Review a fork's `.gitlab-ci.yml` before running its pipeline, and never give it protected variables.
+
+These are project settings Preflight cannot create or check, and a read-only token drift report was considered and
+left out on purpose: it would trade a token for a warning, and the checklist costs nothing to keep.
 
 
 ## Strongly recommended: a git.wayne.edu instance runner.

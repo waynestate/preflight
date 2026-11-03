@@ -40,6 +40,18 @@
       "matchPackageNames": ["waynestate/*", "@waynestate/*"],
       "matchUpdateTypes": ["patch", "minor"],
       "automerge": true
+    },
+    {
+      "matchFileNames": ["templates/**", "contract/**", ".gitlab-ci.yml"],
+      "automerge": false,
+      "platformAutomerge": false,
+      "labels": ["auto-deps", "needs-review"]
+    },
+    {
+      "matchManagers": ["gitlab-ci-include"],
+      "automerge": false,
+      "platformAutomerge": false,
+      "labels": ["auto-deps", "needs-review"]
     }
   ],
   "lockFileMaintenance": {
