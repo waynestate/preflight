@@ -5,7 +5,7 @@
 # pins Preflight itself ships (the image digests in the templates, the
 # contract and this repo's own pipeline, and the component versions an app
 # includes) are what every app pipeline runs, so a change to them must be
-# reviewed. This script checks the two packageRules that enforce that with
+# reviewed. This script checks the packageRules that enforce that with
 # plain string matching, so it needs no modules, no yq and no Docker.
 
 $ErrorActionPreference = "Stop"
@@ -56,7 +56,7 @@ if ($keyIndex -lt 0) {
   $coversContract = $false
   $coversPipeline = $false
   for ($j = $keyIndex; $j -le $last; $j++) {
-    if ($lines[$j] -match '"automerge":s*false') { $automergeOff = $true }
+    if ($lines[$j] -match '"automerge":\s*false') { $automergeOff = $true }
     if ($lines[$j] -match '"contract/\*\*"') { $coversContract = $true }
     if ($lines[$j] -match '".gitlab-ci.yml"') { $coversPipeline = $true }
   }
@@ -68,28 +68,62 @@ if ($keyIndex -lt 0) {
   }
 }
 
-# The component rule: a gitlab-ci-include manager rule must turn automerge
-# off too, so a Preflight component version bump in an app waits for review.
+# The component rule: a gitlabci manager rule must match repository deps and
+# turn automerge off, so a Preflight component version bump in an app waits
+# for review.
 $managerIndex = -1
 for ($i = 0; $i -lt $lines.Count; $i++) {
-  if ($lines[$i] -match '"matchManagers".*"gitlab-ci-include"') {
+  if ($lines[$i] -match '"matchManagers".*"gitlabci"') {
     $managerIndex = $i
   }
 }
 if ($managerIndex -lt 0) {
-  Fail "renovate/default.json has no gitlab-ci-include rule"
+  Fail "renovate/default.json has no gitlabci component rule"
 } else {
   $last = [Math]::Min($managerIndex + 4, $lines.Count - 1)
-  $found = $false
+  $repoDep = $false
+  $componentAutomergeOff = $false
   for ($j = $managerIndex; $j -le $last; $j++) {
-    if ($lines[$j] -match '"automerge":s*false') {
-      $found = $true
-      break
-    }
+    if ($lines[$j] -match '"matchDepTypes".*"repository"') { $repoDep = $true }
+    if ($lines[$j] -match '"automerge":\s*false') { $componentAutomergeOff = $true }
   }
-  if (-not $found) {
-    Fail "the gitlab-ci-include rule does not turn automerge off"
+  if (-not $repoDep) {
+    Fail "the gitlabci component rule does not match repository deps"
   }
+  if (-not $componentAutomergeOff) {
+    Fail "the gitlabci component rule does not turn automerge off"
+  }
+}
+
+# The Squire kit rule: a custom.regex rule for waynestate/squire must turn
+# automerge off and carry the squire-kit label, so a kit version bump waits
+# for a person to run squire update.
+$squireIndex = -1
+for ($i = 0; $i -lt $lines.Count; $i++) {
+  if ($lines[$i] -match '"matchDepNames".*"waynestate/squire"') {
+    $squireIndex = $i
+  }
+}
+if ($squireIndex -lt 0) {
+  Fail "renovate/default.json has no waynestate/squire rule"
+} else {
+  $last = [Math]::Min($squireIndex + 6, $lines.Count - 1)
+  $squireAutomergeOff = $false
+  $squireKitLabel = $false
+  for ($j = $squireIndex; $j -le $last; $j++) {
+    if ($lines[$j] -match '"automerge":\s*false') { $squireAutomergeOff = $true }
+    if ($lines[$j] -match '"squire-kit"') { $squireKitLabel = $true }
+  }
+  if (-not $squireAutomergeOff) {
+    Fail "the waynestate/squire rule does not turn automerge off"
+  }
+  if (-not $squireKitLabel) {
+    Fail "the waynestate/squire rule does not carry the squire-kit label"
+  }
+}
+
+if ($lines | Where-Object { $_ -match 'postUpgradeTasks' }) {
+  Fail "renovate/default.json must not carry postUpgradeTasks"
 }
 
 if ($status -eq 0) {

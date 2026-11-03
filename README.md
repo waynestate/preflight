@@ -234,9 +234,9 @@ Protect your release tags.
 Runs [Renovate](https://docs.renovatebot.com/) as a scheduled or manual job
 that bumps image digests, GitHub action SHAs and package versions across the
 group's repositories, and merges the green ones itself. Bumps of `component:`
-include pins are not covered yet: the preset carries no manager for them.
-Majors open a merge request and wait for a person. See
-[Renovate](#renovate) for what auto-merges and what waits.
+include pins are covered by the preset and wait for review. Majors open a
+merge request and wait for a person. See [Renovate](#renovate) for what
+auto-merges and what waits.
 
 ```yaml
 include:
@@ -325,8 +325,9 @@ Digest updates, pin and pinDigest updates, and patch and minor version bumps
 auto-merge when the pipeline is green. Lock file maintenance runs weekly and
 auto-merges the same way. Every merge request carries the `auto-deps` label.
 The exception is Preflight's own pins: an update that touches the templates,
-the contract or this repository's own pipeline, and a bump of a component
-include version, never auto-merges (see What waits for review).
+the contract or this repository's own pipeline, a bump of a component include
+version, and a bump of the recorded Squire kit version, never auto-merge (see
+What waits for review).
 
 ### What waits
 
@@ -336,11 +337,15 @@ label and waits for a person.
 ### What waits for review
 
 Updates that change an image digest inside the templates, the contract, or
-this repository's own pipeline, and bumps of a Preflight component version in
-an app's `component:` include, carry the `needs-review` label and never
-auto-merge. They wait for a person because those pins are what every app
-pipeline runs: a changed digest here changes what every consuming pipeline
-executes, so it earns a human eye even when its own pipeline is green.
+this repository's own pipeline, bumps of a Preflight component version in an
+app's `component:` include, and bumps of the recorded Squire kit version
+(labelled `squire-kit`) carry the `needs-review` label and never auto-merge.
+They wait for a person because those pins are what every app pipeline runs:
+a changed digest here changes what every consuming pipeline executes, so it
+earns a human eye even when its own pipeline is green. The Squire kit version
+bump is refreshed by a person who runs `squire update` (with the right path
+for the repo), reviews the diff and commits it to the branch; the runner runs
+no commands, so the merge request carries no postUpgradeTasks.
 
 ### Why MySQL and HA-Proxy get digests only
 
