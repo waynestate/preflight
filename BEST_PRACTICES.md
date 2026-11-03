@@ -247,8 +247,11 @@ Why: two jobs with the same name merge into one.
 
 Sources: [GitLab: component examples, dynamic job names](https://docs.gitlab.com/ci/components/examples/).
 
-**How the stack holds it: Not yet.** The jobs are named `proctor`, `php-test`, `composer-audit`, `sbom`, `pint`,
-`phpstan`, `eslint`, `package-publish` and `renovate`, fixed.
+**How the stack holds it: Enforced.** Every component except `portability` takes a `job_name` input whose default is the
+usual job name (`proctor`, `php-test`, `composer-audit`, `sbom`, `pint`, `phpstan`, `eslint`, `package-publish`,
+`renovate`), and `tests/check-job-names.sh` fails if a template builds its job key any other way. `tests/check-contract.sh`
+resolves the key to the default, so the job names stay stable inside a major version. `portability` is the one exception:
+`portability-run` has `needs:` on `portability-build`, so both names are fixed.
 
 ### 2.6 Offer a way to weaken a gate only where it is meant
 `composer-audit` has no `allow_failure` input, on purpose. `proctor` has one.
@@ -1010,7 +1013,7 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
 12. 4.2: Use a dependency proxy or Citadel images for job images.
 13. 3.2: Recommend branch and CI-file protection for app repos.
 14. 3.4: Add a `workflow:rules` example to the README.
-15. 2.5: Build job names from an input so one project can include a component twice.
+15. Done: 2.5: Build job names from an input so one project can include a component twice.
 16. 4.8: Add a Composer cache keyed on `composer.lock`.
 17. Done (advisory): 5.1: Added secret detection to Preflight's own pipeline as an advisory job (`allow_failure:
     true`); it turns blocking after a week of green pipelines.

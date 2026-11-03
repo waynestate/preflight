@@ -61,6 +61,7 @@ include:
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `proctor` | Name of the job. Set it when you include this component more than once. |
 | `image` | string | `php:8.4-cli-trixie@sha256:9cf851bc2c1b37c3e59dfd677a3c3e56d485af5a47c93f629424bb039eafcb69` | Docker image for the job. |
 | `composer_version` | string | `2.10.3` | Composer version to install. |
 | `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline. |
@@ -81,6 +82,7 @@ include:
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the jobs. |
+| `job_name` | string | `php-test` | Name of the job. Set it when you include this component more than once. |
 | `image` | string | `php:${PHP_VERSION}-cli-trixie` | Docker image for the jobs. The default carries the literal `${PHP_VERSION}`, which GitLab expands in the image at job time. |
 | `php_versions` | array | `["8.3", "8.4", "8.5"]` | PHP versions to test against. |
 | `composer_version` | string | `2.10.3` | Composer version to install. |
@@ -108,6 +110,7 @@ include:
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `composer-audit` | Name of the job. Set it when you include this component more than once. |
 | `image` | string | `composer:2@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. |
 | `working_dir` | string | `.` | Directory to run composer audit in, relative to the project root. |
 
@@ -135,6 +138,7 @@ include:
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `sbom` | Name of the job. Set it when you include this component more than once. |
 | `image` | string | `composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. |
 | `omit_dev` | boolean | `true` | Whether to omit dev dependencies from the SBOM. |
 | `output` | string | `sbom.cdx.json` | Path of the SBOM file to publish, relative to the project root. |
@@ -155,6 +159,7 @@ include:
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `pint` | Name of the job. Set it when you include this component more than once. |
 | `image` | string | `composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. |
 | `config` | string | `pint.json` | Path to the app's Pint config file. |
 | `working_dir` | string | `.` | Directory to run Pint in, relative to the project root. |
@@ -176,6 +181,7 @@ include:
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `phpstan` | Name of the job. Set it when you include this component more than once. |
 | `image` | string | `composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. |
 | `config` | string | `phpstan.neon` | Path to the app's PHPStan config file. |
 | `memory_limit` | string | `1G` | Memory limit passed to PHPStan. |
@@ -197,6 +203,7 @@ include:
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `eslint` | Name of the job. Set it when you include this component more than once. |
 | `image` | string | `node:22.13-alpine@sha256:e2b39f7b64281324929257d0f8004fb6cb4bf0fdfb9aa8cedb235a766aec31da` | Docker image for the job. |
 | `working_dir` | string | `.` | Directory to run the commands in, relative to the project root. |
 | `eslint_args` | string | `.` | Arguments passed to eslint. |
@@ -223,6 +230,7 @@ include:
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
 | `stage` | string | `deploy` | Pipeline stage for the job. |
+| `job_name` | string | `package-publish` | Name of the job. Set it when you include this component more than once. |
 | `image` | string | `composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. The default ships curl and PHP, which the job uses for the registry round trip. |
 | `group_id` | string | none | Numeric id of the GitLab group whose built-in Composer registry hosts the package. Required. |
 | `read_token_variable` | string | `PACKAGE_READ_TOKEN` | Name of the masked CI variable holding a token with the `read_package_registry` scope, used to read the registry before publishing. |
@@ -247,6 +255,7 @@ include:
 
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
+| `job_name` | string | `renovate` | Name of the job. Set it when you include this component more than once. |
 | `image` | string | `renovate/renovate:44.192.2@sha256:37960a62ba1faa9079a7c4eead9b3f4470748a64ecd207e06c09fd8858673e17` | Docker image for the job. |
 | `autodiscover_filter` | string | `$CI_PROJECT_NAMESPACE/*` | Glob limiting which projects Renovate discovers, relative to the runner project's namespace. |
 | `dry_run` | string | `"null"` | Dry run mode: `null` (disabled), `lookup` or `full`. |
@@ -508,6 +517,27 @@ app must live on or be mirrored to it. A git.wayne.edu instance runner is strong
 for a non-privileged Docker executor (no privileged mode, no Docker socket mount), a fresh ephemeral
 environment for every job, and no shell executor shared between projects; capacity and maintenance
 stay with ops. A job that needs the host's Docker socket to take off has skipped its own preflight.
+
+## Include a component twice
+
+Every component except `portability` takes a `job_name` input, whose default is the job's usual name. Set it when one
+project includes the same component more than once, for example in a monorepo with two apps; without it the two jobs
+would share a name and merge into one.
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@<full commit SHA> # <tag>
+    inputs:
+      working_dir: app
+      job_name: pint-app
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@<full commit SHA> # <tag>
+    inputs:
+      working_dir: admin
+      job_name: pint-admin
+```
+
+`job_name` ships in the release after 0.1.3, so pin a SHA at or after that release. `portability` keeps its two fixed
+job names, because `portability-run` waits on `portability-build`.
 
 ## Shared conventions
 
