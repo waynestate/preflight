@@ -4,6 +4,7 @@
     "proctor": {
       "inputs": [
         { "name": "stage", "type": "string", "default": "test" },
+        { "name": "job_name", "type": "string", "default": "proctor", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
         { "name": "image", "type": "string", "default": "php:8.4-cli-trixie@sha256:9cf851bc2c1b37c3e59dfd677a3c3e56d485af5a47c93f629424bb039eafcb69" },
         { "name": "composer_version", "type": "string", "default": "2.10.3" },
         { "name": "allow_failure", "type": "boolean", "default": false },
@@ -15,6 +16,7 @@
     "php-test": {
       "inputs": [
         { "name": "stage", "type": "string", "default": "test" },
+        { "name": "job_name", "type": "string", "default": "php-test", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
         { "name": "image", "type": "string", "default": "php:${PHP_VERSION}-cli-trixie" },
         { "name": "php_versions", "type": "array", "default": ["8.3", "8.4", "8.5"] },
         { "name": "composer_version", "type": "string", "default": "2.10.3" },
@@ -26,6 +28,7 @@
     "composer-audit": {
       "inputs": [
         { "name": "stage", "type": "string", "default": "test" },
+        { "name": "job_name", "type": "string", "default": "composer-audit", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
         { "name": "image", "type": "string", "default": "composer:2@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc" },
         { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" }
       ],
@@ -76,6 +79,7 @@
     "package-publish": {
       "inputs": [
         { "name": "stage", "type": "string", "default": "deploy" },
+        { "name": "job_name", "type": "string", "default": "package-publish", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
         { "name": "image", "type": "string", "default": "composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc" },
         { "name": "group_id", "type": "string" },
         { "name": "read_token_variable", "type": "string", "default": "PACKAGE_READ_TOKEN" }

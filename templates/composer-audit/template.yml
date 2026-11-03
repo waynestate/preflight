@@ -4,6 +4,11 @@ spec:
       description: Pipeline stage for the composer-audit job.
       type: string
       default: test
+    job_name:
+      type: string
+      default: composer-audit
+      description: "Name of the job. Set it when you include this component more than once."
+      regex: '^[A-Za-z0-9_][A-Za-z0-9_.-]*$'
     image:
       description: Docker image for the composer-audit job.
       type: string
@@ -14,7 +19,7 @@ spec:
       default: "."
       regex: '^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$'
 ---
-composer-audit:
+"$[[ inputs.job_name ]]":
   stage: $[[ inputs.stage ]]
   # The composer:2 image already ships Composer, so no install step is
   # needed. composer audit --locked exits non-zero when it finds advisories,

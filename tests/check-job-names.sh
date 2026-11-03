@@ -18,7 +18,7 @@ set -u
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 
-TEMPLATES="pint phpstan eslint sbom renovate"
+TEMPLATES="pint phpstan eslint sbom renovate proctor php-test composer-audit package-publish"
 
 status=0
 

@@ -4,6 +4,11 @@ spec:
       description: Pipeline stage for the php-test jobs.
       type: string
       default: test
+    job_name:
+      type: string
+      default: php-test
+      description: "Name of the job. Set it when you include this component more than once."
+      regex: '^[A-Za-z0-9_][A-Za-z0-9_.-]*$'
     image:
       description: Docker image for each php-test job. The default carries the literal ${PHP_VERSION}, which GitLab expands in the image at job time, so the matrix keeps working.
       type: string
@@ -28,7 +33,7 @@ spec:
       default: "."
       regex: '^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$'
 ---
-php-test:
+"$[[ inputs.job_name ]]":
   stage: $[[ inputs.stage ]]
   # An array input that replaces an entire YAML value is interpolated as its
   # specified type (docs: Input types), so the array feeds parallel:matrix

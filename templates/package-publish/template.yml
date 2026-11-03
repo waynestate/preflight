@@ -4,6 +4,11 @@ spec:
       description: Pipeline stage for the package-publish job.
       type: string
       default: deploy
+    job_name:
+      type: string
+      default: package-publish
+      description: "Name of the job. Set it when you include this component more than once."
+      regex: '^[A-Za-z0-9_][A-Za-z0-9_.-]*$'
     image:
       description: Docker image for the package-publish job. The default ships curl and PHP, which the job uses for the registry round trip.
       type: string
@@ -16,7 +21,7 @@ spec:
       type: string
       default: PACKAGE_READ_TOKEN
 ---
-package-publish:
+"$[[ inputs.job_name ]]":
   stage: $[[ inputs.stage ]]
   # GitLab overwrites a version quietly when the same tag is published again
   # with different contents, so the job checks the registry first and refuses

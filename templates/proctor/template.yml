@@ -4,6 +4,11 @@ spec:
       description: Pipeline stage for the proctor job.
       type: string
       default: test
+    job_name:
+      type: string
+      default: proctor
+      description: "Name of the job. Set it when you include this component more than once."
+      regex: '^[A-Za-z0-9_][A-Za-z0-9_.-]*$'
     image:
       description: Docker image for the proctor job.
       type: string
@@ -28,7 +33,7 @@ spec:
       default: "."
       regex: '^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$'
 ---
-proctor:
+"$[[ inputs.job_name ]]":
   stage: $[[ inputs.stage ]]
   image: $[[ inputs.image ]]
   # Boolean input interpolated as a real YAML boolean (docs: an input that
