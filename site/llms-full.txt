@@ -290,9 +290,8 @@ include:
       start_command: php -S 0.0.0.0:8080 -t public
 ```
 
-Portability is not in a release tag yet (the newest tag, 0.1.3, does not
-include it), so pin the full commit SHA of the commit you want and name the
-tag in the comment once one ships. The build job needs a runner that permits
+Portability ships in 0.1.4 and later (0.1.3 does not include it), so pin the
+`0.1.4` tag, or the full commit SHA of a commit at or after it. The build job needs a runner that permits
 user namespaces (Buildah uses unshare for its storage); the run job needs only
 the project's container registry and an app image that carries curl, sha256sum
 and tar.
@@ -546,7 +545,7 @@ include:
       job_name: pint-admin
 ```
 
-`job_name` ships in the release after 0.1.3, so pin a SHA at or after that release. `portability` keeps its two fixed
+`job_name` ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release. `portability` keeps its two fixed
 job names, because `portability-run` waits on `portability-build`.
 
 ### Shared conventions

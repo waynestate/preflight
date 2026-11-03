@@ -6,6 +6,8 @@ are Git tags.
 
 ## Unreleased
 
+## 0.1.4 (2026-11-03)
+
 ### Changed
 
 - Changed: the README explains which jobs may be allowed to fail (only `proctor`) and that the contract check rejects global keys; BEST_PRACTICES 2.3 is now Enforced.
