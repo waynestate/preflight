@@ -4,7 +4,8 @@
     "type": "project",
     "homepage": "https://preflight.apps.wayne.edu/",
     "support": {
-        "source": "https://github.com/waynestate/preflight"
+        "source": "https://nougat.snu.gs/enterprise-apps/preflight",
+        "issues": "https://nougat.snu.gs/enterprise-apps/preflight/-/issues"
     },
     "license": "MIT",
     "authors": [

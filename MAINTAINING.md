@@ -15,9 +15,9 @@ lands on every runway at once. Walk around the plane before you push.
 
 ## Where it lives
 
-Development happens on Wayne State's GitLab. This GitHub repository is a read-only release mirror: `main` and tags are
-copied here automatically, and changes, issues and merge requests go to GitLab first. Nobody pushes to GitHub
-directly. GitLab components can only be included from the same GitLab instance, so other instances need their own
+Development happens on nougat, the canonical repository ([enterprise-apps/preflight](https://nougat.snu.gs/enterprise-apps/preflight)). This GitHub repository and git.wayne.edu are read-only mirrors: `main` and tags are
+copied automatically, and changes, issues and merge requests go to nougat. Nobody pushes to the mirrors. GitLab
+components can only be included from the same GitLab instance, so other instances need their own
 copy (see "Same instance only" in the README).
 
 ## Build and test
@@ -64,7 +64,7 @@ and run PHPUnit inside it the same way.
    versions are git tags; 0.1.0 predates the heading convention.)
 2. `composer ci` and the contract tests green, then both pipelines green for that commit.
 3. Run a secrets scan of the history and check that nothing internal is in the tree.
-4. Tag `X.Y.Z` (no `v`) on GitLab, and protect the tag pattern so a release tag cannot move. The mirror carries the tag
+4. Tag `X.Y.Z` (no `v`) on nougat, and protect the tag pattern so a release tag cannot move. The mirror carries the tag
    to GitHub. Record the tag's commit SHA in the CHANGELOG, because GitHub consumers pin the reusable workflow by SHA.
 5. **Then bump the pins in every consumer:** the `@X.Y.Z` on each component include in their `.gitlab-ci.yml`, and the
     SHA in their `.github/workflows/ci.yml`. Every component ships in each tag from 0.1.1 on, so a new consumer pins

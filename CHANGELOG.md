@@ -6,6 +6,8 @@ are Git tags.
 
 ## Unreleased
 
+- Changed: docs and package metadata name nougat as the canonical repository, with git.wayne.edu and GitHub as read-only mirrors, until git.wayne.edu has CI runners.
+
 ## 0.1.3 (2026-11-03)
 
 ### Added
