@@ -37,7 +37,7 @@ function Get-InputBlock([string[]]$spec, [string]$key) {
   $inBlock = $false
   foreach ($line in $spec) {
     if (-not $inBlock) {
-      if ($line -match "^    $key:[ \t]*$") { $inBlock = $true }
+      if ($line -match "^    ${key}:[ \t]*$") { $inBlock = $true }
       continue
     }
     if ($line -match '^    [A-Za-z_]' -or $line -match '^[^ ]') { break }
