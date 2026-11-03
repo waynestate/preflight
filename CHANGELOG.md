@@ -7,6 +7,8 @@ are Git tags.
 ## Unreleased
 
 - Docs: component pins in the README and site examples now point at 0.1.4.
+- Changed: the front-page deploy layer pins HELMET ^0.3, PROCTOR ^0.4 and CREED ^0.1 (lock: HELMET 0.3.0, PROCTOR 0.4.0, CREED 0.1.6).
+- Changed: the deploy layer sets minimum-stability to stable.
 
 ## 0.1.4 (2026-11-03)
 
