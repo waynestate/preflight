@@ -6,6 +6,8 @@ are Git tags.
 
 ## Unreleased
 
+## 0.1.3 (2026-11-03)
+
 ### Added
 
 - Added: advisory secret detection in the repository's own pipeline.
