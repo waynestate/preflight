@@ -365,8 +365,10 @@ stable author.
 
 | Variable | Required | What it does |
 |----------|----------|--------------|
-| `RENOVATE_TOKEN` | yes | Masked CI variable the component passes through as `RENOVATE_TOKEN`. A project access token with Developer, or Maintainer where only Maintainers may merge. |
-| `GITHUB_COM_TOKEN` | no | Masked CI variable passed through as `GITHUB_COM_TOKEN`, so lookups against github.com do not hit anonymous rate limits. |
+| `RENOVATE_TOKEN` | yes | Masked CI variable in the runner project; the job reads it straight from the project, the component does not map it. A project access token with Developer, or Maintainer where only Maintainers may merge. |
+| `GITHUB_COM_TOKEN` | no | Masked CI variable in the runner project; the job reads it straight from the project, the component does not map it. Lookups against github.com do not hit anonymous rate limits. |
+
+Do not add `RENOVATE_TOKEN: $RENOVATE_TOKEN` to your own `variables:`; that self-reference arrives as literal text.
 
 The component writes its `config.js` at job time, so the `registryAliases`
 entry for the GitLab instance comes from the predefined `CI_SERVER_FQDN`

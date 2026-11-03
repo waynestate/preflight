@@ -29,6 +29,7 @@ are Git tags.
 - Fixed: the readme art script handles all nine components, including package-publish and renovate.
 - Fixed: BEST_PRACTICES 2.2, 2.9 and 6.2 match the templates.
 - Fixed: BEST_PRACTICES statements match the repo; README no longer claims Renovate bumps component pins.
+- Fixed: the renovate component no longer sets `RENOVATE_TOKEN` and `GITHUB_COM_TOKEN` from themselves in the job `variables:`; on GitLab 19.5 that self-reference arrived as literal text and shadowed the masked project CI/CD variables, so the job now reads both tokens straight from the project.
 
 ## 0.1.2 (2026-10-29)
 
