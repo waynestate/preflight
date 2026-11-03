@@ -21,9 +21,9 @@
 <div class="docs-layout docs-layout--toc">
   <details class="docs-menu">
     <summary>Menu</summary>
-    <nav class="docs-nav" aria-label="Documentation"><ul class="docs-nav__list"><li><a href="../docs/index.html" aria-current="page">Overview</a></li></ul></nav>
+    <nav class="docs-nav" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../docs/index.html" aria-current="page">Overview</a></li><li><a href="../docs/install.html">Install</a></li><li><a href="../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../docs/guides/component-pint.html">The pint component</a></li><li><a href="../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../docs/guides/component-portability.html">The portability component</a></li><li><a href="../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../docs/guides/renovate.html">Renovate</a></li><li><a href="../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../docs/guides/template-lint.html">Template lint</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../docs/reference/components.html">Components</a></li><li><a href="../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../docs/reference/local-checks.html">Local checks</a></li></ul></li><li><a href="../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../docs/upgrading.html">Upgrading</a></li><li><a href="../docs/changelog.html">Changelog</a></li></ul></nav>
   </details>
-  <nav class="docs-nav docs-nav--sidebar" aria-label="Documentation"><ul class="docs-nav__list"><li><a href="../docs/index.html" aria-current="page">Overview</a></li></ul></nav>
+  <nav class="docs-nav docs-nav--sidebar" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../docs/index.html" aria-current="page">Overview</a></li><li><a href="../docs/install.html">Install</a></li><li><a href="../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../docs/guides/component-pint.html">The pint component</a></li><li><a href="../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../docs/guides/component-portability.html">The portability component</a></li><li><a href="../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../docs/guides/renovate.html">Renovate</a></li><li><a href="../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../docs/guides/template-lint.html">Template lint</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../docs/reference/components.html">Components</a></li><li><a href="../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../docs/reference/local-checks.html">Local checks</a></li></ul></li><li><a href="../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../docs/upgrading.html">Upgrading</a></li><li><a href="../docs/changelog.html">Changelog</a></li></ul></nav>
   <div class="docs-content">
     <main id="main">
       <article class="docs-article"><div align="center">
@@ -38,26 +38,26 @@
 <p><strong>Every push is cleared for takeoff.</strong></p>
 <p>Preflight is a set of GitLab CI/CD components that give every WSU app the
 same checks: PROCTOR, PHP tests on each supported version, Composer audit,
-an SBOM, Pint, PHPStan and ESLint.</p>
-<p><strong>Not to be confused with:</strong> Preflight is the CI pipeline; it runs Pinstripe's style checks and PROCTOR but sets neither.</p>
-<p>Front page: <a rel="noopener" href="https://github.com/waynestate/preflight/blob/main/site/index.html"><code>site/index.html</code></a>, a static page; see <a rel="noopener" href="https://github.com/waynestate/preflight/blob/main/site/README.md"><code>site/README.md</code></a>.
-On Citadel it is served by the raw-PHP deploy layer in <a rel="noopener" href="https://github.com/waynestate/preflight/tree/main/deploy"><code>deploy/</code></a>: a Squire kit whose front controller serves <code>site/</code> behind HELMET's security headers. For local development, keep serving <code>site/</code> directly.</p>
-<h2 id="where-the-code-lives">Where the code lives<a class="docs-heading-link" aria-label="Link to this section" href="#where-the-code-lives">#</a></h2>
-<p>The canonical repository is on nougat: <a rel="noopener" href="https://nougat.snu.gs/enterprise-apps/preflight">enterprise-apps/preflight</a>. git.wayne.edu and GitHub (<a rel="noopener" href="https://github.com/waynestate/preflight">waynestate/preflight</a>) are read-only mirrors of it.
-Open issues and merge requests on nougat, not on the mirrors.
-This moves to git.wayne.edu once it has CI runners. Cleared for takeoff from nougat; the mirrors are just other gates.</p>
-<details>
-<summary><b>Walk round the aircraft</b>: the placards, the flight plan and the flight manual from the front page</summary>
-<br>
-<div align="center"><img src="readme/gallery.jpg" width="100%" alt="Three crops of the front page on a phone: the cockpit placards ('Seven components, one include each', with the proctor placard), the flight plan ('File a flight plan', the workflow rules and include block), and the flight manual ('Read before flight', a warning that a component is not a lock and a caution that it works on the same instance only)."></div>
-</details>
-<p>Components are GA on the Free tier since GitLab 17.0. They work only within
-the same GitLab instance that hosts this project.</p>
+an SBOM, Pint, PHPStan and ESLint. One include per component, pinned to a
+commit SHA, and the same checklist flies on every push.</p>
+<pre><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      test_command: vendor/bin/phpunit
+</code></pre>
+<h2 id="pick-your-path">Pick your path<a class="docs-heading-link" aria-label="Link to this section" href="#pick-your-path">#</a></h2>
+<ul>
+<li><a href="guides/quick-start.html">Quick start</a>: wire one component into an app and watch the pipeline run it.</li>
+<li><a href="install.html">Install</a>: the requirements, the include snippet, and how to verify the pipeline picked the component up.</li>
+<li><a href="reference/components.html">Reference</a>: every component, with its include example, inputs and defaults.</li>
+</ul>
+<p>Preflight 0.1.4; GitLab components are GA on the Free tier since GitLab 17.0; MIT licensed.</p>
+<p>Agents: fetch <a rel="noopener" href="https://preflight.apps.wayne.edu/llms.txt">https://preflight.apps.wayne.edu/llms.txt</a> for a machine-readable index of this manual.</p>
 </article>
     </main>
-    <nav class="docs-pager" aria-label="Pages"></nav>
+    <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link docs-pager__link--next" href="../docs/install.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">Install</span></a></nav>
   </div>
-  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#where-the-code-lives">Where the code lives</a></li></ul></nav>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#pick-your-path">Pick your path</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
   <span>Documents Preflight <span data-docs-version>0.1.4</span></span>
