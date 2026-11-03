@@ -18,7 +18,7 @@
   <a class="docs-header__brand" href="../../docs/index.html">Preflight</a>
   <span><a class="docs-header__home" rel="noopener" href="https://nougat.snu.gs/enterprise-apps/preflight">Source</a> <a class="docs-header__home" href="../../index.html">Back to Preflight</a></span>
 </header>
-<div class="docs-layout">
+<div class="docs-layout docs-layout--toc">
   <details class="docs-menu">
     <summary>Menu</summary>
     <nav class="docs-nav" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../../docs/index.html">Overview</a></li><li><a href="../../docs/install.html">Install</a></li><li><a href="../../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../../docs/guides/component-pint.html">The pint component</a></li><li><a href="../../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../../docs/guides/component-package-publish.html" aria-current="page">The package-publish component</a></li><li><a href="../../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../../docs/guides/component-portability.html">The portability component</a></li><li><a href="../../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../../docs/guides/renovate.html">Renovate</a></li><li><a href="../../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../../docs/guides/template-lint.html">Template lint</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../../docs/reference/components.html">Components</a></li><li><a href="../../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../../docs/reference/local-checks.html">Local checks</a></li></ul></li><li><a href="../../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../../docs/upgrading.html">Upgrading</a></li><li><a href="../../docs/changelog.html">Changelog</a></li></ul></nav>
@@ -27,11 +27,112 @@
   <div class="docs-content">
     <main id="main">
       <article class="docs-article"><h1 id="the-package-publish-component">The package-publish component<a class="docs-heading-link" aria-label="Link to this section" href="#the-package-publish-component">#</a></h1>
-<p>STUB: this page is written in a later batch.</p>
+<p>This page covers the <code>package-publish</code> component: what the job does, how to
+include it, and every input it takes. Goal: tagging a release publishes the
+package to the GitLab group's built-in Composer registry, and a version that
+is already published never gets overwritten.</p>
+<p>Version 1 · Category: Release/Publishing · Tags: composer,publish,release</p>
+<h2 id="what-the-job-does">What the job does<a class="docs-heading-link" aria-label="Link to this section" href="#what-the-job-does">#</a></h2>
+<p>The job publishes a semantic version tag to the GitLab group's built-in
+Composer registry. It runs only on tags, reads the registry first, and
+refuses a moved version: a version already published from this commit passes
+quietly, and a version published from a different commit fails the pipeline,
+because GitLab would otherwise overwrite it without a word. Once a version is
+on the manifest, it stays on the manifest: no go-arounds.</p>
+<p>The job, in order:</p>
+<ol>
+<li>Runs only when the pipeline is for a tag, so <code>$CI_COMMIT_TAG</code> is set.</li>
+<li>Accepts only semantic versions, <code>1.2.3</code> or <code>v1.2.3</code> with an optional
+pre-release; any other tag fails the job.</li>
+<li>Reads the package name from the <code>name</code> field of <code>composer.json</code> in the
+project root, the file the registry serves.</li>
+<li>Reads the registry index with the read token. A <code>404</code> means the group has
+no published Composer packages yet, and the job goes straight to
+publishing.</li>
+<li>Compares the commit recorded for the version, if any, with
+<code>$CI_COMMIT_SHA</code>: the same commit exits quietly, a different commit fails
+the job instead of overwriting the version.</li>
+<li>Publishes the tag to the group's registry with the job token
+(<code>CI_JOB_TOKEN</code>) and reports the version as published.</li>
+</ol>
+<p>The default image ships curl and PHP, which the job uses for the registry
+round trip. The job is interruptible and times out after 30 minutes.</p>
+<aside class="docs-callout docs-callout--warning" role="note"><p class="docs-callout__label">Warning</p><p>Protect your release tags.</p></aside>
+<aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>The read token lives in a masked CI variable named by
+<code>read_token_variable</code> (default <code>PACKAGE_READ_TOKEN</code>) and needs the
+<code>read_package_registry</code> scope. Publishing itself uses the predefined
+<code>CI_JOB_TOKEN</code>.</p></aside>
+<h2 id="include-the-component">Include the component<a class="docs-heading-link" aria-label="Link to this section" href="#include-the-component">#</a></h2>
+<p>Add the include to the app's <code>.gitlab-ci.yml</code>, pinned to a full commit SHA
+with the tag in a trailing comment, and set <code>group_id</code> to the numeric id of
+the GitLab group whose built-in Composer registry hosts the package:</p>
+<pre><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      group_id: &quot;&lt;your group id&gt;&quot;
+</code></pre>
+<h2 id="inputs">Inputs<a class="docs-heading-link" aria-label="Link to this section" href="#inputs">#</a></h2>
+<div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Type</th>
+<th>Default</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stage</code></td>
+<td>string</td>
+<td><code>deploy</code></td>
+<td>Pipeline stage for the job.</td>
+</tr>
+<tr>
+<td><code>job_name</code></td>
+<td>string</td>
+<td><code>package-publish</code></td>
+<td>Name of the job. Set it when you include this component more than once.</td>
+</tr>
+<tr>
+<td><code>image</code></td>
+<td>string</td>
+<td><code>composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc</code></td>
+<td>Docker image for the job. The default ships curl and PHP, which the job uses for the registry round trip.</td>
+</tr>
+<tr>
+<td><code>group_id</code></td>
+<td>string</td>
+<td>none</td>
+<td>Numeric id of the GitLab group whose built-in Composer registry hosts the package. Required.</td>
+</tr>
+<tr>
+<td><code>read_token_variable</code></td>
+<td>string</td>
+<td><code>PACKAGE_READ_TOKEN</code></td>
+<td>Name of the masked CI variable holding a token with the <code>read_package_registry</code> scope, used to read the registry before publishing.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="verify">Verify<a class="docs-heading-link" aria-label="Link to this section" href="#verify">#</a></h2>
+<p>Define the masked CI variable the component reads, then push a semantic
+version tag. Expected: the <code>package-publish</code> job runs in the <code>deploy</code> stage,
+reads the registry, and ends with <code>Version &lt;version&gt; published.</code> Pushing the
+same tag from the same commit again exits quietly; the same version from a
+different commit fails the job.</p>
+<h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
+<ul>
+<li><a href="quick-start.html">Quick start</a>: wire one component into an app and watch the pipeline run it.</li>
+<li><a href="../install.html">Install</a>: the requirements, the include snippet, and how to verify.</li>
+<li><a href="when-components-run.html">When the components run</a>: the <code>workflow:rules</code> block that belongs in the app's own file.</li>
+<li><a href="include-twice.html">Include a component twice</a>: the <code>job_name</code> input in action.</li>
+<li><a href="../reference/components.html">Reference</a>: every component, with its inputs and defaults.</li>
+</ul>
 </article>
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../../docs/guides/component-eslint.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">The eslint component</span></a><a class="docs-pager__link docs-pager__link--next" href="../../docs/guides/component-renovate.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">The renovate component</span></a></nav>
   </div>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#what-the-job-does">What the job does</a></li><li class="docs-toc__item"><a href="#include-the-component">Include the component</a></li><li class="docs-toc__item"><a href="#inputs">Inputs</a></li><li class="docs-toc__item"><a href="#verify">Verify</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
   <span>Documents Preflight <span data-docs-version>0.1.4</span></span>

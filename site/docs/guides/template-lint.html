@@ -18,7 +18,7 @@
   <a class="docs-header__brand" href="../../docs/index.html">Preflight</a>
   <span><a class="docs-header__home" rel="noopener" href="https://nougat.snu.gs/enterprise-apps/preflight">Source</a> <a class="docs-header__home" href="../../index.html">Back to Preflight</a></span>
 </header>
-<div class="docs-layout">
+<div class="docs-layout docs-layout--toc">
   <details class="docs-menu">
     <summary>Menu</summary>
     <nav class="docs-nav" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../../docs/index.html">Overview</a></li><li><a href="../../docs/install.html">Install</a></li><li><a href="../../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../../docs/guides/component-pint.html">The pint component</a></li><li><a href="../../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../../docs/guides/component-portability.html">The portability component</a></li><li><a href="../../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../../docs/guides/renovate.html">Renovate</a></li><li><a href="../../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../../docs/guides/template-lint.html" aria-current="page">Template lint</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../../docs/reference/components.html">Components</a></li><li><a href="../../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../../docs/reference/local-checks.html">Local checks</a></li></ul></li><li><a href="../../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../../docs/upgrading.html">Upgrading</a></li><li><a href="../../docs/changelog.html">Changelog</a></li></ul></nav>
@@ -27,11 +27,73 @@
   <div class="docs-content">
     <main id="main">
       <article class="docs-article"><h1 id="template-lint">Template lint<a class="docs-heading-link" aria-label="Link to this section" href="#template-lint">#</a></h1>
-<p>STUB: this page is written in a later batch.</p>
+<p>This page lists the unsafe CI patterns the template lint catches and how to
+allowlist a known warning. Run <code>composer ci</code> to see the lint, which runs
+before the fixture tests.</p>
+<h2 id="what-it-runs">What it runs<a class="docs-heading-link" aria-label="Link to this section" href="#what-it-runs">#</a></h2>
+<p><code>composer ci</code> runs <code>bin/lint-templates</code> before the fixture tests. The lint
+scans <code>templates/**/*.yml</code> and <code>.github/workflows/*.yml</code> for unsafe CI
+patterns.</p>
+<h2 id="rules">Rules<a class="docs-heading-link" aria-label="Link to this section" href="#rules">#</a></h2>
+<div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Catches</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>privileged</code></td>
+<td><code>privileged: true</code></td>
+</tr>
+<tr>
+<td><code>dind-service</code></td>
+<td>Docker-in-Docker services</td>
+</tr>
+<tr>
+<td><code>docker-sock</code></td>
+<td>references to <code>docker.sock</code></td>
+</tr>
+<tr>
+<td><code>kaniko-image</code></td>
+<td>Kaniko images</td>
+</tr>
+<tr>
+<td><code>unpinned-action</code></td>
+<td>GitHub <code>uses:</code> entries that are not pinned to a 40-character SHA</td>
+</tr>
+<tr>
+<td><code>image-no-tag</code></td>
+<td>image references with no tag</td>
+</tr>
+<tr>
+<td><code>image-latest</code></td>
+<td>image references with <code>latest</code></td>
+</tr>
+<tr>
+<td><code>image-no-digest</code></td>
+<td>a warning for a tagged image that is not pinned by digest</td>
+</tr>
+</tbody>
+</table></div>
+<p>The container-build rules (<code>privileged</code>, <code>dind-service</code>, <code>docker-sock</code> and
+<code>kaniko-image</code>) are explained in BEST_PRACTICES.md 4.17.</p>
+<h2 id="allowlist-a-known-warning">Allowlist a known warning<a class="docs-heading-link" aria-label="Link to this section" href="#allowlist-a-known-warning">#</a></h2>
+<p>Known warnings can be allowlisted in <code>lint-allow.yml</code>. Each entry needs
+<code>file</code>, <code>rule</code> and <code>reason</code>; the reason is required so an allowlist entry is
+a reviewed decision, not a silence. The preflight checklist checks the
+checklist.</p>
+<h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
+<ul>
+<li><a href="image-pins.html">Updating image pins</a>: why component images are digest-pinned and how to change a pin.</li>
+<li><a href="../reference/conventions.html">Shared conventions</a>: Composer vendor, license, PHP floor and JavaScript installs.</li>
+</ul>
 </article>
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../../docs/guides/image-pins.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">Updating image pins</span></a><a class="docs-pager__link docs-pager__link--next" href="../../docs/reference/components.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">Components</span></a></nav>
   </div>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#what-it-runs">What it runs</a></li><li class="docs-toc__item"><a href="#rules">Rules</a></li><li class="docs-toc__item"><a href="#allowlist-a-known-warning">Allowlist a known warning</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
   <span>Documents Preflight <span data-docs-version>0.1.4</span></span>

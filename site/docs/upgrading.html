@@ -18,7 +18,7 @@
   <a class="docs-header__brand" href="../docs/index.html">Preflight</a>
   <span><a class="docs-header__home" rel="noopener" href="https://nougat.snu.gs/enterprise-apps/preflight">Source</a> <a class="docs-header__home" href="../index.html">Back to Preflight</a></span>
 </header>
-<div class="docs-layout">
+<div class="docs-layout docs-layout--toc">
   <details class="docs-menu">
     <summary>Menu</summary>
     <nav class="docs-nav" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../docs/index.html">Overview</a></li><li><a href="../docs/install.html">Install</a></li><li><a href="../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../docs/guides/component-pint.html">The pint component</a></li><li><a href="../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../docs/guides/component-portability.html">The portability component</a></li><li><a href="../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../docs/guides/renovate.html">Renovate</a></li><li><a href="../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../docs/guides/template-lint.html">Template lint</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../docs/reference/components.html">Components</a></li><li><a href="../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../docs/reference/local-checks.html">Local checks</a></li></ul></li><li><a href="../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../docs/upgrading.html" aria-current="page">Upgrading</a></li><li><a href="../docs/changelog.html">Changelog</a></li></ul></nav>
@@ -27,11 +27,120 @@
   <div class="docs-content">
     <main id="main">
       <article class="docs-article"><h1 id="upgrading">Upgrading<a class="docs-heading-link" aria-label="Link to this section" href="#upgrading">#</a></h1>
-<p>STUB: this page is written in a later batch.</p>
+<p>This page is the checklist for moving an app from one Preflight pin to the next, one released version at a time, newest first; every section follows <code>CHANGELOG.md</code>. Read the section for the version you are moving to, apply its steps, and verify on the next pipeline. Like a real preflight, the walk takes a few minutes and earns its keep: move the pin only after you have read the version notes.</p>
+<h2 id="0-1-4">0.1.4<a class="docs-heading-link" aria-label="Link to this section" href="#0-1-4">#</a></h2>
+<p>Released 2026-11-03. The new pieces are opt-in: the <code>portability</code> component, a <code>job_name</code> input on every component except <code>portability</code>, and a stricter Renovate preset.</p>
+<h3 id="breaking">Breaking<a class="docs-heading-link" aria-label="Link to this section" href="#breaking">#</a></h3>
+<p>0.1.4 has no breaking changes: the version adds a component, an input and preset rules, and removes nothing.</p>
+<h3 id="deprecated">Deprecated<a class="docs-heading-link" aria-label="Link to this section" href="#deprecated">#</a></h3>
+<p>Nothing was deprecated in 0.1.4.</p>
+<h3 id="steps">Steps<a class="docs-heading-link" aria-label="Link to this section" href="#steps">#</a></h3>
+<p>Point each component include at the <code>0.1.4</code> tag, pinned to the tag's full commit SHA with the tag in a trailing comment:</p>
+<pre><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+</code></pre>
+<p>A mirrored package pins the same SHA in its GitHub workflow:</p>
+<pre><code class="language-yaml">jobs:
+  ci:
+    uses: waynestate/preflight/.github/workflows/php-package.yml@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+</code></pre>
+<p>Adopt the new pieces when you want them:</p>
+<ul>
+<li><strong><code>portability</code></strong>: it ships in 0.1.4 and later (0.1.3 does not include it), so pin the <code>0.1.4</code> tag, or the full commit SHA of a commit at or after it. The build job needs a runner that permits user namespaces (Buildah uses unshare for its storage); the run job needs only the project's container registry and an app image that carries curl, sha256sum and tar.</li>
+<li><strong><code>job_name</code></strong>: it ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release. Set it when one project includes the same component more than once, for example in a monorepo with two apps; without it the two jobs would share a name and merge into one.</li>
+<li><strong>Renovate preset</strong>: component version bumps now really wait for review instead of auto-merging (the component-rule manager name is <code>gitlabci</code>, matching repository deps), and a bump of the recorded Squire kit version carries the <code>squire-kit</code> label and never auto-merges; a person runs <code>squire update</code> to refresh the kit files.</li>
+</ul>
+<aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>Pins change only through a reviewed merge request. A tag or branch can move; a SHA cannot.</p></aside>
+<h3 id="how-to-verify">How to verify<a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify">#</a></h3>
+<p>Push the change and run the app's pipeline. The components are ordinary jobs, so they run whenever the app's pipeline runs; expect the same jobs as before, green. PROCTOR's <code>preflight-pinned</code> check warns when an include is not pinned to a commit SHA. If you added <code>portability</code>, the <code>portability-run</code> job passes only when the image boots the strict way and the goss checks hold.</p>
+<h2 id="0-1-3">0.1.3<a class="docs-heading-link" aria-label="Link to this section" href="#0-1-3">#</a></h2>
+<p>Released 2026-11-03. Two consumer-facing changes: the <code>proctor</code> component installs the app with <code>--no-plugins --no-scripts</code>, and the shared Renovate preset stopped auto-merging the pins that every pipeline runs.</p>
+<h3 id="breaking-1">Breaking<a class="docs-heading-link" aria-label="Link to this section" href="#breaking-1">#</a></h3>
+<p>0.1.3 has no breaking changes, but the <code>proctor</code> job now installs the app's dependencies with <code>composer install --no-plugins --no-scripts</code>, so the app's plugins and scripts never run inside the job.</p>
+<h3 id="deprecated-1">Deprecated<a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-1">#</a></h3>
+<p>Nothing was deprecated in 0.1.3.</p>
+<h3 id="steps-1">Steps<a class="docs-heading-link" aria-label="Link to this section" href="#steps-1">#</a></h3>
+<p>Bump each component include to the <code>0.1.3</code> tag's full commit SHA, with the tag in a trailing comment:</p>
+<pre><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@&lt;full commit SHA&gt; # 0.1.3
+</code></pre>
+<p>If your group runs the shared Renovate preset, read the two behavior changes before you merge the bump:</p>
+<ul>
+<li>Updates inside <code>templates/**</code>, <code>contract/**</code> and <code>.gitlab-ci.yml</code>, and bumps of a Preflight component version in an app's <code>component:</code> include, no longer auto-merge: they carry the <code>needs-review</code> label and wait for a person.</li>
+<li>The <code>renovate</code> component no longer sets <code>RENOVATE_TOKEN</code> and <code>GITHUB_COM_TOKEN</code> from themselves in the job <code>variables:</code>; on GitLab 19.5 that self-reference arrived as literal text and shadowed the masked project CI/CD variables, so the job now reads both tokens straight from the project.</li>
+</ul>
+<aside class="docs-callout docs-callout--warning" role="note"><p class="docs-callout__label">Warning</p><p>Do not add <code>RENOVATE_TOKEN: $RENOVATE_TOKEN</code> to your own <code>variables:</code>; that self-reference arrives as literal text.</p></aside>
+<h3 id="how-to-verify-1">How to verify<a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-1">#</a></h3>
+<p>Run the pipeline and confirm the jobs run on the new pin. In the runner project, confirm the job reads <code>RENOVATE_TOKEN</code> straight from the project as a masked CI variable, and that a bump touching the templates, the contract or a component include pin opens a merge request labeled <code>needs-review</code> instead of auto-merging.</p>
+<h2 id="0-1-2">0.1.2<a class="docs-heading-link" aria-label="Link to this section" href="#0-1-2">#</a></h2>
+<p>Released 2026-10-29. The site gained the agent-ready kit (prompt blocks, Markdown twins, llms.txt) from Squire, and the proof page moved to a private site that needs a Wayne State sign-in.</p>
+<h3 id="breaking-2">Breaking<a class="docs-heading-link" aria-label="Link to this section" href="#breaking-2">#</a></h3>
+<p>0.1.2 has no breaking changes: the version touches the site, the README and the proof page, not the components.</p>
+<h3 id="deprecated-2">Deprecated<a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-2">#</a></h3>
+<p>Nothing was deprecated in 0.1.2.</p>
+<h3 id="steps-2">Steps<a class="docs-heading-link" aria-label="Link to this section" href="#steps-2">#</a></h3>
+<p>Bump each component include to the <code>0.1.2</code> tag's full commit SHA, with the tag in a trailing comment:</p>
+<pre><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@&lt;full commit SHA&gt; # 0.1.2
+</code></pre>
+<h3 id="how-to-verify-2">How to verify<a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-2">#</a></h3>
+<p>Run the pipeline and confirm the component jobs run on the new pin. PROCTOR's <code>preflight-pinned</code> check warns when an include is not pinned to a commit SHA.</p>
+<h2 id="0-1-1">0.1.1<a class="docs-heading-link" aria-label="Link to this section" href="#0-1-1">#</a></h2>
+<p>Released 2026-10-29. Two new components: <code>package-publish</code>, which publishes a semantic version tag to the GitLab group's built-in Composer registry, and <code>renovate</code>, with the shared preset <code>renovate/default.json</code>. The reusable GitHub Actions workflow for mirrors ships in this tag too.</p>
+<h3 id="breaking-3">Breaking<a class="docs-heading-link" aria-label="Link to this section" href="#breaking-3">#</a></h3>
+<p>0.1.1 has no breaking changes: the version adds components and changes only the repository's own PHPStan config.</p>
+<h3 id="deprecated-3">Deprecated<a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-3">#</a></h3>
+<p>Nothing was deprecated in 0.1.1.</p>
+<h3 id="steps-3">Steps<a class="docs-heading-link" aria-label="Link to this section" href="#steps-3">#</a></h3>
+<p>Bump the existing includes to the <code>0.1.1</code> tag's full commit SHA, and add the new components where you want them:</p>
+<pre><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@&lt;full commit SHA&gt; # 0.1.1
+    inputs:
+      group_id: &quot;&lt;your group id&gt;&quot;
+</code></pre>
+<p><code>group_id</code> is required: the numeric id of the GitLab group whose built-in Composer registry hosts the package.</p>
+<aside class="docs-callout docs-callout--warning" role="note"><p class="docs-callout__label">Warning</p><p>Protect your release tags. A component ref is a tag, so whoever can move it controls every pipeline that pins it.</p></aside>
+<p>A package mirrored to GitHub calls the reusable workflow from its own <code>.github/workflows/ci.yml</code>; the workflow ships in the <code>0.1.1</code> tag, so pin the full commit SHA of the release tag and keep the tag in a trailing comment:</p>
+<pre><code class="language-yaml">name: CI
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v*', '*.*.*']
+
+jobs:
+  ci:
+    uses: waynestate/preflight/.github/workflows/php-package.yml@&lt;full commit SHA&gt; # 0.1.1
+</code></pre>
+<h3 id="how-to-verify-3">How to verify<a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-3">#</a></h3>
+<p>Run the pipeline. For <code>package-publish</code>, the job runs only on tags and reads the registry first: a version already published from this commit passes quietly, and a version published from a different commit fails the pipeline. For a mirrored package, a release tag is not done until it is green on both sides.</p>
+<h2 id="0-1-0">0.1.0<a class="docs-heading-link" aria-label="Link to this section" href="#0-1-0">#</a></h2>
+<p>Released 2026-10-27. First tagged release.</p>
+<h3 id="breaking-4">Breaking<a class="docs-heading-link" aria-label="Link to this section" href="#breaking-4">#</a></h3>
+<p>0.1.0 is the first tagged release, so there is nothing to break: it is the baseline every later pin moves from.</p>
+<h3 id="deprecated-4">Deprecated<a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-4">#</a></h3>
+<p>Nothing was deprecated in 0.1.0.</p>
+<h3 id="steps-4">Steps<a class="docs-heading-link" aria-label="Link to this section" href="#steps-4">#</a></h3>
+<p>Include the components pinned to the <code>0.1.0</code> tag's full commit SHA:</p>
+<pre><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@&lt;full commit SHA&gt; # 0.1.0
+</code></pre>
+<h3 id="how-to-verify-4">How to verify<a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-4">#</a></h3>
+<p>Run the pipeline and confirm the component jobs run on the pin.</p>
+<h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
+<ul>
+<li><a href="changelog.html">Changelog</a>: the raw entries this page is built from.</li>
+<li><a href="install.html">Install</a>: the requirements, the include snippet, and how to verify the pipeline picked the component up.</li>
+<li><a href="guides/image-pins.html">Updating image pins</a>: why the pins are digests and how to look one up.</li>
+<li><a href="guides/renovate.html">Renovate</a>: what auto-merges, what waits, and what the runner project owes.</li>
+<li><a href="troubleshooting.html">Troubleshooting</a>: symptoms, causes and fixes.</li>
+<li><a href="index.html">Overview</a>: what Preflight is and where the manual starts.</li>
+</ul>
 </article>
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../docs/troubleshooting.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">Troubleshooting</span></a><a class="docs-pager__link docs-pager__link--next" href="../docs/changelog.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">Changelog</span></a></nav>
   </div>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#0-1-4">0.1.4</a></li><li class="docs-toc__item--sub"><a href="#breaking">Breaking</a></li><li class="docs-toc__item--sub"><a href="#deprecated">Deprecated</a></li><li class="docs-toc__item--sub"><a href="#steps">Steps</a></li><li class="docs-toc__item--sub"><a href="#how-to-verify">How to verify</a></li><li class="docs-toc__item"><a href="#0-1-3">0.1.3</a></li><li class="docs-toc__item--sub"><a href="#breaking-1">Breaking</a></li><li class="docs-toc__item--sub"><a href="#deprecated-1">Deprecated</a></li><li class="docs-toc__item--sub"><a href="#steps-1">Steps</a></li><li class="docs-toc__item--sub"><a href="#how-to-verify-1">How to verify</a></li><li class="docs-toc__item"><a href="#0-1-2">0.1.2</a></li><li class="docs-toc__item--sub"><a href="#breaking-2">Breaking</a></li><li class="docs-toc__item--sub"><a href="#deprecated-2">Deprecated</a></li><li class="docs-toc__item--sub"><a href="#steps-2">Steps</a></li><li class="docs-toc__item--sub"><a href="#how-to-verify-2">How to verify</a></li><li class="docs-toc__item"><a href="#0-1-1">0.1.1</a></li><li class="docs-toc__item--sub"><a href="#breaking-3">Breaking</a></li><li class="docs-toc__item--sub"><a href="#deprecated-3">Deprecated</a></li><li class="docs-toc__item--sub"><a href="#steps-3">Steps</a></li><li class="docs-toc__item--sub"><a href="#how-to-verify-3">How to verify</a></li><li class="docs-toc__item"><a href="#0-1-0">0.1.0</a></li><li class="docs-toc__item--sub"><a href="#breaking-4">Breaking</a></li><li class="docs-toc__item--sub"><a href="#deprecated-4">Deprecated</a></li><li class="docs-toc__item--sub"><a href="#steps-4">Steps</a></li><li class="docs-toc__item--sub"><a href="#how-to-verify-4">How to verify</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
   <span>Documents Preflight <span data-docs-version>0.1.4</span></span>

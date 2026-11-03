@@ -14,18 +14,21 @@ generator: Squire agent-ready
 
 **Every push is cleared for takeoff.**
 
-Preflight is a set of GitLab CI/CD components that give every WSU app the same checks: PROCTOR, PHP tests on each supported version, Composer audit, an SBOM, Pint, PHPStan and ESLint.
+Preflight is a set of GitLab CI/CD components that give every WSU app the same checks: PROCTOR, PHP tests on each supported version, Composer audit, an SBOM, Pint, PHPStan and ESLint. One include per component, pinned to a commit SHA, and the same checklist flies on every push.
 
-**Not to be confused with:** Preflight is the CI pipeline; it runs Pinstripe's style checks and PROCTOR but sets neither.
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      test_command: vendor/bin/phpunit
+```
 
-Front page: [`site/index.html`](https://github.com/waynestate/preflight/blob/main/site/index.html), a static page; see [`site/README.md`](https://github.com/waynestate/preflight/blob/main/site/README.md). On Citadel it is served by the raw-PHP deploy layer in [`deploy/`](https://github.com/waynestate/preflight/tree/main/deploy): a Squire kit whose front controller serves `site/` behind HELMET's security headers. For local development, keep serving `site/` directly.
+## Pick your path[#](https://preflight.apps.wayne.edu/docs/#pick-your-path)
 
-## Where the code lives[#](https://preflight.apps.wayne.edu/docs/#where-the-code-lives)
+- [Quick start](https://preflight.apps.wayne.edu/docs/guides/quick-start.html): wire one component into an app and watch the pipeline run it.
+- [Install](https://preflight.apps.wayne.edu/docs/install.html): the requirements, the include snippet, and how to verify the pipeline picked the component up.
+- [Reference](https://preflight.apps.wayne.edu/docs/reference/components.html): every component, with its include example, inputs and defaults.
 
-The canonical repository is on nougat: [enterprise-apps/preflight](https://nougat.snu.gs/enterprise-apps/preflight). git.wayne.edu and GitHub ([waynestate/preflight](https://github.com/waynestate/preflight)) are read-only mirrors of it. Open issues and merge requests on nougat, not on the mirrors. This moves to git.wayne.edu once it has CI runners. Cleared for takeoff from nougat; the mirrors are just other gates.
+Preflight 0.1.4; GitLab components are GA on the Free tier since GitLab 17.0; MIT licensed.
 
-****Walk round the aircraft**: the placards, the flight plan and the flight manual from the front page**
-
-![Three crops of the front page on a phone: the cockpit placards ('Seven components, one include each', with the proctor placard), the flight plan ('File a flight plan', the workflow rules and include block), and the flight manual ('Read before flight', a warning that a component is not a lock and a caution that it works on the same instance only).](https://preflight.apps.wayne.edu/docs/readme/gallery.jpg)
-
-Components are GA on the Free tier since GitLab 17.0. They work only within the same GitLab instance that hosts this project.
+Agents: fetch [https://preflight.apps.wayne.edu/llms.txt](https://preflight.apps.wayne.edu/llms.txt) for a machine-readable index of this manual.

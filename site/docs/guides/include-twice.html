@@ -18,7 +18,7 @@
   <a class="docs-header__brand" href="../../docs/index.html">Preflight</a>
   <span><a class="docs-header__home" rel="noopener" href="https://nougat.snu.gs/enterprise-apps/preflight">Source</a> <a class="docs-header__home" href="../../index.html">Back to Preflight</a></span>
 </header>
-<div class="docs-layout">
+<div class="docs-layout docs-layout--toc">
   <details class="docs-menu">
     <summary>Menu</summary>
     <nav class="docs-nav" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../../docs/index.html">Overview</a></li><li><a href="../../docs/install.html">Install</a></li><li><a href="../../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../../docs/guides/component-pint.html">The pint component</a></li><li><a href="../../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../../docs/guides/component-portability.html">The portability component</a></li><li><a href="../../docs/guides/include-twice.html" aria-current="page">Include a component twice</a></li><li><a href="../../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../../docs/guides/renovate.html">Renovate</a></li><li><a href="../../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../../docs/guides/template-lint.html">Template lint</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../../docs/reference/components.html">Components</a></li><li><a href="../../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../../docs/reference/local-checks.html">Local checks</a></li></ul></li><li><a href="../../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../../docs/upgrading.html">Upgrading</a></li><li><a href="../../docs/changelog.html">Changelog</a></li></ul></nav>
@@ -27,11 +27,47 @@
   <div class="docs-content">
     <main id="main">
       <article class="docs-article"><h1 id="include-a-component-twice">Include a component twice<a class="docs-heading-link" aria-label="Link to this section" href="#include-a-component-twice">#</a></h1>
-<p>STUB: this page is written in a later batch.</p>
+<p>Goal: run the same component more than once in one project, for example in a monorepo with two apps, and keep the two jobs separate. Set the <code>job_name</code> input on each include, as shown below.</p>
+<h2 id="set-job-name">Set <code>job_name</code><a class="docs-heading-link" aria-label="Link to this section" href="#set-job-name">#</a></h2>
+<p>Every component except <code>portability</code> takes a <code>job_name</code> input, whose default is the job's usual name. Set it when one project includes the same component more than once, for example in a monorepo with two apps; without it the two jobs would share a name and merge into one.</p>
+<pre><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@&lt;full commit SHA&gt; # &lt;tag&gt;
+    inputs:
+      working_dir: app
+      job_name: pint-app
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@&lt;full commit SHA&gt; # &lt;tag&gt;
+    inputs:
+      working_dir: admin
+      job_name: pint-admin
+</code></pre>
+<p>Expected: the pipeline runs two separately named jobs, <code>pint-app</code> and <code>pint-admin</code>, instead of two jobs that merge into one.</p>
+<aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p><code>job_name</code> ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release. <code>portability</code> keeps its two fixed job names, because <code>portability-run</code> waits on <code>portability-build</code>.</p></aside>
+<h2 id="another-use-the-next-php-release">Another use: the next PHP release<a class="docs-heading-link" aria-label="Link to this section" href="#another-use-the-next-php-release">#</a></h2>
+<p>Including a component twice is also how you try a PHP release before it is supported. Include <code>php-test</code> a second time for the release that is not supported yet, name that job, and let it fail. The name is what lets your own <code>.gitlab-ci.yml</code> loosen only that job:</p>
+<pre><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@&lt;full commit SHA&gt; # &lt;tag&gt;
+    inputs:
+      php_versions: [&quot;8.6&quot;]
+      job_name: php-test-next
+      # While 8.6 only has release candidate images, name the tag: php:${PHP_VERSION}-rc-cli-trixie
+      # image: &quot;php:${PHP_VERSION}-rc-cli-trixie&quot;
+
+php-test-next:
+  allow_failure: true
+</code></pre>
+<p>A red <code>php-test-next</code> job is an early warning, not a stop. Drop the <code>allow_failure</code> and move the version into the main <code>php_versions</code> list once the release is supported (the supported versions follow <code>policy.json</code>).</p>
+<h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
+<ul>
+<li><a href="component-php-test.html">The php-test component</a>: inputs, caching, and the full next-release example.</li>
+<li><a href="component-portability.html">The portability component</a>: the one component without a <code>job_name</code> input.</li>
+<li><a href="when-components-run.html">When the components run</a>: the <code>workflow:rules</code> block that belongs in the app's own file.</li>
+<li><a href="../reference/components.html">Reference</a>: every component, with its inputs and defaults.</li>
+</ul>
 </article>
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../../docs/guides/component-portability.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">The portability component</span></a><a class="docs-pager__link docs-pager__link--next" href="../../docs/guides/same-instance-only.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">Same instance only</span></a></nav>
   </div>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#set-job-name">Set job_name</a></li><li class="docs-toc__item"><a href="#another-use-the-next-php-release">Another use: the next PHP release</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
   <span>Documents Preflight <span data-docs-version>0.1.4</span></span>

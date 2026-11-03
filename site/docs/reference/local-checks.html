@@ -18,7 +18,7 @@
   <a class="docs-header__brand" href="../../docs/index.html">Preflight</a>
   <span><a class="docs-header__home" rel="noopener" href="https://nougat.snu.gs/enterprise-apps/preflight">Source</a> <a class="docs-header__home" href="../../index.html">Back to Preflight</a></span>
 </header>
-<div class="docs-layout">
+<div class="docs-layout docs-layout--toc">
   <details class="docs-menu">
     <summary>Menu</summary>
     <nav class="docs-nav" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../../docs/index.html">Overview</a></li><li><a href="../../docs/install.html">Install</a></li><li><a href="../../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../../docs/guides/component-pint.html">The pint component</a></li><li><a href="../../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../../docs/guides/component-portability.html">The portability component</a></li><li><a href="../../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../../docs/guides/renovate.html">Renovate</a></li><li><a href="../../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../../docs/guides/template-lint.html">Template lint</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../../docs/reference/components.html">Components</a></li><li><a href="../../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../../docs/reference/local-checks.html" aria-current="page">Local checks</a></li></ul></li><li><a href="../../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../../docs/upgrading.html">Upgrading</a></li><li><a href="../../docs/changelog.html">Changelog</a></li></ul></nav>
@@ -27,11 +27,123 @@
   <div class="docs-content">
     <main id="main">
       <article class="docs-article"><h1 id="local-checks">Local checks<a class="docs-heading-link" aria-label="Link to this section" href="#local-checks">#</a></h1>
-<p>STUB: this page is written in a later batch.</p>
+<p>How maintainers build, test and release this project with Docker, and the Composer scripts behind the gate. The pre-flight checklist, run from your own desk: run the same gate CI runs before you push anything.</p>
+<aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>Maintainers: how to build, test and release this project, and where its data comes from, is in <a rel="noopener" href="https://nougat.snu.gs/enterprise-apps/preflight/-/blob/main/MAINTAINING.md">MAINTAINING.md</a> on the canonical repository.</p></aside>
+<h2 id="the-full-gate">The full gate<a class="docs-heading-link" aria-label="Link to this section" href="#the-full-gate">#</a></h2>
+<p>Run the template lint and the fixture tests with Docker:</p>
+<pre><code class="language-sh">docker run --rm -v &quot;$(pwd):/app&quot; -w /app composer:2 composer install
+docker run --rm -v &quot;$(pwd):/app&quot; -w /app composer:2 composer ci
+</code></pre>
+<pre><code class="language-powershell">docker run --rm -v &quot;${PWD}:/app&quot; -w /app composer:2 composer install
+docker run --rm -v &quot;${PWD}:/app&quot; -w /app composer:2 composer ci
+</code></pre>
+<p>In PowerShell, use <code>${PWD}</code> instead of <code>$(pwd)</code>. <code>composer ci</code> is the whole gate: it runs the template lint, the fixture tests, Pint, PHPStan, the agent-ready file check and the docs site check, in that order.</p>
+<h2 id="composer-scripts">Composer scripts<a class="docs-heading-link" aria-label="Link to this section" href="#composer-scripts">#</a></h2>
+<p>The scripts from <code>composer.json</code>:</p>
+<pre><code class="language-json">{
+    &quot;ci&quot;: [
+        &quot;php bin/lint-templates&quot;,
+        &quot;php bin/lint-templates --test&quot;,
+        &quot;@lint&quot;,
+        &quot;@analyse&quot;,
+        &quot;@site:agent-ready-check&quot;,
+        &quot;@docs:check&quot;
+    ],
+    &quot;lint&quot;: &quot;pint --test&quot;,
+    &quot;fix&quot;: &quot;pint&quot;,
+    &quot;analyse&quot;: &quot;phpstan analyse --memory-limit=1G&quot;,
+    &quot;site:agent-ready&quot;: &quot;php bin/agent-ready.php&quot;,
+    &quot;site:agent-ready-check&quot;: &quot;php bin/agent-ready.php --check&quot;,
+    &quot;docs&quot;: &quot;php bin/docs-site.php&quot;,
+    &quot;docs:check&quot;: &quot;php bin/docs-site.php --check&quot;
+}
+</code></pre>
+<div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Script</th>
+<th>Runs</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ci</code></td>
+<td>the array above</td>
+<td>The full CI gate: template lint, fixture tests, Pint, PHPStan, agent-ready files, docs site.</td>
+</tr>
+<tr>
+<td><code>lint</code></td>
+<td><code>pint --test</code></td>
+<td>Run Pint in test mode; fails on style errors without changing files.</td>
+</tr>
+<tr>
+<td><code>fix</code></td>
+<td><code>pint</code></td>
+<td>Run Pint and rewrite the files it finds.</td>
+</tr>
+<tr>
+<td><code>analyse</code></td>
+<td><code>phpstan analyse --memory-limit=1G</code></td>
+<td>Run PHPStan with a 1G memory limit.</td>
+</tr>
+<tr>
+<td><code>site:agent-ready</code></td>
+<td><code>php bin/agent-ready.php</code></td>
+<td>Rewrite the Markdown twins, llms.txt, llms-full.txt, robots.txt and sitemap.xml in <code>site/</code> (Squire's agent-ready kit).</td>
+</tr>
+<tr>
+<td><code>site:agent-ready-check</code></td>
+<td><code>php bin/agent-ready.php --check</code></td>
+<td>Fail when the agent-ready files are stale, a page lacks its Markdown link, a prompt drifts from the docs, or the kit was edited here.</td>
+</tr>
+<tr>
+<td><code>docs</code></td>
+<td><code>php bin/docs-site.php</code></td>
+<td>Build the docs site from <code>docs/</code> into <code>site/docs/</code> (Squire's docs builder): render the pages, fill the generated command and environment reference, and stamp the current version.</td>
+</tr>
+<tr>
+<td><code>docs:check</code></td>
+<td><code>php bin/docs-site.php --check</code></td>
+<td>Fail when the built docs site is stale or the generated command or environment reference has drifted from the CLI or source.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="the-php-fixture-app">The PHP fixture app<a class="docs-heading-link" aria-label="Link to this section" href="#the-php-fixture-app">#</a></h2>
+<p>Run the PHP fixture app separately:</p>
+<pre><code class="language-sh">docker run --rm -v &quot;$(pwd)/tests/fixture-app:/app&quot; -w /app composer:2 composer install
+docker run --rm -v &quot;$(pwd)/tests/fixture-app:/app&quot; -w /app php:8.4-cli vendor/bin/phpunit
+</code></pre>
+<h2 id="the-portability-fixtures">The portability fixtures<a class="docs-heading-link" aria-label="Link to this section" href="#the-portability-fixtures">#</a></h2>
+<p>Run the portability fixtures with Docker; they build and boot the three fixtures under <code>tests/portability</code> the strict way and exit 0 only when <code>good</code> passes and both <code>bad-*</code> fixtures fail:</p>
+<pre><code class="language-sh">sh tests/check-portability.sh
+</code></pre>
+<pre><code class="language-powershell">pwsh -File tests/check-portability.ps1
+</code></pre>
+<h2 id="proof">Proof<a class="docs-heading-link" aria-label="Link to this section" href="#proof">#</a></h2>
+<p>Proof runs against real Wayne State applications are on a private site, <a rel="noopener" href="https://proof.apps.wayne.edu/preflight/">proof.apps.wayne.edu/preflight</a>, behind a Wayne State employee sign-in.</p>
+<h2 id="docs">Docs<a class="docs-heading-link" aria-label="Link to this section" href="#docs">#</a></h2>
+<p>The full documentation lives at <a rel="noopener" href="https://preflight.apps.wayne.edu/docs/">preflight.apps.wayne.edu/docs/</a> on the project site, built from <code>docs/</code> by Squire's docs builder. It starts with the overview page; the rest of the manual follows as the pages are written.</p>
+<ul>
+<li><code>composer docs</code> rebuilds <code>site/docs/</code> from <code>docs/</code>; run it after editing a page.</li>
+<li><code>composer docs:check</code> fails when the built site is stale; <code>composer ci</code> runs it.</li>
+</ul>
+<p>The pages are committed because the deploy server serves <code>site/</code> without building. Every page links back to its Markdown, and the footer stamps the version the docs describe. Cleared for takeoff: the flight manual flies with the aircraft.</p>
+<h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
+<ul>
+<li><a href="components.html">Components</a></li>
+<li><a href="conventions.html">Shared conventions</a></li>
+<li><a href="../guides/template-lint.html">Template lint</a></li>
+<li><a href="../guides/image-pins.html">Updating image pins</a></li>
+<li><a href="../troubleshooting.html">Troubleshooting</a></li>
+<li><a href="../changelog.html">Changelog</a></li>
+<li><a href="../upgrading.html">Upgrading</a></li>
+</ul>
 </article>
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../../docs/reference/conventions.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">Shared conventions</span></a><a class="docs-pager__link docs-pager__link--next" href="../../docs/troubleshooting.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">Troubleshooting</span></a></nav>
   </div>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#the-full-gate">The full gate</a></li><li class="docs-toc__item"><a href="#composer-scripts">Composer scripts</a></li><li class="docs-toc__item"><a href="#the-php-fixture-app">The PHP fixture app</a></li><li class="docs-toc__item"><a href="#the-portability-fixtures">The portability fixtures</a></li><li class="docs-toc__item"><a href="#proof">Proof</a></li><li class="docs-toc__item"><a href="#docs">Docs</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
   <span>Documents Preflight <span data-docs-version>0.1.4</span></span>

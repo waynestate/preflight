@@ -106,13 +106,13 @@
 <td><code>config</code></td>
 <td>string</td>
 <td><code>phpstan.neon</code></td>
-<td>Path to the app's PHPStan config file.</td>
+<td>Path to the app's PHPStan config file. It must be a relative path; GitLab refuses the pipeline at creation if it is not.</td>
 </tr>
 <tr>
 <td><code>memory_limit</code></td>
 <td>string</td>
 <td><code>1G</code></td>
-<td>Memory limit passed to PHPStan.</td>
+<td>Memory limit passed to PHPStan. A PHP size such as <code>1G</code>, <code>512M</code> or <code>-1</code>; GitLab refuses the pipeline at creation if it is not.</td>
 </tr>
 <tr>
 <td><code>working_dir</code></td>
@@ -123,6 +123,7 @@
 </tbody>
 </table></div>
 <p><code>job_name</code> must match <code>^[A-Za-z0-9_][A-Za-z0-9_.-]*$</code>, and <code>working_dir</code> must match <code>^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$</code>.</p>
+<aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p><code>config</code> must be a relative path, and <code>memory_limit</code> takes a PHP size such as <code>1G</code>, <code>512M</code> or <code>-1</code>. Each carries an input <code>regex</code>, so GitLab refuses the pipeline at creation when a value does not match.</p></aside>
 <h2 id="verify">Verify<a class="docs-heading-link" aria-label="Link to this section" href="#verify">#</a></h2>
 <p>Push the change. The components are ordinary jobs, so the <code>phpstan</code> job runs whenever the app's pipeline runs, in the <code>test</code> stage by default. A green job means no static analysis errors, and the Code Quality report carries the findings.</p>
 <h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>

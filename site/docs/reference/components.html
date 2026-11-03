@@ -18,7 +18,7 @@
   <a class="docs-header__brand" href="../../docs/index.html">Preflight</a>
   <span><a class="docs-header__home" rel="noopener" href="https://nougat.snu.gs/enterprise-apps/preflight">Source</a> <a class="docs-header__home" href="../../index.html">Back to Preflight</a></span>
 </header>
-<div class="docs-layout">
+<div class="docs-layout docs-layout--toc">
   <details class="docs-menu">
     <summary>Menu</summary>
     <nav class="docs-nav" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../../docs/index.html">Overview</a></li><li><a href="../../docs/install.html">Install</a></li><li><a href="../../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../../docs/guides/component-pint.html">The pint component</a></li><li><a href="../../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../../docs/guides/component-portability.html">The portability component</a></li><li><a href="../../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../../docs/guides/renovate.html">Renovate</a></li><li><a href="../../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../../docs/guides/template-lint.html">Template lint</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../../docs/reference/components.html" aria-current="page">Components</a></li><li><a href="../../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../../docs/reference/local-checks.html">Local checks</a></li></ul></li><li><a href="../../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../../docs/upgrading.html">Upgrading</a></li><li><a href="../../docs/changelog.html">Changelog</a></li></ul></nav>
@@ -27,11 +27,685 @@
   <div class="docs-content">
     <main id="main">
       <article class="docs-article"><h1 id="components">Components<a class="docs-heading-link" aria-label="Link to this section" href="#components">#</a></h1>
-<p>STUB: this page is written in a later batch.</p>
+<p>Every GitLab CI component Preflight ships, with its include example, its inputs and their defaults, and the jobs and timeouts each template defines. Add one include to your app's <code>.gitlab-ci.yml</code>, then follow the per-component guide for setup. Like a real pre-flight check, the point is to find the fault on the ground, where it is cheap to fix.</p>
+<aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>Components are GA on the Free tier since GitLab 17.0. They work only within the same GitLab instance that hosts this project.</p></aside>
+<p><img src="../readme/checklist.svg" alt="Preflight's before-takeoff checklist card. 1 PROCTOR, checked; 2 PHP tests, 8.3, 8.4 and 8.5 pass; 3 Composer audit, no advisories; 4 SBOM, validated; 5 Pint, clean; 6 PHPStan, no errors; 7 ESLint and Prettier, clean; 8 clearance, cleared for takeoff. Beside it the annunciator panel lights a green lamp per check, with a11y, contract and freshness marked coming soon, and lists the seven checks, all in the 0.1.4 tag." /></p>
+<p>The checklist, item by item, with each item's job and timeout read from <code>templates/</code>:</p>
+<div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Item</th>
+<th>Job</th>
+<th>Timeout</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>PROCTOR</td>
+<td><code>proctor</code></td>
+<td>30 minutes</td>
+</tr>
+<tr>
+<td>2</td>
+<td>PHP tests, 8.3, 8.4 and 8.5</td>
+<td><code>php-test</code>, one job per version</td>
+<td>30 minutes</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Composer audit</td>
+<td><code>composer-audit</code></td>
+<td>30 minutes</td>
+</tr>
+<tr>
+<td>4</td>
+<td>SBOM</td>
+<td><code>sbom</code></td>
+<td>30 minutes</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Pint</td>
+<td><code>pint</code></td>
+<td>10m</td>
+</tr>
+<tr>
+<td>6</td>
+<td>PHPStan</td>
+<td><code>phpstan</code></td>
+<td>10m</td>
+</tr>
+<tr>
+<td>7</td>
+<td>ESLint and Prettier</td>
+<td><code>eslint</code></td>
+<td>15m</td>
+</tr>
+</tbody>
+</table></div>
+<p>Every job the templates define is <code>interruptible: true</code>. Every component except <code>portability</code> takes a <code>job_name</code> input whose default is the job's usual name; set it when one project includes the same component more than once. <code>portability</code> keeps its two fixed job names, because <code>portability-run</code> waits on <code>portability-build</code>.</p>
+<h2 id="proctor">proctor<a class="docs-heading-link" aria-label="Link to this section" href="#proctor">#</a></h2>
+<p>Runs <code>vendor/bin/proctor check --format=codequality</code> and publishes the result as a GitLab Code Quality report. The job installs the app's dependencies with <code>composer install --no-plugins --no-scripts</code>, so the app's plugins and scripts never run inside the job.</p>
+<pre><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      proctor_command: vendor/bin/proctor check --format=codequality
+</code></pre>
+<div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Type</th>
+<th>Default</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stage</code></td>
+<td>string</td>
+<td><code>test</code></td>
+<td>Pipeline stage for the job.</td>
+</tr>
+<tr>
+<td><code>job_name</code></td>
+<td>string</td>
+<td><code>proctor</code></td>
+<td>Name of the job. Set it when you include this component more than once.</td>
+</tr>
+<tr>
+<td><code>image</code></td>
+<td>string</td>
+<td><code>php:8.4-cli-trixie@sha256:9cf851bc2c1b37c3e59dfd677a3c3e56d485af5a47c93f629424bb039eafcb69</code></td>
+<td>Docker image for the job.</td>
+</tr>
+<tr>
+<td><code>composer_version</code></td>
+<td>string</td>
+<td><code>2.10.3</code></td>
+<td>Composer version to install.</td>
+</tr>
+<tr>
+<td><code>allow_failure</code></td>
+<td>boolean</td>
+<td><code>false</code></td>
+<td>Whether the job can fail without failing the pipeline.</td>
+</tr>
+<tr>
+<td><code>proctor_command</code></td>
+<td>string</td>
+<td><code>vendor/bin/proctor check --format=codequality</code></td>
+<td>The proctor command to run.</td>
+</tr>
+<tr>
+<td><code>working_dir</code></td>
+<td>string</td>
+<td><code>.</code></td>
+<td>Directory to run the command in, relative to the project root.</td>
+</tr>
+</tbody>
+</table></div>
+<p>From <code>templates/proctor/template.yml</code>: the single job (named by <code>job_name</code>) runs in the <code>test</code> stage by default, is <code>interruptible: true</code>, and has a timeout of 30 minutes. It installs Composer with the official getcomposer.org installer, verifies the installer's SHA-384 against composer.github.io/installer.sig, and pins the installed version to <code>composer_version</code>. It then runs <code>composer install --no-interaction --no-progress --no-plugins --no-scripts</code>, so the app's plugins and scripts never run with the job's access. The command's output goes through a plain redirect (not <code>tee</code>) to <code>gl-code-quality-report.json</code> at the project root, which keeps PROCTOR's exit code as the job result and gives the artifact the same path for every <code>working_dir</code>, including <code>.</code>. The report is published as a Code Quality report with <code>when: always</code>.</p>
+<h2 id="php-test">php-test<a class="docs-heading-link" aria-label="Link to this section" href="#php-test">#</a></h2>
+<p>Runs the test command on each supported PHP version through <code>parallel:matrix</code>.</p>
+<pre><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      test_command: vendor/bin/phpunit
+</code></pre>
+<div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Type</th>
+<th>Default</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stage</code></td>
+<td>string</td>
+<td><code>test</code></td>
+<td>Pipeline stage for the jobs.</td>
+</tr>
+<tr>
+<td><code>job_name</code></td>
+<td>string</td>
+<td><code>php-test</code></td>
+<td>Name of the job. Set it when you include this component more than once.</td>
+</tr>
+<tr>
+<td><code>image</code></td>
+<td>string</td>
+<td><code>php:${PHP_VERSION}-cli-trixie</code></td>
+<td>Docker image for the jobs. The default carries the literal <code>${PHP_VERSION}</code>, which GitLab expands in the image at job time.</td>
+</tr>
+<tr>
+<td><code>php_versions</code></td>
+<td>array</td>
+<td><code>[&quot;8.3&quot;, &quot;8.4&quot;, &quot;8.5&quot;]</code></td>
+<td>PHP versions to test against.</td>
+</tr>
+<tr>
+<td><code>composer_version</code></td>
+<td>string</td>
+<td><code>2.10.3</code></td>
+<td>Composer version to install.</td>
+</tr>
+<tr>
+<td><code>test_command</code></td>
+<td>string</td>
+<td><code>vendor/bin/phpunit</code></td>
+<td>The test command to run.</td>
+</tr>
+<tr>
+<td><code>working_dir</code></td>
+<td>string</td>
+<td><code>.</code></td>
+<td>Directory to run the command in, relative to the project root.</td>
+</tr>
+</tbody>
+</table></div>
+<p>From <code>templates/php-test/template.yml</code>: one job is created per entry in <code>php_versions</code> through <code>parallel:matrix</code>; <code>PHP_VERSION</code> becomes a CI/CD variable in each job, which the image input's default expands, and each job runs the newest patch release of its version. The default image is deliberately tag-pinned (the template points at the README section Updating image pins). Each job installs Composer the same way as proctor, runs <code>composer install --no-interaction --no-progress</code>, and then the test command. The jobs are <code>interruptible: true</code> with a timeout of 30 minutes.</p>
+<h3 id="caching">Caching<a class="docs-heading-link" aria-label="Link to this section" href="#caching">#</a></h3>
+<p>The jobs always cache Composer downloads in <code>.composer-cache/</code> so repeat runs do not re-download every package. The cache key depends on <code>composer.lock</code> and is prefixed with the PHP version, so a dependency change invalidates the cache and each PHP version gets its own cache. The template sets <code>COMPOSER_CACHE_DIR</code> to <code>$CI_PROJECT_DIR/.composer-cache</code>, keys the cache on <code>composer.lock</code> with the prefix <code>php-${PHP_VERSION}</code>, caches the path <code>.composer-cache/</code>, and uses the policy <code>pull-push</code>.</p>
+<h3 id="try-the-next-php-release-without-breaking-the-pipeline">Try the next PHP release without breaking the pipeline<a class="docs-heading-link" aria-label="Link to this section" href="#try-the-next-php-release-without-breaking-the-pipeline">#</a></h3>
+<p>Include <code>php-test</code> a second time for the release that is not supported yet, name that job, and let it fail. The name is what lets your own <code>.gitlab-ci.yml</code> loosen only that job:</p>
+<pre><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@&lt;full commit SHA&gt; # &lt;tag&gt;
+    inputs:
+      php_versions: [&quot;8.6&quot;]
+      job_name: php-test-next
+      # While 8.6 only has release candidate images, name the tag: php:${PHP_VERSION}-rc-cli-trixie
+      # image: &quot;php:${PHP_VERSION}-rc-cli-trixie&quot;
+
+php-test-next:
+  allow_failure: true
+</code></pre>
+<p>A red <code>php-test-next</code> job is an early warning, not a stop. Drop the <code>allow_failure</code> and move the version into the main <code>php_versions</code> list once the release is supported (the supported versions follow <code>policy.json</code>).</p>
+<h2 id="composer-audit">composer-audit<a class="docs-heading-link" aria-label="Link to this section" href="#composer-audit">#</a></h2>
+<p>Runs <code>composer audit --locked</code> and fails on advisories.</p>
+<pre><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      working_dir: .
+</code></pre>
+<div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Type</th>
+<th>Default</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stage</code></td>
+<td>string</td>
+<td><code>test</code></td>
+<td>Pipeline stage for the job.</td>
+</tr>
+<tr>
+<td><code>job_name</code></td>
+<td>string</td>
+<td><code>composer-audit</code></td>
+<td>Name of the job. Set it when you include this component more than once.</td>
+</tr>
+<tr>
+<td><code>image</code></td>
+<td>string</td>
+<td><code>composer:2@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc</code></td>
+<td>Docker image for the job.</td>
+</tr>
+<tr>
+<td><code>working_dir</code></td>
+<td>string</td>
+<td><code>.</code></td>
+<td>Directory to run composer audit in, relative to the project root.</td>
+</tr>
+</tbody>
+</table></div>
+<p>From <code>templates/composer-audit/template.yml</code>: the <code>composer:2</code> image already ships Composer, so there is no install step. The job runs <code>composer audit --locked</code>, which exits non-zero when it finds advisories, and fails the job. There is no <code>allow_failure</code> input: advisories must fail. The job is <code>interruptible: true</code> with a timeout of 30 minutes.</p>
+<h3 id="run-it-on-a-schedule">Run it on a schedule<a class="docs-heading-link" aria-label="Link to this section" href="#run-it-on-a-schedule">#</a></h3>
+<p>New advisories are published after code is merged, so a green pipeline today can be stale tomorrow. Create a weekly pipeline schedule on the default branch: project settings, Build, Pipeline schedules. The component needs nothing extra; it carries no <code>rules:</code> block, so it runs in scheduled pipelines like any other. Creating the schedule is a project setting, not a file in the app's repo, and someone with Maintainer rights on the app must do it. It is the one preflight check that books its own flight time.</p>
+<h2 id="sbom">sbom<a class="docs-heading-link" aria-label="Link to this section" href="#sbom">#</a></h2>
+<p>Generates a CycloneDX SBOM with <code>cyclonedx/cyclonedx-php-composer</code>, validates it, and publishes it as an artifact. The plugin is installed globally, so the app's <code>composer.json</code> is never touched.</p>
+<pre><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      output: sbom.cdx.json
+</code></pre>
+<div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Type</th>
+<th>Default</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stage</code></td>
+<td>string</td>
+<td><code>test</code></td>
+<td>Pipeline stage for the job.</td>
+</tr>
+<tr>
+<td><code>job_name</code></td>
+<td>string</td>
+<td><code>sbom</code></td>
+<td>Name of the job. Set it when you include this component more than once.</td>
+</tr>
+<tr>
+<td><code>image</code></td>
+<td>string</td>
+<td><code>composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc</code></td>
+<td>Docker image for the job.</td>
+</tr>
+<tr>
+<td><code>omit_dev</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td>Whether to omit dev dependencies from the SBOM.</td>
+</tr>
+<tr>
+<td><code>output</code></td>
+<td>string</td>
+<td><code>sbom.cdx.json</code></td>
+<td>Path of the SBOM file to publish, relative to the project root.</td>
+</tr>
+</tbody>
+</table></div>
+<p>From <code>templates/sbom/template.yml</code>: the job runs <code>composer install --no-interaction --no-progress --prefer-dist</code>, allows the plugin globally with <code>composer global config --no-plugins allow-plugins.cyclonedx/cyclonedx-php-composer true</code>, installs <code>cyclonedx/cyclonedx-php-composer:^6.2</code> globally, and then runs <code>composer CycloneDX:make-sbom --output-format=JSON --output-reproducible --validate</code> with <code>--omit=dev</code> added while <code>omit_dev</code> is true, writing to the <code>output</code> path. The <code>--validate</code> flag fails the job on an invalid SBOM. The SBOM file is published as an artifact with <code>expire_in: 30 days</code>. The job is <code>interruptible: true</code> with a timeout of 30 minutes.</p>
+<h2 id="pint">pint<a class="docs-heading-link" aria-label="Link to this section" href="#pint">#</a></h2>
+<p>Version 1 · Category: Testing/Validation · Tags: php,style,pint</p>
+<p>Runs the app's own <a rel="noopener" href="https://laravel.com/docs/12.x/pint">Laravel Pint</a> in test mode and fails the pipeline on style errors. The app must require <code>laravel/pint</code> as a dev dependency and ship a <code>pint.json</code> (or point <code>config</code> at its own file).</p>
+<pre><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      config: pint.json
+</code></pre>
+<div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Type</th>
+<th>Default</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stage</code></td>
+<td>string</td>
+<td><code>test</code></td>
+<td>Pipeline stage for the job.</td>
+</tr>
+<tr>
+<td><code>job_name</code></td>
+<td>string</td>
+<td><code>pint</code></td>
+<td>Name of the job. Set it when you include this component more than once.</td>
+</tr>
+<tr>
+<td><code>image</code></td>
+<td>string</td>
+<td><code>composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc</code></td>
+<td>Docker image for the job.</td>
+</tr>
+<tr>
+<td><code>config</code></td>
+<td>string</td>
+<td><code>pint.json</code></td>
+<td>Path to the app's Pint config file.</td>
+</tr>
+<tr>
+<td><code>working_dir</code></td>
+<td>string</td>
+<td><code>.</code></td>
+<td>Directory to run Pint in, relative to the project root.</td>
+</tr>
+</tbody>
+</table></div>
+<p>From <code>templates/pint/template.yml</code>: the component does not install Pint itself; it runs <code>composer install --no-interaction --no-progress --prefer-dist</code> and then the app's own Pint in test mode against the <code>config</code> file. The job is <code>interruptible: true</code> with a timeout of 10m.</p>
+<h2 id="phpstan">phpstan<a class="docs-heading-link" aria-label="Link to this section" href="#phpstan">#</a></h2>
+<p>Version 1 · Category: Testing/Validation · Tags: php,static-analysis,phpstan</p>
+<p>Runs the app's own <a rel="noopener" href="https://phpstan.org/">PHPStan</a> and fails the pipeline on static analysis errors, writing a GitLab Code Quality report. The app must require <code>phpstan/phpstan</code> as a dev dependency and ship a <code>phpstan.neon</code> (or point <code>config</code> at its own file).</p>
+<pre><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      config: phpstan.neon
+      memory_limit: 1G
+</code></pre>
+<div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Type</th>
+<th>Default</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stage</code></td>
+<td>string</td>
+<td><code>test</code></td>
+<td>Pipeline stage for the job.</td>
+</tr>
+<tr>
+<td><code>job_name</code></td>
+<td>string</td>
+<td><code>phpstan</code></td>
+<td>Name of the job. Set it when you include this component more than once.</td>
+</tr>
+<tr>
+<td><code>image</code></td>
+<td>string</td>
+<td><code>composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc</code></td>
+<td>Docker image for the job.</td>
+</tr>
+<tr>
+<td><code>config</code></td>
+<td>string</td>
+<td><code>phpstan.neon</code></td>
+<td>Path to the app's PHPStan config file.</td>
+</tr>
+<tr>
+<td><code>memory_limit</code></td>
+<td>string</td>
+<td><code>1G</code></td>
+<td>Memory limit passed to PHPStan.</td>
+</tr>
+<tr>
+<td><code>working_dir</code></td>
+<td>string</td>
+<td><code>.</code></td>
+<td>Directory to run PHPStan in, relative to the project root.</td>
+</tr>
+</tbody>
+</table></div>
+<p>From <code>templates/phpstan/template.yml</code>: the component does not install PHPStan itself; it runs <code>composer install --no-interaction --no-progress --prefer-dist</code> and then the app's own PHPStan with <code>--no-progress --error-format=gitlab</code>, the <code>memory_limit</code> value and the <code>config</code> file, redirecting the output to <code>$CI_PROJECT_DIR/phpstan-report.json</code>. The report is published as a Code Quality report with <code>when: always</code>. The job is <code>interruptible: true</code> with a timeout of 10m.</p>
+<h2 id="eslint">eslint<a class="docs-heading-link" aria-label="Link to this section" href="#eslint">#</a></h2>
+<p>Version 1 · Category: Testing/Validation · Tags: javascript,style,eslint,prettier</p>
+<p>Runs the app's own <a rel="noopener" href="https://eslint.org/">ESLint</a> (and <a rel="noopener" href="https://prettier.io/">Prettier</a>) and fails the pipeline on lint or format errors. The app must require <code>@waynestate/pinstripe</code>, <code>eslint</code> and <code>prettier</code> as dev dependencies and ship an <code>eslint.config.js</code> (or point <code>eslint_args</code> at its own files).</p>
+<pre><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      eslint_args: .
+</code></pre>
+<div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Type</th>
+<th>Default</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stage</code></td>
+<td>string</td>
+<td><code>test</code></td>
+<td>Pipeline stage for the job.</td>
+</tr>
+<tr>
+<td><code>job_name</code></td>
+<td>string</td>
+<td><code>eslint</code></td>
+<td>Name of the job. Set it when you include this component more than once.</td>
+</tr>
+<tr>
+<td><code>image</code></td>
+<td>string</td>
+<td><code>node:22.13-alpine@sha256:e2b39f7b64281324929257d0f8004fb6cb4bf0fdfb9aa8cedb235a766aec31da</code></td>
+<td>Docker image for the job.</td>
+</tr>
+<tr>
+<td><code>working_dir</code></td>
+<td>string</td>
+<td><code>.</code></td>
+<td>Directory to run the commands in, relative to the project root.</td>
+</tr>
+<tr>
+<td><code>eslint_args</code></td>
+<td>string</td>
+<td><code>.</code></td>
+<td>Arguments passed to eslint.</td>
+</tr>
+<tr>
+<td><code>prettier</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td>Whether to also run <code>prettier --check</code>.</td>
+</tr>
+</tbody>
+</table></div>
+<p>From <code>templates/eslint/template.yml</code>: the component does not install ESLint or Prettier itself; it runs <code>npm ci --ignore-scripts --cache .npm-cache</code> (the cache is keyed on <code>package-lock.json</code> and stores <code>.npm-cache/</code>), then <code>npx --no-install eslint</code> with the <code>eslint_args</code> value, and, while <code>prettier</code> is true, <code>npx --no-install prettier --check .</code>. The job is <code>interruptible: true</code> with a timeout of 15m.</p>
+<h2 id="package-publish">package-publish<a class="docs-heading-link" aria-label="Link to this section" href="#package-publish">#</a></h2>
+<p>Version 1 · Category: Release/Publishing · Tags: composer,publish,release</p>
+<p>Publishes a semantic version tag to the GitLab group's built-in Composer registry. The job runs only on tags, reads the registry first, and refuses a moved version: a version already published from this commit passes quietly, and a version published from a different commit fails the pipeline, because GitLab would otherwise overwrite it without a word. The default image ships curl and PHP, which the job uses for the registry round trip.</p>
+<pre><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      group_id: &quot;&lt;your group id&gt;&quot;
+</code></pre>
+<div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Type</th>
+<th>Default</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stage</code></td>
+<td>string</td>
+<td><code>deploy</code></td>
+<td>Pipeline stage for the job.</td>
+</tr>
+<tr>
+<td><code>job_name</code></td>
+<td>string</td>
+<td><code>package-publish</code></td>
+<td>Name of the job. Set it when you include this component more than once.</td>
+</tr>
+<tr>
+<td><code>image</code></td>
+<td>string</td>
+<td><code>composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc</code></td>
+<td>Docker image for the job. The default ships curl and PHP, which the job uses for the registry round trip.</td>
+</tr>
+<tr>
+<td><code>group_id</code></td>
+<td>string</td>
+<td>none</td>
+<td>Numeric id of the GitLab group whose built-in Composer registry hosts the package. Required.</td>
+</tr>
+<tr>
+<td><code>read_token_variable</code></td>
+<td>string</td>
+<td><code>PACKAGE_READ_TOKEN</code></td>
+<td>Name of the masked CI variable holding a token with the <code>read_package_registry</code> scope, used to read the registry before publishing.</td>
+</tr>
+</tbody>
+</table></div>
+<aside class="docs-callout docs-callout--warning" role="note"><p class="docs-callout__label">Warning</p><p>Protect your release tags.</p></aside>
+<p>From <code>templates/package-publish/template.yml</code>: the job runs only when <code>$CI_COMMIT_TAG</code> is set. The tag must be a semantic version, <code>1.2.3</code> or <code>v1.2.3</code> with an optional pre-release, or the job fails. The package name comes from <code>composer.json</code>, the file the registry serves. The job reads the masked CI variable named by <code>read_token_variable</code>, checks that <code>group_id</code> is numeric, reads the group's Composer registry index with the token, and follows the package metadata to the version already on the manifest. A version already published at this commit passes quietly (exit 0); a version published at a different commit fails (exit 1). Publishing posts the tag to the project's Composer packages endpoint with the job token. The job is <code>interruptible: true</code> with a timeout of 30 minutes.</p>
+<h2 id="renovate">renovate<a class="docs-heading-link" aria-label="Link to this section" href="#renovate">#</a></h2>
+<p>Runs <a rel="noopener" href="https://docs.renovatebot.com/">Renovate</a> as a scheduled or manual job that bumps image digests, GitHub action SHAs and package versions across the group's repositories, and merges the green ones itself. Bumps of <code>component:</code> include pins are covered by the preset and wait for review. Majors open a merge request and wait for a person. See <a href="../guides/renovate.html">Renovate</a> for what auto-merges and what waits.</p>
+<pre><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      git_author: &quot;Preflight Bot &lt;preflight-bot@example.com&gt;&quot;
+</code></pre>
+<div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Type</th>
+<th>Default</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>job_name</code></td>
+<td>string</td>
+<td><code>renovate</code></td>
+<td>Name of the job. Set it when you include this component more than once.</td>
+</tr>
+<tr>
+<td><code>image</code></td>
+<td>string</td>
+<td><code>renovate/renovate:44.192.2@sha256:37960a62ba1faa9079a7c4eead9b3f4470748a64ecd207e06c09fd8858673e17</code></td>
+<td>Docker image for the job.</td>
+</tr>
+<tr>
+<td><code>autodiscover_filter</code></td>
+<td>string</td>
+<td><code>$CI_PROJECT_NAMESPACE/*</code></td>
+<td>Glob limiting which projects Renovate discovers, relative to the runner project's namespace.</td>
+</tr>
+<tr>
+<td><code>dry_run</code></td>
+<td>string</td>
+<td><code>&quot;null&quot;</code></td>
+<td>Dry run mode: <code>null</code> (disabled), <code>lookup</code> or <code>full</code>.</td>
+</tr>
+<tr>
+<td><code>git_author</code></td>
+<td>string</td>
+<td>none</td>
+<td>Author of the commits and merge requests Renovate creates, in the form <code>Name &lt;email&gt;</code>. Required.</td>
+</tr>
+</tbody>
+</table></div>
+<p>From <code>templates/renovate/template.yml</code>: the job has no <code>stage</code> input and sets no stage. It runs only on scheduled and manual pipelines (<code>$CI_PIPELINE_SOURCE == &quot;schedule&quot;</code> or <code>&quot;web&quot;</code>). It writes its <code>config.js</code> at job time, so the <code>registryAliases</code> entry for the GitLab instance comes from the predefined <code>CI_SERVER_FQDN</code> variable; no hostname is stored in the repository, so the public mirror stays clean. It does not set <code>RENOVATE_TOKEN</code> or <code>GITHUB_COM_TOKEN</code> in the job <code>variables:</code> on purpose: a self-reference such as <code>X: $X</code> arrives as literal text on GitLab 19.5 and would shadow the masked project CI/CD variables, so the job reads both tokens straight from the project. The job is <code>interruptible: true</code> with a timeout of 1 hour.</p>
+<h2 id="portability">portability<a class="docs-heading-link" aria-label="Link to this section" href="#portability">#</a></h2>
+<p>Proves the app image meets the twelve-factor boot contract. It builds the image with Buildah (no Docker daemon, no elevated runner), boots it the strict way, and validates it with goss: the health path answers 200 for a foreign Host, the root filesystem and the app root are not writable, the app runs as the declared uid, and each declared writable path is writable. No takeoff without a clean pre-flight.</p>
+<pre><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@&lt;full-commit-sha&gt; # &lt;tag, once one ships&gt;
+    inputs:
+      dockerfile: Dockerfile
+      context: .
+      start_command: php -S 0.0.0.0:8080 -t public
+</code></pre>
+<p>Portability ships in 0.1.4 and later (0.1.3 does not include it), so pin the <code>0.1.4</code> tag, or the full commit SHA of a commit at or after it. The build job needs a runner that permits user namespaces (Buildah uses unshare for its storage); the run job needs only the project's container registry and an app image that carries curl, sha256sum and tar.</p>
+<div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Type</th>
+<th>Default</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stage</code></td>
+<td>string</td>
+<td><code>test</code></td>
+<td>Pipeline stage for the portability jobs.</td>
+</tr>
+<tr>
+<td><code>image</code></td>
+<td>string</td>
+<td><code>$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA</code></td>
+<td>App image the portability-run job starts and validates. The default is what portability-build pushes; GitLab expands the CI variables at job time.</td>
+</tr>
+<tr>
+<td><code>buildah_image</code></td>
+<td>string</td>
+<td><code>quay.io/buildah/stable:v1.41.5@sha256:37fa3027bd4b1d76a0001c6bb7349b63c48ebbaee8fa5f47e6097f5e88f6447c</code></td>
+<td>Buildah image for the portability-build job; it builds and pushes the app image.</td>
+</tr>
+<tr>
+<td><code>dockerfile</code></td>
+<td>string</td>
+<td><code>Dockerfile</code></td>
+<td>Dockerfile to build, relative to the context.</td>
+</tr>
+<tr>
+<td><code>context</code></td>
+<td>string</td>
+<td><code>.</code></td>
+<td>Build context, relative to the project root.</td>
+</tr>
+<tr>
+<td><code>app_root</code></td>
+<td>string</td>
+<td><code>/app</code></td>
+<td>Directory inside the image where the app lives.</td>
+</tr>
+<tr>
+<td><code>writable_paths</code></td>
+<td>array</td>
+<td><code>[&quot;storage&quot;, &quot;bootstrap/cache&quot;]</code></td>
+<td>Paths the app may write to, relative to app_root. Each must be writable by the app user.</td>
+</tr>
+<tr>
+<td><code>port</code></td>
+<td>number</td>
+<td><code>8080</code></td>
+<td>Port the app listens on inside the container.</td>
+</tr>
+<tr>
+<td><code>health_path</code></td>
+<td>string</td>
+<td><code>/up</code></td>
+<td>Path the app must answer 200 on for any Host.</td>
+</tr>
+<tr>
+<td><code>uid</code></td>
+<td>number</td>
+<td><code>100123</code></td>
+<td>Numeric uid the app runs as. The gid is always 0.</td>
+</tr>
+<tr>
+<td><code>start_command</code></td>
+<td>string</td>
+<td>none</td>
+<td>Command that starts the app inside the image. It is app-specific, so it is required and has no default.</td>
+</tr>
+<tr>
+<td><code>boot_timeout</code></td>
+<td>number</td>
+<td><code>60</code></td>
+<td>Seconds goss retries the health check while the app boots.</td>
+</tr>
+</tbody>
+</table></div>
+<p>From <code>templates/portability/template.yml</code>: the component defines two jobs with fixed names. <code>portability-build</code> runs in the <code>buildah_image</code>, sets <code>STORAGE_DRIVER: vfs</code> (the vfs driver needs no special kernel support and runs in an ordinary container), builds the image with <code>buildah bud</code>, logs in to the project's container registry, and pushes <code>$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA</code>. <code>portability-run</code> needs <code>portability-build</code>, generates a goss file from the inputs (the goss template is inlined in the job, because a component only ships its <code>template.yml</code> to the including project), downloads goss pinned by version and checksum, starts the app with <code>start_command</code>, and runs <code>goss validate</code> with <code>--retry-timeout</code> set to <code>boot_timeout</code> seconds. goss runs as the app user (the declared uid, gid 0), so its command checks see the same permissions the app has. Both jobs are <code>interruptible: true</code> with a timeout of 30 minutes.</p>
+<h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
+<ul>
+<li><a href="../guides/component-proctor.html">The proctor component</a></li>
+<li><a href="../guides/component-php-test.html">The php-test component</a></li>
+<li><a href="../guides/component-composer-audit.html">The composer-audit component</a></li>
+<li><a href="../guides/component-sbom.html">The sbom component</a></li>
+<li><a href="../guides/component-pint.html">The pint component</a></li>
+<li><a href="../guides/component-phpstan.html">The phpstan component</a></li>
+<li><a href="../guides/component-eslint.html">The eslint component</a></li>
+<li><a href="../guides/component-package-publish.html">The package-publish component</a></li>
+<li><a href="../guides/component-renovate.html">The renovate component</a></li>
+<li><a href="../guides/component-portability.html">The portability component</a></li>
+<li><a href="conventions.html">Shared conventions</a></li>
+<li><a href="local-checks.html">Local checks</a></li>
+<li><a href="../troubleshooting.html">Troubleshooting</a></li>
+</ul>
 </article>
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../../docs/guides/template-lint.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">Template lint</span></a><a class="docs-pager__link docs-pager__link--next" href="../../docs/reference/conventions.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">Shared conventions</span></a></nav>
   </div>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#proctor">proctor</a></li><li class="docs-toc__item"><a href="#php-test">php-test</a></li><li class="docs-toc__item--sub"><a href="#caching">Caching</a></li><li class="docs-toc__item--sub"><a href="#try-the-next-php-release-without-breaking-the-pipeline">Try the next PHP release without breaking the pipeline</a></li><li class="docs-toc__item"><a href="#composer-audit">composer-audit</a></li><li class="docs-toc__item--sub"><a href="#run-it-on-a-schedule">Run it on a schedule</a></li><li class="docs-toc__item"><a href="#sbom">sbom</a></li><li class="docs-toc__item"><a href="#pint">pint</a></li><li class="docs-toc__item"><a href="#phpstan">phpstan</a></li><li class="docs-toc__item"><a href="#eslint">eslint</a></li><li class="docs-toc__item"><a href="#package-publish">package-publish</a></li><li class="docs-toc__item"><a href="#renovate">renovate</a></li><li class="docs-toc__item"><a href="#portability">portability</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
   <span>Documents Preflight <span data-docs-version>0.1.4</span></span>

@@ -18,7 +18,7 @@
   <a class="docs-header__brand" href="../docs/index.html">Preflight</a>
   <span><a class="docs-header__home" rel="noopener" href="https://nougat.snu.gs/enterprise-apps/preflight">Source</a> <a class="docs-header__home" href="../index.html">Back to Preflight</a></span>
 </header>
-<div class="docs-layout">
+<div class="docs-layout docs-layout--toc">
   <details class="docs-menu">
     <summary>Menu</summary>
     <nav class="docs-nav" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../docs/index.html">Overview</a></li><li><a href="../docs/install.html">Install</a></li><li><a href="../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../docs/guides/component-pint.html">The pint component</a></li><li><a href="../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../docs/guides/component-portability.html">The portability component</a></li><li><a href="../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../docs/guides/renovate.html">Renovate</a></li><li><a href="../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../docs/guides/template-lint.html">Template lint</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../docs/reference/components.html">Components</a></li><li><a href="../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../docs/reference/local-checks.html">Local checks</a></li></ul></li><li><a href="../docs/troubleshooting.html" aria-current="page">Troubleshooting</a></li><li><a href="../docs/upgrading.html">Upgrading</a></li><li><a href="../docs/changelog.html">Changelog</a></li></ul></nav>
@@ -27,11 +27,149 @@
   <div class="docs-content">
     <main id="main">
       <article class="docs-article"><h1 id="troubleshooting">Troubleshooting<a class="docs-heading-link" aria-label="Link to this section" href="#troubleshooting">#</a></h1>
-<p>STUB: this page is written in a later batch.</p>
+<p>What to do when a Preflight job fails or a gate behaves unexpectedly. Each entry names the cause, the fix, and how to check it. Most failures are a pin that moved or a setting that is missing. The checklist catches the rest.</p>
+<aside class="docs-callout docs-callout--tip" role="note"><p class="docs-callout__label">Tip</p><p>Start with the job log. The message usually names the input that is wrong, and every input is listed on the <a href="reference/components.html">Components</a> page.</p></aside>
+<h2 id="the-pipeline">The pipeline<a class="docs-heading-link" aria-label="Link to this section" href="#the-pipeline">#</a></h2>
+<h3 id="the-include-fails-on-another-gitlab-instance">The include fails on another GitLab instance<a class="docs-heading-link" aria-label="Link to this section" href="#the-include-fails-on-another-gitlab-instance">#</a></h3>
+<p>Components work only inside the GitLab instance that hosts this project, and they cannot be used across instances except by mirroring.</p>
+<ul>
+<li><strong>Cause:</strong> the app lives on a different instance than the one that hosts Preflight.</li>
+<li><strong>Fix:</strong> host the app on the same instance. For a package that is also mirrored to GitHub, use the reusable workflow at <code>.github/workflows/php-package.yml</code> in this repo instead of the components.</li>
+<li><strong>Check:</strong> the include path starts with <code>$CI_SERVER_FQDN/enterprise-apps/preflight/</code>, and the app's project is on that same instance.</li>
+</ul>
+<h3 id="the-components-do-not-run-on-merge-requests">The components do not run on merge requests<a class="docs-heading-link" aria-label="Link to this section" href="#the-components-do-not-run-on-merge-requests">#</a></h3>
+<p>The components are ordinary jobs, so they run whenever the app's pipeline runs. Whether the pipeline runs on a merge request is decided by a <code>workflow:rules</code> block, and a component cannot set it for the project that includes it.</p>
+<ul>
+<li><strong>Cause:</strong> the app's own <code>.gitlab-ci.yml</code> has no <code>workflow:rules</code> block with a <code>merge_request_event</code> rule.</li>
+<li><strong>Fix:</strong> add the block to the app's own file:</li>
+</ul>
+<pre><code class="language-yaml">workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == &quot;merge_request_event&quot;
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+</code></pre>
+<ul>
+<li><strong>Check:</strong> a merge request pipeline runs, and so does a push to the default branch.</li>
+</ul>
+<h3 id="a-gate-was-skipped-or-weakened">A gate was skipped or weakened<a class="docs-heading-link" aria-label="Link to this section" href="#a-gate-was-skipped-or-weakened">#</a></h3>
+<p>An included component is a set of ordinary jobs. The app's own <code>.gitlab-ci.yml</code> is merged over them, so an app can override a job's keys, skip it with <code>rules</code>, or delete the <code>include:</code> line. Preflight makes the safe pipeline the easy one. It does not lock it.</p>
+<ul>
+<li><strong>Cause:</strong> a change in the app's own <code>.gitlab-ci.yml</code> overrides, skips or removes a component job.</li>
+<li><strong>Fix:</strong> review the diff of the app's <code>.gitlab-ci.yml</code> against the last known-good pipeline, and restore the job or the <code>include:</code> line.</li>
+<li><strong>Check:</strong> Rollcall is where skipped or weakened gates show up.</li>
+</ul>
+<h3 id="two-includes-of-the-same-component-became-one-job">Two includes of the same component became one job<a class="docs-heading-link" aria-label="Link to this section" href="#two-includes-of-the-same-component-became-one-job">#</a></h3>
+<p>Every component except <code>portability</code> takes a <code>job_name</code> input, whose default is the job's usual name. Without it, two includes of the same component share a job name and merge into one.</p>
+<ul>
+<li><strong>Cause:</strong> one project includes the same component more than once (for example in a monorepo with two apps) without setting <code>job_name</code>.</li>
+<li><strong>Fix:</strong> set <code>job_name</code> on each include, for example <code>pint-app</code> and <code>pint-admin</code>. <code>job_name</code> ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release.</li>
+<li><strong>Check:</strong> the pipeline lists one job per include, with the names you set.</li>
+</ul>
+<h3 id="a-fork-merge-request-ran-with-protected-variables">A fork merge request ran with protected variables<a class="docs-heading-link" aria-label="Link to this section" href="#a-fork-merge-request-ran-with-protected-variables">#</a></h3>
+<p>A fork's merge request pipeline runs the fork's configuration.</p>
+<ul>
+<li><strong>Cause:</strong> the project lets fork pipelines see protected variables.</li>
+<li><strong>Fix:</strong> review a fork's <code>.gitlab-ci.yml</code> before running its pipeline, and never give it protected variables.</li>
+<li><strong>Check:</strong> the fork pipeline's variable list does not include any protected variable.</li>
+</ul>
+<h2 id="job-failures">Job failures<a class="docs-heading-link" aria-label="Link to this section" href="#job-failures">#</a></h2>
+<h3 id="proctor-s-preflight-pinned-check-warns">PROCTOR's preflight-pinned check warns<a class="docs-heading-link" aria-label="Link to this section" href="#proctor-s-preflight-pinned-check-warns">#</a></h3>
+<p>A tag or branch can move. A SHA cannot. PROCTOR's <code>preflight-pinned</code> check warns when an include is not pinned to a commit SHA.</p>
+<ul>
+<li><strong>Cause:</strong> the include is pinned to a tag or a branch instead of a full commit SHA.</li>
+<li><strong>Fix:</strong> pin the full commit SHA and keep the tag in a trailing comment, as in the examples on the <a href="reference/components.html">Components</a> page.</li>
+<li><strong>Check:</strong> PROCTOR's report no longer carries the <code>preflight-pinned</code> finding.</li>
+</ul>
+<h3 id="composer-audit-is-green-then-an-advisory-lands">composer-audit is green, then an advisory lands<a class="docs-heading-link" aria-label="Link to this section" href="#composer-audit-is-green-then-an-advisory-lands">#</a></h3>
+<p>New advisories are published after code is merged, so a green pipeline today can be stale tomorrow.</p>
+<ul>
+<li><strong>Cause:</strong> no pipeline has run since the advisory was published.</li>
+<li><strong>Fix:</strong> create a weekly pipeline schedule on the default branch: project settings, Build, Pipeline schedules. The component needs nothing extra. It carries no <code>rules:</code> block, so it runs in scheduled pipelines like any other. Someone with Maintainer rights on the app creates the schedule.</li>
+<li><strong>Check:</strong> the schedule appears under project settings, Build, Pipeline schedules, and its latest pipeline is green.</li>
+</ul>
+<h3 id="php-test-next-is-red">php-test-next is red<a class="docs-heading-link" aria-label="Link to this section" href="#php-test-next-is-red">#</a></h3>
+<p>A red <code>php-test-next</code> job is an early warning, not a stop. It is the second <code>php-test</code> include that tries the PHP release that is not supported yet, with <code>allow_failure: true</code> in the app's own file.</p>
+<ul>
+<li><strong>Cause:</strong> the next PHP release still fails the app's tests, or only has release candidate images.</li>
+<li><strong>Fix:</strong> leave <code>allow_failure: true</code> in place while the release is unsupported. Once the release is supported (the supported versions follow <code>policy.json</code>), drop the <code>allow_failure</code> and move the version into the main <code>php_versions</code> list.</li>
+<li><strong>Check:</strong> the main <code>php-test</code> matrix is green. Only the named <code>php-test-next</code> job is red.</li>
+</ul>
+<h3 id="package-publish-refuses-the-tag">package-publish refuses the tag<a class="docs-heading-link" aria-label="Link to this section" href="#package-publish-refuses-the-tag">#</a></h3>
+<p>The job reads the registry before publishing. Republishing a version from the same commit is a no-op, and republishing it from a different commit fails instead of overwriting the version, because GitLab would otherwise overwrite it without a word.</p>
+<ul>
+<li><strong>Cause:</strong> the tag's version already exists in the group's Composer registry, published from a different commit.</li>
+<li><strong>Fix:</strong> publish a new version tag instead of moving the old one. Protect the release tags so only maintainers can create or move a tag.</li>
+<li><strong>Check:</strong> the job log shows the version already on the manifest and the commit it was published from.</li>
+</ul>
+<h3 id="portability-is-not-in-the-pinned-ref">portability is not in the pinned ref<a class="docs-heading-link" aria-label="Link to this section" href="#portability-is-not-in-the-pinned-ref">#</a></h3>
+<p>Portability ships in 0.1.4 and later. 0.1.3 does not include it.</p>
+<ul>
+<li><strong>Cause:</strong> the include is pinned to a tag or SHA at or before 0.1.3.</li>
+<li><strong>Fix:</strong> pin the <code>0.1.4</code> tag, or the full commit SHA of a commit at or after it.</li>
+<li><strong>Check:</strong> the pipeline lists <code>portability-build</code> and <code>portability-run</code>.</li>
+</ul>
+<h3 id="portability-build-fails-on-the-runner">portability-build fails on the runner<a class="docs-heading-link" aria-label="Link to this section" href="#portability-build-fails-on-the-runner">#</a></h3>
+<p>The build job runs Buildah, which uses unshare for its storage.</p>
+<ul>
+<li><strong>Cause:</strong> the runner does not permit user namespaces.</li>
+<li><strong>Fix:</strong> run the build job on a runner that permits user namespaces. The job sets <code>STORAGE_DRIVER: vfs</code>, so it needs no special kernel support beyond that.</li>
+<li><strong>Check:</strong> the job log shows an unshare failure before the fix, and a successful <code>buildah bud</code> after it.</li>
+</ul>
+<h3 id="portability-run-s-health-check-ends-in-eof">portability-run's health check ends in EOF<a class="docs-heading-link" aria-label="Link to this section" href="#portability-run-s-health-check-ends-in-eof">#</a></h3>
+<p>goss sends the HTTP method as written, and a lower-case one makes the server close the connection, so the health check failed with EOF. The check now uses <code>method: GET</code>, fixed in 0.1.4.</p>
+<ul>
+<li><strong>Cause:</strong> the include is pinned to a ref before 0.1.4, where the goss health check used a lower-case method.</li>
+<li><strong>Fix:</strong> pin 0.1.4 or a SHA at or after it.</li>
+<li><strong>Check:</strong> <code>goss validate</code> passes the health check instead of ending in EOF.</li>
+</ul>
+<h2 id="renovate">Renovate<a class="docs-heading-link" aria-label="Link to this section" href="#renovate">#</a></h2>
+<h3 id="renovate-sees-literal-text-instead-of-a-token">Renovate sees literal text instead of a token<a class="docs-heading-link" aria-label="Link to this section" href="#renovate-sees-literal-text-instead-of-a-token">#</a></h3>
+<p>On GitLab 19.5 a self-reference such as <code>RENOVATE_TOKEN: $RENOVATE_TOKEN</code> in the job <code>variables:</code> arrives as literal text and shadows the masked project CI/CD variables. The component does not map either token on purpose. The job reads both straight from the project.</p>
+<ul>
+<li><strong>Cause:</strong> the runner project, or the app's file, adds <code>RENOVATE_TOKEN: $RENOVATE_TOKEN</code> or <code>GITHUB_COM_TOKEN: $GITHUB_COM_TOKEN</code> to <code>variables:</code>.</li>
+<li><strong>Fix:</strong> delete the self-reference. Keep <code>RENOVATE_TOKEN</code> (and optionally <code>GITHUB_COM_TOKEN</code>) as masked CI variables in the private runner project.</li>
+<li><strong>Check:</strong> the job log no longer shows the literal text <code>$RENOVATE_TOKEN</code>, and Renovate authenticates.</li>
+</ul>
+<h3 id="renovate-auto-merged-a-component-pin-bump">Renovate auto-merged a component pin bump<a class="docs-heading-link" aria-label="Link to this section" href="#renovate-auto-merged-a-component-pin-bump">#</a></h3>
+<p>In refs before 0.1.4 the component-rule manager name in <code>renovate/default.json</code> did not match repository deps, so a bump of a <code>component:</code> include version auto-merged instead of waiting for review.</p>
+<ul>
+<li><strong>Cause:</strong> the shared preset comes from a ref before the 0.1.4 fix.</li>
+<li><strong>Fix:</strong> point the repositories' <code>renovate.json</code> at the shared preset from 0.1.4 or later. Component version bumps now carry the <code>needs-review</code> label and never auto-merge.</li>
+<li><strong>Check:</strong> the merge request carries the <code>needs-review</code> label.</li>
+</ul>
+<h2 id="local-checks">Local checks<a class="docs-heading-link" aria-label="Link to this section" href="#local-checks">#</a></h2>
+<h3 id="the-portability-fixtures-fail-on-permissions">The portability fixtures fail on permissions<a class="docs-heading-link" aria-label="Link to this section" href="#the-portability-fixtures-fail-on-permissions">#</a></h3>
+<p>The app user is not the host user that owns the fixtures' temp dir, and goss is downloaded into it. As of 0.1.4 the fixtures make their temp dir mode 0777 and the goss files in it mode 0644.</p>
+<ul>
+<li><strong>Cause:</strong> the checkout is from a ref before 0.1.4.</li>
+<li><strong>Fix:</strong> update to 0.1.4 or later, then rerun <code>sh tests/check-portability.sh</code> (or the <code>.ps1</code> twin).</li>
+<li><strong>Check:</strong> the script exits 0: <code>good</code> passes and both <code>bad-*</code> fixtures fail.</li>
+</ul>
+<h3 id="composer-ci-fails-on-a-stale-docs-site">composer ci fails on a stale docs site<a class="docs-heading-link" aria-label="Link to this section" href="#composer-ci-fails-on-a-stale-docs-site">#</a></h3>
+<p><code>composer ci</code> runs <code>docs:check</code>, which fails when the built docs site is stale or the generated command or environment reference has drifted from the CLI or source.</p>
+<ul>
+<li><strong>Cause:</strong> a page under <code>docs/</code> (or a generated reference) changed without rebuilding <code>site/docs/</code>.</li>
+<li><strong>Fix:</strong> run <code>composer docs</code> to rebuild <code>site/docs/</code> from <code>docs/</code>, and commit the rebuilt site with the page.</li>
+<li><strong>Check:</strong> <code>composer docs:check</code> passes.</li>
+</ul>
+<h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
+<ul>
+<li><a href="reference/components.html">Components</a></li>
+<li><a href="reference/local-checks.html">Local checks</a></li>
+<li><a href="guides/when-components-run.html">When the components run</a></li>
+<li><a href="guides/what-components-cannot-force.html">What the components cannot force</a></li>
+<li><a href="guides/same-instance-only.html">Same instance only</a></li>
+<li><a href="guides/include-twice.html">Include a component twice</a></li>
+<li><a href="guides/renovate.html">Renovate</a></li>
+<li><a href="guides/image-pins.html">Updating image pins</a></li>
+<li><a href="changelog.html">Changelog</a></li>
+<li><a href="upgrading.html">Upgrading</a></li>
+</ul>
 </article>
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../docs/reference/local-checks.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">Local checks</span></a><a class="docs-pager__link docs-pager__link--next" href="../docs/upgrading.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">Upgrading</span></a></nav>
   </div>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#the-pipeline">The pipeline</a></li><li class="docs-toc__item--sub"><a href="#the-include-fails-on-another-gitlab-instance">The include fails on another GitLab instance</a></li><li class="docs-toc__item--sub"><a href="#the-components-do-not-run-on-merge-requests">The components do not run on merge requests</a></li><li class="docs-toc__item--sub"><a href="#a-gate-was-skipped-or-weakened">A gate was skipped or weakened</a></li><li class="docs-toc__item--sub"><a href="#two-includes-of-the-same-component-became-one-job">Two includes of the same component became one job</a></li><li class="docs-toc__item--sub"><a href="#a-fork-merge-request-ran-with-protected-variables">A fork merge request ran with protected variables</a></li><li class="docs-toc__item"><a href="#job-failures">Job failures</a></li><li class="docs-toc__item--sub"><a href="#proctor-s-preflight-pinned-check-warns">PROCTOR&#039;s preflight-pinned check warns</a></li><li class="docs-toc__item--sub"><a href="#composer-audit-is-green-then-an-advisory-lands">composer-audit is green, then an advisory lands</a></li><li class="docs-toc__item--sub"><a href="#php-test-next-is-red">php-test-next is red</a></li><li class="docs-toc__item--sub"><a href="#package-publish-refuses-the-tag">package-publish refuses the tag</a></li><li class="docs-toc__item--sub"><a href="#portability-is-not-in-the-pinned-ref">portability is not in the pinned ref</a></li><li class="docs-toc__item--sub"><a href="#portability-build-fails-on-the-runner">portability-build fails on the runner</a></li><li class="docs-toc__item--sub"><a href="#portability-run-s-health-check-ends-in-eof">portability-run&#039;s health check ends in EOF</a></li><li class="docs-toc__item"><a href="#renovate">Renovate</a></li><li class="docs-toc__item--sub"><a href="#renovate-sees-literal-text-instead-of-a-token">Renovate sees literal text instead of a token</a></li><li class="docs-toc__item--sub"><a href="#renovate-auto-merged-a-component-pin-bump">Renovate auto-merged a component pin bump</a></li><li class="docs-toc__item"><a href="#local-checks">Local checks</a></li><li class="docs-toc__item--sub"><a href="#the-portability-fixtures-fail-on-permissions">The portability fixtures fail on permissions</a></li><li class="docs-toc__item--sub"><a href="#composer-ci-fails-on-a-stale-docs-site">composer ci fails on a stale docs site</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
   <span>Documents Preflight <span data-docs-version>0.1.4</span></span>

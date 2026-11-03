@@ -18,7 +18,7 @@
   <a class="docs-header__brand" href="../../docs/index.html">Preflight</a>
   <span><a class="docs-header__home" rel="noopener" href="https://nougat.snu.gs/enterprise-apps/preflight">Source</a> <a class="docs-header__home" href="../../index.html">Back to Preflight</a></span>
 </header>
-<div class="docs-layout">
+<div class="docs-layout docs-layout--toc">
   <details class="docs-menu">
     <summary>Menu</summary>
     <nav class="docs-nav" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../../docs/index.html">Overview</a></li><li><a href="../../docs/install.html">Install</a></li><li><a href="../../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../../docs/guides/component-php-test.html" aria-current="page">The php-test component</a></li><li><a href="../../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../../docs/guides/component-pint.html">The pint component</a></li><li><a href="../../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../../docs/guides/component-portability.html">The portability component</a></li><li><a href="../../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../../docs/guides/renovate.html">Renovate</a></li><li><a href="../../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../../docs/guides/template-lint.html">Template lint</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../../docs/reference/components.html">Components</a></li><li><a href="../../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../../docs/reference/local-checks.html">Local checks</a></li></ul></li><li><a href="../../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../../docs/upgrading.html">Upgrading</a></li><li><a href="../../docs/changelog.html">Changelog</a></li></ul></nav>
@@ -27,11 +27,117 @@
   <div class="docs-content">
     <main id="main">
       <article class="docs-article"><h1 id="the-php-test-component">The php-test component<a class="docs-heading-link" aria-label="Link to this section" href="#the-php-test-component">#</a></h1>
-<p>STUB: this page is written in a later batch.</p>
+<p>Every engine gets its own check: this component runs your test command once per supported PHP version. This page shows how to add the <code>php-test</code> component to your app's <code>.gitlab-ci.yml</code>, how the matrix and the cache work, and how to trial the next PHP release. Next, add the <a href="component-composer-audit.html">composer-audit component</a>.</p>
+<h2 id="include-the-component">Include the component<a class="docs-heading-link" aria-label="Link to this section" href="#include-the-component">#</a></h2>
+<p>Goal: your app's test suite runs on each supported PHP version. The component runs the test command on each supported PHP version through <code>parallel:matrix</code>. Add the include to your app's <code>.gitlab-ci.yml</code>:</p>
+<pre><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      test_command: vendor/bin/phpunit
+</code></pre>
+<h2 id="inputs">Inputs<a class="docs-heading-link" aria-label="Link to this section" href="#inputs">#</a></h2>
+<div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Type</th>
+<th>Default</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stage</code></td>
+<td>string</td>
+<td><code>test</code></td>
+<td>Pipeline stage for the jobs.</td>
+</tr>
+<tr>
+<td><code>job_name</code></td>
+<td>string</td>
+<td><code>php-test</code></td>
+<td>Name of the job. Set it when you include this component more than once.</td>
+</tr>
+<tr>
+<td><code>image</code></td>
+<td>string</td>
+<td><code>php:${PHP_VERSION}-cli-trixie</code></td>
+<td>Docker image for the jobs. The default carries the literal <code>${PHP_VERSION}</code>, which GitLab expands in the image at job time.</td>
+</tr>
+<tr>
+<td><code>php_versions</code></td>
+<td>array</td>
+<td><code>[&quot;8.3&quot;, &quot;8.4&quot;, &quot;8.5&quot;]</code></td>
+<td>PHP versions to test against.</td>
+</tr>
+<tr>
+<td><code>composer_version</code></td>
+<td>string</td>
+<td><code>2.10.3</code></td>
+<td>Composer version to install.</td>
+</tr>
+<tr>
+<td><code>test_command</code></td>
+<td>string</td>
+<td><code>vendor/bin/phpunit</code></td>
+<td>The test command to run.</td>
+</tr>
+<tr>
+<td><code>working_dir</code></td>
+<td>string</td>
+<td><code>.</code></td>
+<td>Directory to run the command in, relative to the project root.</td>
+</tr>
+</tbody>
+</table></div>
+<aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>The template adds regexes to three inputs: <code>job_name</code> must match <code>^[A-Za-z0-9_][A-Za-z0-9_.-]*$</code>, <code>composer_version</code> must match <code>^2\.\d+\.\d+$</code>, and <code>working_dir</code> must match <code>^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$</code>.</p></aside>
+<h2 id="what-the-jobs-do">What the jobs do<a class="docs-heading-link" aria-label="Link to this section" href="#what-the-jobs-do">#</a></h2>
+<p>The array input feeds <code>parallel:matrix</code> directly, so one job is created per PHP version. <code>PHP_VERSION</code> becomes a CI/CD variable in each job, which the <code>image</code> input's default expands at job time. The default image is deliberately tag-pinned, so each job runs the newest patch release of its PHP version. Each job is <code>interruptible: true</code> with a <code>timeout: 30 minutes</code>, and its script:</p>
+<ol>
+<li>Installs <code>unzip</code> and <code>git</code> with <code>apt-get</code>, because the <code>php:*-cli</code> images do not ship them (the images are Debian-based, so <code>apt</code> is used).</li>
+<li>Copies the official Composer installer from <code>getcomposer.org</code> and verifies its SHA-384 against the signature fetched at runtime from <code>composer.github.io/installer.sig</code>. On a mismatch the check deletes the installer and exits 1. No <code>$</code> variables appear in the <code>php -r</code> code, so GitLab CI variable expansion cannot corrupt it.</li>
+<li>Runs the installer quietly with <code>--install-dir=/usr/local/bin --filename=composer</code> and the pinned <code>composer_version</code>, so Composer lands on PATH, then removes <code>composer-setup.php</code>.</li>
+<li>Changes into <code>working_dir</code> and runs <code>composer install --no-interaction --no-progress</code>.</li>
+<li>Runs <code>test_command</code>.</li>
+</ol>
+<h2 id="caching">Caching<a class="docs-heading-link" aria-label="Link to this section" href="#caching">#</a></h2>
+<p>The jobs always cache Composer downloads in <code>.composer-cache/</code> so repeat runs do not re-download every package. The cache key depends on <code>composer.lock</code> and is prefixed with the PHP version, so a dependency change invalidates the cache and each PHP version gets its own cache:</p>
+<pre><code class="language-yaml">cache:
+  key:
+    files:
+      - composer.lock
+    prefix: php-${PHP_VERSION}
+  paths:
+    - .composer-cache/
+  policy: pull-push
+variables:
+  COMPOSER_CACHE_DIR: &quot;$CI_PROJECT_DIR/.composer-cache&quot;
+</code></pre>
+<p><code>COMPOSER_CACHE_DIR</code> points Composer at a path inside the project so GitLab can cache it.</p>
+<h2 id="try-the-next-php-release-without-breaking-the-pipeline">Try the next PHP release without breaking the pipeline<a class="docs-heading-link" aria-label="Link to this section" href="#try-the-next-php-release-without-breaking-the-pipeline">#</a></h2>
+<p>Include <code>php-test</code> a second time for the release that is not supported yet, name that job, and let it fail. The name is what lets your own <code>.gitlab-ci.yml</code> loosen only that job:</p>
+<pre><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@&lt;full commit SHA&gt; # &lt;tag&gt;
+    inputs:
+      php_versions: [&quot;8.6&quot;]
+      job_name: php-test-next
+      # While 8.6 only has release candidate images, name the tag: php:${PHP_VERSION}-rc-cli-trixie
+      # image: &quot;php:${PHP_VERSION}-rc-cli-trixie&quot;
+
+php-test-next:
+  allow_failure: true
+</code></pre>
+<p>A red <code>php-test-next</code> job is an early warning, not a stop. Drop the <code>allow_failure</code> and move the version into the main <code>php_versions</code> list once the release is supported (the supported versions follow <code>policy.json</code>).</p>
+<h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
+<ul>
+<li><a href="component-proctor.html">The proctor component</a></li>
+<li><a href="component-composer-audit.html">The composer-audit component</a></li>
+</ul>
 </article>
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../../docs/guides/component-proctor.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">The proctor component</span></a><a class="docs-pager__link docs-pager__link--next" href="../../docs/guides/component-composer-audit.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">The composer-audit component</span></a></nav>
   </div>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#include-the-component">Include the component</a></li><li class="docs-toc__item"><a href="#inputs">Inputs</a></li><li class="docs-toc__item"><a href="#what-the-jobs-do">What the jobs do</a></li><li class="docs-toc__item"><a href="#caching">Caching</a></li><li class="docs-toc__item"><a href="#try-the-next-php-release-without-breaking-the-pipeline">Try the next PHP release without breaking the pipeline</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
   <span>Documents Preflight <span data-docs-version>0.1.4</span></span>

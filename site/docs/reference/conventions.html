@@ -18,7 +18,7 @@
   <a class="docs-header__brand" href="../../docs/index.html">Preflight</a>
   <span><a class="docs-header__home" rel="noopener" href="https://nougat.snu.gs/enterprise-apps/preflight">Source</a> <a class="docs-header__home" href="../../index.html">Back to Preflight</a></span>
 </header>
-<div class="docs-layout">
+<div class="docs-layout docs-layout--toc">
   <details class="docs-menu">
     <summary>Menu</summary>
     <nav class="docs-nav" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../../docs/index.html">Overview</a></li><li><a href="../../docs/install.html">Install</a></li><li><a href="../../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../../docs/guides/component-pint.html">The pint component</a></li><li><a href="../../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../../docs/guides/component-portability.html">The portability component</a></li><li><a href="../../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../../docs/guides/renovate.html">Renovate</a></li><li><a href="../../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../../docs/guides/template-lint.html">Template lint</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../../docs/reference/components.html">Components</a></li><li><a href="../../docs/reference/conventions.html" aria-current="page">Shared conventions</a></li><li><a href="../../docs/reference/local-checks.html">Local checks</a></li></ul></li><li><a href="../../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../../docs/upgrading.html">Upgrading</a></li><li><a href="../../docs/changelog.html">Changelog</a></li></ul></nav>
@@ -27,11 +27,47 @@
   <div class="docs-content">
     <main id="main">
       <article class="docs-article"><h1 id="shared-conventions">Shared conventions<a class="docs-heading-link" aria-label="Link to this section" href="#shared-conventions">#</a></h1>
-<p>STUB: this page is written in a later batch.</p>
+<p>This page lists the conventions the stack shares: Composer vendor, license,
+PHP floor and JavaScript installs. Check a package against the table when you
+set one up or review one, so every project starts from the same baseline.</p>
+<h2 id="conventions">Conventions<a class="docs-heading-link" aria-label="Link to this section" href="#conventions">#</a></h2>
+<div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Convention</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Composer vendor</td>
+<td><code>waynestate/</code></td>
+</tr>
+<tr>
+<td>License</td>
+<td>MIT</td>
+</tr>
+<tr>
+<td>PHP floor</td>
+<td><code>^8.3</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Preflight itself ships these values in its <code>composer.json</code>:
+<code>waynestate/preflight</code> under the MIT license, requiring <code>php: ^8.3</code>.</p>
+<h2 id="javascript-installs">JavaScript installs<a class="docs-heading-link" aria-label="Link to this section" href="#javascript-installs">#</a></h2>
+<p>JavaScript components install with <code>npm ci --ignore-scripts</code>. The job carries
+no token beyond <code>CI_JOB_TOKEN</code> (BEST_PRACTICES.md 4.12).</p>
+<h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
+<ul>
+<li><a href="../guides/image-pins.html">Updating image pins</a>: why component images are digest-pinned and how to change a pin.</li>
+<li><a href="../guides/template-lint.html">Template lint</a>: the unsafe CI patterns <code>composer ci</code> scans for before the fixture tests.</li>
+</ul>
 </article>
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../../docs/reference/components.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">Components</span></a><a class="docs-pager__link docs-pager__link--next" href="../../docs/reference/local-checks.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">Local checks</span></a></nav>
   </div>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#conventions">Conventions</a></li><li class="docs-toc__item"><a href="#javascript-installs">JavaScript installs</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
   <span>Documents Preflight <span data-docs-version>0.1.4</span></span>

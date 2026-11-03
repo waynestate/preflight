@@ -18,7 +18,7 @@
   <a class="docs-header__brand" href="../../docs/index.html">Preflight</a>
   <span><a class="docs-header__home" rel="noopener" href="https://nougat.snu.gs/enterprise-apps/preflight">Source</a> <a class="docs-header__home" href="../../index.html">Back to Preflight</a></span>
 </header>
-<div class="docs-layout">
+<div class="docs-layout docs-layout--toc">
   <details class="docs-menu">
     <summary>Menu</summary>
     <nav class="docs-nav" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../../docs/index.html">Overview</a></li><li><a href="../../docs/install.html">Install</a></li><li><a href="../../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../../docs/guides/component-pint.html">The pint component</a></li><li><a href="../../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../../docs/guides/component-portability.html">The portability component</a></li><li><a href="../../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../../docs/guides/same-instance-only.html" aria-current="page">Same instance only</a></li><li><a href="../../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../../docs/guides/renovate.html">Renovate</a></li><li><a href="../../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../../docs/guides/template-lint.html">Template lint</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../../docs/reference/components.html">Components</a></li><li><a href="../../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../../docs/reference/local-checks.html">Local checks</a></li></ul></li><li><a href="../../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../../docs/upgrading.html">Upgrading</a></li><li><a href="../../docs/changelog.html">Changelog</a></li></ul></nav>
@@ -27,11 +27,30 @@
   <div class="docs-content">
     <main id="main">
       <article class="docs-article"><h1 id="same-instance-only">Same instance only<a class="docs-heading-link" aria-label="Link to this section" href="#same-instance-only">#</a></h1>
-<p>STUB: this page is written in a later batch.</p>
+<p>This page tells you where Preflight components can run, and what to do when your app is not on the right instance. Read it before you add an include if your app lives on a different GitLab than this project.</p>
+<h2 id="the-rule">The rule<a class="docs-heading-link" aria-label="Link to this section" href="#the-rule">#</a></h2>
+<p>Components work only inside the GitLab instance that hosts this project.</p>
+<aside class="docs-callout docs-callout--warning" role="note"><p class="docs-callout__label">Warning</p><p>Components cannot be used across instances except by mirroring.</p></aside>
+<p>Every include in this manual takes the form <code>component: $CI_SERVER_FQDN/enterprise-apps/preflight/&lt;name&gt;@&lt;full commit SHA&gt;</code>. The path is built from <code>$CI_SERVER_FQDN</code>, the instance the pipeline runs on, so the component must be resolvable on that same instance.</p>
+<h2 id="what-that-means-for-your-app">What that means for your app<a class="docs-heading-link" aria-label="Link to this section" href="#what-that-means-for-your-app">#</a></h2>
+<ul>
+<li>Your app must live on the same GitLab instance that hosts this project; if it does not, the components cannot run here.</li>
+<li>Until git.wayne.edu has a runner, CI runs on the GitLab instance that has one, and Preflight and each app must live on or be mirrored to it. See <a href="instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a>.</li>
+<li>A package that is also mirrored to <code>github.com/waynestate</code> cannot include the components there, because GitHub is not a GitLab instance at all. For those mirrors, Preflight ships a reusable GitHub Actions workflow that runs the same checks: the package's <code>composer ci</code> script on each supported PHP version, plus a Composer audit. See <a href="github-mirrors.html">GitHub mirrors</a>.</li>
+</ul>
+<h2 id="mirroring-is-the-only-exception">Mirroring is the only exception<a class="docs-heading-link" aria-label="Link to this section" href="#mirroring-is-the-only-exception">#</a></h2>
+<p>The one way to use the components on another GitLab instance is mirroring: mirror this project to that instance, so the components live there too. Everything else in this manual assumes the app and the components share an instance.</p>
+<h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
+<ul>
+<li><a href="github-mirrors.html">GitHub mirrors</a>: the reusable GitHub Actions workflow for packages mirrored to <code>github.com/waynestate</code>.</li>
+<li><a href="instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a>: where CI runs until git.wayne.edu has a runner.</li>
+<li><a href="when-components-run.html">When the components run</a>: the <code>workflow:rules</code> block that belongs in the app's own file.</li>
+</ul>
 </article>
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../../docs/guides/include-twice.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">Include a component twice</span></a><a class="docs-pager__link docs-pager__link--next" href="../../docs/guides/github-mirrors.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">GitHub mirrors</span></a></nav>
   </div>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#the-rule">The rule</a></li><li class="docs-toc__item"><a href="#what-that-means-for-your-app">What that means for your app</a></li><li class="docs-toc__item"><a href="#mirroring-is-the-only-exception">Mirroring is the only exception</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
   <span>Documents Preflight <span data-docs-version>0.1.4</span></span>

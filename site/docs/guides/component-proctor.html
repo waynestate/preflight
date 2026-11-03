@@ -18,7 +18,7 @@
   <a class="docs-header__brand" href="../../docs/index.html">Preflight</a>
   <span><a class="docs-header__home" rel="noopener" href="https://nougat.snu.gs/enterprise-apps/preflight">Source</a> <a class="docs-header__home" href="../../index.html">Back to Preflight</a></span>
 </header>
-<div class="docs-layout">
+<div class="docs-layout docs-layout--toc">
   <details class="docs-menu">
     <summary>Menu</summary>
     <nav class="docs-nav" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../../docs/index.html">Overview</a></li><li><a href="../../docs/install.html">Install</a></li><li><a href="../../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../../docs/guides/component-proctor.html" aria-current="page">The proctor component</a></li><li><a href="../../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../../docs/guides/component-pint.html">The pint component</a></li><li><a href="../../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../../docs/guides/component-portability.html">The portability component</a></li><li><a href="../../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../../docs/guides/renovate.html">Renovate</a></li><li><a href="../../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../../docs/guides/template-lint.html">Template lint</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../../docs/reference/components.html">Components</a></li><li><a href="../../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../../docs/reference/local-checks.html">Local checks</a></li></ul></li><li><a href="../../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../../docs/upgrading.html">Upgrading</a></li><li><a href="../../docs/changelog.html">Changelog</a></li></ul></nav>
@@ -27,11 +27,93 @@
   <div class="docs-content">
     <main id="main">
       <article class="docs-article"><h1 id="the-proctor-component">The proctor component<a class="docs-heading-link" aria-label="Link to this section" href="#the-proctor-component">#</a></h1>
-<p>STUB: this page is written in a later batch.</p>
+<p>A proctor keeps an eye on the exam hall; this one keeps an eye on your app. This page shows how to add the <code>proctor</code> component to your app's <code>.gitlab-ci.yml</code> and what the job does once it runs. Next, add the <a href="component-php-test.html">php-test component</a> so the test suite runs on every supported PHP version.</p>
+<h2 id="include-the-component">Include the component<a class="docs-heading-link" aria-label="Link to this section" href="#include-the-component">#</a></h2>
+<p>Goal: your app's pipeline runs PROCTOR and publishes the result as a GitLab Code Quality report. Add the include to your app's <code>.gitlab-ci.yml</code>:</p>
+<pre><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      proctor_command: vendor/bin/proctor check --format=codequality
+</code></pre>
+<p>The job installs the app's dependencies with <code>composer install --no-plugins --no-scripts</code>, so the app's plugins and scripts never run inside the job.</p>
+<aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>The install skips plugins and scripts on purpose: the job only inspects the app, so nothing in the app runs with the job's access.</p></aside>
+<h2 id="inputs">Inputs<a class="docs-heading-link" aria-label="Link to this section" href="#inputs">#</a></h2>
+<div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Type</th>
+<th>Default</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stage</code></td>
+<td>string</td>
+<td><code>test</code></td>
+<td>Pipeline stage for the job.</td>
+</tr>
+<tr>
+<td><code>job_name</code></td>
+<td>string</td>
+<td><code>proctor</code></td>
+<td>Name of the job. Set it when you include this component more than once.</td>
+</tr>
+<tr>
+<td><code>image</code></td>
+<td>string</td>
+<td><code>php:8.4-cli-trixie@sha256:9cf851bc2c1b37c3e59dfd677a3c3e56d485af5a47c93f629424bb039eafcb69</code></td>
+<td>Docker image for the job.</td>
+</tr>
+<tr>
+<td><code>composer_version</code></td>
+<td>string</td>
+<td><code>2.10.3</code></td>
+<td>Composer version to install.</td>
+</tr>
+<tr>
+<td><code>allow_failure</code></td>
+<td>boolean</td>
+<td><code>false</code></td>
+<td>Whether the job can fail without failing the pipeline.</td>
+</tr>
+<tr>
+<td><code>proctor_command</code></td>
+<td>string</td>
+<td><code>vendor/bin/proctor check --format=codequality</code></td>
+<td>The proctor command to run.</td>
+</tr>
+<tr>
+<td><code>working_dir</code></td>
+<td>string</td>
+<td><code>.</code></td>
+<td>Directory to run the command in, relative to the project root.</td>
+</tr>
+</tbody>
+</table></div>
+<aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>The template adds regexes to three inputs: <code>job_name</code> must match <code>^[A-Za-z0-9_][A-Za-z0-9_.-]*$</code>, <code>composer_version</code> must match <code>^2\.\d+\.\d+$</code>, and <code>working_dir</code> must match <code>^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$</code>.</p></aside>
+<h2 id="what-the-job-does">What the job does<a class="docs-heading-link" aria-label="Link to this section" href="#what-the-job-does">#</a></h2>
+<p>The job is <code>interruptible: true</code> with a <code>timeout: 30 minutes</code>. Its script:</p>
+<ol>
+<li>Installs <code>unzip</code> and <code>git</code> with <code>apt-get</code>, because the <code>php:8.4-cli-trixie</code> image does not ship them (the image is Debian-based, so <code>apt</code> is used).</li>
+<li>Copies the official Composer installer from <code>getcomposer.org</code> and verifies its SHA-384 against the signature fetched at runtime from <code>composer.github.io/installer.sig</code>. On a mismatch the check deletes the installer and exits 1. No <code>$</code> variables appear in the <code>php -r</code> code, so GitLab CI variable expansion cannot corrupt it.</li>
+<li>Runs the installer quietly with <code>--install-dir=/usr/local/bin --filename=composer</code> and the pinned <code>composer_version</code>, so Composer lands on PATH, then removes <code>composer-setup.php</code>.</li>
+<li>Changes into <code>working_dir</code> and runs <code>composer install --no-interaction --no-progress --no-plugins --no-scripts</code>.</li>
+<li>Runs <code>proctor_command</code> and redirects the output to <code>&quot;$CI_PROJECT_DIR/gl-code-quality-report.json&quot;</code>. A plain redirect (not <code>tee</code>) keeps proctor's exit code as the job result, and the report is written at the project root so the artifact path is the same for every <code>working_dir</code>, including <code>.</code>.</li>
+</ol>
+<p>The job publishes the report with <code>artifacts: when: always</code> as a GitLab Code Quality report (<code>reports: codequality: gl-code-quality-report.json</code>).</p>
+<aside class="docs-callout docs-callout--tip" role="note"><p class="docs-callout__label">Tip</p><p>Set <code>allow_failure: true</code> if the job may fail without failing the pipeline; the default is <code>false</code>.</p></aside>
+<h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
+<ul>
+<li><a href="component-php-test.html">The php-test component</a></li>
+<li><a href="component-composer-audit.html">The composer-audit component</a></li>
+</ul>
 </article>
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../../docs/guides/quick-start.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">Quick start</span></a><a class="docs-pager__link docs-pager__link--next" href="../../docs/guides/component-php-test.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">The php-test component</span></a></nav>
   </div>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#include-the-component">Include the component</a></li><li class="docs-toc__item"><a href="#inputs">Inputs</a></li><li class="docs-toc__item"><a href="#what-the-job-does">What the job does</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
   <span>Documents Preflight <span data-docs-version>0.1.4</span></span>

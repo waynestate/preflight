@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Changelog | Preflight docs</title>
-<meta name="description" content="Every release of Preflight, newest first.">
+<meta name="description" content="All notable changes to this project.">
 <meta name="docs-version" content="0.1.4">
 <link rel="stylesheet" href="../assets/wayne-ui/wayne-ui.css">
 <link rel="stylesheet" href="../assets/docs.css">
@@ -18,7 +18,7 @@
   <a class="docs-header__brand" href="../docs/index.html">Preflight</a>
   <span><a class="docs-header__home" rel="noopener" href="https://nougat.snu.gs/enterprise-apps/preflight">Source</a> <a class="docs-header__home" href="../index.html">Back to Preflight</a></span>
 </header>
-<div class="docs-layout">
+<div class="docs-layout docs-layout--toc">
   <details class="docs-menu">
     <summary>Menu</summary>
     <nav class="docs-nav" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../docs/index.html">Overview</a></li><li><a href="../docs/install.html">Install</a></li><li><a href="../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../docs/guides/component-pint.html">The pint component</a></li><li><a href="../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../docs/guides/component-portability.html">The portability component</a></li><li><a href="../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../docs/guides/renovate.html">Renovate</a></li><li><a href="../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../docs/guides/template-lint.html">Template lint</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../docs/reference/components.html">Components</a></li><li><a href="../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../docs/reference/local-checks.html">Local checks</a></li></ul></li><li><a href="../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../docs/upgrading.html">Upgrading</a></li><li><a href="../docs/changelog.html" aria-current="page">Changelog</a></li></ul></nav>
@@ -26,12 +26,114 @@
   <nav class="docs-nav docs-nav--sidebar" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../docs/index.html">Overview</a></li><li><a href="../docs/install.html">Install</a></li><li><a href="../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../docs/guides/component-pint.html">The pint component</a></li><li><a href="../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../docs/guides/component-portability.html">The portability component</a></li><li><a href="../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../docs/guides/renovate.html">Renovate</a></li><li><a href="../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../docs/guides/template-lint.html">Template lint</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../docs/reference/components.html">Components</a></li><li><a href="../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../docs/reference/local-checks.html">Local checks</a></li></ul></li><li><a href="../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../docs/upgrading.html">Upgrading</a></li><li><a href="../docs/changelog.html" aria-current="page">Changelog</a></li></ul></nav>
   <div class="docs-content">
     <main id="main">
-      <article class="docs-article"><h1 id="changelog">Changelog<a class="docs-heading-link" aria-label="Link to this section" href="#changelog">#</a></h1>
-<p>STUB: this page is written in a later batch.</p>
+      <article class="docs-article"><!-- Generated from CHANGELOG.md by bin/docs-site.php. Edit CHANGELOG.md, not this file. -->
+<p>All notable changes to PREFLIGHT are recorded here. Entries follow
+<a rel="noopener" href="https://keepachangelog.com/en/1.1.0/">Keep a Changelog</a>; released versions
+are Git tags.</p>
+<h2 id="unreleased">Unreleased<a class="docs-heading-link" aria-label="Link to this section" href="#unreleased">#</a></h2>
+<ul>
+<li>Added: the docs site at <code>site/docs/</code>, built from <code>docs/</code> by Squire's shared docs builder (<code>bin/docs-site.php</code>), starting with the overview page. New composer scripts: <code>docs</code> builds it, <code>docs:check</code> fails when it is stale, and <code>ci</code> now runs the check.</li>
+<li>Docs: component pins in the README and site examples now point at 0.1.4.</li>
+<li>Changed: the front-page deploy layer pins HELMET ^0.3, PROCTOR ^0.4 and CREED ^0.1 (lock: HELMET 0.3.0, PROCTOR 0.4.0, CREED 0.1.6).</li>
+<li>Changed: the deploy layer sets minimum-stability to stable.</li>
+<li>Changed: phpstan config and memory_limit, pint config and sbom output now carry an input regex (relative paths and PHP sizes only); a value outside it stops the pipeline at creation. New test tests/check-path-input-regex.</li>
+</ul>
+<h2 id="0-1-4-2026-11-03">0.1.4 (2026-11-03)<a class="docs-heading-link" aria-label="Link to this section" href="#0-1-4-2026-11-03">#</a></h2>
+<h3 id="changed">Changed<a class="docs-heading-link" aria-label="Link to this section" href="#changed">#</a></h3>
+<ul>
+<li>Changed: the README explains which jobs may be allowed to fail (only <code>proctor</code>) and that the contract check rejects global keys; BEST_PRACTICES 2.3 is now Enforced.</li>
+<li>Changed: check-image-inputs allows <code>portability-build</code> to take <code>buildah_image</code> (the only exemption from 2.10).</li>
+<li>Changed: docs and package metadata name nougat as the canonical repository, with git.wayne.edu and GitHub as read-only mirrors, until git.wayne.edu has CI runners.</li>
+</ul>
+<h3 id="added">Added<a class="docs-heading-link" aria-label="Link to this section" href="#added">#</a></h3>
+<ul>
+<li>Added: README example for an advisory job on the next PHP release (a second <code>php-test</code> include with <code>job_name</code>), and PowerShell forms of the local Docker commands.</li>
+<li>Added: a <code>job_name</code> input on every component except <code>portability</code> (default is the usual job name), so one project can include a component more than once; <code>tests/check-job-names</code> enforces it and <code>tests/check-contract</code> resolves the key.</li>
+<li>Added: portability component (Buildah build, arbitrary-uid boot, goss checks, fixtures).</li>
+<li>Added: a Squire kit version rule in <code>renovate/default.json</code>: a custom regex manager reads the <code>version</code> line of <code>.squire.json</code>, and the <code>waynestate/squire</code> bump carries the <code>squire-kit</code> label and never auto-merges; a person runs <code>squire update</code> to refresh the kit files.</li>
+</ul>
+<h3 id="fixed">Fixed<a class="docs-heading-link" aria-label="Link to this section" href="#fixed">#</a></h3>
+<ul>
+<li>Fixed: the component-rule manager name in <code>renovate/default.json</code> (<code>gitlabci</code>, matching repository deps), so component version bumps really wait for review instead of auto-merging; the contract test now checks the new rule and the Squire kit rule.</li>
+<li>Fixed: the portability goss health check uses <code>method: GET</code>; goss sends the method as written, and a lower-case one makes the server close the connection, so the good fixture failed with EOF.</li>
+<li>Fixed: the portability fixtures make their temp dir mode 0777 and the goss files in it mode 0644, because the app user is not the host user that owns the dir and goss is downloaded into it.</li>
+</ul>
+<h2 id="0-1-3-2026-11-03">0.1.3 (2026-11-03)<a class="docs-heading-link" aria-label="Link to this section" href="#0-1-3-2026-11-03">#</a></h2>
+<h3 id="added-1">Added<a class="docs-heading-link" aria-label="Link to this section" href="#added-1">#</a></h3>
+<ul>
+<li>Added: advisory secret detection in the repository's own pipeline.</li>
+<li>Added: <code>tests/check-renovate-review.sh</code> (and its <code>.ps1</code> twin), a contract test that keeps the reviewed-bump rules in <code>renovate/default.json</code>.</li>
+<li>Added: README &quot;Protection checklist&quot;: protected default branch, protected release tags, merge request approvals, <code>no_one_allowed</code> pipeline variables and no protected variables in fork pipelines.</li>
+<li>Added: README &quot;Set up (the user does this)&quot;: the private runner project, the <code>RENOVATE_TOKEN</code> and optional <code>GITHUB_COM_TOKEN</code> CI variables, and a pipeline schedule; this repository creates none of them.</li>
+</ul>
+<h3 id="changed-1">Changed<a class="docs-heading-link" aria-label="Link to this section" href="#changed-1">#</a></h3>
+<ul>
+<li>Changed: README and examples show SHA pins with the tag in a trailing comment.</li>
+<li>Changed: <code>renovate/default.json</code> no longer auto-merges updates inside <code>templates/**</code>, <code>contract/**</code> and <code>.gitlab-ci.yml</code>, or component include version bumps: they carry the <code>needs-review</code> label and wait for a person.</li>
+<li>Changed: the deploy layer's Squire kit is refreshed to 0.3.3 (release options can now live in ./.env.squire).</li>
+<li>Changed: the deploy layer's Squire kit is refreshed to 0.3.4 (the local .env.squire file is now git-ignored).</li>
+<li>Documented: running the composer-audit component on a weekly pipeline schedule.</li>
+<li>Documented: the job token allowlist rule and the runner request wording (non-privileged, ephemeral Docker executor).</li>
+<li>Changed: the repository's own pipeline pulls Docker Hub images through the GitLab Dependency Proxy (component defaults are unchanged).</li>
+<li>Changed: the proctor component installs the app with --no-plugins --no-scripts.</li>
+</ul>
+<h3 id="fixed-1">Fixed<a class="docs-heading-link" aria-label="Link to this section" href="#fixed-1">#</a></h3>
+<ul>
+<li>Fixed: stale 0.1.0 and next-tag wording in the best practices, the GitHub example and the checklist art.</li>
+<li>Fixed: the readme art script handles all nine components, including package-publish and renovate.</li>
+<li>Fixed: BEST_PRACTICES 2.2, 2.9 and 6.2 match the templates.</li>
+<li>Fixed: BEST_PRACTICES statements match the repo; README no longer claims Renovate bumps component pins.</li>
+<li>Fixed: the renovate component no longer sets <code>RENOVATE_TOKEN</code> and <code>GITHUB_COM_TOKEN</code> from themselves in the job <code>variables:</code>; on GitLab 19.5 that self-reference arrived as literal text and shadowed the masked project CI/CD variables, so the job now reads both tokens straight from the project.</li>
+</ul>
+<h2 id="0-1-2-2026-10-29">0.1.2 (2026-10-29)<a class="docs-heading-link" aria-label="Link to this section" href="#0-1-2-2026-10-29">#</a></h2>
+<h3 id="added-2">Added<a class="docs-heading-link" aria-label="Link to this section" href="#added-2">#</a></h3>
+<ul>
+<li>Added: agent-ready site (prompt blocks, Markdown twins, llms.txt), from Squire's kit.</li>
+</ul>
+<h3 id="fixed-2">Fixed<a class="docs-heading-link" aria-label="Link to this section" href="#fixed-2">#</a></h3>
+<ul>
+<li>Fixed: stale capability claims in the site and README.</li>
+</ul>
+<h3 id="changed-2">Changed<a class="docs-heading-link" aria-label="Link to this section" href="#changed-2">#</a></h3>
+<ul>
+<li>Docs: README.md, MAINTAINING.md and site/index.html pin components at
+<code>@0.1.1</code>, and the notes about components arriving in a later tag are gone,
+because 0.1.1 contains every component.</li>
+<li>Changed: the proof page moves to a private site that needs a Wayne State sign-in.</li>
+<li>Changed: project names written as words except acronyms.</li>
+</ul>
+<h2 id="0-1-1-2026-10-29">0.1.1 (2026-10-29)<a class="docs-heading-link" aria-label="Link to this section" href="#0-1-1-2026-10-29">#</a></h2>
+<h3 id="added-3">Added<a class="docs-heading-link" aria-label="Link to this section" href="#added-3">#</a></h3>
+<ul>
+<li><code>package-publish</code> component: publishes a semantic version tag to the
+GitLab group's built-in Composer registry. The job reads the registry
+before publishing, so republishing from the same commit is a no-op and
+republishing from a different commit fails instead of overwriting the
+version.</li>
+<li><code>renovate</code> component and shared preset <code>renovate/default.json</code>: Renovate
+runs as a scheduled GitLab pipeline in a private runner project and bumps
+image digests, GitHub action SHAs and package versions across the stack.
+Bumps of <code>component:</code> include pins are not covered yet: the preset carries
+no manager for them. Digest, pin and patch/minor updates auto-merge when CI
+is green; majors open a merge request and wait for a person.</li>
+</ul>
+<h3 id="changed-3">Changed<a class="docs-heading-link" aria-label="Link to this section" href="#changed-3">#</a></h3>
+<ul>
+<li>PHPStan: <code>phpstan.neon</code> now includes Pinstripe's <code>raw.neon</code> preset from
+the new <code>waynestate/pinstripe</code> dev dependency instead of carrying a hand
+copy of its settings. The repo keeps only its own paths, excluded fixture
+app and PHP version range. Strict rules stay off as before, and
+deprecation checks now run on every analysis.</li>
+</ul>
+<h2 id="0-1-0-2026-10-27">0.1.0 (2026-10-27)<a class="docs-heading-link" aria-label="Link to this section" href="#0-1-0-2026-10-27">#</a></h2>
+<ul>
+<li>First tagged release.</li>
+</ul>
 </article>
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../docs/upgrading.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">Upgrading</span></a></nav>
   </div>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#unreleased">Unreleased</a></li><li class="docs-toc__item"><a href="#0-1-4-2026-11-03">0.1.4 (2026-11-03)</a></li><li class="docs-toc__item--sub"><a href="#changed">Changed</a></li><li class="docs-toc__item--sub"><a href="#added">Added</a></li><li class="docs-toc__item--sub"><a href="#fixed">Fixed</a></li><li class="docs-toc__item"><a href="#0-1-3-2026-11-03">0.1.3 (2026-11-03)</a></li><li class="docs-toc__item--sub"><a href="#added-1">Added</a></li><li class="docs-toc__item--sub"><a href="#changed-1">Changed</a></li><li class="docs-toc__item--sub"><a href="#fixed-1">Fixed</a></li><li class="docs-toc__item"><a href="#0-1-2-2026-10-29">0.1.2 (2026-10-29)</a></li><li class="docs-toc__item--sub"><a href="#added-2">Added</a></li><li class="docs-toc__item--sub"><a href="#fixed-2">Fixed</a></li><li class="docs-toc__item--sub"><a href="#changed-2">Changed</a></li><li class="docs-toc__item"><a href="#0-1-1-2026-10-29">0.1.1 (2026-10-29)</a></li><li class="docs-toc__item--sub"><a href="#added-3">Added</a></li><li class="docs-toc__item--sub"><a href="#changed-3">Changed</a></li><li class="docs-toc__item"><a href="#0-1-0-2026-10-27">0.1.0 (2026-10-27)</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
   <span>Documents Preflight <span data-docs-version>0.1.4</span></span>

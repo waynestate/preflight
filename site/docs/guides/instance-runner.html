@@ -18,7 +18,7 @@
   <a class="docs-header__brand" href="../../docs/index.html">Preflight</a>
   <span><a class="docs-header__home" rel="noopener" href="https://nougat.snu.gs/enterprise-apps/preflight">Source</a> <a class="docs-header__home" href="../../index.html">Back to Preflight</a></span>
 </header>
-<div class="docs-layout">
+<div class="docs-layout docs-layout--toc">
   <details class="docs-menu">
     <summary>Menu</summary>
     <nav class="docs-nav" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../../docs/index.html">Overview</a></li><li><a href="../../docs/install.html">Install</a></li><li><a href="../../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../../docs/guides/component-pint.html">The pint component</a></li><li><a href="../../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../../docs/guides/component-portability.html">The portability component</a></li><li><a href="../../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../../docs/guides/instance-runner.html" aria-current="page">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../../docs/guides/renovate.html">Renovate</a></li><li><a href="../../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../../docs/guides/template-lint.html">Template lint</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../../docs/reference/components.html">Components</a></li><li><a href="../../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../../docs/reference/local-checks.html">Local checks</a></li></ul></li><li><a href="../../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../../docs/upgrading.html">Upgrading</a></li><li><a href="../../docs/changelog.html">Changelog</a></li></ul></nav>
@@ -27,11 +27,28 @@
   <div class="docs-content">
     <main id="main">
       <article class="docs-article"><h1 id="strongly-recommended-a-git-wayne-edu-instance-runner">Strongly recommended: a git.wayne.edu instance runner<a class="docs-heading-link" aria-label="Link to this section" href="#strongly-recommended-a-git-wayne-edu-instance-runner">#</a></h1>
-<p>STUB: this page is written in a later batch.</p>
+<p>This page explains why a git.wayne.edu instance runner is strongly recommended and exactly what to ask for when you request one. Read it before you file the request, and carry the three asks below into the request itself.</p>
+<h2 id="why-the-recommendation-exists">Why the recommendation exists<a class="docs-heading-link" aria-label="Link to this section" href="#why-the-recommendation-exists">#</a></h2>
+<p>Until git.wayne.edu has a runner, CI runs on the GitLab instance that has one, and Preflight and each app must live on or be mirrored to it. A git.wayne.edu instance runner is strongly recommended.</p>
+<h2 id="what-to-ask-for">What to ask for<a class="docs-heading-link" aria-label="Link to this section" href="#what-to-ask-for">#</a></h2>
+<p>Ask for:</p>
+<ul>
+<li>A non-privileged Docker executor (no privileged mode, no Docker socket mount).</li>
+<li>A fresh ephemeral environment for every job.</li>
+<li>No shell executor shared between projects.</li>
+</ul>
+<p>Capacity and maintenance stay with ops.</p>
+<aside class="docs-callout docs-callout--tip" role="note"><p class="docs-callout__label">Tip</p><p>A job that needs the host's Docker socket to take off has skipped its own preflight.</p></aside>
+<h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
+<ul>
+<li><a href="same-instance-only.html">Same instance only</a></li>
+<li><a href="when-components-run.html">When the components run</a></li>
+</ul>
 </article>
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../../docs/guides/job-token-allowlist.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">Keep the job token allowlist short</span></a><a class="docs-pager__link docs-pager__link--next" href="../../docs/guides/renovate.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">Renovate</span></a></nav>
   </div>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#why-the-recommendation-exists">Why the recommendation exists</a></li><li class="docs-toc__item"><a href="#what-to-ask-for">What to ask for</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
   <span>Documents Preflight <span data-docs-version>0.1.4</span></span>

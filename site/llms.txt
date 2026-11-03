@@ -19,7 +19,35 @@ Every page below is Markdown. The HTML pages send the same Markdown to a client 
 ## Pages
 
 - [Preflight: Every push is cleared for takeoff.](https://preflight.apps.wayne.edu/index.md): Preflight is a set of GitLab CI/CD components for Wayne State apps. Include them and your pipeline runs PROCTOR, PHP tests on each supported version, a Composer audit, an SBOM, Pint, PHPStan and ESLint.
+- [Changelog | Preflight docs](https://preflight.apps.wayne.edu/docs/changelog.md): All notable changes to this project.
+- [The composer-audit component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.md): Runs `composer audit --locked` and fails on advisories.
+- [The eslint component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-eslint.md): Runs the app's own ESLint and Prettier and fails the pipeline on lint or format errors.
+- [The package-publish component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-package-publish.md): Publishes a semantic version tag to the GitLab group's built-in Composer registry.
+- [The php-test component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-php-test.md): Runs the test command on each supported PHP version through `parallel:matrix`.
+- [The phpstan component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.md): Runs the app's own PHPStan and fails the pipeline on static analysis errors, writing a GitLab Code Quality report.
+- [The pint component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-pint.md): Runs the app's own Laravel Pint in test mode and fails the pipeline on style errors.
+- [The portability component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-portability.md): Proves the app image meets the twelve-factor boot contract.
+- [The proctor component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-proctor.md): Runs `vendor/bin/proctor check --format=codequality` and publishes the result as a GitLab Code Quality report.
+- [The renovate component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-renovate.md): Runs Renovate as a scheduled or manual job that bumps versions across the group's repositories and merges the green ones itself.
+- [The sbom component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-sbom.md): Generates a CycloneDX SBOM, validates it, and publishes it as an artifact.
+- [GitHub mirrors | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/github-mirrors.md): A reusable GitHub Actions workflow runs the same checks for packages mirrored to `github.com/waynestate`.
+- [Updating image pins | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/image-pins.md): Every image the components run is pinned by digest, so a repointed tag cannot quietly change what a pipeline executes.
+- [Include a component twice | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/include-twice.md): Set the `job_name` input when one project includes the same component more than once.
+- [Strongly recommended: a git.wayne.edu instance runner | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/instance-runner.md): Ask for a non-privileged Docker executor, a fresh ephemeral environment for every job, and no shell executor shared between projects.
+- [Keep the job token allowlist short | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/job-token-allowlist.md): List only the projects an app really needs in its CI/CD job token allowlist, and review the list when a dependency is dropped.
+- [Quick start | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/quick-start.md): Wire one Preflight component into an app and watch the pipeline run it.
+- [Renovate | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/renovate.md): Preflight owns the stack's version automation: the shared preset and the component that runs it.
+- [Same instance only | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/same-instance-only.md): Components work only inside the GitLab instance that hosts this project.
+- [Template lint | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/template-lint.md): `composer ci` scans the templates for unsafe CI patterns before the fixture tests.
+- [What the components cannot force | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/what-components-cannot-force.md): An included component is a set of ordinary jobs that the app's own `.gitlab-ci.yml` is merged over.
+- [When the components run | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/when-components-run.md): The components are ordinary jobs, so they run whenever the app's pipeline runs.
 - [Preflight | Preflight docs](https://preflight.apps.wayne.edu/docs/index.md): Preflight is a set of GitLab CI/CD components that give every WSU app the same checks.
+- [Install | Preflight docs](https://preflight.apps.wayne.edu/docs/install.md): Add Preflight's components to an app's .gitlab-ci.yml with one include per component.
+- [Components | Preflight docs](https://preflight.apps.wayne.edu/docs/reference/components.md): Every component, with its include example, inputs and defaults.
+- [Shared conventions | Preflight docs](https://preflight.apps.wayne.edu/docs/reference/conventions.md): The conventions the stack shares: Composer vendor, license, PHP floor and JavaScript installs.
+- [Local checks | Preflight docs](https://preflight.apps.wayne.edu/docs/reference/local-checks.md): How maintainers build, test and release this project with Docker.
+- [Troubleshooting | Preflight docs](https://preflight.apps.wayne.edu/docs/troubleshooting.md): What to do when a Preflight job fails or a gate behaves unexpectedly.
+- [Upgrading | Preflight docs](https://preflight.apps.wayne.edu/docs/upgrading.md): How to move an app from one Preflight pin to the next.
 
 ## Prompts
 

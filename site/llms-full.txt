@@ -1154,6 +1154,1279 @@ Preflight is one stop on the way to Citadel. Here is everyone else on the board.
 
 ---
 
+Source: https://preflight.apps.wayne.edu/docs/changelog.html
+
+## Changelog | Preflight docs
+
+All notable changes to PREFLIGHT are recorded here. Entries follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); released versions are Git tags.
+
+### Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
+
+- Added: the docs site at `site/docs/`, built from `docs/` by Squire's shared docs builder (`bin/docs-site.php`), starting with the overview page. New composer scripts: `docs` builds it, `docs:check` fails when it is stale, and `ci` now runs the check.
+- Docs: component pins in the README and site examples now point at 0.1.4.
+- Changed: the front-page deploy layer pins HELMET ^0.3, PROCTOR ^0.4 and CREED ^0.1 (lock: HELMET 0.3.0, PROCTOR 0.4.0, CREED 0.1.6).
+- Changed: the deploy layer sets minimum-stability to stable.
+- Changed: phpstan config and memory_limit, pint config and sbom output now carry an input regex (relative paths and PHP sizes only); a value outside it stops the pipeline at creation. New test tests/check-path-input-regex.
+
+### 0.1.4 (2026-11-03)[#](https://preflight.apps.wayne.edu/docs/changelog.html#0-1-4-2026-11-03)
+
+#### Changed[#](https://preflight.apps.wayne.edu/docs/changelog.html#changed)
+
+- Changed: the README explains which jobs may be allowed to fail (only `proctor`) and that the contract check rejects global keys; BEST_PRACTICES 2.3 is now Enforced.
+- Changed: check-image-inputs allows `portability-build` to take `buildah_image` (the only exemption from 2.10).
+- Changed: docs and package metadata name nougat as the canonical repository, with git.wayne.edu and GitHub as read-only mirrors, until git.wayne.edu has CI runners.
+
+#### Added[#](https://preflight.apps.wayne.edu/docs/changelog.html#added)
+
+- Added: README example for an advisory job on the next PHP release (a second `php-test` include with `job_name`), and PowerShell forms of the local Docker commands.
+- Added: a `job_name` input on every component except `portability` (default is the usual job name), so one project can include a component more than once; `tests/check-job-names` enforces it and `tests/check-contract` resolves the key.
+- Added: portability component (Buildah build, arbitrary-uid boot, goss checks, fixtures).
+- Added: a Squire kit version rule in `renovate/default.json`: a custom regex manager reads the `version` line of `.squire.json`, and the `waynestate/squire` bump carries the `squire-kit` label and never auto-merges; a person runs `squire update` to refresh the kit files.
+
+#### Fixed[#](https://preflight.apps.wayne.edu/docs/changelog.html#fixed)
+
+- Fixed: the component-rule manager name in `renovate/default.json` (`gitlabci`, matching repository deps), so component version bumps really wait for review instead of auto-merging; the contract test now checks the new rule and the Squire kit rule.
+- Fixed: the portability goss health check uses `method: GET`; goss sends the method as written, and a lower-case one makes the server close the connection, so the good fixture failed with EOF.
+- Fixed: the portability fixtures make their temp dir mode 0777 and the goss files in it mode 0644, because the app user is not the host user that owns the dir and goss is downloaded into it.
+
+### 0.1.3 (2026-11-03)[#](https://preflight.apps.wayne.edu/docs/changelog.html#0-1-3-2026-11-03)
+
+#### Added[#](https://preflight.apps.wayne.edu/docs/changelog.html#added-1)
+
+- Added: advisory secret detection in the repository's own pipeline.
+- Added: `tests/check-renovate-review.sh` (and its `.ps1` twin), a contract test that keeps the reviewed-bump rules in `renovate/default.json`.
+- Added: README "Protection checklist": protected default branch, protected release tags, merge request approvals, `no_one_allowed` pipeline variables and no protected variables in fork pipelines.
+- Added: README "Set up (the user does this)": the private runner project, the `RENOVATE_TOKEN` and optional `GITHUB_COM_TOKEN` CI variables, and a pipeline schedule; this repository creates none of them.
+
+#### Changed[#](https://preflight.apps.wayne.edu/docs/changelog.html#changed-1)
+
+- Changed: README and examples show SHA pins with the tag in a trailing comment.
+- Changed: `renovate/default.json` no longer auto-merges updates inside `templates/**`, `contract/**` and `.gitlab-ci.yml`, or component include version bumps: they carry the `needs-review` label and wait for a person.
+- Changed: the deploy layer's Squire kit is refreshed to 0.3.3 (release options can now live in ./.env.squire).
+- Changed: the deploy layer's Squire kit is refreshed to 0.3.4 (the local .env.squire file is now git-ignored).
+- Documented: running the composer-audit component on a weekly pipeline schedule.
+- Documented: the job token allowlist rule and the runner request wording (non-privileged, ephemeral Docker executor).
+- Changed: the repository's own pipeline pulls Docker Hub images through the GitLab Dependency Proxy (component defaults are unchanged).
+- Changed: the proctor component installs the app with --no-plugins --no-scripts.
+
+#### Fixed[#](https://preflight.apps.wayne.edu/docs/changelog.html#fixed-1)
+
+- Fixed: stale 0.1.0 and next-tag wording in the best practices, the GitHub example and the checklist art.
+- Fixed: the readme art script handles all nine components, including package-publish and renovate.
+- Fixed: BEST_PRACTICES 2.2, 2.9 and 6.2 match the templates.
+- Fixed: BEST_PRACTICES statements match the repo; README no longer claims Renovate bumps component pins.
+- Fixed: the renovate component no longer sets `RENOVATE_TOKEN` and `GITHUB_COM_TOKEN` from themselves in the job `variables:`; on GitLab 19.5 that self-reference arrived as literal text and shadowed the masked project CI/CD variables, so the job now reads both tokens straight from the project.
+
+### 0.1.2 (2026-10-29)[#](https://preflight.apps.wayne.edu/docs/changelog.html#0-1-2-2026-10-29)
+
+#### Added[#](https://preflight.apps.wayne.edu/docs/changelog.html#added-2)
+
+- Added: agent-ready site (prompt blocks, Markdown twins, llms.txt), from Squire's kit.
+
+#### Fixed[#](https://preflight.apps.wayne.edu/docs/changelog.html#fixed-2)
+
+- Fixed: stale capability claims in the site and README.
+
+#### Changed[#](https://preflight.apps.wayne.edu/docs/changelog.html#changed-2)
+
+- Docs: README.md, MAINTAINING.md and site/index.html pin components at `@0.1.1`, and the notes about components arriving in a later tag are gone, because 0.1.1 contains every component.
+- Changed: the proof page moves to a private site that needs a Wayne State sign-in.
+- Changed: project names written as words except acronyms.
+
+### 0.1.1 (2026-10-29)[#](https://preflight.apps.wayne.edu/docs/changelog.html#0-1-1-2026-10-29)
+
+#### Added[#](https://preflight.apps.wayne.edu/docs/changelog.html#added-3)
+
+- `package-publish` component: publishes a semantic version tag to the GitLab group's built-in Composer registry. The job reads the registry before publishing, so republishing from the same commit is a no-op and republishing from a different commit fails instead of overwriting the version.
+- `renovate` component and shared preset `renovate/default.json`: Renovate runs as a scheduled GitLab pipeline in a private runner project and bumps image digests, GitHub action SHAs and package versions across the stack. Bumps of `component:` include pins are not covered yet: the preset carries no manager for them. Digest, pin and patch/minor updates auto-merge when CI is green; majors open a merge request and wait for a person.
+
+#### Changed[#](https://preflight.apps.wayne.edu/docs/changelog.html#changed-3)
+
+- PHPStan: `phpstan.neon` now includes Pinstripe's `raw.neon` preset from the new `waynestate/pinstripe` dev dependency instead of carrying a hand copy of its settings. The repo keeps only its own paths, excluded fixture app and PHP version range. Strict rules stay off as before, and deprecation checks now run on every analysis.
+
+### 0.1.0 (2026-10-27)[#](https://preflight.apps.wayne.edu/docs/changelog.html#0-1-0-2026-10-27)
+
+- First tagged release.
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html
+
+## The composer-audit component[#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#the-composer-audit-component)
+
+Fresh eyes on the manifest: this component runs `composer audit --locked` and fails the pipeline on advisories. This page shows how to add the `composer-audit` component to your app's `.gitlab-ci.yml`, then how to run it on a weekly schedule so the check keeps running after code is merged.
+
+### Include the component[#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#include-the-component)
+
+Goal: your app's pipeline fails whenever a locked dependency has a known advisory. Add the include to your app's `.gitlab-ci.yml`:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      working_dir: .
+```
+
+### Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#inputs)
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `composer-audit` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `composer:2@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. |
+| `working_dir` | string | `.` | Directory to run composer audit in, relative to the project root. |
+
+Note
+
+The template adds regexes to two inputs: `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$` and `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$`.
+
+### What the job does[#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#what-the-job-does)
+
+The `composer:2` image already ships Composer, so no install step is needed. The job is `interruptible: true` with a `timeout: 30 minutes`. Its script changes into `working_dir` and runs `composer audit --locked`. The command exits non-zero when it finds advisories, which fails the job.
+
+Warning
+
+The component carries no `allow_failure` input on purpose: a known advisory must fail the pipeline.
+
+### Run it on a schedule[#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#run-it-on-a-schedule)
+
+New advisories are published after code is merged, so a green pipeline today can be stale tomorrow. Create a weekly pipeline schedule on the default branch: project settings, Build, Pipeline schedules. The component needs nothing extra; it carries no `rules:` block, so it runs in scheduled pipelines like any other. Creating the schedule is a project setting, not a file in the app's repo, and someone with Maintainer rights on the app must do it. It is the one Preflight check that books its own flight time.
+
+### Related[#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#related)
+
+- [The proctor component](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html)
+- [The php-test component](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html)
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/guides/component-eslint.html
+
+## The eslint component[#](https://preflight.apps.wayne.edu/docs/guides/component-eslint.html#the-eslint-component)
+
+This page covers the `eslint` component: what the job does, how to include it, and every input it takes. Goal: the app's pipeline fails on any lint or format error, judged by the app's own config. Start with the include block, then check the inputs against your app. Preflight is named for the pre-flight check, and this component is the row that keeps the JavaScript airworthy.
+
+Version 1 · Category: Testing/Validation · Tags: javascript,style,eslint,prettier
+
+### What the job does[#](https://preflight.apps.wayne.edu/docs/guides/component-eslint.html#what-the-job-does)
+
+The component runs the app's own [ESLint](https://eslint.org/) (and [Prettier](https://prettier.io/)) and fails the pipeline on lint or format errors. It does not install ESLint or Prettier itself: the app must require `@waynestate/pinstripe`, `eslint` and `prettier` as dev dependencies and ship an `eslint.config.js` (or point `eslint_args` at its own files).
+
+The job, in order:
+
+1. Moves into `working_dir` (default `.`).
+2. Installs the app's dependencies with `npm ci --ignore-scripts --cache .npm-cache`.
+3. Runs `npx --no-install eslint` with `eslint_args` (default `.`).
+4. When `prettier` is `true` (the default), runs `npx --no-install prettier --check .`.
+
+The job caches npm downloads in `.npm-cache/`, with the cache key based on `package-lock.json`. It is interruptible and times out after 15m.
+
+### Include the component[#](https://preflight.apps.wayne.edu/docs/guides/component-eslint.html#include-the-component)
+
+Add the include to the app's `.gitlab-ci.yml`, pinned to a full commit SHA with the tag in a trailing comment:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      eslint_args: .
+```
+
+### Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-eslint.html#inputs)
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `eslint` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `node:22.13-alpine@sha256:e2b39f7b64281324929257d0f8004fb6cb4bf0fdfb9aa8cedb235a766aec31da` | Docker image for the job. |
+| `working_dir` | string | `.` | Directory to run the commands in, relative to the project root. |
+| `eslint_args` | string | `.` | Arguments passed to eslint. |
+| `prettier` | boolean | `true` | Whether to also run `prettier --check`. |
+
+### Verify[#](https://preflight.apps.wayne.edu/docs/guides/component-eslint.html#verify)
+
+Push the change. The `eslint` job lands in the `test` stage by default, and a green job means ESLint and Prettier found nothing to fix.
+
+Note
+
+The `eslint` job has no `allow_failure` input: a lint or format error fails the pipeline.
+
+### Related[#](https://preflight.apps.wayne.edu/docs/guides/component-eslint.html#related)
+
+- [Quick start](https://preflight.apps.wayne.edu/docs/guides/quick-start.html): wire one component into an app and watch the pipeline run it.
+- [Install](https://preflight.apps.wayne.edu/docs/install.html): the requirements, the include snippet, and how to verify.
+- [The phpstan component](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html): the static analysis check for the PHP side.
+- [Include a component twice](https://preflight.apps.wayne.edu/docs/guides/include-twice.html): the `job_name` input in action.
+- [Reference](https://preflight.apps.wayne.edu/docs/reference/components.html): every component, with its inputs and defaults.
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/guides/component-package-publish.html
+
+## The package-publish component[#](https://preflight.apps.wayne.edu/docs/guides/component-package-publish.html#the-package-publish-component)
+
+This page covers the `package-publish` component: what the job does, how to include it, and every input it takes. Goal: tagging a release publishes the package to the GitLab group's built-in Composer registry, and a version that is already published never gets overwritten.
+
+Version 1 · Category: Release/Publishing · Tags: composer,publish,release
+
+### What the job does[#](https://preflight.apps.wayne.edu/docs/guides/component-package-publish.html#what-the-job-does)
+
+The job publishes a semantic version tag to the GitLab group's built-in Composer registry. It runs only on tags, reads the registry first, and refuses a moved version: a version already published from this commit passes quietly, and a version published from a different commit fails the pipeline, because GitLab would otherwise overwrite it without a word. Once a version is on the manifest, it stays on the manifest: no go-arounds.
+
+The job, in order:
+
+1. Runs only when the pipeline is for a tag, so `$CI_COMMIT_TAG` is set.
+2. Accepts only semantic versions, `1.2.3` or `v1.2.3` with an optional pre-release; any other tag fails the job.
+3. Reads the package name from the `name` field of `composer.json` in the project root, the file the registry serves.
+4. Reads the registry index with the read token. A `404` means the group has no published Composer packages yet, and the job goes straight to publishing.
+5. Compares the commit recorded for the version, if any, with `$CI_COMMIT_SHA`: the same commit exits quietly, a different commit fails the job instead of overwriting the version.
+6. Publishes the tag to the group's registry with the job token (`CI_JOB_TOKEN`) and reports the version as published.
+
+The default image ships curl and PHP, which the job uses for the registry round trip. The job is interruptible and times out after 30 minutes.
+
+Warning
+
+Protect your release tags.
+
+Note
+
+The read token lives in a masked CI variable named by `read_token_variable` (default `PACKAGE_READ_TOKEN`) and needs the `read_package_registry` scope. Publishing itself uses the predefined `CI_JOB_TOKEN`.
+
+### Include the component[#](https://preflight.apps.wayne.edu/docs/guides/component-package-publish.html#include-the-component)
+
+Add the include to the app's `.gitlab-ci.yml`, pinned to a full commit SHA with the tag in a trailing comment, and set `group_id` to the numeric id of the GitLab group whose built-in Composer registry hosts the package:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      group_id: "<your group id>"
+```
+
+### Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-package-publish.html#inputs)
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `deploy` | Pipeline stage for the job. |
+| `job_name` | string | `package-publish` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. The default ships curl and PHP, which the job uses for the registry round trip. |
+| `group_id` | string | none | Numeric id of the GitLab group whose built-in Composer registry hosts the package. Required. |
+| `read_token_variable` | string | `PACKAGE_READ_TOKEN` | Name of the masked CI variable holding a token with the `read_package_registry` scope, used to read the registry before publishing. |
+
+### Verify[#](https://preflight.apps.wayne.edu/docs/guides/component-package-publish.html#verify)
+
+Define the masked CI variable the component reads, then push a semantic version tag. Expected: the `package-publish` job runs in the `deploy` stage, reads the registry, and ends with `Version <version> published.` Pushing the same tag from the same commit again exits quietly; the same version from a different commit fails the job.
+
+### Related[#](https://preflight.apps.wayne.edu/docs/guides/component-package-publish.html#related)
+
+- [Quick start](https://preflight.apps.wayne.edu/docs/guides/quick-start.html): wire one component into an app and watch the pipeline run it.
+- [Install](https://preflight.apps.wayne.edu/docs/install.html): the requirements, the include snippet, and how to verify.
+- [When the components run](https://preflight.apps.wayne.edu/docs/guides/when-components-run.html): the `workflow:rules` block that belongs in the app's own file.
+- [Include a component twice](https://preflight.apps.wayne.edu/docs/guides/include-twice.html): the `job_name` input in action.
+- [Reference](https://preflight.apps.wayne.edu/docs/reference/components.html): every component, with its inputs and defaults.
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/guides/component-php-test.html
+
+## The php-test component[#](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html#the-php-test-component)
+
+Every engine gets its own check: this component runs your test command once per supported PHP version. This page shows how to add the `php-test` component to your app's `.gitlab-ci.yml`, how the matrix and the cache work, and how to trial the next PHP release. Next, add the [composer-audit component](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html).
+
+### Include the component[#](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html#include-the-component)
+
+Goal: your app's test suite runs on each supported PHP version. The component runs the test command on each supported PHP version through `parallel:matrix`. Add the include to your app's `.gitlab-ci.yml`:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      test_command: vendor/bin/phpunit
+```
+
+### Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html#inputs)
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `test` | Pipeline stage for the jobs. |
+| `job_name` | string | `php-test` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `php:${PHP_VERSION}-cli-trixie` | Docker image for the jobs. The default carries the literal `${PHP_VERSION}`, which GitLab expands in the image at job time. |
+| `php_versions` | array | `["8.3", "8.4", "8.5"]` | PHP versions to test against. |
+| `composer_version` | string | `2.10.3` | Composer version to install. |
+| `test_command` | string | `vendor/bin/phpunit` | The test command to run. |
+| `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
+
+Note
+
+The template adds regexes to three inputs: `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`, `composer_version` must match `^2\.\d+\.\d+$`, and `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$`.
+
+### What the jobs do[#](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html#what-the-jobs-do)
+
+The array input feeds `parallel:matrix` directly, so one job is created per PHP version. `PHP_VERSION` becomes a CI/CD variable in each job, which the `image` input's default expands at job time. The default image is deliberately tag-pinned, so each job runs the newest patch release of its PHP version. Each job is `interruptible: true` with a `timeout: 30 minutes`, and its script:
+
+1. Installs `unzip` and `git` with `apt-get`, because the `php:*-cli` images do not ship them (the images are Debian-based, so `apt` is used).
+2. Copies the official Composer installer from `getcomposer.org` and verifies its SHA-384 against the signature fetched at runtime from `composer.github.io/installer.sig`. On a mismatch the check deletes the installer and exits 1. No `$` variables appear in the `php -r` code, so GitLab CI variable expansion cannot corrupt it.
+3. Runs the installer quietly with `--install-dir=/usr/local/bin --filename=composer` and the pinned `composer_version`, so Composer lands on PATH, then removes `composer-setup.php`.
+4. Changes into `working_dir` and runs `composer install --no-interaction --no-progress`.
+5. Runs `test_command`.
+
+### Caching[#](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html#caching)
+
+The jobs always cache Composer downloads in `.composer-cache/` so repeat runs do not re-download every package. The cache key depends on `composer.lock` and is prefixed with the PHP version, so a dependency change invalidates the cache and each PHP version gets its own cache:
+
+```yaml
+cache:
+  key:
+    files:
+      - composer.lock
+    prefix: php-${PHP_VERSION}
+  paths:
+    - .composer-cache/
+  policy: pull-push
+variables:
+  COMPOSER_CACHE_DIR: "$CI_PROJECT_DIR/.composer-cache"
+```
+
+`COMPOSER_CACHE_DIR` points Composer at a path inside the project so GitLab can cache it.
+
+### Try the next PHP release without breaking the pipeline[#](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html#try-the-next-php-release-without-breaking-the-pipeline)
+
+Include `php-test` a second time for the release that is not supported yet, name that job, and let it fail. The name is what lets your own `.gitlab-ci.yml` loosen only that job:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<full commit SHA> # <tag>
+    inputs:
+      php_versions: ["8.6"]
+      job_name: php-test-next
+      # While 8.6 only has release candidate images, name the tag: php:${PHP_VERSION}-rc-cli-trixie
+      # image: "php:${PHP_VERSION}-rc-cli-trixie"
+
+php-test-next:
+  allow_failure: true
+```
+
+A red `php-test-next` job is an early warning, not a stop. Drop the `allow_failure` and move the version into the main `php_versions` list once the release is supported (the supported versions follow `policy.json`).
+
+### Related[#](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html#related)
+
+- [The proctor component](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html)
+- [The composer-audit component](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html)
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html
+
+## The phpstan component[#](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html#the-phpstan-component)
+
+This page shows how to add the `phpstan` component to an app's `.gitlab-ci.yml`: it runs the app's own [PHPStan](https://phpstan.org/) and fails the pipeline on static analysis errors, writing a GitLab Code Quality report. It finds the loose bolts before the flight does; check the requirements first, then add the include.
+
+Version 1, category Testing/Validation, tags `php`, `static-analysis`, `phpstan`.
+
+### Before you start[#](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html#before-you-start)
+
+The component does not install PHPStan itself. The app must:
+
+- Require `phpstan/phpstan` as a dev dependency.
+- Ship a `phpstan.neon`, or point the `config` input at its own file.
+
+### Include the component[#](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html#include-the-component)
+
+Add the include to the app's `.gitlab-ci.yml`, pinned to a commit SHA with the tag in a trailing comment:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      config: phpstan.neon
+      memory_limit: 1G
+```
+
+A tag or branch can move; a SHA cannot.
+
+### What the job does[#](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html#what-the-job-does)
+
+The job lands in the `test` stage by default, is `interruptible: true`, and has a `timeout: 10m`. It runs three steps:
+
+1. Move to the directory given by `working_dir` (default `.`).
+2. Install the app's dependencies:
+   ```sh
+   composer install --no-interaction --no-progress --prefer-dist
+   ```
+3. Run PHPStan against the app's own config:
+   ```sh
+   vendor/bin/phpstan analyse --no-progress --error-format=gitlab --memory-limit=1G -c phpstan.neon > "$CI_PROJECT_DIR/phpstan-report.json"
+   ```
+   - `--memory-limit` takes the `memory_limit` input (default `1G`).
+   - `-c` takes the `config` input (default `phpstan.neon`).
+   - `--error-format=gitlab` writes the findings as a GitLab Code Quality report to `$CI_PROJECT_DIR/phpstan-report.json`.
+
+### Report[#](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html#report)
+
+The job publishes the report as a Code Quality report:
+
+```yaml
+artifacts:
+  when: always
+  reports:
+    codequality: phpstan-report.json
+```
+
+### Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html#inputs)
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `phpstan` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. |
+| `config` | string | `phpstan.neon` | Path to the app's PHPStan config file. It must be a relative path; GitLab refuses the pipeline at creation if it is not. |
+| `memory_limit` | string | `1G` | Memory limit passed to PHPStan. A PHP size such as `1G`, `512M` or `-1`; GitLab refuses the pipeline at creation if it is not. |
+| `working_dir` | string | `.` | Directory to run PHPStan in, relative to the project root. |
+
+`job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`, and `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$`.
+
+Note
+
+`config` must be a relative path, and `memory_limit` takes a PHP size such as `1G`, `512M` or `-1`. Each carries an input `regex`, so GitLab refuses the pipeline at creation when a value does not match.
+
+### Verify[#](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html#verify)
+
+Push the change. The components are ordinary jobs, so the `phpstan` job runs whenever the app's pipeline runs, in the `test` stage by default. A green job means no static analysis errors, and the Code Quality report carries the findings.
+
+### Related[#](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html#related)
+
+- [The pint component](https://preflight.apps.wayne.edu/docs/guides/component-pint.html): the style check that pairs with it.
+- [The proctor component](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html): another check that publishes a Code Quality report.
+- [Include a component twice](https://preflight.apps.wayne.edu/docs/guides/include-twice.html): the `job_name` input when one project includes the same component more than once.
+- [Reference](https://preflight.apps.wayne.edu/docs/reference/components.html): every component, with its inputs and defaults.
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/guides/component-pint.html
+
+## The pint component[#](https://preflight.apps.wayne.edu/docs/guides/component-pint.html#the-pint-component)
+
+This page shows how to add the `pint` component to an app's `.gitlab-ci.yml`: it runs the app's own [Laravel Pint](https://laravel.com/docs/12.x/pint) in test mode and fails the pipeline on style errors. It is the cockpit polish (every line tidied before takeoff); check the requirements first, then add the include.
+
+Version 1, category Testing/Validation, tags `php`, `style`, `pint`.
+
+### Before you start[#](https://preflight.apps.wayne.edu/docs/guides/component-pint.html#before-you-start)
+
+The component does not install Pint itself. The app must:
+
+- Require `laravel/pint` as a dev dependency.
+- Ship a `pint.json`, or point the `config` input at its own file.
+
+### Include the component[#](https://preflight.apps.wayne.edu/docs/guides/component-pint.html#include-the-component)
+
+Add the include to the app's `.gitlab-ci.yml`, pinned to a commit SHA with the tag in a trailing comment:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      config: pint.json
+```
+
+A tag or branch can move; a SHA cannot.
+
+### What the job does[#](https://preflight.apps.wayne.edu/docs/guides/component-pint.html#what-the-job-does)
+
+The job lands in the `test` stage by default, is `interruptible: true`, and has a `timeout: 10m`. It runs three steps:
+
+1. Move to the directory given by `working_dir` (default `.`).
+2. Install the app's dependencies:
+   ```sh
+   composer install --no-interaction --no-progress --prefer-dist
+   ```
+3. Run Pint in test mode against the app's own config:
+   ```sh
+   vendor/bin/pint --test --config=pint.json
+   ```
+   `--config` takes the `config` input (default `pint.json`). A style error fails the job, and with it the pipeline.
+
+### Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-pint.html#inputs)
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `pint` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. |
+| `config` | string | `pint.json` | Path to the app's Pint config file. It must be a relative path; GitLab refuses the pipeline at creation if it is not. |
+| `working_dir` | string | `.` | Directory to run Pint in, relative to the project root. |
+
+`job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`, and `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$`.
+
+Note
+
+`config` must be a relative path. The input carries a `regex`, so GitLab refuses the pipeline at creation when a value does not match.
+
+### Verify[#](https://preflight.apps.wayne.edu/docs/guides/component-pint.html#verify)
+
+Push the change. The components are ordinary jobs, so the `pint` job runs whenever the app's pipeline runs, in the `test` stage by default. A green job means the app's code is clean under its own Pint config.
+
+### Related[#](https://preflight.apps.wayne.edu/docs/guides/component-pint.html#related)
+
+- [The phpstan component](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html): the static analysis check that pairs with it.
+- [The eslint component](https://preflight.apps.wayne.edu/docs/guides/component-eslint.html): the JavaScript style check.
+- [Include a component twice](https://preflight.apps.wayne.edu/docs/guides/include-twice.html): the `job_name` input when one project includes the same component more than once.
+- [Reference](https://preflight.apps.wayne.edu/docs/reference/components.html): every component, with its inputs and defaults.
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/guides/component-portability.html
+
+## The portability component[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#the-portability-component)
+
+The portability component proves your app image meets the twelve-factor boot contract: it builds the image, boots it the strict way, and validates it before anything else gets to run it. Like the real pre-flight, it is a list of checks you finish on the ground before you are cleared for takeoff. Add the include below to your app's `.gitlab-ci.yml`, then read what the two jobs check.
+
+### What it checks[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#what-it-checks)
+
+Proves the app image meets the twelve-factor boot contract. It builds the image with Buildah (no Docker daemon, no elevated runner), boots it the strict way, and validates it with goss: the health path answers 200 for a foreign Host, the root filesystem and the app root are not writable, the app runs as the declared uid, and each declared writable path is writable. No takeoff without a clean pre-flight.
+
+This is the twelve-factor boot check from ADR-0010: the app must start as a non-root user, write only to its declared paths, and answer its health path for any Host, not just its own.
+
+### Add the include[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#add-the-include)
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@<full-commit-sha> # <tag, once one ships>
+    inputs:
+      dockerfile: Dockerfile
+      context: .
+      start_command: php -S 0.0.0.0:8080 -t public
+```
+
+Note
+
+Portability ships in 0.1.4 and later (0.1.3 does not include it), so pin the `0.1.4` tag, or the full commit SHA of a commit at or after it.
+
+Warning
+
+The build job needs a runner that permits user namespaces (Buildah uses unshare for its storage); the run job needs only the project's container registry and an app image that carries curl, sha256sum and tar.
+
+`start_command` is the one input with no default: it is app-specific, so you must set it.
+
+### How the jobs work[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#how-the-jobs-work)
+
+The component is two jobs.
+
+`portability-build` builds the image with Buildah, which needs no Docker daemon, and pushes it to the project's container registry. Buildah stores its layers with the vfs driver, which needs no special kernel support and runs in an ordinary container. Both jobs are interruptible and carry `timeout: 30 minutes`.
+
+`portability-run` pulls that image, starts the app as an arbitrary uid, and validates it with goss. In order, the job:
+
+1. Generates the goss file from the template and the inputs. The template is the same file the local checks use (`templates/portability/goss.yaml`); it is inlined in the component because a component only ships its `template.yml` to the including project. The `PORT`, `HEALTH_PATH`, `APP_ROOT` and `UID` placeholders are replaced with the inputs, and one command check per writable path is appended.
+2. Downloads goss, pinned by version and checksum (v0.4.10, verified with `sha256sum -c`).
+3. Starts the app in the background with `start_command`, then runs `goss validate` against the generated file, retrying the health check until the app answers or `boot_timeout` seconds expire.
+
+goss runs as the app user (uid, gid 0), so the command checks see the same permissions the app has.
+
+#### The goss checks[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#the-goss-checks)
+
+| Check | Command or request | What it asserts |
+| --- | --- | --- |
+| Health path | `http://127.0.0.1:{{PORT}}{{HEALTH_PATH}}`, `method: GET`, request header `Host: portability-check.invalid` | The app answers 200 for a foreign Host, not just its own. |
+| `root-not-writable` | `test ! -w /` | The app cannot write to the root of the filesystem. |
+| `app-root-not-writable` | `test ! -w {{APP_ROOT}}` | The app cannot write to its own root directory. |
+| `runs-as-uid` | `test "$(id -u)" = "{{UID}}"` | The app runs as the declared uid, not root. |
+| One `writable-...` check per entry of `writable_paths` | `test -w <app_root>/<path>` | Each declared writable path is writable by the app user. |
+
+Note
+
+goss sends the method as written, so the health check uses upper case `GET`.
+
+### Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#inputs)
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `test` | Pipeline stage for the portability jobs. |
+| `image` | string | `$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA` | App image the portability-run job starts and validates. The default is what portability-build pushes; GitLab expands the CI variables at job time. |
+| `buildah_image` | string | `quay.io/buildah/stable:v1.41.5@sha256:37fa3027bd4b1d76a0001c6bb7349b63c48ebbaee8fa5f47e6097f5e88f6447c` | Buildah image for the portability-build job; it builds and pushes the app image. |
+| `dockerfile` | string | `Dockerfile` | Dockerfile to build, relative to the context. |
+| `context` | string | `.` | Build context, relative to the project root. |
+| `app_root` | string | `/app` | Directory inside the image where the app lives. |
+| `writable_paths` | array | `["storage", "bootstrap/cache"]` | Paths the app may write to, relative to app_root. Each must be writable by the app user. |
+| `port` | number | `8080` | Port the app listens on inside the container. |
+| `health_path` | string | `/up` | Path the app must answer 200 on for any Host. |
+| `uid` | number | `100123` | Numeric uid the app runs as. The gid is always 0. |
+| `start_command` | string | none | Command that starts the app inside the image. It is app-specific, so it is required and has no default. |
+| `boot_timeout` | number | `60` | Seconds goss retries the health check while the app boots. |
+
+### Verify locally[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#verify-locally)
+
+The goss template is the same file the local checks use. `tests/check-portability.sh` (and its `.ps1` twin) do the placeholder replacement for the fixtures and build and boot the three fixtures under `tests/portability` the strict way; they exit 0 only when `good` passes and both `bad-*` fixtures fail. See [Local checks](https://preflight.apps.wayne.edu/docs/reference/local-checks.html) for the commands.
+
+### Related[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#related)
+
+- [Include a component twice](https://preflight.apps.wayne.edu/docs/guides/include-twice.html): the `job_name` input, and why `portability` keeps its two fixed job names instead.
+- [Same instance only](https://preflight.apps.wayne.edu/docs/guides/same-instance-only.html): components run only inside the GitLab instance that hosts this project.
+- [When the components run](https://preflight.apps.wayne.edu/docs/guides/when-components-run.html): the `workflow:rules` block that belongs in the app's own file.
+- [Reference](https://preflight.apps.wayne.edu/docs/reference/components.html): every component, with its inputs and defaults.
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/guides/component-proctor.html
+
+## The proctor component[#](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html#the-proctor-component)
+
+A proctor keeps an eye on the exam hall; this one keeps an eye on your app. This page shows how to add the `proctor` component to your app's `.gitlab-ci.yml` and what the job does once it runs. Next, add the [php-test component](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html) so the test suite runs on every supported PHP version.
+
+### Include the component[#](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html#include-the-component)
+
+Goal: your app's pipeline runs PROCTOR and publishes the result as a GitLab Code Quality report. Add the include to your app's `.gitlab-ci.yml`:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      proctor_command: vendor/bin/proctor check --format=codequality
+```
+
+The job installs the app's dependencies with `composer install --no-plugins --no-scripts`, so the app's plugins and scripts never run inside the job.
+
+Note
+
+The install skips plugins and scripts on purpose: the job only inspects the app, so nothing in the app runs with the job's access.
+
+### Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html#inputs)
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `proctor` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `php:8.4-cli-trixie@sha256:9cf851bc2c1b37c3e59dfd677a3c3e56d485af5a47c93f629424bb039eafcb69` | Docker image for the job. |
+| `composer_version` | string | `2.10.3` | Composer version to install. |
+| `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline. |
+| `proctor_command` | string | `vendor/bin/proctor check --format=codequality` | The proctor command to run. |
+| `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
+
+Note
+
+The template adds regexes to three inputs: `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`, `composer_version` must match `^2\.\d+\.\d+$`, and `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$`.
+
+### What the job does[#](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html#what-the-job-does)
+
+The job is `interruptible: true` with a `timeout: 30 minutes`. Its script:
+
+1. Installs `unzip` and `git` with `apt-get`, because the `php:8.4-cli-trixie` image does not ship them (the image is Debian-based, so `apt` is used).
+2. Copies the official Composer installer from `getcomposer.org` and verifies its SHA-384 against the signature fetched at runtime from `composer.github.io/installer.sig`. On a mismatch the check deletes the installer and exits 1. No `$` variables appear in the `php -r` code, so GitLab CI variable expansion cannot corrupt it.
+3. Runs the installer quietly with `--install-dir=/usr/local/bin --filename=composer` and the pinned `composer_version`, so Composer lands on PATH, then removes `composer-setup.php`.
+4. Changes into `working_dir` and runs `composer install --no-interaction --no-progress --no-plugins --no-scripts`.
+5. Runs `proctor_command` and redirects the output to `"$CI_PROJECT_DIR/gl-code-quality-report.json"`. A plain redirect (not `tee`) keeps proctor's exit code as the job result, and the report is written at the project root so the artifact path is the same for every `working_dir`, including `.`.
+
+The job publishes the report with `artifacts: when: always` as a GitLab Code Quality report (`reports: codequality: gl-code-quality-report.json`).
+
+Tip
+
+Set `allow_failure: true` if the job may fail without failing the pipeline; the default is `false`.
+
+### Related[#](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html#related)
+
+- [The php-test component](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html)
+- [The composer-audit component](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html)
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/guides/component-renovate.html
+
+## The renovate component[#](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html#the-renovate-component)
+
+This page covers the `renovate` component: what the job does, how to include it, and every input it takes. Goal: one scheduled job keeps image digests, GitHub action SHAs and package versions current across the group's repositories, and merges the updates whose pipeline is green. The component flies on autopilot; majors keep a human in the seat.
+
+### What the job does[#](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html#what-the-job-does)
+
+The component runs [Renovate](https://docs.renovatebot.com/) as a scheduled or manual job that bumps image digests, GitHub action SHAs and package versions across the group's repositories, and merges the green ones itself. Bumps of `component:` include pins are covered by the preset and wait for review. Majors open a merge request and wait for a person. See [Renovate](https://preflight.apps.wayne.edu/docs/guides/renovate.html) for what auto-merges and what waits.
+
+Under the hood, the job:
+
+- Runs only in scheduled pipelines (`$CI_PIPELINE_SOURCE == "schedule"`) and manual pipelines started from the web (`$CI_PIPELINE_SOURCE == "web"`).
+- Points Renovate at the instance: `RENOVATE_PLATFORM` is `gitlab` and `RENOVATE_ENDPOINT` is `$CI_API_V4_URL`.
+- Turns on autodiscovery (`RENOVATE_AUTODISCOVER: "true"`), limited to the `autodiscover_filter` glob, default `$CI_PROJECT_NAMESPACE/*`, relative to the runner project's namespace.
+- Writes its `config.js` at job time. The `registryAliases` entry for the GitLab instance comes from the predefined `CI_SERVER_FQDN` variable: GitLab expands the key before the shell runs, and Node resolves the value when Renovate loads `config.js`. No hostname is stored in the template, so the public mirror stays clean.
+- Passes `git_author` through as `RENOVATE_GIT_AUTHOR` and `dry_run` through as `RENOVATE_DRY_RUN`.
+- Is interruptible and times out after 1 hour.
+
+Warning
+
+`RENOVATE_TOKEN` and `GITHUB_COM_TOKEN` are not set in the job's `variables:` on purpose. A self-reference such as `RENOVATE_TOKEN: $RENOVATE_TOKEN` arrives as literal text on GitLab 19.5 and shadows the masked project CI/CD variable, so the component leaves both tokens to the project and the masked values reach the job unchanged.
+
+### Include the component[#](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html#include-the-component)
+
+Add the include to the runner project's `.gitlab-ci.yml`, pinned to a full commit SHA with the tag in a trailing comment, and set `git_author`:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      git_author: "Preflight Bot <preflight-bot@example.com>"
+```
+
+### Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html#inputs)
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `job_name` | string | `renovate` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `renovate/renovate:44.192.2@sha256:37960a62ba1faa9079a7c4eead9b3f4470748a64ecd207e06c09fd8858673e17` | Docker image for the job. |
+| `autodiscover_filter` | string | `$CI_PROJECT_NAMESPACE/*` | Glob limiting which projects Renovate discovers, relative to the runner project's namespace. |
+| `dry_run` | string | `"null"` | Dry run mode: `null` (disabled), `lookup` or `full`. |
+| `git_author` | string | none | Author of the commits and merge requests Renovate creates, in the form `Name <email>`. Required. |
+
+### Verify[#](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html#verify)
+
+Start the job manually from the web, or wait for the schedule. Expected: the job bumps the versions it finds and merges the ones whose pipeline is green. To try it without changes, set `dry_run` to `lookup` or `full`; `null` (disabled) is the default.
+
+### Related[#](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html#related)
+
+- [Renovate](https://preflight.apps.wayne.edu/docs/guides/renovate.html): the shared preset, and what auto-merges, what waits and what waits for review.
+- [Include a component twice](https://preflight.apps.wayne.edu/docs/guides/include-twice.html): the `job_name` input in action.
+- [Quick start](https://preflight.apps.wayne.edu/docs/guides/quick-start.html): wire one component into an app and watch the pipeline run it.
+- [Reference](https://preflight.apps.wayne.edu/docs/reference/components.html): every component, with its inputs and defaults.
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/guides/component-sbom.html
+
+## The sbom component[#](https://preflight.apps.wayne.edu/docs/guides/component-sbom.html#the-sbom-component)
+
+This page shows how to add the `sbom` component to an app's `.gitlab-ci.yml`: it generates a CycloneDX SBOM with `cyclonedx/cyclonedx-php-composer`, validates it, and publishes it as an artifact. The SBOM is the aircraft's parts manifest (nothing flies that is not on the list); start with the include, then read what the job does and which inputs it takes.
+
+### Include the component[#](https://preflight.apps.wayne.edu/docs/guides/component-sbom.html#include-the-component)
+
+Add the include to the app's `.gitlab-ci.yml`, pinned to a commit SHA with the tag in a trailing comment:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      output: sbom.cdx.json
+```
+
+A tag or branch can move; a SHA cannot.
+
+### What the job does[#](https://preflight.apps.wayne.edu/docs/guides/component-sbom.html#what-the-job-does)
+
+The job lands in the `test` stage by default, is `interruptible: true`, and has a `timeout: 30 minutes`. It runs four steps:
+
+1. Install the app's dependencies:
+   ```sh
+   composer install --no-interaction --no-progress --prefer-dist
+   ```
+   The default image is a composer image, which already ships Composer, so no install step for Composer itself is needed.
+2. Allow the CycloneDX plugin:
+   ```sh
+   composer global config --no-plugins allow-plugins.cyclonedx/cyclonedx-php-composer true
+   ```
+3. Install the plugin globally:
+   ```sh
+   composer global require cyclonedx/cyclonedx-php-composer:^6.2
+   ```
+   The plugin is installed globally, so the app's `composer.json` is never touched.
+4. Generate the SBOM. `--validate` fails the job on an invalid SBOM:
+   ```sh
+   composer CycloneDX:make-sbom --output-format=JSON --output-reproducible --validate --omit=dev --output-file=sbom.cdx.json
+   ```
+   ```sh
+   composer CycloneDX:make-sbom --output-format=JSON --output-reproducible --validate --output-file=sbom.cdx.json
+   ```
+   `--omit=dev` is present only when `omit_dev` is `true`; `--output-file` takes the `output` input (default `sbom.cdx.json`).
+
+### Artifacts[#](https://preflight.apps.wayne.edu/docs/guides/component-sbom.html#artifacts)
+
+The job publishes the SBOM file as an artifact:
+
+```yaml
+artifacts:
+  paths:
+    - sbom.cdx.json
+  expire_in: 30 days
+```
+
+The path is the `output` input, and the artifact expires in 30 days.
+
+### Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-sbom.html#inputs)
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `sbom` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. |
+| `omit_dev` | boolean | `true` | Whether to omit dev dependencies from the SBOM. |
+| `output` | string | `sbom.cdx.json` | Path of the SBOM file to publish, relative to the project root. It must be a relative path; GitLab refuses the pipeline at creation if it is not. |
+
+`job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`.
+
+Note
+
+`output` must be a relative path. The input carries a `regex`, so GitLab refuses the pipeline at creation when a value does not match.
+
+### Verify[#](https://preflight.apps.wayne.edu/docs/guides/component-sbom.html#verify)
+
+Push the change. The components are ordinary jobs, so the `sbom` job runs whenever the app's pipeline runs, in the `test` stage by default. A green job means the SBOM was generated, validated, and published.
+
+### Related[#](https://preflight.apps.wayne.edu/docs/guides/component-sbom.html#related)
+
+- [The composer-audit component](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html): the companion dependency check.
+- [Include a component twice](https://preflight.apps.wayne.edu/docs/guides/include-twice.html): the `job_name` input when one project includes the same component more than once.
+- [When the components run](https://preflight.apps.wayne.edu/docs/guides/when-components-run.html): the `workflow:rules` block that belongs in the app's own file.
+- [Reference](https://preflight.apps.wayne.edu/docs/reference/components.html): every component, with its inputs and defaults.
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/guides/github-mirrors.html
+
+## GitHub mirrors[#](https://preflight.apps.wayne.edu/docs/guides/github-mirrors.html#github-mirrors)
+
+Preflight's components fly inside one GitLab instance only, so this page shows how a package that is also mirrored to `github.com/waynestate` still gets the same checks: call Preflight's reusable GitHub Actions workflow from the mirror's own `.github/workflows/ci.yml`. Start here, then read [Same instance only](https://preflight.apps.wayne.edu/docs/guides/same-instance-only.html) for why the components cannot cross instances.
+
+### Why the mirror needs its own workflow[#](https://preflight.apps.wayne.edu/docs/guides/github-mirrors.html#why-the-mirror-needs-its-own-workflow)
+
+Components work only inside one GitLab instance, so a package that is also mirrored to `github.com/waynestate` cannot include them there. For those mirrors, Preflight ships a reusable GitHub Actions workflow that runs the same checks: the package's `composer ci` script on each supported PHP version, plus a Composer audit.
+
+### The workflow just calls `composer ci` [#](https://preflight.apps.wayne.edu/docs/guides/github-mirrors.html#the-workflow-just-calls-composer-ci)
+
+Each package keeps its checks in a `ci` script in its `composer.json`; the workflow just calls `composer ci`, so the mirror runs whatever the package already runs on GitLab.
+
+### Call the workflow from your package[#](https://preflight.apps.wayne.edu/docs/guides/github-mirrors.html#call-the-workflow-from-your-package)
+
+The workflow lives at `.github/workflows/php-package.yml` in this repo. A mirrored package calls it from its own `.github/workflows/ci.yml`:
+
+```yaml
+name: CI
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v*', '*.*.*']
+
+jobs:
+  ci:
+    uses: waynestate/preflight/.github/workflows/php-package.yml@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+```
+
+### Pin the include to a commit SHA[#](https://preflight.apps.wayne.edu/docs/guides/github-mirrors.html#pin-the-include-to-a-commit-sha)
+
+This workflow ships in the `0.1.1` tag, so pin the full commit SHA of the release tag and keep the tag in a trailing comment. A tag or branch can move; a SHA cannot. PROCTOR's `preflight-pinned` check warns when an include is not pinned to a commit SHA. The Renovate preset (see the Renovate section) proposes the bumps, and they wait for review (the `needs-review` label).
+
+### Workflow inputs[#](https://preflight.apps.wayne.edu/docs/guides/github-mirrors.html#workflow-inputs)
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `php-versions` | string (JSON array) | `'["8.3","8.4","8.5"]'` | PHP versions to test, lowest first. The audit job runs on the first entry. |
+| `ci-command` | string | `composer ci` | The command to run in each PHP version job. |
+| `working-directory` | string | `.` | Directory to run the command in, relative to the repository root. |
+
+### Green on both sides[#](https://preflight.apps.wayne.edu/docs/guides/github-mirrors.html#green-on-both-sides)
+
+The workflow is committed to this repo (and so to GitLab) but only runs on the GitHub mirror; GitLab ignores `.github/workflows`. A release tag is not done until it is green on both sides. Two cockpits, one checklist.
+
+### Related[#](https://preflight.apps.wayne.edu/docs/guides/github-mirrors.html#related)
+
+- [Same instance only](https://preflight.apps.wayne.edu/docs/guides/same-instance-only.html)
+- [Renovate](https://preflight.apps.wayne.edu/docs/guides/renovate.html)
+- [Composer audit component](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html)
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/guides/image-pins.html
+
+## Updating image pins[#](https://preflight.apps.wayne.edu/docs/guides/image-pins.html#updating-image-pins)
+
+This page covers the image pins Preflight's components run: why they are digests, how to look one up, and how to change one. Read the pinning rules, look up the new digest, and open a reviewed merge request. Like the aircraft preflight it is named after, the value shows up on the day it catches something.
+
+### Why pins are digests[#](https://preflight.apps.wayne.edu/docs/guides/image-pins.html#why-pins-are-digests)
+
+Every image the components run is pinned by digest (`name:tag@sha256:...`), so a repointed tag cannot quietly change what a pipeline executes. The tag stays in front of the digest so a diff still reads like a version bump.
+
+Note
+
+The php-test matrix is the one exception. Its PHP images are tag-pinned on purpose, so those jobs run on the newest PHP patch release; every other component image is digest-pinned.
+
+### Look up the digest[#](https://preflight.apps.wayne.edu/docs/guides/image-pins.html#look-up-the-digest)
+
+To look up the digest for an image:
+
+```sh
+docker buildx imagetools inspect <image>:<tag>
+```
+
+Use the top-level `Digest:` line (the multi-arch index digest), not a per-platform one. Without `buildx`, `docker manifest inspect -v <image>:<tag>` shows the same index digest.
+
+### Change a pin[#](https://preflight.apps.wayne.edu/docs/guides/image-pins.html#change-a-pin)
+
+Pins change only through a reviewed merge request.
+
+### Related[#](https://preflight.apps.wayne.edu/docs/guides/image-pins.html#related)
+
+- [Template lint](https://preflight.apps.wayne.edu/docs/guides/template-lint.html): the unsafe CI patterns `composer ci` scans for before the fixture tests.
+- [Shared conventions](https://preflight.apps.wayne.edu/docs/reference/conventions.html): Composer vendor, license, PHP floor and JavaScript installs.
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/guides/include-twice.html
+
+## Include a component twice[#](https://preflight.apps.wayne.edu/docs/guides/include-twice.html#include-a-component-twice)
+
+Goal: run the same component more than once in one project, for example in a monorepo with two apps, and keep the two jobs separate. Set the `job_name` input on each include, as shown below.
+
+### Set `job_name` [#](https://preflight.apps.wayne.edu/docs/guides/include-twice.html#set-job-name)
+
+Every component except `portability` takes a `job_name` input, whose default is the job's usual name. Set it when one project includes the same component more than once, for example in a monorepo with two apps; without it the two jobs would share a name and merge into one.
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@<full commit SHA> # <tag>
+    inputs:
+      working_dir: app
+      job_name: pint-app
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@<full commit SHA> # <tag>
+    inputs:
+      working_dir: admin
+      job_name: pint-admin
+```
+
+Expected: the pipeline runs two separately named jobs, `pint-app` and `pint-admin`, instead of two jobs that merge into one.
+
+Note
+
+`job_name` ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release. `portability` keeps its two fixed job names, because `portability-run` waits on `portability-build`.
+
+### Another use: the next PHP release[#](https://preflight.apps.wayne.edu/docs/guides/include-twice.html#another-use-the-next-php-release)
+
+Including a component twice is also how you try a PHP release before it is supported. Include `php-test` a second time for the release that is not supported yet, name that job, and let it fail. The name is what lets your own `.gitlab-ci.yml` loosen only that job:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<full commit SHA> # <tag>
+    inputs:
+      php_versions: ["8.6"]
+      job_name: php-test-next
+      # While 8.6 only has release candidate images, name the tag: php:${PHP_VERSION}-rc-cli-trixie
+      # image: "php:${PHP_VERSION}-rc-cli-trixie"
+
+php-test-next:
+  allow_failure: true
+```
+
+A red `php-test-next` job is an early warning, not a stop. Drop the `allow_failure` and move the version into the main `php_versions` list once the release is supported (the supported versions follow `policy.json`).
+
+### Related[#](https://preflight.apps.wayne.edu/docs/guides/include-twice.html#related)
+
+- [The php-test component](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html): inputs, caching, and the full next-release example.
+- [The portability component](https://preflight.apps.wayne.edu/docs/guides/component-portability.html): the one component without a `job_name` input.
+- [When the components run](https://preflight.apps.wayne.edu/docs/guides/when-components-run.html): the `workflow:rules` block that belongs in the app's own file.
+- [Reference](https://preflight.apps.wayne.edu/docs/reference/components.html): every component, with its inputs and defaults.
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/guides/instance-runner.html
+
+## Strongly recommended: a git.wayne.edu instance runner[#](https://preflight.apps.wayne.edu/docs/guides/instance-runner.html#strongly-recommended-a-git-wayne-edu-instance-runner)
+
+This page explains why a git.wayne.edu instance runner is strongly recommended and exactly what to ask for when you request one. Read it before you file the request, and carry the three asks below into the request itself.
+
+### Why the recommendation exists[#](https://preflight.apps.wayne.edu/docs/guides/instance-runner.html#why-the-recommendation-exists)
+
+Until git.wayne.edu has a runner, CI runs on the GitLab instance that has one, and Preflight and each app must live on or be mirrored to it. A git.wayne.edu instance runner is strongly recommended.
+
+### What to ask for[#](https://preflight.apps.wayne.edu/docs/guides/instance-runner.html#what-to-ask-for)
+
+Ask for:
+
+- A non-privileged Docker executor (no privileged mode, no Docker socket mount).
+- A fresh ephemeral environment for every job.
+- No shell executor shared between projects.
+
+Capacity and maintenance stay with ops.
+
+Tip
+
+A job that needs the host's Docker socket to take off has skipped its own preflight.
+
+### Related[#](https://preflight.apps.wayne.edu/docs/guides/instance-runner.html#related)
+
+- [Same instance only](https://preflight.apps.wayne.edu/docs/guides/same-instance-only.html)
+- [When the components run](https://preflight.apps.wayne.edu/docs/guides/when-components-run.html)
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/guides/job-token-allowlist.html
+
+## Keep the job token allowlist short[#](https://preflight.apps.wayne.edu/docs/guides/job-token-allowlist.html#keep-the-job-token-allowlist-short)
+
+This page is for an app that installs private packages from GitLab's package registry. It sets out what belongs in the CI/CD job token allowlist, where the setting lives, and when to review it. Apply the rule once, then repeat the review whenever a dependency is dropped.
+
+### What to list[#](https://preflight.apps.wayne.edu/docs/guides/job-token-allowlist.html#what-to-list)
+
+An app that installs private packages from GitLab's package registry should list only the projects it really needs in its CI/CD job token allowlist (project settings, Settings, CI/CD, Job token permissions), use the fine-grained permissions where they fit, and review the list when a dependency is dropped.
+
+Warning
+
+A leaked job token acts with the triggering user's access.
+
+### When to review[#](https://preflight.apps.wayne.edu/docs/guides/job-token-allowlist.html#when-to-review)
+
+Review the list when a dependency is dropped, and drop any project the app no longer installs from it.
+
+### What Preflight cannot do[#](https://preflight.apps.wayne.edu/docs/guides/job-token-allowlist.html#what-preflight-cannot-do)
+
+This is a project setting, not a file Preflight can create or check. The setting is made in the app's GitLab project settings, so no file in the app's repository sets it for you.
+
+### Related[#](https://preflight.apps.wayne.edu/docs/guides/job-token-allowlist.html#related)
+
+- [What the components cannot force](https://preflight.apps.wayne.edu/docs/guides/what-components-cannot-force.html)
+- [Install](https://preflight.apps.wayne.edu/docs/install.html)
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/guides/quick-start.html
+
+## Quick start[#](https://preflight.apps.wayne.edu/docs/guides/quick-start.html#quick-start)
+
+This quick start adds the `php-test` component to an app, the same way the front page shows it. Every other component installs the same way: one include, pinned to a commit SHA.
+
+1. **Check the requirements.** Your GitLab must be 17.0 or newer (components are GA on the Free tier since GitLab 17.0), and the app must live on the same GitLab instance that hosts this project. Expected: both true, or the components cannot run here.
+2. **Add the include** to the app's `.gitlab-ci.yml`:
+   ```yaml
+   include:
+     - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+     inputs:
+       test_command: vendor/bin/phpunit
+   ```
+   Expected: the file includes the component pinned to a full commit SHA, with the tag in a trailing comment. A tag or branch can move; a SHA cannot.
+3. **Commit and push** the change:
+   ```sh
+   git push
+   ```
+   Expected: the next pipeline runs the `php-test` jobs, one per entry of `php_versions`, `8.3`, `8.4` and `8.5` by default, each in the `test` stage.
+4. **Read the result.** Each job installs the app's dependencies, caches Composer downloads in `.composer-cache/`, and runs the test command. Expected: a green matrix, meaning the app passes on every supported PHP version.
+
+### What you built[#](https://preflight.apps.wayne.edu/docs/guides/quick-start.html#what-you-built)
+
+Your app now runs the same PHP tests on each supported PHP version that every WSU app runs, from one pinned include. Add the remaining components the same way, one include each.
+
+### Next steps[#](https://preflight.apps.wayne.edu/docs/guides/quick-start.html#next-steps)
+
+- [Install](https://preflight.apps.wayne.edu/docs/install.html): requirements, the full include, and how to verify.
+- [When the components run](https://preflight.apps.wayne.edu/docs/guides/when-components-run.html): the `workflow:rules` block that keeps the checks on merge requests and the default branch.
+- [The php-test component](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html): inputs, caching, and trying the next PHP release without breaking the pipeline.
+- [Reference](https://preflight.apps.wayne.edu/docs/reference/components.html): every component, with its inputs and defaults.
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/guides/renovate.html
+
+## Renovate: what merges and what waits[#](https://preflight.apps.wayne.edu/docs/guides/renovate.html#renovate-what-merges-and-what-waits)
+
+This page covers what Preflight's version automation auto-merges, what waits for a person, and how the private runner project is set up. For the component's inputs, go to [the `renovate` component](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html).
+
+### How it works[#](https://preflight.apps.wayne.edu/docs/guides/renovate.html#how-it-works)
+
+Preflight owns the stack's version automation (ADR-0015): the shared preset `renovate/default.json` and the [`renovate` component](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html) that runs it. A private runner project includes the component on a schedule; Renovate discovers every repository in the filter, opens merge requests for outdated versions, and GitLab's native auto-merge takes in the ones whose pipeline is green.
+
+Every stack repository carries a `renovate.json` that extends the shared preset, so the rules change in one place:
+
+```json
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["local>enterprise-apps/preflight//renovate/default"]
+}
+```
+
+### What auto-merges[#](https://preflight.apps.wayne.edu/docs/guides/renovate.html#what-auto-merges)
+
+Digest updates, pin and pinDigest updates, and patch and minor version bumps auto-merge when the pipeline is green. Lock file maintenance runs weekly and auto-merges the same way. Every merge request carries the `auto-deps` label.
+
+The exception is Preflight's own pins: an update that touches the templates, the contract or this repository's own pipeline, a bump of a component include version, and a bump of the recorded Squire kit version, never auto-merge (see [What waits for review](https://preflight.apps.wayne.edu/docs/guides/renovate.html#what-waits-for-review)).
+
+### What waits[#](https://preflight.apps.wayne.edu/docs/guides/renovate.html#what-waits)
+
+Major version bumps never auto-merge. The merge request carries the `major` label and waits for a person.
+
+### What waits for review[#](https://preflight.apps.wayne.edu/docs/guides/renovate.html#what-waits-for-review)
+
+Updates that change an image digest inside the templates, the contract, or this repository's own pipeline, bumps of a Preflight component version in an app's `component:` include, and bumps of the recorded Squire kit version (labeled `squire-kit`) carry the `needs-review` label and never auto-merge. They wait for a person because those pins are what every app pipeline runs: a changed digest here changes what every consuming pipeline executes, so it earns a human eye even when its own pipeline is green. The Squire kit version bump is refreshed by a person who runs `squire update` (with the right path for the repo), reviews the diff and commits it to the branch; the runner runs no commands, so the merge request carries no postUpgradeTasks.
+
+### Why MySQL and HA-Proxy get digests only[#](https://preflight.apps.wayne.edu/docs/guides/renovate.html#why-mysql-and-ha-proxy-get-digests-only)
+
+The `mysql` and `haproxy` images mirror the versions Citadel actually runs, not the newest releases in the world. Bumping their tags would drift the apps away from production, so only digest updates are enabled for them: the same tag, the exact image. `citadel/php-apache` is disabled entirely, because Squire's own data owns that image.
+
+### Set up (the user does this)[#](https://preflight.apps.wayne.edu/docs/guides/renovate.html#set-up-the-user-does-this)
+
+This repository ships the preset and the component, and creates nothing else. A person must set up:
+
+- A private runner project that includes the `renovate` component on a schedule (see [The runner project](https://preflight.apps.wayne.edu/docs/guides/renovate.html#the-runner-project)).
+- The `RENOVATE_TOKEN` masked CI variable in that project, and optionally `GITHUB_COM_TOKEN`.
+- A pipeline schedule on that project so the job runs regularly; weekly on Monday is a sensible default.
+
+### The runner project[#](https://preflight.apps.wayne.edu/docs/guides/renovate.html#the-runner-project)
+
+Warning
+
+The runner project must stay private. It holds `RENOVATE_TOKEN`, a token that can open and merge merge requests across the group, and this repository is mirrored to public GitHub. Use a group bot account for the token, not a person's: the bot outlives any one maintainer, and the commits keep one stable author.
+
+| Variable | Required | What it does |
+| --- | --- | --- |
+| `RENOVATE_TOKEN` | yes | Masked CI variable in the runner project; the job reads it straight from the project, the component does not map it. A project access token with Developer, or Maintainer where only Maintainers may merge. |
+| `GITHUB_COM_TOKEN` | no | Masked CI variable in the runner project; the job reads it straight from the project, the component does not map it. Lookups against github.com do not hit anonymous rate limits. |
+
+Warning
+
+Do not add `RENOVATE_TOKEN: $RENOVATE_TOKEN` to your own `variables:`; that self-reference arrives as literal text.
+
+The component writes its `config.js` at job time, so the `registryAliases` entry for the GitLab instance comes from the predefined `CI_SERVER_FQDN` variable. No hostname is stored in this repository.
+
+### Related[#](https://preflight.apps.wayne.edu/docs/guides/renovate.html#related)
+
+- [The `renovate` component](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html)
+- [GitHub mirrors](https://preflight.apps.wayne.edu/docs/guides/github-mirrors.html)
+- [Image pins](https://preflight.apps.wayne.edu/docs/guides/image-pins.html)
+- [Quick start](https://preflight.apps.wayne.edu/docs/guides/quick-start.html)
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/guides/same-instance-only.html
+
+## Same instance only[#](https://preflight.apps.wayne.edu/docs/guides/same-instance-only.html#same-instance-only)
+
+This page tells you where Preflight components can run, and what to do when your app is not on the right instance. Read it before you add an include if your app lives on a different GitLab than this project.
+
+### The rule[#](https://preflight.apps.wayne.edu/docs/guides/same-instance-only.html#the-rule)
+
+Components work only inside the GitLab instance that hosts this project.
+
+Warning
+
+Components cannot be used across instances except by mirroring.
+
+Every include in this manual takes the form `component: $CI_SERVER_FQDN/enterprise-apps/preflight/<name>@<full commit SHA>`. The path is built from `$CI_SERVER_FQDN`, the instance the pipeline runs on, so the component must be resolvable on that same instance.
+
+### What that means for your app[#](https://preflight.apps.wayne.edu/docs/guides/same-instance-only.html#what-that-means-for-your-app)
+
+- Your app must live on the same GitLab instance that hosts this project; if it does not, the components cannot run here.
+- Until git.wayne.edu has a runner, CI runs on the GitLab instance that has one, and Preflight and each app must live on or be mirrored to it. See [Strongly recommended: a git.wayne.edu instance runner](https://preflight.apps.wayne.edu/docs/guides/instance-runner.html).
+- A package that is also mirrored to `github.com/waynestate` cannot include the components there, because GitHub is not a GitLab instance at all. For those mirrors, Preflight ships a reusable GitHub Actions workflow that runs the same checks: the package's `composer ci` script on each supported PHP version, plus a Composer audit. See [GitHub mirrors](https://preflight.apps.wayne.edu/docs/guides/github-mirrors.html).
+
+### Mirroring is the only exception[#](https://preflight.apps.wayne.edu/docs/guides/same-instance-only.html#mirroring-is-the-only-exception)
+
+The one way to use the components on another GitLab instance is mirroring: mirror this project to that instance, so the components live there too. Everything else in this manual assumes the app and the components share an instance.
+
+### Related[#](https://preflight.apps.wayne.edu/docs/guides/same-instance-only.html#related)
+
+- [GitHub mirrors](https://preflight.apps.wayne.edu/docs/guides/github-mirrors.html): the reusable GitHub Actions workflow for packages mirrored to `github.com/waynestate`.
+- [Strongly recommended: a git.wayne.edu instance runner](https://preflight.apps.wayne.edu/docs/guides/instance-runner.html): where CI runs until git.wayne.edu has a runner.
+- [When the components run](https://preflight.apps.wayne.edu/docs/guides/when-components-run.html): the `workflow:rules` block that belongs in the app's own file.
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/guides/template-lint.html
+
+## Template lint[#](https://preflight.apps.wayne.edu/docs/guides/template-lint.html#template-lint)
+
+This page lists the unsafe CI patterns the template lint catches and how to allowlist a known warning. Run `composer ci` to see the lint, which runs before the fixture tests.
+
+### What it runs[#](https://preflight.apps.wayne.edu/docs/guides/template-lint.html#what-it-runs)
+
+`composer ci` runs `bin/lint-templates` before the fixture tests. The lint scans `templates/**/*.yml` and `.github/workflows/*.yml` for unsafe CI patterns.
+
+### Rules[#](https://preflight.apps.wayne.edu/docs/guides/template-lint.html#rules)
+
+| Rule | Catches |
+| --- | --- |
+| `privileged` | `privileged: true` |
+| `dind-service` | Docker-in-Docker services |
+| `docker-sock` | references to `docker.sock` |
+| `kaniko-image` | Kaniko images |
+| `unpinned-action` | GitHub `uses:` entries that are not pinned to a 40-character SHA |
+| `image-no-tag` | image references with no tag |
+| `image-latest` | image references with `latest` |
+| `image-no-digest` | a warning for a tagged image that is not pinned by digest |
+
+The container-build rules (`privileged`, `dind-service`, `docker-sock` and `kaniko-image`) are explained in BEST_PRACTICES.md 4.17.
+
+### Allowlist a known warning[#](https://preflight.apps.wayne.edu/docs/guides/template-lint.html#allowlist-a-known-warning)
+
+Known warnings can be allowlisted in `lint-allow.yml`. Each entry needs `file`, `rule` and `reason`; the reason is required so an allowlist entry is a reviewed decision, not a silence. The preflight checklist checks the checklist.
+
+### Related[#](https://preflight.apps.wayne.edu/docs/guides/template-lint.html#related)
+
+- [Updating image pins](https://preflight.apps.wayne.edu/docs/guides/image-pins.html): why component images are digest-pinned and how to change a pin.
+- [Shared conventions](https://preflight.apps.wayne.edu/docs/reference/conventions.html): Composer vendor, license, PHP floor and JavaScript installs.
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/guides/what-components-cannot-force.html
+
+## What the components cannot force[#](https://preflight.apps.wayne.edu/docs/guides/what-components-cannot-force.html#what-the-components-cannot-force)
+
+An included component is a set of ordinary jobs. The app's own `.gitlab-ci.yml` is merged over them, so an app can override a job's keys, skip it with `rules`, or delete the `include:` line. Preflight makes the safe pipeline the easy one; it does not lock it. Rollcall is where skipped or weakened gates will show up. A preflight checklist only works if the pilot reads it. This page lists which jobs may be allowed to fail and the five project settings that make the gates harder to skip.
+
+### Which jobs may be allowed to fail[#](https://preflight.apps.wayne.edu/docs/guides/what-components-cannot-force.html#which-jobs-may-be-allowed-to-fail)
+
+Only `proctor` takes an `allow_failure` input (default `false`). A policy finding is a warning while an app adopts PROCTOR's rules, so the job may fail without failing the pipeline during adoption. `composer-audit` has no such input on purpose: a known advisory must fail the pipeline. The other jobs have no `allow_failure` input either.
+
+No template adds a global key such as `default:`, `variables:`, `workflow:` or `stages:`. `tests/check-contract.sh` (and its `.ps1` twin) fails on any top-level key in a template that is not a job named in `contract/inputs.json`, so a global key fails `composer ci`.
+
+### Protection checklist[#](https://preflight.apps.wayne.edu/docs/guides/what-components-cannot-force.html#protection-checklist)
+
+A pilot signs each line of the checklist; the plane does not sign for you. Five project settings make the gates harder to skip, and every one of them works on GitLab Community Edition:
+
+- **Protect the default branch** and require a merge request to change it. Every change to `.gitlab-ci.yml` then gets a reviewer. (Code owner approval needs Premium, so on Community Edition the reviewer is whoever merges.)
+- **Protect the release tags.** Protect `*` or the release tag pattern so only maintainers can create or move a tag. A component ref is a tag, so whoever can move it controls every pipeline that pins it.
+- **Set merge request approvals to at least one** for changes to the default branch. Approvals are available on every tier, but code owner rules within them need Premium, so on Community Edition the approval rests with whoever has merge rights: rely on the merger as the reviewer.
+- **Set "Minimum role to use pipeline variables" to `no_one_allowed`** unless the project needs pipeline variables. The components take inputs, which are fixed and type checked for the whole run. Self-managed GitLab defaults this setting to `maintainer`.
+- **Keep secrets away from fork merge requests.** A fork's merge request pipeline runs the fork's configuration. Review a fork's `.gitlab-ci.yml` before running its pipeline, and never give it protected variables.
+
+Note
+
+These are project settings Preflight cannot create or check, and a read-only token drift report was considered and left out on purpose: it would trade a token for a warning, and the checklist costs nothing to keep.
+
+### Related[#](https://preflight.apps.wayne.edu/docs/guides/what-components-cannot-force.html#related)
+
+- [When the components run](https://preflight.apps.wayne.edu/docs/guides/when-components-run.html)
+- [The job token allowlist](https://preflight.apps.wayne.edu/docs/guides/job-token-allowlist.html)
+- [GitHub mirrors](https://preflight.apps.wayne.edu/docs/guides/github-mirrors.html)
+- [The `proctor` component](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html)
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/guides/when-components-run.html
+
+## When the components run[#](https://preflight.apps.wayne.edu/docs/guides/when-components-run.html#when-the-components-run)
+
+The components are ordinary jobs, so they run whenever the app's pipeline runs. This page shows the `workflow:rules` block that runs them on every merge request and on pushes to the default branch, and why that block must live in the app's own file.
+
+### The workflow:rules block[#](https://preflight.apps.wayne.edu/docs/guides/when-components-run.html#the-workflow-rules-block)
+
+To run the components on every merge request and on pushes to the default branch, put a `workflow:rules` block in the app's own `.gitlab-ci.yml`:
+
+```yaml
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+```
+
+Note
+
+The `workflow:rules` block must live in the app's own file. A component cannot set the pipeline's `workflow:rules` for the project that includes it, so the `merge_request_event` rule goes in the app's `.gitlab-ci.yml`.
+
+### Related[#](https://preflight.apps.wayne.edu/docs/guides/when-components-run.html#related)
+
+- [Install](https://preflight.apps.wayne.edu/docs/install.html)
+- [Quick start](https://preflight.apps.wayne.edu/docs/guides/quick-start.html)
+- [Include a component twice](https://preflight.apps.wayne.edu/docs/guides/include-twice.html)
+- [What the components cannot force](https://preflight.apps.wayne.edu/docs/guides/what-components-cannot-force.html)
+
+---
+
 Source: https://preflight.apps.wayne.edu/docs/
 
 [![Preflight's front page: the headline Preflight, 'Every push is cleared for takeoff.', the include block for the php-test component, and the runway mark set in a heading-indicator instrument.](https://preflight.apps.wayne.edu/docs/readme/hero.jpg)](https://preflight.apps.wayne.edu/index.html)
@@ -1164,18 +2437,872 @@ Source: https://preflight.apps.wayne.edu/docs/
 
 **Every push is cleared for takeoff.**
 
-Preflight is a set of GitLab CI/CD components that give every WSU app the same checks: PROCTOR, PHP tests on each supported version, Composer audit, an SBOM, Pint, PHPStan and ESLint.
+Preflight is a set of GitLab CI/CD components that give every WSU app the same checks: PROCTOR, PHP tests on each supported version, Composer audit, an SBOM, Pint, PHPStan and ESLint. One include per component, pinned to a commit SHA, and the same checklist flies on every push.
 
-**Not to be confused with:** Preflight is the CI pipeline; it runs Pinstripe's style checks and PROCTOR but sets neither.
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      test_command: vendor/bin/phpunit
+```
 
-Front page: [`site/index.html`](https://github.com/waynestate/preflight/blob/main/site/index.html), a static page; see [`site/README.md`](https://github.com/waynestate/preflight/blob/main/site/README.md). On Citadel it is served by the raw-PHP deploy layer in [`deploy/`](https://github.com/waynestate/preflight/tree/main/deploy): a Squire kit whose front controller serves `site/` behind HELMET's security headers. For local development, keep serving `site/` directly.
+### Pick your path[#](https://preflight.apps.wayne.edu/docs/#pick-your-path)
 
-### Where the code lives[#](https://preflight.apps.wayne.edu/docs/#where-the-code-lives)
+- [Quick start](https://preflight.apps.wayne.edu/docs/guides/quick-start.html): wire one component into an app and watch the pipeline run it.
+- [Install](https://preflight.apps.wayne.edu/docs/install.html): the requirements, the include snippet, and how to verify the pipeline picked the component up.
+- [Reference](https://preflight.apps.wayne.edu/docs/reference/components.html): every component, with its include example, inputs and defaults.
 
-The canonical repository is on nougat: [enterprise-apps/preflight](https://nougat.snu.gs/enterprise-apps/preflight). git.wayne.edu and GitHub ([waynestate/preflight](https://github.com/waynestate/preflight)) are read-only mirrors of it. Open issues and merge requests on nougat, not on the mirrors. This moves to git.wayne.edu once it has CI runners. Cleared for takeoff from nougat; the mirrors are just other gates.
+Preflight 0.1.4; GitLab components are GA on the Free tier since GitLab 17.0; MIT licensed.
 
-****Walk round the aircraft**: the placards, the flight plan and the flight manual from the front page**
+Agents: fetch [https://preflight.apps.wayne.edu/llms.txt](https://preflight.apps.wayne.edu/llms.txt) for a machine-readable index of this manual.
 
-![Three crops of the front page on a phone: the cockpit placards ('Seven components, one include each', with the proctor placard), the flight plan ('File a flight plan', the workflow rules and include block), and the flight manual ('Read before flight', a warning that a component is not a lock and a caution that it works on the same instance only).](https://preflight.apps.wayne.edu/docs/readme/gallery.jpg)
+---
+
+Source: https://preflight.apps.wayne.edu/docs/install.html
+
+## Install[#](https://preflight.apps.wayne.edu/docs/install.html#install)
+
+Preflight installs as an `include:` in the app's own `.gitlab-ci.yml`, one line per component, pinned to a commit SHA with the tag in a trailing comment. A tag or branch can move; a SHA cannot.
+
+### Requirements[#](https://preflight.apps.wayne.edu/docs/install.html#requirements)
+
+- GitLab 17.0 or newer. Components are GA on the Free tier since GitLab 17.0.
+- Same instance only. Components work only within the same GitLab instance that hosts this project; they cannot be used across instances except by mirroring.
+
+### Install[#](https://preflight.apps.wayne.edu/docs/install.html#install-1)
+
+Add the include to the app's `.gitlab-ci.yml`:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+```
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      test_command: vendor/bin/phpunit
+```
+
+### Verify[#](https://preflight.apps.wayne.edu/docs/install.html#verify)
+
+Push the change. The components are ordinary jobs, so they run whenever the app's pipeline runs, and each one lands in the `test` stage by default. Expected result: the pipeline shows the component's job, and for `php-test` that is one job per entry of `php_versions`, `8.3`, `8.4` and `8.5` by default. A green job means the check passed.
+
+### Next steps[#](https://preflight.apps.wayne.edu/docs/install.html#next-steps)
+
+- [Quick start](https://preflight.apps.wayne.edu/docs/guides/quick-start.html): the same install as numbered steps with expected results.
+- [When the components run](https://preflight.apps.wayne.edu/docs/guides/when-components-run.html): the `workflow:rules` block that belongs in the app's own file.
+- [The php-test component](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html): inputs, caching, and trying the next PHP release.
+- [Reference](https://preflight.apps.wayne.edu/docs/reference/components.html): every component, with its inputs and defaults.
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/reference/components.html
+
+## Components[#](https://preflight.apps.wayne.edu/docs/reference/components.html#components)
+
+Every GitLab CI component Preflight ships, with its include example, its inputs and their defaults, and the jobs and timeouts each template defines. Add one include to your app's `.gitlab-ci.yml`, then follow the per-component guide for setup. Like a real pre-flight check, the point is to find the fault on the ground, where it is cheap to fix.
+
+Note
 
 Components are GA on the Free tier since GitLab 17.0. They work only within the same GitLab instance that hosts this project.
+
+![Preflight's before-takeoff checklist card. 1 PROCTOR, checked; 2 PHP tests, 8.3, 8.4 and 8.5 pass; 3 Composer audit, no advisories; 4 SBOM, validated; 5 Pint, clean; 6 PHPStan, no errors; 7 ESLint and Prettier, clean; 8 clearance, cleared for takeoff. Beside it the annunciator panel lights a green lamp per check, with a11y, contract and freshness marked coming soon, and lists the seven checks, all in the 0.1.4 tag.](https://preflight.apps.wayne.edu/docs/readme/checklist.svg)
+
+The checklist, item by item, with each item's job and timeout read from `templates/`:
+
+| # | Item | Job | Timeout |
+| --- | --- | --- | --- |
+| 1 | PROCTOR | `proctor` | 30 minutes |
+| 2 | PHP tests, 8.3, 8.4 and 8.5 | `php-test`, one job per version | 30 minutes |
+| 3 | Composer audit | `composer-audit` | 30 minutes |
+| 4 | SBOM | `sbom` | 30 minutes |
+| 5 | Pint | `pint` | 10m |
+| 6 | PHPStan | `phpstan` | 10m |
+| 7 | ESLint and Prettier | `eslint` | 15m |
+
+Every job the templates define is `interruptible: true`. Every component except `portability` takes a `job_name` input whose default is the job's usual name; set it when one project includes the same component more than once. `portability` keeps its two fixed job names, because `portability-run` waits on `portability-build`.
+
+### proctor[#](https://preflight.apps.wayne.edu/docs/reference/components.html#proctor)
+
+Runs `vendor/bin/proctor check --format=codequality` and publishes the result as a GitLab Code Quality report. The job installs the app's dependencies with `composer install --no-plugins --no-scripts`, so the app's plugins and scripts never run inside the job.
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      proctor_command: vendor/bin/proctor check --format=codequality
+```
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `proctor` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `php:8.4-cli-trixie@sha256:9cf851bc2c1b37c3e59dfd677a3c3e56d485af5a47c93f629424bb039eafcb69` | Docker image for the job. |
+| `composer_version` | string | `2.10.3` | Composer version to install. |
+| `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline. |
+| `proctor_command` | string | `vendor/bin/proctor check --format=codequality` | The proctor command to run. |
+| `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
+
+From `templates/proctor/template.yml`: the single job (named by `job_name`) runs in the `test` stage by default, is `interruptible: true`, and has a timeout of 30 minutes. It installs Composer with the official getcomposer.org installer, verifies the installer's SHA-384 against composer.github.io/installer.sig, and pins the installed version to `composer_version`. It then runs `composer install --no-interaction --no-progress --no-plugins --no-scripts`, so the app's plugins and scripts never run with the job's access. The command's output goes through a plain redirect (not `tee`) to `gl-code-quality-report.json` at the project root, which keeps PROCTOR's exit code as the job result and gives the artifact the same path for every `working_dir`, including `.`. The report is published as a Code Quality report with `when: always`.
+
+### php-test[#](https://preflight.apps.wayne.edu/docs/reference/components.html#php-test)
+
+Runs the test command on each supported PHP version through `parallel:matrix`.
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      test_command: vendor/bin/phpunit
+```
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `test` | Pipeline stage for the jobs. |
+| `job_name` | string | `php-test` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `php:${PHP_VERSION}-cli-trixie` | Docker image for the jobs. The default carries the literal `${PHP_VERSION}`, which GitLab expands in the image at job time. |
+| `php_versions` | array | `["8.3", "8.4", "8.5"]` | PHP versions to test against. |
+| `composer_version` | string | `2.10.3` | Composer version to install. |
+| `test_command` | string | `vendor/bin/phpunit` | The test command to run. |
+| `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
+
+From `templates/php-test/template.yml`: one job is created per entry in `php_versions` through `parallel:matrix`; `PHP_VERSION` becomes a CI/CD variable in each job, which the image input's default expands, and each job runs the newest patch release of its version. The default image is deliberately tag-pinned (the template points at the README section Updating image pins). Each job installs Composer the same way as proctor, runs `composer install --no-interaction --no-progress`, and then the test command. The jobs are `interruptible: true` with a timeout of 30 minutes.
+
+#### Caching[#](https://preflight.apps.wayne.edu/docs/reference/components.html#caching)
+
+The jobs always cache Composer downloads in `.composer-cache/` so repeat runs do not re-download every package. The cache key depends on `composer.lock` and is prefixed with the PHP version, so a dependency change invalidates the cache and each PHP version gets its own cache. The template sets `COMPOSER_CACHE_DIR` to `$CI_PROJECT_DIR/.composer-cache`, keys the cache on `composer.lock` with the prefix `php-${PHP_VERSION}`, caches the path `.composer-cache/`, and uses the policy `pull-push`.
+
+#### Try the next PHP release without breaking the pipeline[#](https://preflight.apps.wayne.edu/docs/reference/components.html#try-the-next-php-release-without-breaking-the-pipeline)
+
+Include `php-test` a second time for the release that is not supported yet, name that job, and let it fail. The name is what lets your own `.gitlab-ci.yml` loosen only that job:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<full commit SHA> # <tag>
+    inputs:
+      php_versions: ["8.6"]
+      job_name: php-test-next
+      # While 8.6 only has release candidate images, name the tag: php:${PHP_VERSION}-rc-cli-trixie
+      # image: "php:${PHP_VERSION}-rc-cli-trixie"
+
+php-test-next:
+  allow_failure: true
+```
+
+A red `php-test-next` job is an early warning, not a stop. Drop the `allow_failure` and move the version into the main `php_versions` list once the release is supported (the supported versions follow `policy.json`).
+
+### composer-audit[#](https://preflight.apps.wayne.edu/docs/reference/components.html#composer-audit)
+
+Runs `composer audit --locked` and fails on advisories.
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      working_dir: .
+```
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `composer-audit` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `composer:2@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. |
+| `working_dir` | string | `.` | Directory to run composer audit in, relative to the project root. |
+
+From `templates/composer-audit/template.yml`: the `composer:2` image already ships Composer, so there is no install step. The job runs `composer audit --locked`, which exits non-zero when it finds advisories, and fails the job. There is no `allow_failure` input: advisories must fail. The job is `interruptible: true` with a timeout of 30 minutes.
+
+#### Run it on a schedule[#](https://preflight.apps.wayne.edu/docs/reference/components.html#run-it-on-a-schedule)
+
+New advisories are published after code is merged, so a green pipeline today can be stale tomorrow. Create a weekly pipeline schedule on the default branch: project settings, Build, Pipeline schedules. The component needs nothing extra; it carries no `rules:` block, so it runs in scheduled pipelines like any other. Creating the schedule is a project setting, not a file in the app's repo, and someone with Maintainer rights on the app must do it. It is the one preflight check that books its own flight time.
+
+### sbom[#](https://preflight.apps.wayne.edu/docs/reference/components.html#sbom)
+
+Generates a CycloneDX SBOM with `cyclonedx/cyclonedx-php-composer`, validates it, and publishes it as an artifact. The plugin is installed globally, so the app's `composer.json` is never touched.
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      output: sbom.cdx.json
+```
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `sbom` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. |
+| `omit_dev` | boolean | `true` | Whether to omit dev dependencies from the SBOM. |
+| `output` | string | `sbom.cdx.json` | Path of the SBOM file to publish, relative to the project root. |
+
+From `templates/sbom/template.yml`: the job runs `composer install --no-interaction --no-progress --prefer-dist`, allows the plugin globally with `composer global config --no-plugins allow-plugins.cyclonedx/cyclonedx-php-composer true`, installs `cyclonedx/cyclonedx-php-composer:^6.2` globally, and then runs `composer CycloneDX:make-sbom --output-format=JSON --output-reproducible --validate` with `--omit=dev` added while `omit_dev` is true, writing to the `output` path. The `--validate` flag fails the job on an invalid SBOM. The SBOM file is published as an artifact with `expire_in: 30 days`. The job is `interruptible: true` with a timeout of 30 minutes.
+
+### pint[#](https://preflight.apps.wayne.edu/docs/reference/components.html#pint)
+
+Version 1 · Category: Testing/Validation · Tags: php,style,pint
+
+Runs the app's own [Laravel Pint](https://laravel.com/docs/12.x/pint) in test mode and fails the pipeline on style errors. The app must require `laravel/pint` as a dev dependency and ship a `pint.json` (or point `config` at its own file).
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      config: pint.json
+```
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `pint` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. |
+| `config` | string | `pint.json` | Path to the app's Pint config file. |
+| `working_dir` | string | `.` | Directory to run Pint in, relative to the project root. |
+
+From `templates/pint/template.yml`: the component does not install Pint itself; it runs `composer install --no-interaction --no-progress --prefer-dist` and then the app's own Pint in test mode against the `config` file. The job is `interruptible: true` with a timeout of 10m.
+
+### phpstan[#](https://preflight.apps.wayne.edu/docs/reference/components.html#phpstan)
+
+Version 1 · Category: Testing/Validation · Tags: php,static-analysis,phpstan
+
+Runs the app's own [PHPStan](https://phpstan.org/) and fails the pipeline on static analysis errors, writing a GitLab Code Quality report. The app must require `phpstan/phpstan` as a dev dependency and ship a `phpstan.neon` (or point `config` at its own file).
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      config: phpstan.neon
+      memory_limit: 1G
+```
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `phpstan` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. |
+| `config` | string | `phpstan.neon` | Path to the app's PHPStan config file. |
+| `memory_limit` | string | `1G` | Memory limit passed to PHPStan. |
+| `working_dir` | string | `.` | Directory to run PHPStan in, relative to the project root. |
+
+From `templates/phpstan/template.yml`: the component does not install PHPStan itself; it runs `composer install --no-interaction --no-progress --prefer-dist` and then the app's own PHPStan with `--no-progress --error-format=gitlab`, the `memory_limit` value and the `config` file, redirecting the output to `$CI_PROJECT_DIR/phpstan-report.json`. The report is published as a Code Quality report with `when: always`. The job is `interruptible: true` with a timeout of 10m.
+
+### eslint[#](https://preflight.apps.wayne.edu/docs/reference/components.html#eslint)
+
+Version 1 · Category: Testing/Validation · Tags: javascript,style,eslint,prettier
+
+Runs the app's own [ESLint](https://eslint.org/) (and [Prettier](https://prettier.io/)) and fails the pipeline on lint or format errors. The app must require `@waynestate/pinstripe`, `eslint` and `prettier` as dev dependencies and ship an `eslint.config.js` (or point `eslint_args` at its own files).
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      eslint_args: .
+```
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `eslint` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `node:22.13-alpine@sha256:e2b39f7b64281324929257d0f8004fb6cb4bf0fdfb9aa8cedb235a766aec31da` | Docker image for the job. |
+| `working_dir` | string | `.` | Directory to run the commands in, relative to the project root. |
+| `eslint_args` | string | `.` | Arguments passed to eslint. |
+| `prettier` | boolean | `true` | Whether to also run `prettier --check`. |
+
+From `templates/eslint/template.yml`: the component does not install ESLint or Prettier itself; it runs `npm ci --ignore-scripts --cache .npm-cache` (the cache is keyed on `package-lock.json` and stores `.npm-cache/`), then `npx --no-install eslint` with the `eslint_args` value, and, while `prettier` is true, `npx --no-install prettier --check .`. The job is `interruptible: true` with a timeout of 15m.
+
+### package-publish[#](https://preflight.apps.wayne.edu/docs/reference/components.html#package-publish)
+
+Version 1 · Category: Release/Publishing · Tags: composer,publish,release
+
+Publishes a semantic version tag to the GitLab group's built-in Composer registry. The job runs only on tags, reads the registry first, and refuses a moved version: a version already published from this commit passes quietly, and a version published from a different commit fails the pipeline, because GitLab would otherwise overwrite it without a word. The default image ships curl and PHP, which the job uses for the registry round trip.
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      group_id: "<your group id>"
+```
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `deploy` | Pipeline stage for the job. |
+| `job_name` | string | `package-publish` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. The default ships curl and PHP, which the job uses for the registry round trip. |
+| `group_id` | string | none | Numeric id of the GitLab group whose built-in Composer registry hosts the package. Required. |
+| `read_token_variable` | string | `PACKAGE_READ_TOKEN` | Name of the masked CI variable holding a token with the `read_package_registry` scope, used to read the registry before publishing. |
+
+Warning
+
+Protect your release tags.
+
+From `templates/package-publish/template.yml`: the job runs only when `$CI_COMMIT_TAG` is set. The tag must be a semantic version, `1.2.3` or `v1.2.3` with an optional pre-release, or the job fails. The package name comes from `composer.json`, the file the registry serves. The job reads the masked CI variable named by `read_token_variable`, checks that `group_id` is numeric, reads the group's Composer registry index with the token, and follows the package metadata to the version already on the manifest. A version already published at this commit passes quietly (exit 0); a version published at a different commit fails (exit 1). Publishing posts the tag to the project's Composer packages endpoint with the job token. The job is `interruptible: true` with a timeout of 30 minutes.
+
+### renovate[#](https://preflight.apps.wayne.edu/docs/reference/components.html#renovate)
+
+Runs [Renovate](https://docs.renovatebot.com/) as a scheduled or manual job that bumps image digests, GitHub action SHAs and package versions across the group's repositories, and merges the green ones itself. Bumps of `component:` include pins are covered by the preset and wait for review. Majors open a merge request and wait for a person. See [Renovate](https://preflight.apps.wayne.edu/docs/guides/renovate.html) for what auto-merges and what waits.
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      git_author: "Preflight Bot <preflight-bot@example.com>"
+```
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `job_name` | string | `renovate` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `renovate/renovate:44.192.2@sha256:37960a62ba1faa9079a7c4eead9b3f4470748a64ecd207e06c09fd8858673e17` | Docker image for the job. |
+| `autodiscover_filter` | string | `$CI_PROJECT_NAMESPACE/*` | Glob limiting which projects Renovate discovers, relative to the runner project's namespace. |
+| `dry_run` | string | `"null"` | Dry run mode: `null` (disabled), `lookup` or `full`. |
+| `git_author` | string | none | Author of the commits and merge requests Renovate creates, in the form `Name <email>`. Required. |
+
+From `templates/renovate/template.yml`: the job has no `stage` input and sets no stage. It runs only on scheduled and manual pipelines (`$CI_PIPELINE_SOURCE == "schedule"` or `"web"`). It writes its `config.js` at job time, so the `registryAliases` entry for the GitLab instance comes from the predefined `CI_SERVER_FQDN` variable; no hostname is stored in the repository, so the public mirror stays clean. It does not set `RENOVATE_TOKEN` or `GITHUB_COM_TOKEN` in the job `variables:` on purpose: a self-reference such as `X: $X` arrives as literal text on GitLab 19.5 and would shadow the masked project CI/CD variables, so the job reads both tokens straight from the project. The job is `interruptible: true` with a timeout of 1 hour.
+
+### portability[#](https://preflight.apps.wayne.edu/docs/reference/components.html#portability)
+
+Proves the app image meets the twelve-factor boot contract. It builds the image with Buildah (no Docker daemon, no elevated runner), boots it the strict way, and validates it with goss: the health path answers 200 for a foreign Host, the root filesystem and the app root are not writable, the app runs as the declared uid, and each declared writable path is writable. No takeoff without a clean pre-flight.
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@<full-commit-sha> # <tag, once one ships>
+    inputs:
+      dockerfile: Dockerfile
+      context: .
+      start_command: php -S 0.0.0.0:8080 -t public
+```
+
+Portability ships in 0.1.4 and later (0.1.3 does not include it), so pin the `0.1.4` tag, or the full commit SHA of a commit at or after it. The build job needs a runner that permits user namespaces (Buildah uses unshare for its storage); the run job needs only the project's container registry and an app image that carries curl, sha256sum and tar.
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `test` | Pipeline stage for the portability jobs. |
+| `image` | string | `$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA` | App image the portability-run job starts and validates. The default is what portability-build pushes; GitLab expands the CI variables at job time. |
+| `buildah_image` | string | `quay.io/buildah/stable:v1.41.5@sha256:37fa3027bd4b1d76a0001c6bb7349b63c48ebbaee8fa5f47e6097f5e88f6447c` | Buildah image for the portability-build job; it builds and pushes the app image. |
+| `dockerfile` | string | `Dockerfile` | Dockerfile to build, relative to the context. |
+| `context` | string | `.` | Build context, relative to the project root. |
+| `app_root` | string | `/app` | Directory inside the image where the app lives. |
+| `writable_paths` | array | `["storage", "bootstrap/cache"]` | Paths the app may write to, relative to app_root. Each must be writable by the app user. |
+| `port` | number | `8080` | Port the app listens on inside the container. |
+| `health_path` | string | `/up` | Path the app must answer 200 on for any Host. |
+| `uid` | number | `100123` | Numeric uid the app runs as. The gid is always 0. |
+| `start_command` | string | none | Command that starts the app inside the image. It is app-specific, so it is required and has no default. |
+| `boot_timeout` | number | `60` | Seconds goss retries the health check while the app boots. |
+
+From `templates/portability/template.yml`: the component defines two jobs with fixed names. `portability-build` runs in the `buildah_image`, sets `STORAGE_DRIVER: vfs` (the vfs driver needs no special kernel support and runs in an ordinary container), builds the image with `buildah bud`, logs in to the project's container registry, and pushes `$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA`. `portability-run` needs `portability-build`, generates a goss file from the inputs (the goss template is inlined in the job, because a component only ships its `template.yml` to the including project), downloads goss pinned by version and checksum, starts the app with `start_command`, and runs `goss validate` with `--retry-timeout` set to `boot_timeout` seconds. goss runs as the app user (the declared uid, gid 0), so its command checks see the same permissions the app has. Both jobs are `interruptible: true` with a timeout of 30 minutes.
+
+### Related[#](https://preflight.apps.wayne.edu/docs/reference/components.html#related)
+
+- [The proctor component](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html)
+- [The php-test component](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html)
+- [The composer-audit component](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html)
+- [The sbom component](https://preflight.apps.wayne.edu/docs/guides/component-sbom.html)
+- [The pint component](https://preflight.apps.wayne.edu/docs/guides/component-pint.html)
+- [The phpstan component](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html)
+- [The eslint component](https://preflight.apps.wayne.edu/docs/guides/component-eslint.html)
+- [The package-publish component](https://preflight.apps.wayne.edu/docs/guides/component-package-publish.html)
+- [The renovate component](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html)
+- [The portability component](https://preflight.apps.wayne.edu/docs/guides/component-portability.html)
+- [Shared conventions](https://preflight.apps.wayne.edu/docs/reference/conventions.html)
+- [Local checks](https://preflight.apps.wayne.edu/docs/reference/local-checks.html)
+- [Troubleshooting](https://preflight.apps.wayne.edu/docs/troubleshooting.html)
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/reference/conventions.html
+
+## Shared conventions[#](https://preflight.apps.wayne.edu/docs/reference/conventions.html#shared-conventions)
+
+This page lists the conventions the stack shares: Composer vendor, license, PHP floor and JavaScript installs. Check a package against the table when you set one up or review one, so every project starts from the same baseline.
+
+### Conventions[#](https://preflight.apps.wayne.edu/docs/reference/conventions.html#conventions)
+
+| Convention | Value |
+| --- | --- |
+| Composer vendor | `waynestate/` |
+| License | MIT |
+| PHP floor | `^8.3` |
+
+Preflight itself ships these values in its `composer.json`: `waynestate/preflight` under the MIT license, requiring `php: ^8.3`.
+
+### JavaScript installs[#](https://preflight.apps.wayne.edu/docs/reference/conventions.html#javascript-installs)
+
+JavaScript components install with `npm ci --ignore-scripts`. The job carries no token beyond `CI_JOB_TOKEN` (BEST_PRACTICES.md 4.12).
+
+### Related[#](https://preflight.apps.wayne.edu/docs/reference/conventions.html#related)
+
+- [Updating image pins](https://preflight.apps.wayne.edu/docs/guides/image-pins.html): why component images are digest-pinned and how to change a pin.
+- [Template lint](https://preflight.apps.wayne.edu/docs/guides/template-lint.html): the unsafe CI patterns `composer ci` scans for before the fixture tests.
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/reference/local-checks.html
+
+## Local checks[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#local-checks)
+
+How maintainers build, test and release this project with Docker, and the Composer scripts behind the gate. The pre-flight checklist, run from your own desk: run the same gate CI runs before you push anything.
+
+Note
+
+Maintainers: how to build, test and release this project, and where its data comes from, is in [MAINTAINING.md](https://nougat.snu.gs/enterprise-apps/preflight/-/blob/main/MAINTAINING.md) on the canonical repository.
+
+### The full gate[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#the-full-gate)
+
+Run the template lint and the fixture tests with Docker:
+
+```sh
+docker run --rm -v "$(pwd):/app" -w /app composer:2 composer install
+docker run --rm -v "$(pwd):/app" -w /app composer:2 composer ci
+```
+
+```powershell
+docker run --rm -v "${PWD}:/app" -w /app composer:2 composer install
+docker run --rm -v "${PWD}:/app" -w /app composer:2 composer ci
+```
+
+In PowerShell, use `${PWD}` instead of `$(pwd)`. `composer ci` is the whole gate: it runs the template lint, the fixture tests, Pint, PHPStan, the agent-ready file check and the docs site check, in that order.
+
+### Composer scripts[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#composer-scripts)
+
+The scripts from `composer.json`:
+
+```json
+{
+    "ci": [
+        "php bin/lint-templates",
+        "php bin/lint-templates --test",
+        "@lint",
+        "@analyse",
+        "@site:agent-ready-check",
+        "@docs:check"
+    ],
+    "lint": "pint --test",
+    "fix": "pint",
+    "analyse": "phpstan analyse --memory-limit=1G",
+    "site:agent-ready": "php bin/agent-ready.php",
+    "site:agent-ready-check": "php bin/agent-ready.php --check",
+    "docs": "php bin/docs-site.php",
+    "docs:check": "php bin/docs-site.php --check"
+}
+```
+
+| Script | Runs | What it does |
+| --- | --- | --- |
+| `ci` | the array above | The full CI gate: template lint, fixture tests, Pint, PHPStan, agent-ready files, docs site. |
+| `lint` | `pint --test` | Run Pint in test mode; fails on style errors without changing files. |
+| `fix` | `pint` | Run Pint and rewrite the files it finds. |
+| `analyse` | `phpstan analyse --memory-limit=1G` | Run PHPStan with a 1G memory limit. |
+| `site:agent-ready` | `php bin/agent-ready.php` | Rewrite the Markdown twins, llms.txt, llms-full.txt, robots.txt and sitemap.xml in `site/` (Squire's agent-ready kit). |
+| `site:agent-ready-check` | `php bin/agent-ready.php --check` | Fail when the agent-ready files are stale, a page lacks its Markdown link, a prompt drifts from the docs, or the kit was edited here. |
+| `docs` | `php bin/docs-site.php` | Build the docs site from `docs/` into `site/docs/` (Squire's docs builder): render the pages, fill the generated command and environment reference, and stamp the current version. |
+| `docs:check` | `php bin/docs-site.php --check` | Fail when the built docs site is stale or the generated command or environment reference has drifted from the CLI or source. |
+
+### The PHP fixture app[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#the-php-fixture-app)
+
+Run the PHP fixture app separately:
+
+```sh
+docker run --rm -v "$(pwd)/tests/fixture-app:/app" -w /app composer:2 composer install
+docker run --rm -v "$(pwd)/tests/fixture-app:/app" -w /app php:8.4-cli vendor/bin/phpunit
+```
+
+### The portability fixtures[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#the-portability-fixtures)
+
+Run the portability fixtures with Docker; they build and boot the three fixtures under `tests/portability` the strict way and exit 0 only when `good` passes and both `bad-*` fixtures fail:
+
+```sh
+sh tests/check-portability.sh
+```
+
+```powershell
+pwsh -File tests/check-portability.ps1
+```
+
+### Proof[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#proof)
+
+Proof runs against real Wayne State applications are on a private site, [proof.apps.wayne.edu/preflight](https://proof.apps.wayne.edu/preflight/), behind a Wayne State employee sign-in.
+
+### Docs[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#docs)
+
+The full documentation lives at [preflight.apps.wayne.edu/docs/](https://preflight.apps.wayne.edu/docs/) on the project site, built from `docs/` by Squire's docs builder. It starts with the overview page; the rest of the manual follows as the pages are written.
+
+- `composer docs` rebuilds `site/docs/` from `docs/`; run it after editing a page.
+- `composer docs:check` fails when the built site is stale; `composer ci` runs it.
+
+The pages are committed because the deploy server serves `site/` without building. Every page links back to its Markdown, and the footer stamps the version the docs describe. Cleared for takeoff: the flight manual flies with the aircraft.
+
+### Related[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#related)
+
+- [Components](https://preflight.apps.wayne.edu/docs/reference/components.html)
+- [Shared conventions](https://preflight.apps.wayne.edu/docs/reference/conventions.html)
+- [Template lint](https://preflight.apps.wayne.edu/docs/guides/template-lint.html)
+- [Updating image pins](https://preflight.apps.wayne.edu/docs/guides/image-pins.html)
+- [Troubleshooting](https://preflight.apps.wayne.edu/docs/troubleshooting.html)
+- [Changelog](https://preflight.apps.wayne.edu/docs/changelog.html)
+- [Upgrading](https://preflight.apps.wayne.edu/docs/upgrading.html)
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/troubleshooting.html
+
+## Troubleshooting[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#troubleshooting)
+
+What to do when a Preflight job fails or a gate behaves unexpectedly. Each entry names the cause, the fix, and how to check it. Most failures are a pin that moved or a setting that is missing. The checklist catches the rest.
+
+Tip
+
+Start with the job log. The message usually names the input that is wrong, and every input is listed on the [Components](https://preflight.apps.wayne.edu/docs/reference/components.html) page.
+
+### The pipeline[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#the-pipeline)
+
+#### The include fails on another GitLab instance[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#the-include-fails-on-another-gitlab-instance)
+
+Components work only inside the GitLab instance that hosts this project, and they cannot be used across instances except by mirroring.
+
+- **Cause:** the app lives on a different instance than the one that hosts Preflight.
+- **Fix:** host the app on the same instance. For a package that is also mirrored to GitHub, use the reusable workflow at `.github/workflows/php-package.yml` in this repo instead of the components.
+- **Check:** the include path starts with `$CI_SERVER_FQDN/enterprise-apps/preflight/`, and the app's project is on that same instance.
+
+#### The components do not run on merge requests[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#the-components-do-not-run-on-merge-requests)
+
+The components are ordinary jobs, so they run whenever the app's pipeline runs. Whether the pipeline runs on a merge request is decided by a `workflow:rules` block, and a component cannot set it for the project that includes it.
+
+- **Cause:** the app's own `.gitlab-ci.yml` has no `workflow:rules` block with a `merge_request_event` rule.
+- **Fix:** add the block to the app's own file:
+
+```yaml
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+```
+
+- **Check:** a merge request pipeline runs, and so does a push to the default branch.
+
+#### A gate was skipped or weakened[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#a-gate-was-skipped-or-weakened)
+
+An included component is a set of ordinary jobs. The app's own `.gitlab-ci.yml` is merged over them, so an app can override a job's keys, skip it with `rules`, or delete the `include:` line. Preflight makes the safe pipeline the easy one. It does not lock it.
+
+- **Cause:** a change in the app's own `.gitlab-ci.yml` overrides, skips or removes a component job.
+- **Fix:** review the diff of the app's `.gitlab-ci.yml` against the last known-good pipeline, and restore the job or the `include:` line.
+- **Check:** Rollcall is where skipped or weakened gates show up.
+
+#### Two includes of the same component became one job[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#two-includes-of-the-same-component-became-one-job)
+
+Every component except `portability` takes a `job_name` input, whose default is the job's usual name. Without it, two includes of the same component share a job name and merge into one.
+
+- **Cause:** one project includes the same component more than once (for example in a monorepo with two apps) without setting `job_name`.
+- **Fix:** set `job_name` on each include, for example `pint-app` and `pint-admin`. `job_name` ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release.
+- **Check:** the pipeline lists one job per include, with the names you set.
+
+#### A fork merge request ran with protected variables[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#a-fork-merge-request-ran-with-protected-variables)
+
+A fork's merge request pipeline runs the fork's configuration.
+
+- **Cause:** the project lets fork pipelines see protected variables.
+- **Fix:** review a fork's `.gitlab-ci.yml` before running its pipeline, and never give it protected variables.
+- **Check:** the fork pipeline's variable list does not include any protected variable.
+
+### Job failures[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#job-failures)
+
+#### PROCTOR's preflight-pinned check warns[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#proctor-s-preflight-pinned-check-warns)
+
+A tag or branch can move. A SHA cannot. PROCTOR's `preflight-pinned` check warns when an include is not pinned to a commit SHA.
+
+- **Cause:** the include is pinned to a tag or a branch instead of a full commit SHA.
+- **Fix:** pin the full commit SHA and keep the tag in a trailing comment, as in the examples on the [Components](https://preflight.apps.wayne.edu/docs/reference/components.html) page.
+- **Check:** PROCTOR's report no longer carries the `preflight-pinned` finding.
+
+#### composer-audit is green, then an advisory lands[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#composer-audit-is-green-then-an-advisory-lands)
+
+New advisories are published after code is merged, so a green pipeline today can be stale tomorrow.
+
+- **Cause:** no pipeline has run since the advisory was published.
+- **Fix:** create a weekly pipeline schedule on the default branch: project settings, Build, Pipeline schedules. The component needs nothing extra. It carries no `rules:` block, so it runs in scheduled pipelines like any other. Someone with Maintainer rights on the app creates the schedule.
+- **Check:** the schedule appears under project settings, Build, Pipeline schedules, and its latest pipeline is green.
+
+#### php-test-next is red[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#php-test-next-is-red)
+
+A red `php-test-next` job is an early warning, not a stop. It is the second `php-test` include that tries the PHP release that is not supported yet, with `allow_failure: true` in the app's own file.
+
+- **Cause:** the next PHP release still fails the app's tests, or only has release candidate images.
+- **Fix:** leave `allow_failure: true` in place while the release is unsupported. Once the release is supported (the supported versions follow `policy.json`), drop the `allow_failure` and move the version into the main `php_versions` list.
+- **Check:** the main `php-test` matrix is green. Only the named `php-test-next` job is red.
+
+#### package-publish refuses the tag[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#package-publish-refuses-the-tag)
+
+The job reads the registry before publishing. Republishing a version from the same commit is a no-op, and republishing it from a different commit fails instead of overwriting the version, because GitLab would otherwise overwrite it without a word.
+
+- **Cause:** the tag's version already exists in the group's Composer registry, published from a different commit.
+- **Fix:** publish a new version tag instead of moving the old one. Protect the release tags so only maintainers can create or move a tag.
+- **Check:** the job log shows the version already on the manifest and the commit it was published from.
+
+#### portability is not in the pinned ref[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#portability-is-not-in-the-pinned-ref)
+
+Portability ships in 0.1.4 and later. 0.1.3 does not include it.
+
+- **Cause:** the include is pinned to a tag or SHA at or before 0.1.3.
+- **Fix:** pin the `0.1.4` tag, or the full commit SHA of a commit at or after it.
+- **Check:** the pipeline lists `portability-build` and `portability-run`.
+
+#### portability-build fails on the runner[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#portability-build-fails-on-the-runner)
+
+The build job runs Buildah, which uses unshare for its storage.
+
+- **Cause:** the runner does not permit user namespaces.
+- **Fix:** run the build job on a runner that permits user namespaces. The job sets `STORAGE_DRIVER: vfs`, so it needs no special kernel support beyond that.
+- **Check:** the job log shows an unshare failure before the fix, and a successful `buildah bud` after it.
+
+#### portability-run's health check ends in EOF[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#portability-run-s-health-check-ends-in-eof)
+
+goss sends the HTTP method as written, and a lower-case one makes the server close the connection, so the health check failed with EOF. The check now uses `method: GET`, fixed in 0.1.4.
+
+- **Cause:** the include is pinned to a ref before 0.1.4, where the goss health check used a lower-case method.
+- **Fix:** pin 0.1.4 or a SHA at or after it.
+- **Check:** `goss validate` passes the health check instead of ending in EOF.
+
+### Renovate[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#renovate)
+
+#### Renovate sees literal text instead of a token[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#renovate-sees-literal-text-instead-of-a-token)
+
+On GitLab 19.5 a self-reference such as `RENOVATE_TOKEN: $RENOVATE_TOKEN` in the job `variables:` arrives as literal text and shadows the masked project CI/CD variables. The component does not map either token on purpose. The job reads both straight from the project.
+
+- **Cause:** the runner project, or the app's file, adds `RENOVATE_TOKEN: $RENOVATE_TOKEN` or `GITHUB_COM_TOKEN: $GITHUB_COM_TOKEN` to `variables:`.
+- **Fix:** delete the self-reference. Keep `RENOVATE_TOKEN` (and optionally `GITHUB_COM_TOKEN`) as masked CI variables in the private runner project.
+- **Check:** the job log no longer shows the literal text `$RENOVATE_TOKEN`, and Renovate authenticates.
+
+#### Renovate auto-merged a component pin bump[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#renovate-auto-merged-a-component-pin-bump)
+
+In refs before 0.1.4 the component-rule manager name in `renovate/default.json` did not match repository deps, so a bump of a `component:` include version auto-merged instead of waiting for review.
+
+- **Cause:** the shared preset comes from a ref before the 0.1.4 fix.
+- **Fix:** point the repositories' `renovate.json` at the shared preset from 0.1.4 or later. Component version bumps now carry the `needs-review` label and never auto-merge.
+- **Check:** the merge request carries the `needs-review` label.
+
+### Local checks[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#local-checks)
+
+#### The portability fixtures fail on permissions[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#the-portability-fixtures-fail-on-permissions)
+
+The app user is not the host user that owns the fixtures' temp dir, and goss is downloaded into it. As of 0.1.4 the fixtures make their temp dir mode 0777 and the goss files in it mode 0644.
+
+- **Cause:** the checkout is from a ref before 0.1.4.
+- **Fix:** update to 0.1.4 or later, then rerun `sh tests/check-portability.sh` (or the `.ps1` twin).
+- **Check:** the script exits 0: `good` passes and both `bad-*` fixtures fail.
+
+#### composer ci fails on a stale docs site[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#composer-ci-fails-on-a-stale-docs-site)
+
+`composer ci` runs `docs:check`, which fails when the built docs site is stale or the generated command or environment reference has drifted from the CLI or source.
+
+- **Cause:** a page under `docs/` (or a generated reference) changed without rebuilding `site/docs/`.
+- **Fix:** run `composer docs` to rebuild `site/docs/` from `docs/`, and commit the rebuilt site with the page.
+- **Check:** `composer docs:check` passes.
+
+### Related[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#related)
+
+- [Components](https://preflight.apps.wayne.edu/docs/reference/components.html)
+- [Local checks](https://preflight.apps.wayne.edu/docs/reference/local-checks.html)
+- [When the components run](https://preflight.apps.wayne.edu/docs/guides/when-components-run.html)
+- [What the components cannot force](https://preflight.apps.wayne.edu/docs/guides/what-components-cannot-force.html)
+- [Same instance only](https://preflight.apps.wayne.edu/docs/guides/same-instance-only.html)
+- [Include a component twice](https://preflight.apps.wayne.edu/docs/guides/include-twice.html)
+- [Renovate](https://preflight.apps.wayne.edu/docs/guides/renovate.html)
+- [Updating image pins](https://preflight.apps.wayne.edu/docs/guides/image-pins.html)
+- [Changelog](https://preflight.apps.wayne.edu/docs/changelog.html)
+- [Upgrading](https://preflight.apps.wayne.edu/docs/upgrading.html)
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/upgrading.html
+
+## Upgrading[#](https://preflight.apps.wayne.edu/docs/upgrading.html#upgrading)
+
+This page is the checklist for moving an app from one Preflight pin to the next, one released version at a time, newest first; every section follows `CHANGELOG.md`. Read the section for the version you are moving to, apply its steps, and verify on the next pipeline. Like a real preflight, the walk takes a few minutes and earns its keep: move the pin only after you have read the version notes.
+
+### 0.1.4[#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-1-4)
+
+Released 2026-11-03. The new pieces are opt-in: the `portability` component, a `job_name` input on every component except `portability`, and a stricter Renovate preset.
+
+#### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking)
+
+0.1.4 has no breaking changes: the version adds a component, an input and preset rules, and removes nothing.
+
+#### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated)
+
+Nothing was deprecated in 0.1.4.
+
+#### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps)
+
+Point each component include at the `0.1.4` tag, pinned to the tag's full commit SHA with the tag in a trailing comment:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+```
+
+A mirrored package pins the same SHA in its GitHub workflow:
+
+```yaml
+jobs:
+  ci:
+    uses: waynestate/preflight/.github/workflows/php-package.yml@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+```
+
+Adopt the new pieces when you want them:
+
+- **`portability`**: it ships in 0.1.4 and later (0.1.3 does not include it), so pin the `0.1.4` tag, or the full commit SHA of a commit at or after it. The build job needs a runner that permits user namespaces (Buildah uses unshare for its storage); the run job needs only the project's container registry and an app image that carries curl, sha256sum and tar.
+- **`job_name`**: it ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release. Set it when one project includes the same component more than once, for example in a monorepo with two apps; without it the two jobs would share a name and merge into one.
+- **Renovate preset**: component version bumps now really wait for review instead of auto-merging (the component-rule manager name is `gitlabci`, matching repository deps), and a bump of the recorded Squire kit version carries the `squire-kit` label and never auto-merges; a person runs `squire update` to refresh the kit files.
+
+Note
+
+Pins change only through a reviewed merge request. A tag or branch can move; a SHA cannot.
+
+#### How to verify[#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify)
+
+Push the change and run the app's pipeline. The components are ordinary jobs, so they run whenever the app's pipeline runs; expect the same jobs as before, green. PROCTOR's `preflight-pinned` check warns when an include is not pinned to a commit SHA. If you added `portability`, the `portability-run` job passes only when the image boots the strict way and the goss checks hold.
+
+### 0.1.3[#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-1-3)
+
+Released 2026-11-03. Two consumer-facing changes: the `proctor` component installs the app with `--no-plugins --no-scripts`, and the shared Renovate preset stopped auto-merging the pins that every pipeline runs.
+
+#### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-1)
+
+0.1.3 has no breaking changes, but the `proctor` job now installs the app's dependencies with `composer install --no-plugins --no-scripts`, so the app's plugins and scripts never run inside the job.
+
+#### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated-1)
+
+Nothing was deprecated in 0.1.3.
+
+#### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-1)
+
+Bump each component include to the `0.1.3` tag's full commit SHA, with the tag in a trailing comment:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@<full commit SHA> # 0.1.3
+```
+
+If your group runs the shared Renovate preset, read the two behavior changes before you merge the bump:
+
+- Updates inside `templates/**`, `contract/**` and `.gitlab-ci.yml`, and bumps of a Preflight component version in an app's `component:` include, no longer auto-merge: they carry the `needs-review` label and wait for a person.
+- The `renovate` component no longer sets `RENOVATE_TOKEN` and `GITHUB_COM_TOKEN` from themselves in the job `variables:`; on GitLab 19.5 that self-reference arrived as literal text and shadowed the masked project CI/CD variables, so the job now reads both tokens straight from the project.
+
+Warning
+
+Do not add `RENOVATE_TOKEN: $RENOVATE_TOKEN` to your own `variables:`; that self-reference arrives as literal text.
+
+#### How to verify[#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-1)
+
+Run the pipeline and confirm the jobs run on the new pin. In the runner project, confirm the job reads `RENOVATE_TOKEN` straight from the project as a masked CI variable, and that a bump touching the templates, the contract or a component include pin opens a merge request labeled `needs-review` instead of auto-merging.
+
+### 0.1.2[#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-1-2)
+
+Released 2026-10-29. The site gained the agent-ready kit (prompt blocks, Markdown twins, llms.txt) from Squire, and the proof page moved to a private site that needs a Wayne State sign-in.
+
+#### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-2)
+
+0.1.2 has no breaking changes: the version touches the site, the README and the proof page, not the components.
+
+#### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated-2)
+
+Nothing was deprecated in 0.1.2.
+
+#### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-2)
+
+Bump each component include to the `0.1.2` tag's full commit SHA, with the tag in a trailing comment:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@<full commit SHA> # 0.1.2
+```
+
+#### How to verify[#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-2)
+
+Run the pipeline and confirm the component jobs run on the new pin. PROCTOR's `preflight-pinned` check warns when an include is not pinned to a commit SHA.
+
+### 0.1.1[#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-1-1)
+
+Released 2026-10-29. Two new components: `package-publish`, which publishes a semantic version tag to the GitLab group's built-in Composer registry, and `renovate`, with the shared preset `renovate/default.json`. The reusable GitHub Actions workflow for mirrors ships in this tag too.
+
+#### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-3)
+
+0.1.1 has no breaking changes: the version adds components and changes only the repository's own PHPStan config.
+
+#### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated-3)
+
+Nothing was deprecated in 0.1.1.
+
+#### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-3)
+
+Bump the existing includes to the `0.1.1` tag's full commit SHA, and add the new components where you want them:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@<full commit SHA> # 0.1.1
+    inputs:
+      group_id: "<your group id>"
+```
+
+`group_id` is required: the numeric id of the GitLab group whose built-in Composer registry hosts the package.
+
+Warning
+
+Protect your release tags. A component ref is a tag, so whoever can move it controls every pipeline that pins it.
+
+A package mirrored to GitHub calls the reusable workflow from its own `.github/workflows/ci.yml`; the workflow ships in the `0.1.1` tag, so pin the full commit SHA of the release tag and keep the tag in a trailing comment:
+
+```yaml
+name: CI
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v*', '*.*.*']
+
+jobs:
+  ci:
+    uses: waynestate/preflight/.github/workflows/php-package.yml@<full commit SHA> # 0.1.1
+```
+
+#### How to verify[#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-3)
+
+Run the pipeline. For `package-publish`, the job runs only on tags and reads the registry first: a version already published from this commit passes quietly, and a version published from a different commit fails the pipeline. For a mirrored package, a release tag is not done until it is green on both sides.
+
+### 0.1.0[#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-1-0)
+
+Released 2026-10-27. First tagged release.
+
+#### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-4)
+
+0.1.0 is the first tagged release, so there is nothing to break: it is the baseline every later pin moves from.
+
+#### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated-4)
+
+Nothing was deprecated in 0.1.0.
+
+#### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-4)
+
+Include the components pinned to the `0.1.0` tag's full commit SHA:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@<full commit SHA> # 0.1.0
+```
+
+#### How to verify[#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-4)
+
+Run the pipeline and confirm the component jobs run on the pin.
+
+### Related[#](https://preflight.apps.wayne.edu/docs/upgrading.html#related)
+
+- [Changelog](https://preflight.apps.wayne.edu/docs/changelog.html): the raw entries this page is built from.
+- [Install](https://preflight.apps.wayne.edu/docs/install.html): the requirements, the include snippet, and how to verify the pipeline picked the component up.
+- [Updating image pins](https://preflight.apps.wayne.edu/docs/guides/image-pins.html): why the pins are digests and how to look one up.
+- [Renovate](https://preflight.apps.wayne.edu/docs/guides/renovate.html): what auto-merges, what waits, and what the runner project owes.
+- [Troubleshooting](https://preflight.apps.wayne.edu/docs/troubleshooting.html): symptoms, causes and fixes.
+- [Overview](https://preflight.apps.wayne.edu/docs/index.html): what Preflight is and where the manual starts.

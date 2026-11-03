@@ -18,7 +18,7 @@
   <a class="docs-header__brand" href="../../docs/index.html">Preflight</a>
   <span><a class="docs-header__home" rel="noopener" href="https://nougat.snu.gs/enterprise-apps/preflight">Source</a> <a class="docs-header__home" href="../../index.html">Back to Preflight</a></span>
 </header>
-<div class="docs-layout">
+<div class="docs-layout docs-layout--toc">
   <details class="docs-menu">
     <summary>Menu</summary>
     <nav class="docs-nav" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../../docs/index.html">Overview</a></li><li><a href="../../docs/install.html">Install</a></li><li><a href="../../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../../docs/guides/component-pint.html">The pint component</a></li><li><a href="../../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../../docs/guides/component-eslint.html" aria-current="page">The eslint component</a></li><li><a href="../../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../../docs/guides/component-portability.html">The portability component</a></li><li><a href="../../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../../docs/guides/renovate.html">Renovate</a></li><li><a href="../../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../../docs/guides/template-lint.html">Template lint</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../../docs/reference/components.html">Components</a></li><li><a href="../../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../../docs/reference/local-checks.html">Local checks</a></li></ul></li><li><a href="../../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../../docs/upgrading.html">Upgrading</a></li><li><a href="../../docs/changelog.html">Changelog</a></li></ul></nav>
@@ -27,11 +27,102 @@
   <div class="docs-content">
     <main id="main">
       <article class="docs-article"><h1 id="the-eslint-component">The eslint component<a class="docs-heading-link" aria-label="Link to this section" href="#the-eslint-component">#</a></h1>
-<p>STUB: this page is written in a later batch.</p>
+<p>This page covers the <code>eslint</code> component: what the job does, how to include
+it, and every input it takes. Goal: the app's pipeline fails on any lint or
+format error, judged by the app's own config. Start with the include block,
+then check the inputs against your app. Preflight is named for the pre-flight
+check, and this component is the row that keeps the JavaScript airworthy.</p>
+<p>Version 1 · Category: Testing/Validation · Tags: javascript,style,eslint,prettier</p>
+<h2 id="what-the-job-does">What the job does<a class="docs-heading-link" aria-label="Link to this section" href="#what-the-job-does">#</a></h2>
+<p>The component runs the app's own <a rel="noopener" href="https://eslint.org/">ESLint</a> (and
+<a rel="noopener" href="https://prettier.io/">Prettier</a>) and fails the pipeline on lint or format
+errors. It does not install ESLint or Prettier itself: the app must require
+<code>@waynestate/pinstripe</code>, <code>eslint</code> and <code>prettier</code> as dev dependencies and
+ship an <code>eslint.config.js</code> (or point <code>eslint_args</code> at its own files).</p>
+<p>The job, in order:</p>
+<ol>
+<li>Moves into <code>working_dir</code> (default <code>.</code>).</li>
+<li>Installs the app's dependencies with <code>npm ci --ignore-scripts --cache .npm-cache</code>.</li>
+<li>Runs <code>npx --no-install eslint</code> with <code>eslint_args</code> (default <code>.</code>).</li>
+<li>When <code>prettier</code> is <code>true</code> (the default), runs <code>npx --no-install prettier --check .</code>.</li>
+</ol>
+<p>The job caches npm downloads in <code>.npm-cache/</code>, with the cache key based on
+<code>package-lock.json</code>. It is interruptible and times out after 15m.</p>
+<h2 id="include-the-component">Include the component<a class="docs-heading-link" aria-label="Link to this section" href="#include-the-component">#</a></h2>
+<p>Add the include to the app's <code>.gitlab-ci.yml</code>, pinned to a full commit SHA
+with the tag in a trailing comment:</p>
+<pre><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      eslint_args: .
+</code></pre>
+<h2 id="inputs">Inputs<a class="docs-heading-link" aria-label="Link to this section" href="#inputs">#</a></h2>
+<div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Type</th>
+<th>Default</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stage</code></td>
+<td>string</td>
+<td><code>test</code></td>
+<td>Pipeline stage for the job.</td>
+</tr>
+<tr>
+<td><code>job_name</code></td>
+<td>string</td>
+<td><code>eslint</code></td>
+<td>Name of the job. Set it when you include this component more than once.</td>
+</tr>
+<tr>
+<td><code>image</code></td>
+<td>string</td>
+<td><code>node:22.13-alpine@sha256:e2b39f7b64281324929257d0f8004fb6cb4bf0fdfb9aa8cedb235a766aec31da</code></td>
+<td>Docker image for the job.</td>
+</tr>
+<tr>
+<td><code>working_dir</code></td>
+<td>string</td>
+<td><code>.</code></td>
+<td>Directory to run the commands in, relative to the project root.</td>
+</tr>
+<tr>
+<td><code>eslint_args</code></td>
+<td>string</td>
+<td><code>.</code></td>
+<td>Arguments passed to eslint.</td>
+</tr>
+<tr>
+<td><code>prettier</code></td>
+<td>boolean</td>
+<td><code>true</code></td>
+<td>Whether to also run <code>prettier --check</code>.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="verify">Verify<a class="docs-heading-link" aria-label="Link to this section" href="#verify">#</a></h2>
+<p>Push the change. The <code>eslint</code> job lands in the <code>test</code> stage by default, and
+a green job means ESLint and Prettier found nothing to fix.</p>
+<aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>The <code>eslint</code> job has no <code>allow_failure</code> input: a lint or format error
+fails the pipeline.</p></aside>
+<h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
+<ul>
+<li><a href="quick-start.html">Quick start</a>: wire one component into an app and watch the pipeline run it.</li>
+<li><a href="../install.html">Install</a>: the requirements, the include snippet, and how to verify.</li>
+<li><a href="component-phpstan.html">The phpstan component</a>: the static analysis check for the PHP side.</li>
+<li><a href="include-twice.html">Include a component twice</a>: the <code>job_name</code> input in action.</li>
+<li><a href="../reference/components.html">Reference</a>: every component, with its inputs and defaults.</li>
+</ul>
 </article>
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../../docs/guides/component-phpstan.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">The phpstan component</span></a><a class="docs-pager__link docs-pager__link--next" href="../../docs/guides/component-package-publish.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">The package-publish component</span></a></nav>
   </div>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#what-the-job-does">What the job does</a></li><li class="docs-toc__item"><a href="#include-the-component">Include the component</a></li><li class="docs-toc__item"><a href="#inputs">Inputs</a></li><li class="docs-toc__item"><a href="#verify">Verify</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
   <span>Documents Preflight <span data-docs-version>0.1.4</span></span>

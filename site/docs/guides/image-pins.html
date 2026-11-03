@@ -18,7 +18,7 @@
   <a class="docs-header__brand" href="../../docs/index.html">Preflight</a>
   <span><a class="docs-header__home" rel="noopener" href="https://nougat.snu.gs/enterprise-apps/preflight">Source</a> <a class="docs-header__home" href="../../index.html">Back to Preflight</a></span>
 </header>
-<div class="docs-layout">
+<div class="docs-layout docs-layout--toc">
   <details class="docs-menu">
     <summary>Menu</summary>
     <nav class="docs-nav" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../../docs/index.html">Overview</a></li><li><a href="../../docs/install.html">Install</a></li><li><a href="../../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../../docs/guides/component-pint.html">The pint component</a></li><li><a href="../../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../../docs/guides/component-portability.html">The portability component</a></li><li><a href="../../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../../docs/guides/renovate.html">Renovate</a></li><li><a href="../../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../../docs/guides/image-pins.html" aria-current="page">Updating image pins</a></li><li><a href="../../docs/guides/template-lint.html">Template lint</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../../docs/reference/components.html">Components</a></li><li><a href="../../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../../docs/reference/local-checks.html">Local checks</a></li></ul></li><li><a href="../../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../../docs/upgrading.html">Upgrading</a></li><li><a href="../../docs/changelog.html">Changelog</a></li></ul></nav>
@@ -27,11 +27,37 @@
   <div class="docs-content">
     <main id="main">
       <article class="docs-article"><h1 id="updating-image-pins">Updating image pins<a class="docs-heading-link" aria-label="Link to this section" href="#updating-image-pins">#</a></h1>
-<p>STUB: this page is written in a later batch.</p>
+<p>This page covers the image pins Preflight's components run: why they are
+digests, how to look one up, and how to change one. Read the pinning rules,
+look up the new digest, and open a reviewed merge request. Like the aircraft
+preflight it is named after, the value shows up on the day it catches
+something.</p>
+<h2 id="why-pins-are-digests">Why pins are digests<a class="docs-heading-link" aria-label="Link to this section" href="#why-pins-are-digests">#</a></h2>
+<p>Every image the components run is pinned by digest (<code>name:tag@sha256:...</code>),
+so a repointed tag cannot quietly change what a pipeline executes. The tag
+stays in front of the digest so a diff still reads like a version bump.</p>
+<aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>The php-test matrix is the one exception. Its PHP images are tag-pinned on
+purpose, so those jobs run on the newest PHP patch release; every other
+component image is digest-pinned.</p></aside>
+<h2 id="look-up-the-digest">Look up the digest<a class="docs-heading-link" aria-label="Link to this section" href="#look-up-the-digest">#</a></h2>
+<p>To look up the digest for an image:</p>
+<pre><code class="language-sh">docker buildx imagetools inspect &lt;image&gt;:&lt;tag&gt;
+</code></pre>
+<p>Use the top-level <code>Digest:</code> line (the multi-arch index digest), not a
+per-platform one. Without <code>buildx</code>, <code>docker manifest inspect -v &lt;image&gt;:&lt;tag&gt;</code>
+shows the same index digest.</p>
+<h2 id="change-a-pin">Change a pin<a class="docs-heading-link" aria-label="Link to this section" href="#change-a-pin">#</a></h2>
+<p>Pins change only through a reviewed merge request.</p>
+<h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
+<ul>
+<li><a href="template-lint.html">Template lint</a>: the unsafe CI patterns <code>composer ci</code> scans for before the fixture tests.</li>
+<li><a href="../reference/conventions.html">Shared conventions</a>: Composer vendor, license, PHP floor and JavaScript installs.</li>
+</ul>
 </article>
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../../docs/guides/what-components-cannot-force.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">What the components cannot force</span></a><a class="docs-pager__link docs-pager__link--next" href="../../docs/guides/template-lint.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">Template lint</span></a></nav>
   </div>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#why-pins-are-digests">Why pins are digests</a></li><li class="docs-toc__item"><a href="#look-up-the-digest">Look up the digest</a></li><li class="docs-toc__item"><a href="#change-a-pin">Change a pin</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
   <span>Documents Preflight <span data-docs-version>0.1.4</span></span>
