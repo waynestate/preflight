@@ -69,11 +69,14 @@ artifacts:
 | `stage` | string | `test` | Pipeline stage for the job. |
 | `job_name` | string | `phpstan` | Name of the job. Set it when you include this component more than once. |
 | `image` | string | `composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. |
-| `config` | string | `phpstan.neon` | Path to the app's PHPStan config file. |
-| `memory_limit` | string | `1G` | Memory limit passed to PHPStan. |
+| `config` | string | `phpstan.neon` | Path to the app's PHPStan config file. It must be a relative path; GitLab refuses the pipeline at creation if it is not. |
+| `memory_limit` | string | `1G` | Memory limit passed to PHPStan. A PHP size such as `1G`, `512M` or `-1`; GitLab refuses the pipeline at creation if it is not. |
 | `working_dir` | string | `.` | Directory to run PHPStan in, relative to the project root. |
 
 `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`, and `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$`.
+
+> [!NOTE]
+> `config` must be a relative path, and `memory_limit` takes a PHP size such as `1G`, `512M` or `-1`. Each carries an input `regex`, so GitLab refuses the pipeline at creation when a value does not match.
 
 ## Verify
 

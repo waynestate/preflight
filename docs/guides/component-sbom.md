@@ -79,9 +79,12 @@ The path is the `output` input, and the artifact expires in 30 days.
 | `job_name` | string | `sbom` | Name of the job. Set it when you include this component more than once. |
 | `image` | string | `composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. |
 | `omit_dev` | boolean | `true` | Whether to omit dev dependencies from the SBOM. |
-| `output` | string | `sbom.cdx.json` | Path of the SBOM file to publish, relative to the project root. |
+| `output` | string | `sbom.cdx.json` | Path of the SBOM file to publish, relative to the project root. It must be a relative path; GitLab refuses the pipeline at creation if it is not. |
 
 `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`.
+
+> [!NOTE]
+> `output` must be a relative path. The input carries a `regex`, so GitLab refuses the pipeline at creation when a value does not match.
 
 ## Verify
 

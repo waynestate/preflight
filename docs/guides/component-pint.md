@@ -55,10 +55,13 @@ The job lands in the `test` stage by default, is `interruptible: true`, and has 
 | `stage` | string | `test` | Pipeline stage for the job. |
 | `job_name` | string | `pint` | Name of the job. Set it when you include this component more than once. |
 | `image` | string | `composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. |
-| `config` | string | `pint.json` | Path to the app's Pint config file. |
+| `config` | string | `pint.json` | Path to the app's Pint config file. It must be a relative path; GitLab refuses the pipeline at creation if it is not. |
 | `working_dir` | string | `.` | Directory to run Pint in, relative to the project root. |
 
 `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`, and `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$`.
+
+> [!NOTE]
+> `config` must be a relative path. The input carries a `regex`, so GitLab refuses the pipeline at creation when a value does not match.
 
 ## Verify
 
