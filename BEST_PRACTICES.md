@@ -205,10 +205,14 @@ Sources: [GitLab: CI/CD inputs, guidance](https://docs.gitlab.com/ci/inputs/);
 
 **How the stack holds it: Partially.** Every `working_dir` input (six components carry one) is constrained by
 `regex: '^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$'` and quoted at its only use, `cd "$[[ inputs.working_dir ]]"`. The two
-`composer_version` inputs match `^2\.\d+\.\d+$`, and `renovate`'s `dry_run` matches `^(null|lookup|full)$`. Still free
-are `test_command` (php-test) and `proctor_command` (proctor), each placed unquoted in a `script` line, along with a
-few path-like inputs (`config`, `memory_limit`, `output`, `eslint_args`). The values come from the app's own author, so
-the risk is low, but `proctor_command` is also how an app could drop `--policy` or add `--today`.
+`composer_version` inputs match `^2\.\d+\.\d+$`, and `renovate`'s `dry_run` matches `^(null|lookup|full)$`. The four
+path-like inputs that reach a shell line are now constrained too: `phpstan` `config` and `pint` `config` and `sbom`
+`output` match `^[A-Za-z0-9_-][A-Za-z0-9._/-]*$` (a relative path only), and `phpstan` `memory_limit` matches
+`^(-1|[0-9]+[KkMmGg]?)$` (a PHP size such as `1G`); `tests/check-path-input-regex.sh` (and its `.ps1` twin) pins both
+regex lines and checks sample values on every pipeline. Still free by design are `test_command` (php-test),
+`proctor_command` (proctor) and `eslint_args` (eslint): they are arbitrary commands or arguments, so a path regex would
+only pretend to constrain them. The values come from the app's own author, so the risk is low, but `proctor_command` is
+also how an app could drop `--policy` or add `--today`.
 
 Second pass: the GitLab inputs page was re-read and the first pass is right. It says "Do not rely on `posix_escape` for
 security purposes with untrusted input values". It recommends `number` and `boolean` types, `regex` and `options` for
@@ -1007,8 +1011,9 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
    considered and left out on purpose.
 8. 6.2: Derive the PHP matrix from the policy, and drop 8.2 by 2027-01-01.
 9. 4.9: Pin the Composer version the installer fetches and the `composer-audit` image.
-10. 2.2 (updated): Constrain the inputs that are still free: `test_command`, `proctor_command` and the path-like
-    `config`, `memory_limit`, `output` and `eslint_args`.
+10. Done (partly): 2.2: the path-like inputs are constrained and pinned by `tests/check-path-input-regex`: `phpstan`
+    `config` and `memory_limit`, `pint` `config` and `sbom` `output` carry input regexes (relative paths and PHP sizes).
+    Left free by design: `test_command`, `proctor_command` and `eslint_args` (arbitrary commands and arguments).
 11. Done: 4.7: Documented the scheduled audit in the README: a weekly pipeline schedule on the default branch (project settings, Build, Pipeline schedules); the component has no `rules:` and runs in scheduled pipelines, and the schedule itself is a project setting Preflight cannot create or check.
 12. 4.2: Use a dependency proxy or Citadel images for job images.
 13. 3.2: Recommend branch and CI-file protection for app repos.
