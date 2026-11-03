@@ -1,7 +1,8 @@
 {
     "preset": "per",
     "exclude": [
-        "tests/fixture-app"
+        "tests/fixture-app",
+        "tests/portability"
     ],
     "notPath": [
         "bin/agent-ready.php"
