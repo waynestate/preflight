@@ -18,7 +18,7 @@
   <a class="docs-header__brand" href="../../docs/index.html">Preflight</a>
   <span><a class="docs-header__home" rel="noopener" href="https://nougat.snu.gs/enterprise-apps/preflight">Source</a> <a class="docs-header__home" href="../../index.html">Back to Preflight</a></span>
 </header>
-<div class="docs-layout">
+<div class="docs-layout docs-layout--toc">
   <details class="docs-menu">
     <summary>Menu</summary>
     <nav class="docs-nav" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../../docs/index.html">Overview</a></li><li><a href="../../docs/install.html">Install</a></li><li><a href="../../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../../docs/guides/component-pint.html">The pint component</a></li><li><a href="../../docs/guides/component-phpstan.html" aria-current="page">The phpstan component</a></li><li><a href="../../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../../docs/guides/component-portability.html">The portability component</a></li><li><a href="../../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../../docs/guides/renovate.html">Renovate</a></li><li><a href="../../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../../docs/guides/template-lint.html">Template lint</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../../docs/reference/components.html">Components</a></li><li><a href="../../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../../docs/reference/local-checks.html">Local checks</a></li></ul></li><li><a href="../../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../../docs/upgrading.html">Upgrading</a></li><li><a href="../../docs/changelog.html">Changelog</a></li></ul></nav>
@@ -27,11 +27,116 @@
   <div class="docs-content">
     <main id="main">
       <article class="docs-article"><h1 id="the-phpstan-component">The phpstan component<a class="docs-heading-link" aria-label="Link to this section" href="#the-phpstan-component">#</a></h1>
-<p>STUB: this page is written in a later batch.</p>
+<p>This page shows how to add the <code>phpstan</code> component to an app's <code>.gitlab-ci.yml</code>: it runs the app's own <a rel="noopener" href="https://phpstan.org/">PHPStan</a> and fails the pipeline on static analysis errors, writing a GitLab Code Quality report. It finds the loose bolts before the flight does; check the requirements first, then add the include.</p>
+<p>Version 1, category Testing/Validation, tags <code>php</code>, <code>static-analysis</code>, <code>phpstan</code>.</p>
+<h2 id="before-you-start">Before you start<a class="docs-heading-link" aria-label="Link to this section" href="#before-you-start">#</a></h2>
+<p>The component does not install PHPStan itself. The app must:</p>
+<ul>
+<li>Require <code>phpstan/phpstan</code> as a dev dependency.</li>
+<li>Ship a <code>phpstan.neon</code>, or point the <code>config</code> input at its own file.</li>
+</ul>
+<h2 id="include-the-component">Include the component<a class="docs-heading-link" aria-label="Link to this section" href="#include-the-component">#</a></h2>
+<p>Add the include to the app's <code>.gitlab-ci.yml</code>, pinned to a commit SHA with the tag in a trailing comment:</p>
+<pre><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+    inputs:
+      config: phpstan.neon
+      memory_limit: 1G
+</code></pre>
+<p>A tag or branch can move; a SHA cannot.</p>
+<h2 id="what-the-job-does">What the job does<a class="docs-heading-link" aria-label="Link to this section" href="#what-the-job-does">#</a></h2>
+<p>The job lands in the <code>test</code> stage by default, is <code>interruptible: true</code>, and has a <code>timeout: 10m</code>. It runs three steps:</p>
+<ol>
+<li>
+<p>Move to the directory given by <code>working_dir</code> (default <code>.</code>).</p>
+</li>
+<li>
+<p>Install the app's dependencies:</p>
+<pre><code class="language-sh">composer install --no-interaction --no-progress --prefer-dist
+</code></pre>
+</li>
+<li>
+<p>Run PHPStan against the app's own config:</p>
+<pre><code class="language-sh">vendor/bin/phpstan analyse --no-progress --error-format=gitlab --memory-limit=1G -c phpstan.neon &gt; &quot;$CI_PROJECT_DIR/phpstan-report.json&quot;
+</code></pre>
+<ul>
+<li><code>--memory-limit</code> takes the <code>memory_limit</code> input (default <code>1G</code>).</li>
+<li><code>-c</code> takes the <code>config</code> input (default <code>phpstan.neon</code>).</li>
+<li><code>--error-format=gitlab</code> writes the findings as a GitLab Code Quality report to <code>$CI_PROJECT_DIR/phpstan-report.json</code>.</li>
+</ul>
+</li>
+</ol>
+<h2 id="report">Report<a class="docs-heading-link" aria-label="Link to this section" href="#report">#</a></h2>
+<p>The job publishes the report as a Code Quality report:</p>
+<pre><code class="language-yaml">artifacts:
+  when: always
+  reports:
+    codequality: phpstan-report.json
+</code></pre>
+<h2 id="inputs">Inputs<a class="docs-heading-link" aria-label="Link to this section" href="#inputs">#</a></h2>
+<div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Type</th>
+<th>Default</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stage</code></td>
+<td>string</td>
+<td><code>test</code></td>
+<td>Pipeline stage for the job.</td>
+</tr>
+<tr>
+<td><code>job_name</code></td>
+<td>string</td>
+<td><code>phpstan</code></td>
+<td>Name of the job. Set it when you include this component more than once.</td>
+</tr>
+<tr>
+<td><code>image</code></td>
+<td>string</td>
+<td><code>composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc</code></td>
+<td>Docker image for the job.</td>
+</tr>
+<tr>
+<td><code>config</code></td>
+<td>string</td>
+<td><code>phpstan.neon</code></td>
+<td>Path to the app's PHPStan config file.</td>
+</tr>
+<tr>
+<td><code>memory_limit</code></td>
+<td>string</td>
+<td><code>1G</code></td>
+<td>Memory limit passed to PHPStan.</td>
+</tr>
+<tr>
+<td><code>working_dir</code></td>
+<td>string</td>
+<td><code>.</code></td>
+<td>Directory to run PHPStan in, relative to the project root.</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>job_name</code> must match <code>^[A-Za-z0-9_][A-Za-z0-9_.-]*$</code>, and <code>working_dir</code> must match <code>^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$</code>.</p>
+<h2 id="verify">Verify<a class="docs-heading-link" aria-label="Link to this section" href="#verify">#</a></h2>
+<p>Push the change. The components are ordinary jobs, so the <code>phpstan</code> job runs whenever the app's pipeline runs, in the <code>test</code> stage by default. A green job means no static analysis errors, and the Code Quality report carries the findings.</p>
+<h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
+<ul>
+<li><a href="component-pint.html">The pint component</a>: the style check that pairs with it.</li>
+<li><a href="component-proctor.html">The proctor component</a>: another check that publishes a Code Quality report.</li>
+<li><a href="include-twice.html">Include a component twice</a>: the <code>job_name</code> input when one project includes the same component more than once.</li>
+<li><a href="../reference/components.html">Reference</a>: every component, with its inputs and defaults.</li>
+</ul>
 </article>
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../../docs/guides/component-pint.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">The pint component</span></a><a class="docs-pager__link docs-pager__link--next" href="../../docs/guides/component-eslint.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">The eslint component</span></a></nav>
   </div>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#before-you-start">Before you start</a></li><li class="docs-toc__item"><a href="#include-the-component">Include the component</a></li><li class="docs-toc__item"><a href="#what-the-job-does">What the job does</a></li><li class="docs-toc__item"><a href="#report">Report</a></li><li class="docs-toc__item"><a href="#inputs">Inputs</a></li><li class="docs-toc__item"><a href="#verify">Verify</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
   <span>Documents Preflight <span data-docs-version>0.1.4</span></span>
