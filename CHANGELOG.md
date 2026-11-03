@@ -14,6 +14,7 @@ are Git tags.
 
 ### Added
 
+- Added: README example for an advisory job on the next PHP release (a second `php-test` include with `job_name`), and PowerShell forms of the local Docker commands.
 - Added: a `job_name` input on every component except `portability` (default is the usual job name), so one project can include a component more than once; `tests/check-job-names` enforces it and `tests/check-contract` resolves the key.
 - Added: portability component (Buildah build, arbitrary-uid boot, goss checks, fixtures).
 - Added: a Squire kit version rule in `renovate/default.json`: a custom regex manager reads the `version` line of `.squire.json`, and the `waynestate/squire` bump carries the `squire-kit` label and never auto-merges; a person runs `squire update` to refresh the kit files.

@@ -86,6 +86,27 @@ do not re-download every package. The cache key depends on `composer.lock`
 and is prefixed with the PHP version, so a dependency change invalidates the
 cache and each PHP version gets its own cache.
 
+##### Try the next PHP release without breaking the pipeline
+
+Include `php-test` a second time for the release that is not supported yet, name that job, and let it fail. The name
+is what lets your own `.gitlab-ci.yml` loosen only that job:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<full commit SHA> # <tag>
+    inputs:
+      php_versions: ["8.6"]
+      job_name: php-test-next
+      # While 8.6 only has release candidate images, name the tag: php:${PHP_VERSION}-rc-cli-trixie
+      # image: "php:${PHP_VERSION}-rc-cli-trixie"
+
+php-test-next:
+  allow_failure: true
+```
+
+A red `php-test-next` job is an early warning, not a stop. Drop the `allow_failure` and move the version into the main
+`php_versions` list once the release is supported (the supported versions follow `policy.json`).
+
 #### composer-audit
 
 Runs `composer audit --locked` and fails on advisories.
@@ -590,6 +611,13 @@ Run the template lint and the fixture tests with Docker:
 ```sh
 docker run --rm -v "$(pwd):/app" -w /app composer:2 composer install
 docker run --rm -v "$(pwd):/app" -w /app composer:2 composer ci
+```
+
+In PowerShell, use `${PWD}` instead of `$(pwd)`:
+
+```powershell
+docker run --rm -v "${PWD}:/app" -w /app composer:2 composer install
+docker run --rm -v "${PWD}:/app" -w /app composer:2 composer ci
 ```
 
 Run the PHP fixture app separately:
