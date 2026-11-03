@@ -19,6 +19,7 @@
     },
     "require-dev": {
         "laravel/pint": "^1.32",
+        "league/commonmark": "^2.10",
         "phpstan/phpstan": "^2.3",
         "waynestate/pinstripe": "^0.1"
     },
@@ -42,18 +43,23 @@
             "php bin/lint-templates --test",
             "@lint",
             "@analyse",
-            "@site:agent-ready-check"
+            "@site:agent-ready-check",
+            "@docs:check"
         ],
         "lint": "pint --test",
         "fix": "pint",
         "analyse": "phpstan analyse --memory-limit=1G",
         "site:agent-ready": "php bin/agent-ready.php",
-        "site:agent-ready-check": "php bin/agent-ready.php --check"
+        "site:agent-ready-check": "php bin/agent-ready.php --check",
+        "docs": "php bin/docs-site.php",
+        "docs:check": "php bin/docs-site.php --check"
     },
     "scripts-descriptions": {
-        "ci": "The full CI gate: template lint, fixture tests, Pint, PHPStan, agent-ready files.",
+        "ci": "The full CI gate: template lint, fixture tests, Pint, PHPStan, agent-ready files, docs site.",
         "site:agent-ready": "Rewrite the Markdown twins, llms.txt, llms-full.txt, robots.txt and sitemap.xml in site/ (Squire's agent-ready kit).",
-        "site:agent-ready-check": "Fail when the agent-ready files are stale, a page lacks its Markdown link, a prompt drifts from the docs, or the kit was edited here."
+        "site:agent-ready-check": "Fail when the agent-ready files are stale, a page lacks its Markdown link, a prompt drifts from the docs, or the kit was edited here.",
+        "docs": "Build the docs site from docs/ into site/docs/ (Squire's docs builder): render the pages, fill the generated command and environment reference, and stamp the current version.",
+        "docs:check": "Fail when the built docs site is stale or the generated command or environment reference has drifted from the CLI or source."
     },
     "extra": {
         "proctor": {
