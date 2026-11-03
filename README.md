@@ -259,7 +259,7 @@ takeoff without a clean pre-flight.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@<full-commit-sha> # <tag, once one ships>
     inputs:
       dockerfile: Dockerfile
       context: .
