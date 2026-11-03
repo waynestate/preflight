@@ -5,6 +5,7 @@
         "tests/portability"
     ],
     "notPath": [
-        "bin/agent-ready.php"
+        "bin/agent-ready.php",
+        "bin/docs-site.php"
     ]
 }
