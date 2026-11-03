@@ -48,10 +48,21 @@
       "labels": ["auto-deps", "needs-review"]
     },
     {
-      "matchManagers": ["gitlab-ci-include"],
+      "matchManagers": ["gitlabci", "gitlabci-include"],
+      "matchDepTypes": ["repository"],
       "automerge": false,
       "platformAutomerge": false,
       "labels": ["auto-deps", "needs-review"]
+    },
+    {
+      "matchDepNames": ["waynestate/squire"],
+      "matchManagers": ["custom.regex"],
+      "automerge": false,
+      "platformAutomerge": false,
+      "labels": ["auto-deps", "squire-kit", "needs-review"],
+      "prBodyNotes": [
+        "This changes the recorded Squire kit version only. Run `vendor/bin/squire update --path=deploy` (use the right path for this repo), review the diff, commit it to this branch, then merge. `squire init --check` in CI fails until the kit files match. A person refreshes the Squire kit MR by running `squire update`; the runner runs no commands, so the preset carries no post-bump tasks."
+      ]
     }
   ],
   "lockFileMaintenance": {
@@ -83,6 +94,15 @@
         "\"default\"\\s*:\\s*\"(?<depName>[a-z0-9][a-z0-9._/-]*):(?<currentValue>[^:@{}\\n]+)@(?<currentDigest>sha256:[a-f0-9]{64})\""
       ],
       "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/(^|/)\\.squire\\.json$/"],
+      "matchStrings": [
+        "\"squire\"\\s*:\\s*\"Written by SQUIRE[^\\n]*\\n\\s*\"version\"\\s*:\\s*\"(?<currentValue>[^\"]+)\""
+      ],
+      "depNameTemplate": "waynestate/squire",
+      "datasourceTemplate": "packagist"
     }
   ]
 }

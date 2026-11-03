@@ -6,6 +6,14 @@ are Git tags.
 
 ## Unreleased
 
+### Added
+
+- Added: a Squire kit version rule in `renovate/default.json`: a custom regex manager reads the `version` line of `.squire.json`, and the `waynestate/squire` bump carries the `squire-kit` label and never auto-merges; a person runs `squire update` to refresh the kit files.
+
+### Fixed
+
+- Fixed: the component-rule manager name in `renovate/default.json` (`gitlabci`, matching repository deps), so component version bumps really wait for review instead of auto-merging; the contract test now checks the new rule and the Squire kit rule.
+
 ## 0.1.3 (2026-11-03)
 
 ### Added
