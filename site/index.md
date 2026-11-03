@@ -20,7 +20,7 @@ Preflight is a set of GitLab CI/CD components. Add them to the `include:` block 
 
 ```
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
 ```
 
 Already included in [WELD](https://weld.apps.wayne.edu/) and in every [Sourdough](https://sourdough.apps.wayne.edu/) app. Use Preflight on its own to give a GitLab project you already have the stack's CI checks.
@@ -85,9 +85,9 @@ Cockpit placards
 
 ## Seven checks, one include each
 
-Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All seven are in the 0.1.1 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Two more components, `package-publish` and `renovate`, ship in the same tag; the README documents them.
+Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All seven are in the 0.1.4 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Two more components, `package-publish` and `renovate`, ship in the same tag; the README documents them.
 
-in 0.1.1
+in 0.1.4
 
 ### proctor
 
@@ -96,7 +96,7 @@ Watches the cabin.
 Runs PROCTOR's checks and publishes them as a Code Quality report.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
 ```
 
 **6 inputs**
@@ -108,7 +108,7 @@ Runs PROCTOR's checks and publishes them as a Code Quality report.
 - **proctor_command**: `vendor/bin/proctor check --format=codequality`
 - **working_dir**: `.`
 
-in 0.1.1
+in 0.1.4
 
 ### php-test
 
@@ -117,7 +117,7 @@ Three engines, all running.
 The test command on each supported PHP version, one job per version.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
 ```
 
 **6 inputs**
@@ -129,7 +129,7 @@ The test command on each supported PHP version, one job per version.
 - **test_command**: `vendor/bin/phpunit`
 - **working_dir**: `.`
 
-in 0.1.1
+in 0.1.4
 
 ### composer-audit
 
@@ -138,7 +138,7 @@ Checks the passenger list.
 `composer audit --locked`, failing on any advisory.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
 ```
 
 **3 inputs**
@@ -147,7 +147,7 @@ Checks the passenger list.
 - **image**: `composer:2@sha256:…`
 - **working_dir**: `.`
 
-in 0.1.1
+in 0.1.4
 
 ### sbom
 
@@ -156,7 +156,7 @@ The cargo manifest.
 A validated CycloneDX SBOM, published as an artifact. The plugin installs globally, so the app's files stay as they are.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
 ```
 
 **4 inputs**
@@ -166,7 +166,7 @@ A validated CycloneDX SBOM, published as an artifact. The plugin installs global
 - **omit_dev**: `true`
 - **output**: `sbom.cdx.json`
 
-in 0.1.1
+in 0.1.4
 
 ### pint
 
@@ -175,7 +175,7 @@ Uniform pressed.
 The app's own Laravel Pint in test mode. The app requires `laravel/pint` and ships a `pint.json`.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
 ```
 
 **4 inputs**
@@ -185,7 +185,7 @@ The app's own Laravel Pint in test mode. The app requires `laravel/pint` and shi
 - **config**: `pint.json`
 - **working_dir**: `.`
 
-in 0.1.1
+in 0.1.4
 
 ### phpstan
 
@@ -194,7 +194,7 @@ Instruments cross-checked.
 The app's own PHPStan, with a Code Quality report. The app requires `phpstan/phpstan` and ships a `phpstan.neon`.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
 ```
 
 **5 inputs**
@@ -205,7 +205,7 @@ The app's own PHPStan, with a Code Quality report. The app requires `phpstan/php
 - **memory_limit**: `1G`
 - **working_dir**: `.`
 
-in 0.1.1
+in 0.1.4
 
 ### eslint
 
@@ -214,7 +214,7 @@ The front cabin, too.
 The app's own ESLint and Prettier. The app requires `@waynestate/pinstripe`, `eslint` and `prettier`.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
 ```
 
 **5 inputs**
@@ -225,7 +225,7 @@ The app's own ESLint and Prettier. The app requires `@waynestate/pinstripe`, `es
 - **eslint_args**: `.`
 - **prettier**: `true`
 
-in 0.1.1
+in 0.1.4
 
 ### php-package.yml
 
@@ -234,7 +234,7 @@ Two cockpits, one checklist.
 Components stay inside one GitLab instance, so GitHub mirrors call this reusable workflow instead: `composer ci` on each PHP version, then a Composer audit.
 
 ```
-uses: waynestate/preflight/.github/workflows/php-package.yml@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
+uses: waynestate/preflight/.github/workflows/php-package.yml@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
 ```
 
 **3 inputs**
@@ -270,13 +270,13 @@ workflow:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
 ```
 
 2 Switches · project settings
@@ -303,7 +303,7 @@ on:
 
 jobs:
   ci:
-    uses: waynestate/preflight/.github/workflows/php-package.yml@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
+    uses: waynestate/preflight/.github/workflows/php-package.yml@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
 ```
 
 4 Ground check · your machine

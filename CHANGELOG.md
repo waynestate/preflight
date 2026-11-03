@@ -6,6 +6,8 @@ are Git tags.
 
 ## Unreleased
 
+- Docs: component pins in the README and site examples now point at 0.1.4.
+
 ## 0.1.4 (2026-11-03)
 
 ### Changed
