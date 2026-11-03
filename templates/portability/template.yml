@@ -67,27 +67,27 @@ spec:
       default: 60
 ---
 portability-build:
-    stage: $[[ inputs.stage ]]
-    image: $[[ inputs.buildah_image ]]
-    variables:
-        # Buildah stores its layers with the vfs driver, which needs no special
-        # kernel support and runs in an ordinary container.
-        STORAGE_DRIVER: vfs
-    interruptible: true
-    timeout: 30 minutes
-    script:
-        - |
-          set -eu
+  stage: $[[ inputs.stage ]]
+  image: $[[ inputs.image ]]
+  variables:
+    # Buildah stores its layers with the vfs driver, which needs no special
+    # kernel support and runs in an ordinary container.
+    STORAGE_DRIVER: vfs
+  interruptible: true
+  timeout: 30 minutes
+  script:
+    - |
+      set -eu
 
-          # Build the image. The local tag is a placeholder; the push below gives
-          # it the registry reference.
-          buildah bud -f "$[[ inputs.dockerfile ]]" -t portability-app "$[[ inputs.context ]]"
+      # Build the image. The local tag is a placeholder; the push below gives
+      # it the registry reference.
+      buildah bud -f "$[[ inputs.dockerfile ]]" -t portability-app "$[[ inputs.context ]]"
 
-          # Push it to the project's container registry.
-          buildah login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
-          buildah push portability-app "docker://$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA"
+      # Push it to the project's container registry.
+      buildah login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
+      buildah push portability-app "docker://$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA"
 
-          echo "portability: built and pushed $CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA"
+      echo "portability: built and pushed $CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA"
 
 portability-run:
   stage: $[[ inputs.stage ]]

@@ -6,6 +6,10 @@ are Git tags.
 
 ## Unreleased
 
+### Added
+
+- Added: portability component (Buildah build, arbitrary-uid boot, goss checks, fixtures).
+
 ## 0.1.3 (2026-11-03)
 
 ### Added

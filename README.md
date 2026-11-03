@@ -248,6 +248,46 @@ include:
 | `dry_run` | string | `"null"` | Dry run mode: `null` (disabled), `lookup` or `full`. |
 | `git_author` | string | none | Author of the commits and merge requests Renovate creates, in the form `Name <email>`. Required. |
 
+### portability
+
+Proves the app image meets the twelve-factor boot contract. It builds the
+image with Buildah (no Docker daemon, no elevated runner), boots it the
+strict way, and validates it with goss: the health path answers 200 for a
+foreign Host, the root filesystem and the app root are not writable, the app
+runs as the declared uid, and each declared writable path is writable. No
+takeoff without a clean pre-flight.
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0
+    inputs:
+      dockerfile: Dockerfile
+      context: .
+      start_command: php -S 0.0.0.0:8080 -t public
+```
+
+Portability is not in a release tag yet (the newest tag, 0.1.3, does not
+include it), so pin the full commit SHA of the commit you want and name the
+tag in the comment once one ships. The build job needs a runner that permits
+user namespaces (Buildah uses unshare for its storage); the run job needs only
+the project's container registry and an app image that carries curl, sha256sum
+and tar.
+
+| Input | Type | Default | What it does |
+|-------|------|---------|--------------|
+| `stage` | string | `test` | Pipeline stage for the portability jobs. |
+| `image` | string | `$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA` | App image the portability-run job starts and validates. The default is what portability-build pushes; GitLab expands the CI variables at job time. |
+| `buildah_image` | string | `quay.io/buildah/stable:v1.41.5@sha256:37fa3027bd4b1d76a0001c6bb7349b63c48ebbaee8fa5f47e6097f5e88f6447c` | Buildah image that builds and pushes the app image. |
+| `dockerfile` | string | `Dockerfile` | Dockerfile to build, relative to the context. |
+| `context` | string | `.` | Build context, relative to the project root. |
+| `app_root` | string | `/app` | Directory inside the image where the app lives. |
+| `writable_paths` | array | `["storage", "bootstrap/cache"]` | Paths the app may write to, relative to app_root. Each must be writable by the app user. |
+| `port` | number | `8080` | Port the app listens on inside the container. |
+| `health_path` | string | `/up` | Path the app must answer 200 on for any Host. |
+| `uid` | number | `100123` | Numeric uid the app runs as. The gid is always 0. |
+| `start_command` | string | none | Command that starts the app inside the image. It is app-specific, so it is required and has no default. |
+| `boot_timeout` | number | `60` | Seconds goss retries the health check while the app boots. |
+
 ## Same instance only
 
 Components work only inside the GitLab instance that hosts this project.
@@ -283,8 +323,9 @@ jobs:
 
 This workflow ships in the `0.1.1` tag, so pin the full commit SHA of the
 release tag and keep the tag in a trailing comment. A tag or branch can move;
-a SHA cannot. The Renovate preset (see the Renovate section) proposes the
-bumps, and they wait for review (the `needs-review` label).
+a SHA cannot. PROCTOR's `preflight-pinned` check warns when an include is not
+pinned to a commit SHA. The Renovate preset (see the Renovate section)
+proposes the bumps, and they wait for review (the `needs-review` label).
 
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
@@ -518,6 +559,18 @@ Run the PHP fixture app separately:
 ```sh
 docker run --rm -v "$(pwd)/tests/fixture-app:/app" -w /app composer:2 composer install
 docker run --rm -v "$(pwd)/tests/fixture-app:/app" -w /app php:8.4-cli vendor/bin/phpunit
+```
+
+Run the portability fixtures with Docker; they build and boot the three
+fixtures under `tests/portability` the strict way and exit 0 only when `good`
+passes and both `bad-*` fixtures fail:
+
+```sh
+sh tests/check-portability.sh
+```
+
+```powershell
+pwsh -File tests/check-portability.ps1
 ```
 
 
