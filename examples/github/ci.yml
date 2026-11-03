@@ -1,8 +1,10 @@
 # A mirrored package calls the reusable workflow from its own
 # .github/workflows/ci.yml. Copy this file and change the `uses:` ref.
 #
-# Pin the tag, the same rule as the GitLab components. `0.1.1` is the first
-# tag that carries this workflow; `0.1.0` predates it.
+# Pin the full commit SHA of the release tag and keep the tag in a trailing
+# comment, the same rule as the GitLab components. `0.1.1` is the first tag
+# that carries this workflow; `0.1.0` predates it. A tag or branch can move;
+# a SHA cannot.
 name: CI
 
 on:
@@ -12,4 +14,4 @@ on:
 
 jobs:
   ci:
-    uses: waynestate/preflight/.github/workflows/php-package.yml@0.1.1
+    uses: waynestate/preflight/.github/workflows/php-package.yml@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
