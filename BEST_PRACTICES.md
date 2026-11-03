@@ -84,8 +84,12 @@ Sources: [GitLab: components, security](https://docs.gitlab.com/ci/components/);
 [GitLab: protected branches](https://docs.gitlab.com/user/project/repository/branches/protected/);
 [OpenSSF Scorecard: Branch-Protection](https://github.com/ossf/scorecard/blob/main/docs/checks.md).
 
-**How the stack holds it: Not yet.** The project settings are not recorded in the repo or in a design document. Write
-them down and check them.
+**How the stack holds it: Documented.** The README's "Protection checklist" lists the settings as a task list:
+protect the default branch with a required merge request, protect the release tags so only maintainers can create or
+move one, set merge request approvals to at least one, set "Minimum role to use pipeline variables" to
+`no_one_allowed`, and keep fork pipelines away from protected variables. Nothing in the repo checks the settings:
+they are project settings Preflight cannot create or verify, and a read-only token drift report was considered and
+left out on purpose.
 
 ### 1.3 Publish to the CI/CD Catalog with a semantic-version tag and a release job
 The catalog needs a root `README.md`, a project description, components under `templates/`, and a job that uses the
@@ -982,10 +986,17 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
 1. 6.1: Make the `proctor` default command work (bundled policy), then add it to PROCTOR's and CREED's pipelines.
 2. 7.2: Add failing fixtures for each component and replace the stub `bin/proctor` with the real tool.
 3. 3.3: Add a check or Rollcall report for apps that skip, unpin or weaken Preflight.
-4. 4.1: Pin images by digest and update the pins through reviewed merge requests.
+4. Done: 4.1: Image digests stay pinned, and the pins that matter most move through review: the shared preset
+   `renovate/default.json` turns off automerge (and platform automerge) for updates inside the templates, the
+   contract and this repository's own pipeline, and for component include version bumps, labelling them
+   `needs-review`; `tests/check-renovate-review.sh` (and its `.ps1` twin) keeps the rules in place.
 5. Done (option A): 4.4: the `proctor` job installs with `--no-plugins --no-scripts`, pinned by a contract test. Option B remains: run PROCTOR without installing the app at all (behind the PROCTOR PHAR work).
 6. 1.3: Confirm the `release` job and publish the Catalog entry for the current tag (`0.1.2`); the components added after `0.1.0` already shipped in `0.1.1`.
-7. 1.2: Record and check the project's branch and tag protection.
+7. Done: 1.2: Recorded the project's branch and tag protection as the README's "Protection checklist": protected
+   default branch with a required merge request, protected release tags, merge request approvals of at least one,
+   `no_one_allowed` pipeline variables, and no protected variables in fork pipelines. Checking them stays a human
+   step: they are project settings Preflight cannot create or verify, and a read-only token drift report was
+   considered and left out on purpose.
 8. 6.2: Derive the PHP matrix from the policy, and drop 8.2 by 2027-01-01.
 9. 4.9: Pin the Composer version the installer fetches and the `composer-audit` image.
 10. 2.2 (updated): Constrain the inputs that are still free: `test_command`, `proctor_command` and the path-like
@@ -1020,8 +1031,10 @@ Added in the second pass (2026-10-27):
     current), because of the April to August 2026 Composer security fixes.
 28. 4.6 and 7.2 (updated): Add fixtures for an advisory, an abandoned package and a malware-flagged version, and record
     the real audit exit codes. Settle the conflict on abandoned packages.
-29. 1.7: Offer a reviewed bump process (bot or scheduled merge request) for component SHAs and image digests. Test whether
-    Renovate handles `component:` includes first.
+29. Done: 1.7: The reviewed bump process is in place: Renovate runs from the private runner project, and the shared
+    preset routes digest changes inside the templates, the contract and this repository's own pipeline, plus
+    component include version bumps, to a `needs-review` label that never auto-merges. Still open: confirm in
+    practice that Renovate's `gitlab-ci-include` manager bumps an app's own `component:` includes.
 30. 1.6: Put the commit SHA in every release note and tell apps to pin it.
 31. 4.11: Write the stack's rule for Composer malware, advisory and abandoned policy, and require Composer 2.10 or later.
 32. 4.10: Name the Debian release in image tags, or match the image family of the target you deploy to.
