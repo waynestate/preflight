@@ -8,6 +8,7 @@ are Git tags.
 
 ### Changed
 
+- Changed: the README explains which jobs may be allowed to fail (only `proctor`) and that the contract check rejects global keys; BEST_PRACTICES 2.3 is now Enforced.
 - Changed: check-image-inputs allows `portability-build` to take `buildah_image` (the only exemption from 2.10).
 - Changed: docs and package metadata name nougat as the canonical repository, with git.wayne.edu and GitHub as read-only mirrors, until git.wayne.edu has CI runners.
 

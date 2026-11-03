@@ -226,8 +226,9 @@ Why: global keys leak into the consuming pipeline.
 
 Sources: [GitLab: component examples](https://docs.gitlab.com/ci/components/examples/).
 
-**How the stack holds it: Documented.** All nine templates follow it, by convention. No lint fails if a template adds
-a global key.
+**How the stack holds it: Enforced.** All nine templates follow it. `tests/check-contract.sh` fails on any top-level
+key that is not a job named in `contract/inputs.json`, so a template cannot add a global key. The README's "Which jobs
+may be allowed to fail" explains why only `proctor` takes `allow_failure`.
 
 ### 2.4 Make the stage an input
 Consumers have their own stage lists.

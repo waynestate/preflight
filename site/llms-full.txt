@@ -459,6 +459,16 @@ override a job's keys, skip it with `rules`, or delete the `include:` line. Pref
 one; it does not lock it. Rollcall is where skipped or weakened gates will show up. A preflight checklist only works
 if the pilot reads it.
 
+#### Which jobs may be allowed to fail
+
+Only `proctor` takes an `allow_failure` input (default `false`). A policy finding is a warning while an app adopts
+PROCTOR's rules, so the job may fail without failing the pipeline during adoption. `composer-audit` has no such input
+on purpose: a known advisory must fail the pipeline. The other jobs have no `allow_failure` input either.
+
+No template adds a global key such as `default:`, `variables:`, `workflow:` or `stages:`. `tests/check-contract.sh`
+(and its `.ps1` twin) fails on any top-level key in a template that is not a job named in `contract/inputs.json`, so a
+global key fails `composer ci`.
+
 #### Protection checklist
 
 A pilot signs each line of the checklist; the plane does not sign for you. Five project settings make the gates
