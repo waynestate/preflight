@@ -6,6 +6,10 @@ are Git tags.
 
 ## Unreleased
 
+### Added
+
+- Added: advisory secret detection in the repository's own pipeline.
+
 ### Changed
 
 - Changed: the deploy layer's Squire kit is refreshed to 0.3.3 (release options can now live in ./.env.squire).

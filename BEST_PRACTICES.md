@@ -737,8 +737,11 @@ Sources: [GitLab: CI/CD variables](https://docs.gitlab.com/ci/variables/);
 [GitLab: pipeline security, secrets](https://docs.gitlab.com/ci/pipeline_security/);
 [OWASP CICD-SEC-6 Insufficient Credential Hygiene](https://owasp.org/www-project-top-10-ci-cd-security-risks/).
 
-**How the stack holds it: Not yet.** The nine templates use no secrets, which is good. Nothing fails if a later
-template adds one, and no secret scan runs on the Preflight repo.
+**How the stack holds it: Partially.** The nine templates use no secrets, which is good. Nothing fails if a later
+template adds one. The repository's own pipeline now runs GitLab's pipeline secret detection as an advisory job
+(`secret_detection` with `allow_failure: true`, kept in place by `tests/check-secret-detection.sh` and its `.ps1`
+twin); the plan is to make it blocking after a week of green pipelines. Whether it runs on the git.wayne.edu
+instance (Community Edition) is still to confirm.
 
 Second pass: GitLab's pipeline secret detection is available on Free, Premium and Ultimate. Its docs show
 `include: template: Jobs/Secret-Detection.gitlab-ci.yml`, and the error messages reference gitleaks. Limits: it needs a
@@ -993,7 +996,8 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
 14. 3.4: Add a `workflow:rules` example to the README.
 15. 2.5: Build job names from an input so one project can include a component twice.
 16. 4.8: Add a Composer cache keyed on `composer.lock`.
-17. 5.1: Add secret detection to Preflight's own pipeline.
+17. Done (advisory): 5.1: Added secret detection to Preflight's own pipeline as an advisory job (`allow_failure:
+    true`); it turns blocking after a week of green pipelines.
 18. Done: 5.2: Documented the job token allowlist rule in the README: list only the projects a private-package install
     really needs, use the fine-grained permissions where they fit, and review the list when a dependency is
     dropped; the allowlist is a project setting Preflight cannot create or check.
@@ -1031,8 +1035,8 @@ Added in the second pass (2026-10-27):
 40. 1.8: Write a retirement policy for components, and test whether SHA pins survive a Catalog unpublish.
 41. 4.12: Record the install-scripts rule before a JavaScript component is written.
 42. 2.11: Print the component version in job logs once the instance runs GitLab 18.7 or later.
-43. 5.1 (updated): Test whether GitLab secret detection runs on git.wayne.edu (Community Edition), and add it to Preflight's
-    pipeline if it does.
+43. Done (advisory): 5.1 (updated): added GitLab secret detection to Preflight's pipeline. Still open: confirm
+    whether it runs on git.wayne.edu (Community Edition).
 
 ## Sources
 
