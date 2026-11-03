@@ -1,0 +1,21 @@
+{
+  "title": "Preflight",
+  "tagline": "Every push is cleared for takeoff.",
+  "items": [
+    {
+      "title": "Overview",
+      "path": "index"
+    }
+  ],
+  "source": "https://nougat.snu.gs/enterprise-apps/preflight",
+  "mirrors": [
+    {
+      "title": "git.wayne.edu",
+      "url": "https://git.wayne.edu/enterprise-apps/preflight"
+    },
+    {
+      "title": "GitHub",
+      "url": "https://github.com/waynestate/preflight"
+    }
+  ]
+}
