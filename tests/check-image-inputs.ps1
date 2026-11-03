@@ -50,17 +50,28 @@ Get-ChildItem -Path (Join-Path $Root "templates") -Directory | ForEach-Object {
   $spec = @($lines[0..($sepIndex - 1)])
   $jobs = @($lines[($sepIndex + 1)..($lines.Count - 1)])
 
-  # 2.10: every job image: is the image input.
-  $imageLines = @($jobs | Where-Object { $_ -match '^  image:' })
-  if ($imageLines.Count -eq 0) {
-    Fail "${name}: no job image: line found"
-  } else {
-    foreach ($line in $imageLines) {
-      $value = ($line -replace '^  image:[ \t]*', '')
-      if ($value -ne '$[[ inputs.image ]]') {
-        Fail "${name}: job image is not the image input: $value"
-      }
+  # 2.10: every job image: is the image input. The job a line belongs to is
+  # the most recent top-level key before it in the jobs document. One
+  # exemption only: the portability component runs two images, Buildah in
+  # portability-build and the app image in portability-run (whose image
+  # input defaults to what the build job pushes), so portability-build alone
+  # may take inputs.buildah_image. Every other job and value fails.
+  $jobName = $null
+  $imageCount = 0
+  foreach ($line in $jobs) {
+    if ($line -match '^[A-Za-z0-9_-]+:') {
+      $jobName = ($line -replace ':.*$', '')
     }
+    if ($line -match '^  image:') {
+      $imageCount++
+      $value = ($line -replace '^  image:[ \t]*', '')
+      if ($value -eq '$[[ inputs.image ]]') { continue }
+      if ($jobName -eq 'portability-build' -and $value -eq '$[[ inputs.buildah_image ]]') { continue }
+      Fail "${name}: job image is not the image input ($jobName): $value"
+    }
+  }
+  if ($imageCount -eq 0) {
+    Fail "${name}: no job image: line found"
   }
 
   # The spec must define the image input with a default.

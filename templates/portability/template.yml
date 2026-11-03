@@ -1,0 +1,177 @@
+# Portability: prove the app image builds, boots strictly, and serves its
+# health path.
+#
+# Two jobs. portability-build builds the image with Buildah, which needs no
+# Docker daemon, and pushes it to the project's container registry.
+# portability-run pulls that image, starts the app as an arbitrary uid, and
+# validates it with goss: the health path answers 200 for a foreign Host, the
+# root filesystem and the app root are not writable, the app runs as the
+# declared uid, and each declared writable path is writable.
+#
+# This is the twelve-factor boot check from ADR-0010: the app must start as a
+# non-root user, write only to its declared paths, and answer its health path
+# for any Host, not just its own.
+#
+# The build job needs a runner that permits user namespaces (Buildah uses
+# unshare to set up its storage). The run job needs only the project's
+# container registry and an app image that carries curl, sha256sum and tar.
+
+spec:
+  inputs:
+    stage:
+      description: Pipeline stage for the portability jobs.
+      type: string
+      default: test
+    image:
+      description: App image the portability-run job starts and validates. The default is what portability-build pushes; GitLab expands the CI variables at job time.
+      type: string
+      default: $CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA
+    buildah_image:
+      description: Buildah image that builds and pushes the app image.
+      type: string
+      default: quay.io/buildah/stable:v1.41.5@sha256:37fa3027bd4b1d76a0001c6bb7349b63c48ebbaee8fa5f47e6097f5e88f6447c
+    dockerfile:
+      description: Dockerfile to build, relative to the context.
+      type: string
+      default: Dockerfile
+    context:
+      description: Build context, relative to the project root.
+      type: string
+      default: .
+    app_root:
+      description: Directory inside the image where the app lives.
+      type: string
+      default: /app
+    writable_paths:
+      description: Paths the app may write to, relative to app_root. Each must be writable by the app user.
+      type: array
+      default: ["storage", "bootstrap/cache"]
+    port:
+      description: Port the app listens on inside the container.
+      type: number
+      default: 8080
+    health_path:
+      description: Path the app must answer 200 on for any Host.
+      type: string
+      default: /up
+    uid:
+      description: Numeric uid the app runs as. The gid is always 0.
+      type: number
+      default: 100123
+    start_command:
+      description: Command that starts the app inside the image. It is app-specific, so it is required and has no default.
+      type: string
+    boot_timeout:
+      description: Seconds goss retries the health check while the app boots.
+      type: number
+      default: 60
+---
+portability-build:
+  stage: $[[ inputs.stage ]]
+  image: $[[ inputs.buildah_image ]]
+  variables:
+    # Buildah stores its layers with the vfs driver, which needs no special
+    # kernel support and runs in an ordinary container.
+    STORAGE_DRIVER: vfs
+  interruptible: true
+  timeout: 30 minutes
+  script:
+    - |
+      set -eu
+
+      # Build the image. The local tag is a placeholder; the push below gives
+      # it the registry reference.
+      buildah bud -f "$[[ inputs.dockerfile ]]" -t portability-app "$[[ inputs.context ]]"
+
+      # Push it to the project's container registry.
+      buildah login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
+      buildah push portability-app "docker://$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA"
+
+      echo "portability: built and pushed $CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA"
+
+portability-run:
+  stage: $[[ inputs.stage ]]
+  image: $[[ inputs.image ]]
+  needs:
+    - portability-build
+  interruptible: true
+  timeout: 30 minutes
+  script:
+    - |
+      set -eu
+
+      # Generate the goss file from the template and the inputs. The template
+      # is the same file the local checks use (templates/portability/goss.yaml);
+      # it is inlined here because a component only ships its template.yml to
+      # the including project.
+      cat > /tmp/goss-template.yaml <<'GOSS'
+      # Portability goss checks (template).
+      #
+      # This is a template, not a runnable goss file. Before goss reads it, the
+      # PORT, HEALTH_PATH, APP_ROOT and UID placeholders are replaced with the
+      # component inputs, and one command check per writable path is appended.
+      # The portability-run job does this inline; tests/check-portability.sh and
+      # .ps1 do it for the fixtures.
+      #
+      # goss runs as the app user (uid, gid 0), so the command checks see the same
+      # permissions the app has: the root filesystem and the app root must not be
+      # writable, and each declared writable path must be.
+
+      http:
+        http://127.0.0.1:{{PORT}}{{HEALTH_PATH}}:
+          method: get
+          status: 200
+          request-headers:
+            - "Host: portability-check.invalid"
+
+      command:
+        root-not-writable:
+          # The app must not be able to write to the root of the filesystem.
+          exec: test ! -w /
+          exit-status: 0
+        app-root-not-writable:
+          # The app must not be able to write to its own root directory.
+          exec: test ! -w {{APP_ROOT}}
+          exit-status: 0
+        runs-as-uid:
+          # The app must run as the declared uid, not root.
+          exec: test "$(id -u)" = "{{UID}}"
+          exit-status: 0
+      GOSS
+
+      # The delimiter is | because the health path and app root contain /.
+      sed -e "s|{{PORT}}|$[[ inputs.port ]]|g" \
+          -e "s|{{HEALTH_PATH}}|$[[ inputs.health_path ]]|g" \
+          -e "s|{{APP_ROOT}}|$[[ inputs.app_root ]]|g" \
+          -e "s|{{UID}}|$[[ inputs.uid ]]|g" \
+          /tmp/goss-template.yaml > /tmp/goss.yaml
+
+      # Append one command check per writable path. writable_paths arrives as a
+      # Ruby-inspect string, for example ["storage", "bootstrap/cache"]. Strip
+      # the brackets and quotes, then turn each comma into a newline.
+      paths=$([[ inputs.writable_paths ]])
+      paths=$(printf '%s' "$paths" | tr -d '[]"' | tr ',' '\n')
+      for p in $paths; do
+        [ -n "$p" ] || continue
+        key="writable-$(printf '%s' "$p" | tr '/' '-')"
+        printf '  %s:\n    exec: test -w %s/%s\n    exit-status: 0\n' "$key" "$[[ inputs.app_root ]]" "$p" >> /tmp/goss.yaml
+      done
+
+      # Download goss, pinned by version and checksum.
+      arch=$(uname -m)
+      case "$arch" in
+        x86_64) goss_arch=x86_64; goss_sha=26e365428946294bcec0c61d867bb3c8349f39feb3d0e6f59084e98632785cc7 ;;
+        aarch64|arm64) goss_arch=arm64; goss_sha=90a59612b4d67d9f1a9038634c000790136bb82526a69de1e81ac075c2f6d2c6 ;;
+        *) echo "portability: unsupported architecture $arch" >&2; exit 1 ;;
+      esac
+      curl -fsSL -o /tmp/goss.tar.gz "https://github.com/goss-org/goss/releases/download/v0.4.10/goss_0.4.10_linux_${goss_arch}.tar.gz"
+      echo "${goss_sha}  /tmp/goss.tar.gz" | sha256sum -c -
+      tar -xzf /tmp/goss.tar.gz -C /tmp goss
+      chmod +x /tmp/goss
+
+      # Start the app in the background, then validate with goss. goss runs as
+      # the app user, so the command checks see the same permissions the app
+      # has. The health check retries until the app answers or the timeout
+      # expires.
+      $[[ inputs.start_command ]] &
+      /tmp/goss validate -g /tmp/goss.yaml --retry-timeout $[[ inputs.boot_timeout ]]s

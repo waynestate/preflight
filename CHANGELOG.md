@@ -8,10 +8,12 @@ are Git tags.
 
 ### Changed
 
+- Changed: check-image-inputs allows `portability-build` to take `buildah_image` (the only exemption from 2.10).
 - Changed: docs and package metadata name nougat as the canonical repository, with git.wayne.edu and GitHub as read-only mirrors, until git.wayne.edu has CI runners.
 
 ### Added
 
+- Added: portability component (Buildah build, arbitrary-uid boot, goss checks, fixtures).
 - Added: a Squire kit version rule in `renovate/default.json`: a custom regex manager reads the `version` line of `.squire.json`, and the `waynestate/squire` bump carries the `squire-kit` label and never auto-merges; a person runs `squire update` to refresh the kit files.
 
 ### Fixed

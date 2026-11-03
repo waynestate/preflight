@@ -1,0 +1,32 @@
+# Portability goss checks (template).
+#
+# This is a template, not a runnable goss file. Before goss reads it, the
+# PORT, HEALTH_PATH, APP_ROOT and UID placeholders are replaced with the
+# component inputs, and one command check per writable path is appended.
+# The portability-run job does this inline; tests/check-portability.sh and
+# .ps1 do it for the fixtures.
+#
+# goss runs as the app user (uid, gid 0), so the command checks see the same
+# permissions the app has: the root filesystem and the app root must not be
+# writable, and each declared writable path must be.
+
+http:
+  http://127.0.0.1:{{PORT}}{{HEALTH_PATH}}:
+    method: get
+    status: 200
+    request-headers:
+      - "Host: portability-check.invalid"
+
+command:
+  root-not-writable:
+    # The app must not be able to write to the root of the filesystem.
+    exec: test ! -w /
+    exit-status: 0
+  app-root-not-writable:
+    # The app must not be able to write to its own root directory.
+    exec: test ! -w {{APP_ROOT}}
+    exit-status: 0
+  runs-as-uid:
+    # The app must run as the declared uid, not root.
+    exec: test "$(id -u)" = "{{UID}}"
+    exit-status: 0

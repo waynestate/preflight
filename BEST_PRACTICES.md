@@ -316,6 +316,10 @@ survives input interpolation, and GitLab expands it in the image at job time, so
 `tests/check-image-inputs.sh` (and its `.ps1` twin) fail if a job's `image:` stops being an input or a default
 `php:` tag loses its Debian release name.
 
+One exception: `portability-build` takes the Buildah image from `buildah_image` because it builds the image that
+`portability-run` then tests via `image`; the exemption is named in `tests/check-image-inputs.sh` (and its `.ps1`
+twin).
+
 ### 2.11 Print which component version ran
 Use `spec:component` and `$[[ component.sha ]]` or `$[[ component.version ]]` to write the component's own version into
 the job log.

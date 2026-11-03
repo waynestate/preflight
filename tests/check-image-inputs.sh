@@ -46,19 +46,29 @@ for tpl in "$ROOT"/templates/*/template.yml; do
   spec=$(awk -v n="$sep" 'NR < n' "$tpl")
   jobs=$(awk -v n="$sep" 'NR > n' "$tpl")
 
-  # 2.10: every job image: is the image input.
-  image_lines=$(printf '%s\n' "$jobs" | grep -E '^  image:' || true)
-  if [ -z "$image_lines" ]; then
-    fail "$name: no job image: line found"
-  else
+  # 2.10: every job image: is the image input. The job a line belongs to is
+  # the most recent top-level key before it in the jobs document. One
+  # exemption only: the portability component runs two images, Buildah in
+  # portability-build and the app image in portability-run (whose image
+  # input defaults to what the build job pushes), so portability-build alone
+  # may take inputs.buildah_image. Every other job and value fails.
+  image_report=$(printf '%s\n' "$jobs" | awk '
+    /^[A-Za-z0-9_-]+:/ { job = $0; sub(/:.*$/, "", job) }
+    /^  image:/ {
+      count++
+      value = $0
+      sub(/^  image:[ \t]*/, "", value)
+      if (value == "$[[ inputs.image ]]") next
+      if (job == "portability-build" && value == "$[[ inputs.buildah_image ]]") next
+      print "job image is not the image input (" job "): " value
+    }
+    END { if (count == 0) print "no job image: line found" }')
+  if [ -n "$image_report" ]; then
     while IFS= read -r line; do
       [ -n "$line" ] || continue
-      value=$(printf '%s\n' "$line" | sed -E 's/^  image:[[:blank:]]*//')
-      if [ "$value" != '$[[ inputs.image ]]' ]; then
-        fail "$name: job image is not the image input: $value"
-      fi
+      fail "$name: $line"
     done <<EOF
-$image_lines
+$image_report
 EOF
   fi
 

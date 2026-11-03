@@ -34,6 +34,9 @@ Each contract test comes as a `.sh` and `.ps1` pair that check the same thing (`
 `check-proctor-install-flags`, `check-secret-detection`, `check-renovate-review`, `check-sha-pins`). CI runs the `.sh` ones.
 Keep both in step when you change one.
 
+`tests/check-portability.sh` (and `tests/check-portability.ps1`) is a local check that needs Docker and runs the
+three fixtures in `tests/portability`; the contract job does not run it.
+
 With only Docker:
 
 ```
