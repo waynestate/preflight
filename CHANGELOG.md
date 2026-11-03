@@ -10,6 +10,10 @@ are Git tags.
 
 - Added: portability component (Buildah build, arbitrary-uid boot, goss checks, fixtures).
 
+### Changed
+
+- Changed: check-image-inputs allows `portability-build` to take `buildah_image` (the only exemption from 2.10).
+
 ## 0.1.3 (2026-11-03)
 
 ### Added

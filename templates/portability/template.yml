@@ -68,7 +68,7 @@ spec:
 ---
 portability-build:
   stage: $[[ inputs.stage ]]
-  image: $[[ inputs.image ]]
+  image: $[[ inputs.buildah_image ]]
   variables:
     # Buildah stores its layers with the vfs driver, which needs no special
     # kernel support and runs in an ordinary container.

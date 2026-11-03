@@ -277,7 +277,7 @@ and tar.
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the portability jobs. |
 | `image` | string | `$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA` | App image the portability-run job starts and validates. The default is what portability-build pushes; GitLab expands the CI variables at job time. |
-| `buildah_image` | string | `quay.io/buildah/stable:v1.41.5@sha256:37fa3027bd4b1d76a0001c6bb7349b63c48ebbaee8fa5f47e6097f5e88f6447c` | Buildah image that builds and pushes the app image. |
+| `buildah_image` | string | `quay.io/buildah/stable:v1.41.5@sha256:37fa3027bd4b1d76a0001c6bb7349b63c48ebbaee8fa5f47e6097f5e88f6447c` | Buildah image for the portability-build job; it builds and pushes the app image. |
 | `dockerfile` | string | `Dockerfile` | Dockerfile to build, relative to the context. |
 | `context` | string | `.` | Build context, relative to the project root. |
 | `app_root` | string | `/app` | Directory inside the image where the app lives. |
