@@ -22,10 +22,14 @@ spec:
       description: Pipeline stage for the portability jobs.
       type: string
       default: test
+    image:
+      description: App image the portability-run job starts and validates. The default is what portability-build pushes; GitLab expands the CI variables at job time.
+      type: string
+      default: $CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA
     buildah_image:
       description: Buildah image that builds and pushes the app image.
       type: string
-      default: quay.io/buildah/stable:latest@sha256:87f219f5a7bf5d7bee870253c14a57751e85833cb2cc645216a20bbb66c68724
+      default: quay.io/buildah/stable:v1.41.5@sha256:37fa3027bd4b1d76a0001c6bb7349b63c48ebbaee8fa5f47e6097f5e88f6447c
     dockerfile:
       description: Dockerfile to build, relative to the context.
       type: string
@@ -63,31 +67,31 @@ spec:
       default: 60
 ---
 portability-build:
-  stage: $[[ inputs.stage ]]
-  image: $[[ inputs.buildah_image ]]
-  variables:
-    # Buildah stores its layers with the vfs driver, which needs no special
-    # kernel support and runs in an ordinary container.
-    STORAGE_DRIVER: vfs
-  interruptible: true
-  timeout: 30 minutes
-  script:
-    - |
-      set -eu
+    stage: $[[ inputs.stage ]]
+    image: $[[ inputs.buildah_image ]]
+    variables:
+        # Buildah stores its layers with the vfs driver, which needs no special
+        # kernel support and runs in an ordinary container.
+        STORAGE_DRIVER: vfs
+    interruptible: true
+    timeout: 30 minutes
+    script:
+        - |
+          set -eu
 
-      # Build the image. The local tag is a placeholder; the push below gives
-      # it the registry reference.
-      buildah bud -f "$[[ inputs.dockerfile ]]" -t portability-app "$[[ inputs.context ]]"
+          # Build the image. The local tag is a placeholder; the push below gives
+          # it the registry reference.
+          buildah bud -f "$[[ inputs.dockerfile ]]" -t portability-app "$[[ inputs.context ]]"
 
-      # Push it to the project's container registry.
-      buildah login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
-      buildah push portability-app "docker://$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA"
+          # Push it to the project's container registry.
+          buildah login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD"
+          buildah push portability-app "docker://$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA"
 
-      echo "portability: built and pushed $CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA"
+          echo "portability: built and pushed $CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA"
 
 portability-run:
   stage: $[[ inputs.stage ]]
-  image: $CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA
+  image: $[[ inputs.image ]]
   needs:
     - portability-build
   interruptible: true

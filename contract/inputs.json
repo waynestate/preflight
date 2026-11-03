@@ -86,6 +86,23 @@
         { "name": "git_author", "type": "string" }
       ],
       "jobs": ["renovate"]
+    },
+    "portability": {
+      "inputs": [
+        { "name": "stage", "type": "string", "default": "test" },
+        { "name": "image", "type": "string", "default": "$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA" },
+        { "name": "buildah_image", "type": "string", "default": "quay.io/buildah/stable:v1.41.5@sha256:37fa3027bd4b1d76a0001c6bb7349b63c48ebbaee8fa5f47e6097f5e88f6447c" },
+        { "name": "dockerfile", "type": "string", "default": "Dockerfile" },
+        { "name": "context", "type": "string", "default": "." },
+        { "name": "app_root", "type": "string", "default": "/app" },
+        { "name": "writable_paths", "type": "array", "default": ["storage", "bootstrap/cache"] },
+        { "name": "port", "type": "number", "default": 8080 },
+        { "name": "health_path", "type": "string", "default": "/up" },
+        { "name": "uid", "type": "number", "default": 100123 },
+        { "name": "start_command", "type": "string" },
+        { "name": "boot_timeout", "type": "number", "default": 60 }
+      ],
+      "jobs": ["portability-build", "portability-run"]
     }
   }
 }
