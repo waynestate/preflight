@@ -65,7 +65,7 @@ Sources: [GitLab: CI/CD components, versions](https://docs.gitlab.com/ci/compone
 [GitLab: pipeline security, includes](https://docs.gitlab.com/ci/pipeline_security/);
 [OpenSSF Scorecard: Pinned-Dependencies](https://github.com/ossf/scorecard/blob/main/docs/checks.md).
 
-**How the stack holds it: Documented.** The README pins `proctor` to `0.1.1`, the newest tag that changed a component. PROCTOR's own
+**How the stack holds it: Documented.** The README and examples now show SHA pins with the tag in a comment, and Renovate proposes the bumps for review. PROCTOR's own
 `.gitlab-ci.yml` pins a full SHA, with a comment against `~latest`. Nothing checks an app's includes.
 
 ### 1.2 Protect the component project's default branch and release tags

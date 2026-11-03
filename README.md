@@ -49,7 +49,7 @@ app's plugins and scripts never run inside the job.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
     inputs:
       proctor_command: vendor/bin/proctor check --format=codequality
 ```
@@ -69,7 +69,7 @@ Runs the test command on each supported PHP version through `parallel:matrix`.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
     inputs:
       test_command: vendor/bin/phpunit
 ```
@@ -96,7 +96,7 @@ Runs `composer audit --locked` and fails on advisories.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
     inputs:
       working_dir: .
 ```
@@ -123,7 +123,7 @@ Generates a CycloneDX SBOM with `cyclonedx/cyclonedx-php-composer`, validates it
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
     inputs:
       output: sbom.cdx.json
 ```
@@ -143,7 +143,7 @@ Runs the app's own [Laravel Pint](https://laravel.com/docs/12.x/pint) in test mo
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
     inputs:
       config: pint.json
 ```
@@ -163,7 +163,7 @@ Runs the app's own [PHPStan](https://phpstan.org/) and fails the pipeline on sta
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
     inputs:
       config: phpstan.neon
       memory_limit: 1G
@@ -185,7 +185,7 @@ Runs the app's own [ESLint](https://eslint.org/) (and [Prettier](https://prettie
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
     inputs:
       eslint_args: .
 ```
@@ -211,7 +211,7 @@ curl and PHP, which the job uses for the registry round trip.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
     inputs:
       group_id: "<your group id>"
 ```
@@ -236,7 +236,7 @@ Majors open a merge request and wait for a person. See
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
     inputs:
       git_author: "Preflight Bot <preflight-bot@example.com>"
 ```
@@ -278,10 +278,13 @@ on:
 
 jobs:
   ci:
-    uses: waynestate/preflight/.github/workflows/php-package.yml@0.1.1
+    uses: waynestate/preflight/.github/workflows/php-package.yml@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
 ```
 
-This workflow ships in the `0.1.1` tag, so pin the tag or the tag's commit SHA.
+This workflow ships in the `0.1.1` tag, so pin the full commit SHA of the
+release tag and keep the tag in a trailing comment. A tag or branch can move;
+a SHA cannot. The Renovate preset (see the Renovate section) proposes the
+bumps, and they wait for review (the `needs-review` label).
 
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
@@ -396,13 +399,13 @@ workflow:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@0.1.1
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@0.1.1
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@0.1.1
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@0.1.1
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@0.1.1
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@0.1.1
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@331b44faa060f19241f44ba75fd4e4e78da7d320 # 0.1.1
 ```
 
 The `workflow:rules` block must live in the app's own file. A component

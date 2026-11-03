@@ -877,6 +877,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
   color: #fff;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+  overflow-x: auto;
 }
 .placard__line + .placard__code { margin-top: 1rem; }
 .placard__inputs { margin-top: .75rem; }
