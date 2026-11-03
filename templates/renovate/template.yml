@@ -1,5 +1,10 @@
 spec:
   inputs:
+    job_name:
+      type: string
+      default: renovate
+      description: "Name of the job. Set it when you include this component more than once."
+      regex: '^[A-Za-z0-9_][A-Za-z0-9_.-]*$'
     image:
       description: Docker image for the renovate job.
       type: string
@@ -18,7 +23,7 @@ spec:
       description: Author of the commits and merge requests Renovate creates, in the form Name <email>. Required; the runner project sets it.
       type: string
 ---
-renovate:
+"$[[ inputs.job_name ]]":
   image: $[[ inputs.image ]]
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"

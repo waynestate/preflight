@@ -34,6 +34,7 @@
     "sbom": {
       "inputs": [
         { "name": "stage", "type": "string", "default": "test" },
+        { "name": "job_name", "type": "string", "default": "sbom", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
         { "name": "image", "type": "string", "default": "composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc" },
         { "name": "omit_dev", "type": "boolean", "default": true },
         { "name": "output", "type": "string", "default": "sbom.cdx.json" }
@@ -43,6 +44,7 @@
     "pint": {
       "inputs": [
         { "name": "stage", "type": "string", "default": "test" },
+        { "name": "job_name", "type": "string", "default": "pint", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
         { "name": "image", "type": "string", "default": "composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc" },
         { "name": "config", "type": "string", "default": "pint.json" },
         { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" }
@@ -52,6 +54,7 @@
     "phpstan": {
       "inputs": [
         { "name": "stage", "type": "string", "default": "test" },
+        { "name": "job_name", "type": "string", "default": "phpstan", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
         { "name": "image", "type": "string", "default": "composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc" },
         { "name": "config", "type": "string", "default": "phpstan.neon" },
         { "name": "memory_limit", "type": "string", "default": "1G" },
@@ -62,6 +65,7 @@
     "eslint": {
       "inputs": [
         { "name": "stage", "type": "string", "default": "test" },
+        { "name": "job_name", "type": "string", "default": "eslint", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
         { "name": "image", "type": "string", "default": "node:22.13-alpine@sha256:e2b39f7b64281324929257d0f8004fb6cb4bf0fdfb9aa8cedb235a766aec31da" },
         { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" },
         { "name": "eslint_args", "type": "string", "default": "." },
@@ -80,6 +84,7 @@
     },
     "renovate": {
       "inputs": [
+        { "name": "job_name", "type": "string", "default": "renovate", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
         { "name": "image", "type": "string", "default": "renovate/renovate:44.192.2@sha256:37960a62ba1faa9079a7c4eead9b3f4470748a64ecd207e06c09fd8858673e17" },
         { "name": "autodiscover_filter", "type": "string", "default": "$CI_PROJECT_NAMESPACE/*" },
         { "name": "dry_run", "type": "string", "default": "null" },

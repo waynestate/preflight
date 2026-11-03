@@ -57,8 +57,18 @@ while IFS= read -r name; do
       | LC_ALL=C sort > "$tmpdir/tpl-in"
     yq eval ".components.$name.inputs[].name" "$CONTRACT" \
       | tr -d '"' | LC_ALL=C sort > "$tmpdir/c-in"
-    yq eval 'select(document_index == 1) | keys[]' "$tpl" \
-      | LC_ALL=C sort > "$tmpdir/tpl-jobs"
+    # A job key that is exactly $[[ inputs.job_name ]] stands for the default
+    # of the job_name input in the spec (document 0); resolve it to that name
+    # so the comparison below still checks the promised job name.
+    job_default=$(yq eval -o=json 'select(document_index == 0) | .spec.inputs.job_name.default' "$tpl" | tr -d '"')
+    yq eval -o=json 'select(document_index == 1) | keys[]' "$tpl" \
+      | tr -d '"' | while IFS= read -r k; do
+        if [ "$k" = '$[[ inputs.job_name ]]' ]; then
+          printf '%s\n' "$job_default"
+        else
+          printf '%s\n' "$k"
+        fi
+      done | LC_ALL=C sort > "$tmpdir/tpl-jobs"
     yq eval ".components.$name.jobs[]" "$CONTRACT" \
       | tr -d '"' | LC_ALL=C sort > "$tmpdir/c-jobs"
 

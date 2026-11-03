@@ -52,6 +52,7 @@ contract:
     - sh tests/check-image-inputs.sh
     - sh tests/check-working-dir-regex.sh
     - sh tests/check-spec-keys.sh
+    - sh tests/check-job-names.sh
     - sh tests/check-proctor-install-flags.sh
     - sh tests/check-secret-detection.sh
     - sh tests/check-renovate-review.sh

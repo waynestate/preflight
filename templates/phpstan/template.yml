@@ -12,6 +12,11 @@ spec:
       type: string
       default: test
       description: "Pipeline stage for the phpstan job."
+    job_name:
+      type: string
+      default: phpstan
+      description: "Name of the job. Set it when you include this component more than once."
+      regex: '^[A-Za-z0-9_][A-Za-z0-9_.-]*$'
     image:
       type: string
       default: "composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc"
@@ -30,7 +35,7 @@ spec:
       description: "Directory the app lives in, relative to the repository root."
       regex: '^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$'
 ---
-phpstan:
+"$[[ inputs.job_name ]]":
   stage: $[[ inputs.stage ]]
   image: $[[ inputs.image ]]
   interruptible: true

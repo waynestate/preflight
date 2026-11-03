@@ -13,6 +13,11 @@ spec:
       type: string
       default: test
       description: "Pipeline stage for the eslint job."
+    job_name:
+      type: string
+      default: eslint
+      description: "Name of the job. Set it when you include this component more than once."
+      regex: '^[A-Za-z0-9_][A-Za-z0-9_.-]*$'
     image:
       type: string
       default: "node:22.13-alpine@sha256:e2b39f7b64281324929257d0f8004fb6cb4bf0fdfb9aa8cedb235a766aec31da"
@@ -31,7 +36,7 @@ spec:
       default: true
       description: "Whether to also run prettier --check."
 ---
-eslint:
+"$[[ inputs.job_name ]]":
   stage: $[[ inputs.stage ]]
   image: $[[ inputs.image ]]
   interruptible: true

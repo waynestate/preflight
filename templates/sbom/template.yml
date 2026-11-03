@@ -4,6 +4,11 @@ spec:
       description: Pipeline stage for the sbom job.
       type: string
       default: test
+    job_name:
+      type: string
+      default: sbom
+      description: "Name of the job. Set it when you include this component more than once."
+      regex: '^[A-Za-z0-9_][A-Za-z0-9_.-]*$'
     image:
       description: Docker image for the sbom job.
       type: string
@@ -17,7 +22,7 @@ spec:
       type: string
       default: sbom.cdx.json
 ---
-sbom:
+"$[[ inputs.job_name ]]":
   stage: $[[ inputs.stage ]]
   # The composer image already ships Composer, so no install step is needed.
   # The CycloneDX plugin is installed globally so the app's composer.json is

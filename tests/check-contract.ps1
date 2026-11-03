@@ -57,7 +57,16 @@ foreach ($name in $componentNames) {
     continue
   }
   $tplInputs = Invoke-YqJson @("eval", "select(document_index == 0) | .spec.inputs", $tplPath) | ConvertFrom-Json
-  $tplJobs = @(Invoke-YqJson @("eval", "select(document_index == 1) | keys", $tplPath) | ConvertFrom-Json)
+  # A job key that is exactly $[[ inputs.job_name ]] stands for the default
+  # of the job_name input in the spec (document 0); resolve it to that name
+  # so the comparison below still checks the promised job name.
+  $jobDefault = (Invoke-YqJson @("eval", "-o=json", "select(document_index == 0) | .spec.inputs.job_name.default", $tplPath)).Trim('"')
+  $rawJobs = @(Invoke-YqJson @("eval", "-o=json", "select(document_index == 1) | keys[]", $tplPath))
+  $tplJobs = @()
+  foreach ($k in $rawJobs) {
+    $k = "$k".Trim('"')
+    if ($k -ceq '$[[ inputs.job_name ]]') { $tplJobs += $jobDefault } else { $tplJobs += $k }
+  }
   $contractInputs = @($component.inputs)
   $contractJobs = @($component.jobs)
   $mismatches = @()
