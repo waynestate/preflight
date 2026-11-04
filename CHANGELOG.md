@@ -6,6 +6,7 @@ are Git tags.
 
 ## Unreleased
 
+- Added: a Composer cache on the proctor component, keyed on composer.lock (BEST_PRACTICES 4.8); new test tests/check-proctor-cache.
 - Added: the docs site at `site/docs/`, built from `docs/` by Squire's shared docs builder (`bin/docs-site.php`), starting with the overview page. New composer scripts: `docs` builds it, `docs:check` fails when it is stale, and `ci` now runs the check.
 - Docs: component pins in the README and site examples now point at 0.1.4.
 - Changed: the front-page deploy layer pins HELMET ^0.3, PROCTOR ^0.4 and CREED ^0.1 (lock: HELMET 0.3.0, PROCTOR 0.4.0, CREED 0.1.6).

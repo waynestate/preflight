@@ -41,6 +41,19 @@ spec:
   allow_failure: $[[ inputs.allow_failure ]]
   interruptible: true
   timeout: 30 minutes
+  # The cache is always on. COMPOSER_CACHE_DIR points Composer at a path
+  # inside the project so GitLab can cache it. The key depends on
+  # composer.lock, so a dependency change invalidates the cache.
+  cache:
+    key:
+      files:
+        - composer.lock
+      prefix: proctor
+    paths:
+      - .composer-cache/
+    policy: pull-push
+  variables:
+    COMPOSER_CACHE_DIR: "$CI_PROJECT_DIR/.composer-cache"
   script:
     # php:8.4-cli-trixie does not ship Composer, unzip or git. The image is
     # Debian-based, so apt is used.

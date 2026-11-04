@@ -48,6 +48,8 @@ The job is `interruptible: true` with a `timeout: 30 minutes`. Its script:
 4. Changes into `working_dir` and runs `composer install --no-interaction --no-progress --no-plugins --no-scripts`.
 5. Runs `proctor_command` and redirects the output to `"$CI_PROJECT_DIR/gl-code-quality-report.json"`. A plain redirect (not `tee`) keeps proctor's exit code as the job result, and the report is written at the project root so the artifact path is the same for every `working_dir`, including `.`.
 
+The job keeps Composer downloads in a cache under `.composer-cache/`, keyed on `composer.lock`, so repeat runs skip the download when the lock is unchanged.
+
 The job publishes the report with `artifacts: when: always` as a GitLab Code Quality report (`reports: codequality: gl-code-quality-report.json`).
 
 > [!TIP]

@@ -581,7 +581,7 @@ Why: pipelines run faster, and an unreviewed branch cannot poison the cache that
 
 Sources: [GitLab: caching](https://docs.gitlab.com/ci/caching/).
 
-**How the stack holds it: Checked.** `php-test` caches Composer downloads in `.composer-cache/`, keyed on `composer.lock` and prefixed with the PHP version, so a dependency change invalidates the cache and each PHP version gets its own cache. `tests/check-php-test-cache.sh` (and its `.ps1` twin) fail if the key stops depending on `composer.lock` or the prefix stops including the PHP version. `proctor` and `composer-audit` still define no cache.
+**How the stack holds it: Checked.** `php-test` and `proctor` cache Composer downloads in `.composer-cache/`, keyed on `composer.lock`, so a dependency change invalidates the cache; `php-test` prefixes the key with the PHP version, so each PHP version gets its own cache. `tests/check-php-test-cache.sh` (and its `.ps1` twin) fail if the key stops depending on `composer.lock` or the prefix stops including the PHP version, and `tests/check-proctor-cache.sh` (and its `.ps1` twin) fail if the proctor key stops depending on `composer.lock` or the prefix stops being `proctor`. `composer-audit` still defines no cache.
 
 Second pass: GitLab appends `-protected` or `-non_protected` to every cache key. Pipelines on protected branches or tags,
 and pipelines started by a Maintainer or Owner, get `-protected`. The separation is on by default and GitLab calls it
@@ -1020,7 +1020,7 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
 13. 3.2: Recommend branch and CI-file protection for app repos.
 14. 3.4: Add a `workflow:rules` example to the README.
 15. Done: 2.5: Build job names from an input so one project can include a component twice.
-16. 4.8: Add a Composer cache keyed on `composer.lock`.
+16. Done: 4.8: `php-test` and `proctor` carry a Composer cache keyed on `composer.lock`, kept in place by `tests/check-php-test-cache` and `tests/check-proctor-cache`.
 17. Done (advisory): 5.1: Added secret detection to Preflight's own pipeline as an advisory job (`allow_failure:
     true`); it turns blocking after a week of green pipelines.
 18. Done: 5.2: Documented the job token allowlist rule in the README: list only the projects a private-package install
