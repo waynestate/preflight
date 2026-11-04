@@ -16,6 +16,7 @@ are Git tags.
 - Changed: the front-page deploy layer pins HELMET ^0.3, PROCTOR ^0.4 and CREED ^0.1 (lock: HELMET 0.3.0, PROCTOR 0.4.0, CREED 0.1.6).
 - Changed: the deploy layer sets minimum-stability to stable.
 - Changed: phpstan config and memory_limit, pint config and sbom output now carry an input regex (relative paths and PHP sizes only); a value outside it stops the pipeline at creation. New test tests/check-path-input-regex.
+- Added: a tag-triggered `release` job in the repository's own pipeline: pushing a protected tag creates the GitLab Release through the Releases API with curl, and the release notes carry the tag's commit SHA so consumers can pin it (BEST_PRACTICES 1.3, 1.6); new test tests/check-release-job.
 
 ## 0.1.4 (2026-11-03)
 
