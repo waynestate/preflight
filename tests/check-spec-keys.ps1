@@ -1,11 +1,13 @@
 # check-spec-keys.ps1: does every template keep spec: to the keys GitLab
-# accepts (inputs and description)?
+# accepts (component, inputs and description)?
 #
 # GitLab's component spec header rejects unknown keys: a pipeline that
 # includes a component carrying version, name, category or tags under
 # spec: fails at creation with "header:spec config contains unknown keys".
-# The spec may carry only inputs and description, so this test fails on any
-# other key directly under spec:.
+# The spec may carry only component, inputs and description, so this test
+# fails on any other key directly under spec:. component must be a flow
+# list drawn from name, version, sha and reference, because that is the
+# shape GitLab fills in for the job's log line.
 #
 # The template is two YAML documents separated by `---`: the spec before the
 # last separator, the jobs after it. Some templates start with a comment
@@ -45,8 +47,24 @@ Get-ChildItem -Path (Join-Path $Root "templates") -Directory | ForEach-Object {
 
   # The keys directly under spec: are the two-space-indented keys.
   foreach ($line in $spec) {
-    if ($line -match '^  ([A-Za-z_][A-Za-z0-9_-]*):') {
+    if ($line -match '^  ([A-Za-z_][A-Za-z0-9_-]*):(.*)$') {
       $key = $Matches[1]
+      $rest = $Matches[2]
+      if ($key -eq 'component') {
+        # component must be a flow list of the fields GitLab fills in:
+        # [name, version, sha, reference], in any order.
+        if ($rest -notmatch '^\s*\[\s*(?:[A-Za-z_][A-Za-z0-9_-]*\s*,\s*)*[A-Za-z_][A-Za-z0-9_-]*\s*\]\s*$') {
+          Fail "${name}: spec: component must be a flow list such as [name, version, sha, reference]"
+          continue
+        }
+        $items = @($rest.Trim() -replace '^\[|\]$', '' | ForEach-Object { $_.Split(',') } | ForEach-Object { $_.Trim() })
+        foreach ($item in $items) {
+          if ($item -ne 'name' -and $item -ne 'version' -and $item -ne 'sha' -and $item -ne 'reference') {
+            Fail "${name}: spec: component lists an unknown field: $item"
+          }
+        }
+        continue
+      }
       if ($key -ne 'inputs' -and $key -ne 'description') {
         Fail "${name}: spec: has an unknown key: $key"
       }

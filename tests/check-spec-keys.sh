@@ -1,12 +1,14 @@
 #!/bin/sh
 # check-spec-keys.sh: does every template keep spec: to the keys GitLab
-# accepts (inputs and description)?
+# accepts (component, inputs and description)?
 #
 # GitLab's component spec header rejects unknown keys: a pipeline that
 # includes a component carrying version, name, category or tags under
 # spec: fails at creation with "header:spec config contains unknown keys".
-# The spec may carry only inputs and description, so this test fails on any
-# other key directly under spec:.
+# The spec may carry only component, inputs and description, so this test
+# fails on any other key directly under spec:. component must be a flow
+# list drawn from name, version, sha and reference, because that is the
+# shape GitLab fills in for the job's log line.
 #
 # The template is two YAML documents separated by `---`: the spec before the
 # last separator, the jobs after it. Some templates start with a comment
@@ -47,6 +49,26 @@ for tpl in "$ROOT"/templates/*/template.yml; do
     [ -n "$key" ] || continue
     case $key in
       inputs|description) ;;
+      component)
+        # component must be a flow list of the fields GitLab fills in:
+        # [name, version, sha, reference], in any order.
+        value=$(printf '%s\n' "$spec" | grep -E "^  component:[[:blank:]]" \
+          | head -n 1 | sed -E 's/^  component:[[:blank:]]*//')
+        if ! printf '%s\n' "$value" | grep -qE '^\[[[:blank:]]*[A-Za-z_][A-Za-z0-9_-]*([[:blank:]]*,[[:blank:]]*[A-Za-z_][A-Za-z0-9_-]*)*[[:blank:]]*\]$'; then
+          fail "$name: spec: component must be a flow list such as [name, version, sha, reference]"
+          continue
+        fi
+        items=$(printf '%s\n' "$value" | sed -E 's/^\[[[:blank:]]*//; s/[[:blank:]]*\]$//' | tr ',' '\n' | sed -E 's/^[[:blank:]]+//; s/[[:blank:]]+$//' | grep -v '^$')
+        while IFS= read -r item; do
+          [ -n "$item" ] || continue
+          case $item in
+            name|version|sha|reference) ;;
+            *) fail "$name: spec: component lists an unknown field: $item" ;;
+          esac
+        done <<EOF2
+$items
+EOF2
+        ;;
       *) fail "$name: spec: has an unknown key: $key" ;;
     esac
   done <<EOF

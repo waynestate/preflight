@@ -1,4 +1,5 @@
 spec:
+  component: [name, version, sha, reference]
   inputs:
     stage:
       description: Pipeline stage for the php-test jobs.
@@ -62,6 +63,7 @@ spec:
   variables:
     COMPOSER_CACHE_DIR: "$CI_PROJECT_DIR/.composer-cache"
   script:
+    - echo "Preflight component $[[ component.name ]] $[[ component.version ]] (ref $[[ component.reference ]], sha $[[ component.sha ]])"
     # php:*-cli images do not ship Composer, unzip or git. The images are
     # Debian-based, so apt is used.
     # Composer is installed with the official getcomposer.org installer;

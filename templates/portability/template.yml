@@ -17,6 +17,7 @@
 # container registry and an app image that carries curl, sha256sum and tar.
 
 spec:
+  component: [name, version, sha, reference]
   inputs:
     stage:
       description: Pipeline stage for the portability jobs.
@@ -76,6 +77,7 @@ portability-build:
   interruptible: true
   timeout: 30 minutes
   script:
+    - echo "Preflight component $[[ component.name ]] $[[ component.version ]] (ref $[[ component.reference ]], sha $[[ component.sha ]])"
     - |
       set -eu
 
@@ -97,6 +99,7 @@ portability-run:
   interruptible: true
   timeout: 30 minutes
   script:
+    - echo "Preflight component $[[ component.name ]] $[[ component.version ]] (ref $[[ component.reference ]], sha $[[ component.sha ]])"
     - |
       set -eu
 

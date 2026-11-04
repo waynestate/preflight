@@ -85,6 +85,7 @@ final class TemplateLinter
         foreach ($files as $file) {
             $relative = $this->relativePath($file, $baseDir);
             foreach ($this->parseYaml($file, $relative, $findings) as $document) {
+                $this->checkSpecKeys($document, $relative, $findings);
                 $this->checkComponentInputDefaults($document, $relative, $findings);
                 $this->visit($document, $relative, [], $findings);
             }
@@ -323,6 +324,77 @@ final class TemplateLinter
             }
 
             $this->checkImageRef($input['default'], $file, $findings);
+        }
+    }
+
+    /**
+     * GitLab's component spec header accepts only component, inputs and
+     * description directly under spec:; any other key (name, category, tags,
+     * version) makes GitLab refuse the pipeline at creation with "header:spec
+     * config contains unknown keys". component must be a flow list drawn from
+     * name, version, sha and reference, the fields GitLab fills in for the
+     * job's log line.
+     *
+     * @param list<array{file: string, severity: string, rule: string, message: string}> $findings
+     */
+    private function checkSpecKeys(mixed $document, string $file, array &$findings): void
+    {
+        if (!is_array($document)) {
+            return;
+        }
+
+        $spec = $document['spec'] ?? null;
+        if (!is_array($spec)) {
+            return;
+        }
+
+        foreach ($spec as $key => $value) {
+            $stringKey = (string) $key;
+
+            if ($stringKey === 'component') {
+                $this->checkComponentSpecValue($value, $file, $findings);
+                continue;
+            }
+
+            if ($stringKey !== 'inputs' && $stringKey !== 'description') {
+                $this->addFinding(
+                    $file,
+                    'error',
+                    'spec-unknown-key',
+                    "spec: has an unknown key: $stringKey",
+                    $findings,
+                );
+            }
+        }
+    }
+
+    /**
+     * @param list<array{file: string, severity: string, rule: string, message: string}> $findings
+     */
+    private function checkComponentSpecValue(mixed $value, string $file, array &$findings): void
+    {
+        if (!is_array($value) || !array_is_list($value)) {
+            $this->addFinding(
+                $file,
+                'error',
+                'spec-component-shape',
+                'spec: component must be a flow list such as [name, version, sha, reference]',
+                $findings,
+            );
+
+            return;
+        }
+
+        foreach ($value as $field) {
+            if (!is_string($field) || !in_array($field, ['name', 'version', 'sha', 'reference'], true)) {
+                $this->addFinding(
+                    $file,
+                    'error',
+                    'spec-component-shape',
+                    'spec: component lists an unknown field: ' . var_export($field, true),
+                    $findings,
+                );
+            }
         }
     }
 

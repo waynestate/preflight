@@ -1,4 +1,5 @@
 spec:
+  component: [name, version, sha, reference]
   inputs:
     job_name:
       type: string
@@ -43,6 +44,7 @@ spec:
     RENOVATE_GIT_AUTHOR: $[[ inputs.git_author ]]
     RENOVATE_DRY_RUN: $[[ inputs.dry_run ]]
   script:
+    - echo "Preflight component $[[ component.name ]] $[[ component.version ]] (ref $[[ component.reference ]], sha $[[ component.sha ]])"
     # The registry alias for the GitLab instance is built at job time from
     # the predefined CI_SERVER_FQDN variable: GitLab expands the key before
     # the shell runs, and Node resolves the value when Renovate loads
