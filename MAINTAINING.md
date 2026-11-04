@@ -31,7 +31,7 @@ copy (see "Same instance only" in the README).
 
 Each contract test comes as a `.sh` and `.ps1` pair that check the same thing (`check-contract`, `check-spec-keys`,
 `check-image-inputs`, `check-php-test-cache`, `check-working-dir-regex`, `check-path-input-regex`, `check-github-workflow`,
-`check-proctor-install-flags`, `check-secret-detection`, `check-renovate-review`, `check-sha-pins`). CI runs the `.sh` ones.
+`check-proctor-install-flags`, `check-secret-detection`, `check-renovate-review`, `check-sha-pins`, `check-release-job`). CI runs the `.sh` ones.
 Keep both in step when you change one.
 
 `tests/check-portability.sh` (and `tests/check-portability.ps1`) is a local check that needs Docker and runs the
@@ -67,8 +67,10 @@ and run PHPUnit inside it the same way.
    versions are git tags; 0.1.0 predates the heading convention.)
 2. `composer ci` and the contract tests green, then both pipelines green for that commit.
 3. Run a secrets scan of the history and check that nothing internal is in the tree.
-4. Tag `X.Y.Z` (no `v`) on nougat, and protect the tag pattern so a release tag cannot move. The mirror carries the tag
-   to GitHub. Record the tag's commit SHA in the CHANGELOG, because GitHub consumers pin the reusable workflow by SHA.
+4. Tag `X.Y.Z` (no `v`) on nougat, and protect the tag pattern so a release tag cannot move. Pushing the protected tag
+   runs the `release` job, which creates the GitLab Release with the tag's commit SHA in its notes, so consumers can pin
+   the SHA. The project's job token must be allowed to create releases, or the job fails. The mirror carries the tag to
+   GitHub. Record the tag's commit SHA in the CHANGELOG, because GitHub consumers pin the reusable workflow by SHA.
 5. **Then bump the pins in every consumer:** the `@X.Y.Z` on each component include in their `.gitlab-ci.yml`, and the
     SHA in their `.github/workflows/ci.yml`. Every component ships in each tag from 0.1.1 on, so a new consumer pins
     the latest tag on every include.

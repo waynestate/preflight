@@ -37,6 +37,7 @@ include:
 stages:
   - test
   - audit
+  - release
 
 # The inputs contract: templates must keep the inputs and job names they
 # promised in contract/inputs.json (BEST_PRACTICES.md 1.4). Runs on the
@@ -58,8 +59,28 @@ contract:
     - sh tests/check-secret-detection.sh
     - sh tests/check-renovate-review.sh
     - sh tests/check-sha-pins.sh
+    - sh tests/check-release-job.sh
 
 # Advisory for now: secret detection is new here. Dated 2026-11-02: make this
 # job blocking (remove allow_failure) after one week of green pipelines.
 secret_detection:
   allow_failure: true
+
+# Creates the GitLab Release for a pushed tag. It posts to the Releases API
+# with curl because the nougat runner is arm64 and the official GitLab image
+# for creating releases has no arm64 build. The project's job token must be
+# allowed to create releases (job token allowlist), and the job sits in its
+# own stage after test and audit: stages run in order, so a failed test or
+# audit job stops the pipeline before a release is created.
+release:
+  stage: release
+  rules:
+    - if: $CI_COMMIT_TAG
+  interruptible: false
+  timeout: 10 minutes
+  image:
+    name: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/curlimages/curl:8.11.1@sha256:c1fe1679c34d9784c1b0d1e5f62ac0a79fca01fb6377cdd33e90473c6f9f9a69
+    entrypoint: [""]
+  script:
+    - |
+      curl --fail --silent --show-error --request POST "$CI_API_V4_URL/projects/$CI_PROJECT_ID/releases" --header "JOB-TOKEN: $CI_JOB_TOKEN" --header "Content-Type: application/json" --data "$(printf '{"name":"Preflight %s","tag_name":"%s","ref":"%s","description":"Commit: %s\\nPin: preflight/<component>@%s # %s\\nChanges: see CHANGELOG.md under %s."}' "$CI_COMMIT_TAG" "$CI_COMMIT_TAG" "$CI_COMMIT_SHA" "$CI_COMMIT_SHA" "$CI_COMMIT_SHA" "$CI_COMMIT_TAG" "$CI_COMMIT_TAG")"

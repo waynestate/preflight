@@ -99,7 +99,7 @@ Why: the catalog gives typed discovery and lets consumers pin an exact or partia
 
 Sources: [GitLab: components, publishing](https://docs.gitlab.com/ci/components/).
 
-**How the stack holds it: Not yet.** The layout is right (`templates/<name>/template.yml`, a README). Tags `0.1.0`, `0.1.1` and `0.1.2` exist; the `release` job is still to be confirmed.
+**How the stack holds it: Partially.** The layout is right (`templates/<name>/template.yml`, a README), and the tag-triggered `release` job now exists in this repository's own pipeline: pushing a protected tag creates the GitLab Release with the commit SHA in its notes, after the test and audit stages. The Catalog entry still depends on the first tag run, because the release job has not run for a tag yet.
 The README examples pin `@0.1.1` for every component and the GitHub workflow.
 
 ### 1.4 Keep inputs and job names stable inside a major version
@@ -140,9 +140,10 @@ Sources: [StepSecurity: tj-actions breach](https://www.stepsecurity.io/blog/when
 The tj-actions details above come from search summaries of these pages and the NVD record could not be read in this
 pass, so treat the exact counts and dates as unverified.
 
-**How the stack holds it: Documented.** Tags `0.1.0`, `0.1.1` and `0.1.2` exist, and MAINTAINING.md documents the release process,
-including recording the tag's commit SHA in the CHANGELOG when a tag is cut. Apps still pin the tag in their component includes,
-and nothing checks an app's includes.
+**How the stack holds it: Partially.** Tags `0.1.0`, `0.1.1` and `0.1.2` exist, and MAINTAINING.md documents the release process,
+including recording the tag's commit SHA in the CHANGELOG when a tag is cut. The tag-triggered `release` job now puts the
+commit SHA in the GitLab Release notes on every tag (the first run is still to come), so new releases carry the SHA from
+the start. Apps still pin the tag in their component includes, and nothing checks an app's includes.
 
 ### 1.7 Give consumers a reviewed way to bump their pins
 A pin that nobody updates freezes security fixes. Offer a scheduled merge request or a bot that proposes new SHAs and new
@@ -1003,7 +1004,7 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
    contract and this repository's own pipeline, and for component include version bumps, labelling them
    `needs-review`; `tests/check-renovate-review.sh` (and its `.ps1` twin) keeps the rules in place.
 5. Done (option A): 4.4: the `proctor` job installs with `--no-plugins --no-scripts`, pinned by a contract test. Option B remains: run PROCTOR without installing the app at all (behind the PROCTOR PHAR work).
-6. 1.3: Confirm the `release` job and publish the Catalog entry for the current tag (`0.1.2`); the components added after `0.1.0` already shipped in `0.1.1`.
+6. Done: 1.3: The `release` job exists and runs on every tag after the test and audit stages, creating the GitLab Release through the Releases API; the `Catalog entry` still depends on the first tag run, because no release job has run for a tag yet. The components added after `0.1.0` already shipped in `0.1.1`.
 7. Done: 1.2: Recorded the project's branch and tag protection as the README's "Protection checklist": protected
    default branch with a required merge request, protected release tags, merge request approvals of at least one,
    `no_one_allowed` pipeline variables, and no protected variables in fork pipelines. Checking them stays a human
@@ -1049,7 +1050,7 @@ Added in the second pass (2026-10-27):
     component include version bumps, to a `needs-review` label that never auto-merges. The `gitlabci` manager
     extracts an app's own `component:` includes, and the preset routes those repository dep bumps to review;
     `tests/check-renovate-review.sh` (and its `.ps1` twin) keeps that rule in place.
-30. 1.6: Put the commit SHA in every release note and tell apps to pin it.
+30. Done: 1.6: The tag-triggered `release` job puts the commit SHA in every GitLab Release note from the first tag run on, and the README and examples already tell apps to pin the SHA with the tag in a trailing comment.
 31. 4.11: Write the stack's rule for Composer malware, advisory and abandoned policy, and require Composer 2.10 or later.
 32. 4.10: Name the Debian release in image tags, or match the image family of the target you deploy to.
 33. 2.9 (done): Add `timeout` and `interruptible` to each job.
