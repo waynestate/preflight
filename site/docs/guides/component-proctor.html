@@ -102,6 +102,7 @@
 <li>Changes into <code>working_dir</code> and runs <code>composer install --no-interaction --no-progress --no-plugins --no-scripts</code>.</li>
 <li>Runs <code>proctor_command</code> and redirects the output to <code>&quot;$CI_PROJECT_DIR/gl-code-quality-report.json&quot;</code>. A plain redirect (not <code>tee</code>) keeps proctor's exit code as the job result, and the report is written at the project root so the artifact path is the same for every <code>working_dir</code>, including <code>.</code>.</li>
 </ol>
+<p>The job keeps Composer downloads in a cache under <code>.composer-cache/</code>, keyed on <code>composer.lock</code>, so repeat runs skip the download when the lock is unchanged.</p>
 <p>The job publishes the report with <code>artifacts: when: always</code> as a GitLab Code Quality report (<code>reports: codequality: gl-code-quality-report.json</code>).</p>
 <aside class="docs-callout docs-callout--tip" role="note"><p class="docs-callout__label">Tip</p><p>Set <code>allow_failure: true</code> if the job may fail without failing the pipeline; the default is <code>false</code>.</p></aside>
 <h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
