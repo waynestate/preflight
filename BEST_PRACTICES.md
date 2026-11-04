@@ -99,7 +99,7 @@ Why: the catalog gives typed discovery and lets consumers pin an exact or partia
 
 Sources: [GitLab: components, publishing](https://docs.gitlab.com/ci/components/).
 
-**How the stack holds it: Partially.** The layout is right (`templates/<name>/template.yml`, a README), and the tag-triggered `release` job now exists in this repository's own pipeline: pushing a protected tag creates the GitLab Release with the commit SHA in its notes, after the test and audit stages. The Catalog entry still depends on the first tag run, because the release job has not run for a tag yet.
+**How the stack holds it: Documented.** The layout is right (`templates/<name>/template.yml`, a README), and the tag-triggered `release` job now exists in this repository's own pipeline: pushing a protected tag creates the GitLab Release with the commit SHA in its notes, after the test and audit stages. The Catalog entry still depends on the first tag run, because the release job has not run for a tag yet.
 The README examples pin `@0.1.1` for every component and the GitHub workflow.
 
 ### 1.4 Keep inputs and job names stable inside a major version
@@ -140,7 +140,7 @@ Sources: [StepSecurity: tj-actions breach](https://www.stepsecurity.io/blog/when
 The tj-actions details above come from search summaries of these pages and the NVD record could not be read in this
 pass, so treat the exact counts and dates as unverified.
 
-**How the stack holds it: Partially.** Tags `0.1.0`, `0.1.1` and `0.1.2` exist, and MAINTAINING.md documents the release process,
+**How the stack holds it: Documented.** Tags `0.1.0`, `0.1.1` and `0.1.2` exist, and MAINTAINING.md documents the release process,
 including recording the tag's commit SHA in the CHANGELOG when a tag is cut. The tag-triggered `release` job now puts the
 commit SHA in the GitLab Release notes on every tag (the first run is still to come), so new releases carry the SHA from
 the start. Apps still pin the tag in their component includes, and nothing checks an app's includes.
@@ -204,7 +204,7 @@ Why: GitLab calls `posix_escape` best effort and says to use `type`, `regex` or 
 Sources: [GitLab: CI/CD inputs, guidance](https://docs.gitlab.com/ci/inputs/);
 [OWASP CICD-SEC-4 Poisoned Pipeline Execution](https://owasp.org/www-project-top-10-ci-cd-security-risks/).
 
-**How the stack holds it: Partially.** Every `working_dir` input (six components carry one) is constrained by
+**How the stack holds it: Documented.** Every `working_dir` input (six components carry one) is constrained by
 `regex: '^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$'` and quoted at its only use, `cd "$[[ inputs.working_dir ]]"`. The two
 `composer_version` inputs match `^2\.\d+\.\d+$`, and `renovate`'s `dry_run` matches `^(null|lookup|full)$`. The four
 path-like inputs that reach a shell line are now constrained too: `phpstan` `config` and `pint` `config` and `sbom`
@@ -305,7 +305,7 @@ A job timeout cannot exceed the runner's timeout.
 
 Sources: [GitLab: CI/CD YAML, `timeout` and `interruptible`](https://docs.gitlab.com/ci/yaml/).
 
-**How the stack holds it: Partially.** All nine templates set `interruptible: true` and a `timeout` of their own:
+**How the stack holds it: Documented.** All nine templates set `interruptible: true` and a `timeout` of their own:
 `10m` for pint and phpstan, `15m` for eslint, `30 minutes` for composer-audit, package-publish, php-test, proctor and
 sbom, and `1 hour` for renovate. What stays open is the cancellation half: whether a superseded pipeline is actually
 canceled still needs `workflow:auto_cancel` in the app's own file, which a component cannot force (see 3.1).
@@ -467,7 +467,7 @@ deploy image in extensions and settings.
 Sources: [GitLab: dependency proxy for container images (all tiers)](https://docs.gitlab.com/user/packages/dependency_proxy/);
 [Docker: build best practices](https://docs.docker.com/build/building/best-practices/).
 
-**How the stack holds it: Partially.** The templates use the official `php` images from Docker Hub, the default for
+**How the stack holds it: Documented.** The templates use the official `php` images from Docker Hub, the default for
 raw Docker, OpenShift and Coolify. For the `citadel` target, the jobs should run on Citadel's own images; the
 templates do not switch on the target yet.
 
@@ -498,7 +498,7 @@ Why: install runs the app's scripts and plugins with the job's access.
 Sources: [Composer CLI: `install`, `--no-plugins`, `--no-scripts`](https://getcomposer.org/doc/03-cli.md);
 [OWASP CICD-SEC-4](https://owasp.org/www-project-top-10-ci-cd-security-risks/).
 
-**How the stack holds it: Partially.** The templates use `composer install`, which is right, and the `proctor`
+**How the stack holds it: Documented.** The templates use `composer install`, which is right, and the `proctor`
 job now installs with `--no-plugins --no-scripts`, because the job only inspects the app; a contract test
 (`tests/check-proctor-install-flags.sh` and its `.ps1` twin) pins those flags. What remains is running PROCTOR
 without installing the app at all (gap item 5 option B), which is behind the PROCTOR PHAR work. An app on an
@@ -754,7 +754,7 @@ Sources: [GitLab: CI/CD variables](https://docs.gitlab.com/ci/variables/);
 [GitLab: pipeline security, secrets](https://docs.gitlab.com/ci/pipeline_security/);
 [OWASP CICD-SEC-6 Insufficient Credential Hygiene](https://owasp.org/www-project-top-10-ci-cd-security-risks/).
 
-**How the stack holds it: Partially.** The nine templates use no secrets, which is good. Nothing fails if a later
+**How the stack holds it: Documented.** The nine templates use no secrets, which is good. Nothing fails if a later
 template adds one. The repository's own pipeline now runs GitLab's pipeline secret detection as an advisory job
 (`secret_detection` with `allow_failure: true`, kept in place by `tests/check-secret-detection.sh` and its `.ps1`
 twin); the plan is to make it blocking after a week of green pipelines. Whether it runs on the git.wayne.edu
@@ -866,7 +866,7 @@ Why: a hard-coded list goes stale when a version reaches end of life.
 Sources: [PHP supported versions](https://www.php.net/supported-versions.php);
 [GitLab: CI/CD YAML, `parallel:matrix`](https://docs.gitlab.com/ci/yaml/).
 
-**How the stack holds it: Partially.** The default list is `["8.3", "8.4", "8.5"]`, so 8.2 is already out, and the
+**How the stack holds it: Documented.** The default list is `["8.3", "8.4", "8.5"]`, so 8.2 is already out, and the
 floor in the README is `^8.3`. Both are still hard-coded values rather than derived from CREED's policy, and 8.6 has
 not been added anywhere. PHP 8.2 reaches end of life on 2026-12-31, and PHP 8.3 is already past active support.
 
