@@ -33,6 +33,11 @@
       "enabled": false
     },
     {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["quay.io/buildah/stable"],
+      "versioning": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<compatibility>-immutable)$"
+    },
+    {
       "matchPackageNames": ["waynestate/*", "@waynestate/*"],
       "minimumReleaseAge": "0"
     },
