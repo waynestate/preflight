@@ -59,6 +59,7 @@ contract:
     - sh tests/check-proctor-install-flags.sh
     - sh tests/check-secret-detection.sh
     - sh tests/check-renovate-review.sh
+    - sh tests/check-renovate-buildah.sh
     - sh tests/check-sha-pins.sh
     - sh tests/check-release-job.sh
 

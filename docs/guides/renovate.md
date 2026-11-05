@@ -65,6 +65,18 @@ away from production, so only digest updates are enabled for them: the same
 tag, the exact image. `citadel/php-apache` is disabled entirely, because
 Squire's own data owns that image.
 
+## Pinned to immutable tags
+
+The `quay.io/buildah/stable` image (the `buildah_image` default of the
+portability component) is matched to `-immutable` tags only. Red Hat re-pushed
+v1.43.5 under the mutable tag and garbage-collected the old digest, which broke
+an image job, so DRAWBRIDGE and SQUIRE now pin the immutable form,
+`v1.43.5-immutable@sha256:...`. The preset carries a packageRule for
+`quay.io/buildah/stable` with a regex versioning that only matches
+`vX.Y.Z-immutable` tags, so Renovate proposes updates within the immutable tags
+and never moves a pin back to a mutable one. Digests stay pinned as before
+(`docker:pinDigests`).
+
 ## Set up (the user does this)
 
 This repository ships the preset and the component, and creates nothing else.

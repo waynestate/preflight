@@ -398,7 +398,9 @@ auto-merges the same way. Every merge request carries the `auto-deps` label.
 The exception is Preflight's own pins: an update that touches the templates,
 the contract or this repository's own pipeline, a bump of a component include
 version, and a bump of the recorded Squire kit version, never auto-merge (see
-What waits for review).
+What waits for review). One image gets a narrower rule: `quay.io/buildah/stable`
+only ever matches `-immutable` tags, because Red Hat re-pushed a mutable tag
+and garbage-collected the old digest, which broke an image job.
 
 ### What waits
 
@@ -410,7 +412,7 @@ label and waits for a person.
 Updates that change an image digest inside the templates, the contract, or
 this repository's own pipeline, bumps of a Preflight component version in an
 app's `component:` include, and bumps of the recorded Squire kit version
-(labelled `squire-kit`) carry the `needs-review` label and never auto-merge.
+(labeled `squire-kit`) carry the `needs-review` label and never auto-merge.
 They wait for a person because those pins are what every app pipeline runs:
 a changed digest here changes what every consuming pipeline executes, so it
 earns a human eye even when its own pipeline is green. The Squire kit version
