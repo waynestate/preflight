@@ -285,6 +285,10 @@ include:
 
 All three work on GitLab Community Edition. Flip each one as you set it.
 
+- [ ] **Protect the default branch** and require a merge request to change it, so every change to `.gitlab-ci.yml` gets a reviewer.
+- [ ] **Set "Minimum role to use pipeline variables" to `no_one_allowed`** unless the project needs them. Inputs are fixed and type checked for the whole run.
+- [ ] **Keep secrets away from fork merge requests.** Review a fork's `.gitlab-ci.yml` before running its pipeline, and never give it protected variables.
+
 0 of 3 set
 
 3 Alternate · GitHub mirror

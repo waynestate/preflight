@@ -945,6 +945,10 @@ include:
 
 All three work on GitLab Community Edition. Flip each one as you set it.
 
+- [ ] **Protect the default branch** and require a merge request to change it, so every change to `.gitlab-ci.yml` gets a reviewer.
+- [ ] **Set "Minimum role to use pipeline variables" to `no_one_allowed`** unless the project needs them. Inputs are fixed and type checked for the whole run.
+- [ ] **Keep secrets away from fork merge requests.** Review a fork's `.gitlab-ci.yml` before running its pipeline, and never give it protected variables.
+
 0 of 3 set
 
 3 Alternate · GitHub mirror
@@ -1167,7 +1171,7 @@ Preflight is one stop on the way to Citadel. Here is everyone else on the board.
 
 Source: https://preflight.apps.wayne.edu/docs/changelog.html
 
-## Changelog | Preflight docs
+## Changelog[#](https://preflight.apps.wayne.edu/docs/changelog.html#changelog)
 
 All notable changes to PREFLIGHT are recorded here. Entries follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); released versions are Git tags.
 
@@ -1958,9 +1962,11 @@ The job lands in the `test` stage by default, is `interruptible: true`, and has 
    ```
    The plugin is installed globally, so the app's `composer.json` is never touched.
 4. Generate the SBOM. `--validate` fails the job on an invalid SBOM:
+   omit_dev true (default)
    ```sh
    composer CycloneDX:make-sbom --output-format=JSON --output-reproducible --validate --omit=dev --output-file=sbom.cdx.json
    ```
+   omit_dev false
    ```sh
    composer CycloneDX:make-sbom --output-format=JSON --output-reproducible --validate --output-file=sbom.cdx.json
    ```
@@ -2410,6 +2416,12 @@ No template adds a global key such as `default:`, `variables:`, `workflow:` or `
 
 A pilot signs each line of the checklist; the plane does not sign for you. Five project settings make the gates harder to skip, and every one of them works on GitLab Community Edition:
 
+- [ ] **Protect the default branch** and require a merge request to change it. Every change to `.gitlab-ci.yml` then gets a reviewer. (Code owner approval needs Premium, so on Community Edition the reviewer is whoever merges.)
+- [ ] **Protect the release tags.** Protect `*` or the release tag pattern so only maintainers can create or move a tag. A component ref is a tag, so whoever can move it controls every pipeline that pins it.
+- [ ] **Set merge request approvals to at least one** for changes to the default branch. Approvals are available on every tier, but code owner rules within them need Premium, so on Community Edition the approval rests with whoever has merge rights: rely on the merger as the reviewer.
+- [ ] **Set "Minimum role to use pipeline variables" to `no_one_allowed`** unless the project needs pipeline variables. The components take inputs, which are fixed and type checked for the whole run. Self-managed GitLab defaults this setting to `maintainer`.
+- [ ] **Keep secrets away from fork merge requests.** A fork's merge request pipeline runs the fork's configuration. Review a fork's `.gitlab-ci.yml` before running its pipeline, and never give it protected variables.
+
 Note
 
 These are project settings Preflight cannot create or check, and a read-only token drift report was considered and left out on purpose: it would trade a token for a warning, and the checklist costs nothing to keep.
@@ -2508,6 +2520,8 @@ Preflight installs as an `include:` in the app's own `.gitlab-ci.yml`, one line 
 
 Add the include to the app's `.gitlab-ci.yml`:
 
+All seven components
+
 ```yaml
 include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
@@ -2518,6 +2532,8 @@ include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
 ```
+
+One component
 
 ```yaml
 include:

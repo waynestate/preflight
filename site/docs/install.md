@@ -19,6 +19,8 @@ Preflight installs as an `include:` in the app's own `.gitlab-ci.yml`, one line 
 
 Add the include to the app's `.gitlab-ci.yml`:
 
+All seven components
+
 ```yaml
 include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
@@ -29,6 +31,8 @@ include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
 ```
+
+One component
 
 ```yaml
 include:

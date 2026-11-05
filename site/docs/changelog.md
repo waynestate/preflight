@@ -6,7 +6,7 @@ llms: https://preflight.apps.wayne.edu/llms.txt
 generator: Squire agent-ready
 ---
 
-# Changelog | Preflight docs
+# Changelog[#](https://preflight.apps.wayne.edu/docs/changelog.html#changelog)
 
 All notable changes to PREFLIGHT are recorded here. Entries follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); released versions are Git tags.
 

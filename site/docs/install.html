@@ -53,7 +53,7 @@ mirroring.</li>
 </ul>
 <h2 id="install-1">Install<a class="docs-heading-link" aria-label="Link to this section" href="#install-1">#</a></h2>
 <p>Add the include to the app's <code>.gitlab-ci.yml</code>:</p>
-<pre><code class="language-yaml">include:
+<div class="docs-tabs" data-tabs="all seven components|one component"><div class="docs-tabs__panel" data-tab-label="All seven components"><p class="docs-tabs__label">All seven components</p><pre><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
@@ -61,12 +61,12 @@ mirroring.</li>
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
-</code></pre>
-<pre><code class="language-yaml">include:
+</code></pre></div>
+<div class="docs-tabs__panel" data-tab-label="One component"><p class="docs-tabs__label">One component</p><pre><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
     inputs:
       test_command: vendor/bin/phpunit
-</code></pre>
+</code></pre></div></div>
 <h2 id="verify">Verify<a class="docs-heading-link" aria-label="Link to this section" href="#verify">#</a></h2>
 <p>Push the change. The components are ordinary jobs, so they run whenever the
 app's pipeline runs, and each one lands in the <code>test</code> stage by default.

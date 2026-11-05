@@ -72,10 +72,10 @@
 </li>
 <li>
 <p>Generate the SBOM. <code>--validate</code> fails the job on an invalid SBOM:</p>
-<pre><code class="language-sh">composer CycloneDX:make-sbom --output-format=JSON --output-reproducible --validate --omit=dev --output-file=sbom.cdx.json
-</code></pre>
-<pre><code class="language-sh">composer CycloneDX:make-sbom --output-format=JSON --output-reproducible --validate --output-file=sbom.cdx.json
-</code></pre>
+<div class="docs-tabs" data-tabs="omit_dev true (default)|omit_dev false"><div class="docs-tabs__panel" data-tab-label="omit_dev true (default)"><p class="docs-tabs__label">omit_dev true (default)</p><pre><code class="language-sh">composer CycloneDX:make-sbom --output-format=JSON --output-reproducible --validate --omit=dev --output-file=sbom.cdx.json
+</code></pre></div>
+<div class="docs-tabs__panel" data-tab-label="omit_dev false"><p class="docs-tabs__label">omit_dev false</p><pre><code class="language-sh">composer CycloneDX:make-sbom --output-format=JSON --output-reproducible --validate --output-file=sbom.cdx.json
+</code></pre></div></div>
 <p><code>--omit=dev</code> is present only when <code>omit_dev</code> is <code>true</code>; <code>--output-file</code> takes the <code>output</code> input (default <code>sbom.cdx.json</code>).</p>
 </li>
 </ol>

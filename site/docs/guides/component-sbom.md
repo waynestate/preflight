@@ -42,9 +42,11 @@ The job lands in the `test` stage by default, is `interruptible: true`, and has 
    ```
    The plugin is installed globally, so the app's `composer.json` is never touched.
 4. Generate the SBOM. `--validate` fails the job on an invalid SBOM:
+   omit_dev true (default)
    ```sh
    composer CycloneDX:make-sbom --output-format=JSON --output-reproducible --validate --omit=dev --output-file=sbom.cdx.json
    ```
+   omit_dev false
    ```sh
    composer CycloneDX:make-sbom --output-format=JSON --output-reproducible --validate --output-file=sbom.cdx.json
    ```
