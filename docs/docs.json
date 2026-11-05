@@ -1,3 +1,7 @@
 {
+    "theme": {
+        "css": "theme/preflight.css",
+        "header": "_header.html"
+    },
     "blocks": {}
 }

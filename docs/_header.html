@@ -1,0 +1,24 @@
+<!--
+  The docs pages board under the front page's top bar (site/index.html). The docs builder puts the header below in
+  place of its generic one on every page, rewrites the relative links (written as if from site/) to the page's depth,
+  fills the version placeholder and marks the Docs link aria-current. Styles: docs/theme/preflight.css.
+  Keep the links in step with the front page's top bar: same crew, same call signs.
+-->
+<header class="topbar">
+  <div class="topbar__inner">
+    <a class="brand" href="index.html">
+      <img src="brand/preflight-avatar-256.png" width="36" height="36" alt="">
+      <span class="brand__name">PREFLIGHT</span>
+      <span class="brand__tail">{{version}}</span>
+    </a>
+    <nav class="topnav" aria-label="Site">
+      <a class="topnav__section" href="index.html#checklist">Checklist</a>
+      <a class="topnav__section" href="index.html#components">Components</a>
+      <a class="topnav__section" href="index.html#flight-plan">Flight plan</a>
+      <a class="topnav__section" href="index.html#copilot">Agents</a>
+      <a class="topnav__section" href="index.html#stack">Stack</a>
+      <a href="docs/index.html">Docs</a>
+      <a href="https://proof.apps.wayne.edu/preflight/">Proof</a>
+    </nav>
+  </div>
+</header>

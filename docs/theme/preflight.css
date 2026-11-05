@@ -1,0 +1,1139 @@
+/* ============================================================================
+   PREFLIGHT docs theme (2026-11-05).
+
+   The docs are the flight manual, so they wear the flight deck the front page
+   (site/assets/preflight.css) is built from: the cream chart page, B612 and
+   B612 Mono (the faces Airbus commissioned for cockpit displays), the green
+   ink, the blue of the flight-plan form, gold only where the front page uses
+   it (the hover underline, the heading bug). Commands sit on the quickstart's
+   dark green slab with its label and its cream Copy key; notes, cautions and
+   warnings are the front page's handbook boxes; tables and the pager are
+   flight-plan forms; the footer keeps its runway threshold stripes. Every
+   value below comes from the front page.
+
+   How it gets onto the pages: docs/docs.json "theme" names this file and
+   docs/_header.html. The docs builder copies this file to
+   site/docs/theme/preflight.css and links it after the kit's docs.css, so the
+   --dk-* tokens and the rules below win without !important. The kit's
+   docs.css stays byte for byte Squire's.
+
+   The front page has no dark mode, so the dark set is the front page's own
+   instrument panel: glass ground, panel-light text, the annunciator's lit
+   green for links and focus.
+
+   Motion only under prefers-reduced-motion: no-preference: the page title
+   lights up like the hero's letters, once; the mark banks on hover; the pager
+   lifts. Nothing blinks, nothing loops.
+
+   File map: 1. fonts and tokens  2. frame  3. top bar  4. sidebar and menu
+             5. article  6. code  7. tabs  8. handbook boxes, tables, tasks
+             9. toc, pager, footer  10. dark  11. responsive  12. motion
+             13. print
+   ========================================================================== */
+
+/* ---------------------------------------------------- 1. fonts and tokens */
+
+@font-face { font-family: "B612"; src: url("../../assets/fonts/b612-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "B612"; src: url("../../assets/fonts/b612-latin-400-italic.woff2") format("woff2"); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: "B612"; src: url("../../assets/fonts/b612-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: "B612 Mono"; src: url("../../assets/fonts/b612-mono-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "B612 Mono"; src: url("../../assets/fonts/b612-mono-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
+
+:root {
+  /* The front page's palette, under its own names. */
+  --green: #0c5449;
+  --green-deep: #083b33;
+  --green-ink: #0a2f29;
+  --gold: #ffcc33;
+  --cream: #f4f1ea;
+  --paper: #fffdf7;
+  --blue: #0e5a7d;
+  --blue-deep: #0a3f58;
+  --ink: #16211f;
+  --ink-muted: #3e4a47;
+  --rule: #cfc8b8;
+  --amber: #ffc94a;
+  --red: #c8352b;
+
+  --display: "B612", "Lato", system-ui, sans-serif;
+  --mono: "B612 Mono", ui-monospace, Consolas, monospace;
+  /* Code keeps the system monospace, as on the front page: B612 Mono sets a
+     full cell after each full stop and reads "0.1.4" as "0. 1. 4". */
+  --code: var(--wsu-font-family-mono, ui-monospace, Consolas, monospace);
+  --body: var(--wsu-font-family-body, "Lato", system-ui, sans-serif);
+  --ease-out: cubic-bezier(.2, .8, .2, 1);
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+
+  /* Roles, so the dark panel below only swaps values. */
+  --pf-ground: var(--cream);          /* the chart page */
+  --pf-card: #ffffff;                 /* handbook boxes, forms */
+  --pf-title: var(--green);           /* page titles, the brand, here marks */
+  --pf-h2: var(--green);              /* section titles */
+  --pf-strong: var(--ink);
+  --pf-label: var(--blue);            /* the eyebrow: B612 Mono caps */
+  --pf-frame: var(--blue);            /* the flight-plan form's frame */
+  --pf-band: #e8f0f4;                 /* the form's field band */
+  --pf-band-ink: var(--blue-deep);
+  --pf-here: var(--paper);            /* the current page in the sidebar */
+  --pf-code-inline: #e1e4dd;          /* front page inline code: green at 8% on cream */
+  --pf-slab: var(--green-ink);        /* the quickstart slab */
+  --pf-slab-ink: var(--cream);
+  --pf-slab-label: #a9c9c1;
+  --pf-slab-edge: transparent;
+  --pf-key: var(--cream);             /* the Copy key */
+  --pf-key-hover: #ffffff;
+  --pf-key-ink: var(--green-ink);
+  --pf-key-shadow: #b9b19f;
+  --pf-box-ink: var(--ink);           /* the handbook box frame */
+  --pf-foot: var(--green);
+  --pf-foot-ink: var(--cream);
+  --pf-foot-muted: #cfe3dd;
+
+  /* The kit's tokens, set from the palette above. */
+  --dk-bg: var(--pf-ground);
+  --dk-ink: var(--ink);
+  --dk-muted: var(--ink-muted);
+  --dk-rule: var(--rule);
+  --dk-accent: var(--green);
+  --dk-on-accent: #ffffff;
+  --dk-note: var(--blue);
+  --dk-tip: var(--green);
+  --dk-warning: #634d00;
+  --dk-danger: var(--red);
+  --dk-code-bg: var(--pf-code-inline);
+  --dk-display: var(--display);
+  --dk-mono: var(--code);
+  --dk-radius: 10px;
+  --dk-focus: var(--blue);
+  --dk-focus-w: 3px;
+  --dk-focus-o: 3px;
+  --dk-sidebar: 16rem;
+  --dk-prose-max: 46rem;
+  --dk-gap: 1.75rem;
+
+  color-scheme: light;
+}
+
+/* ------------------------------------------------------------- 2. frame */
+
+html {
+  background: var(--dk-bg);
+}
+
+body {
+  margin: 0;
+  color: var(--dk-ink);
+  background: var(--dk-bg);
+  font-family: var(--body);
+}
+
+:where(a, button, summary, [tabindex]):focus-visible {
+  outline: var(--dk-focus-w) solid var(--dk-focus);
+  outline-offset: var(--dk-focus-o);
+  border-radius: 6px;
+}
+
+/* ----------------------------------------------------------- 3. top bar */
+
+.topbar {
+  position: relative;
+  z-index: 5;
+  background: var(--dk-bg);
+  border-bottom: 1px solid var(--dk-rule);
+}
+
+.topbar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  box-sizing: border-box;
+  max-width: 100rem;
+  min-height: 64px;
+  margin-inline: auto;
+  padding-inline: var(--dk-gap);
+}
+
+.brand {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: .65rem;
+  color: var(--pf-title);
+  text-decoration: none;
+}
+
+.brand img {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+}
+
+.brand__name {
+  font-family: var(--display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+}
+
+.brand__tail {
+  padding: .12rem .45rem;
+  font-family: var(--display);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  border: 1.5px solid currentColor;
+  border-radius: 4px;
+}
+
+.topnav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0 1.4rem;
+}
+
+.topnav a {
+  padding-block: .4rem;
+  font-family: var(--mono);
+  font-size: .82rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  color: var(--dk-muted);
+  background: linear-gradient(var(--gold), var(--gold)) left bottom / 0 3px no-repeat;
+}
+
+.topnav a:hover {
+  color: var(--pf-title);
+  background-size: 100% 3px;
+}
+
+/* You are here: the front page's gold hover underline, held. */
+.topnav a[aria-current="page"] {
+  color: var(--pf-title);
+  background-size: 100% 3px;
+}
+
+/* --------------------------------------------------- 4. sidebar and menu */
+
+.docs-layout {
+  gap: 1.5rem clamp(1.75rem, 1rem + 2.5vw, 3.5rem);
+  padding-block: 2.25rem 3.5rem;
+  padding-inline: var(--dk-gap);
+}
+
+/* Group labels are the front page's eyebrow: B612 Mono caps in flight-plan blue. */
+.docs-nav__label {
+  margin: 1.5rem 0 .4rem;
+  padding-inline: .75rem;
+  font-family: var(--mono);
+  font-size: .74rem;
+  font-weight: 700;
+  letter-spacing: .14em;
+  color: var(--pf-label);
+}
+
+.docs-nav__list > li:first-child > .docs-nav__label {
+  margin-top: 0;
+}
+
+/* Group lists are plain <ul> inside the kit's list: no bullets, no indent. */
+.docs-nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.docs-nav__group + li {
+  margin-top: 1.1rem;
+}
+
+.docs-nav__group + li + li,
+.docs-nav__group + li + li + li {
+  margin-top: 0;
+}
+
+.docs-nav a {
+  padding: .38rem .75rem;
+  font-size: .95rem;
+  line-height: 1.35;
+  color: var(--dk-ink);
+  border-radius: 0 6px 6px 0;
+}
+
+.docs-nav a:hover {
+  color: var(--pf-title);
+  background: var(--pf-here);
+}
+
+/* The current line on the checklist: the card's green bar down its edge. */
+.docs-nav a[aria-current="page"] {
+  font-weight: 700;
+  color: var(--pf-title);
+  background: var(--pf-here);
+  box-shadow: inset 3px 0 0 var(--pf-title);
+}
+
+.docs-menu summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding: .4rem 1rem;
+  font-family: var(--mono);
+  font-size: .82rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--pf-title);
+  background: var(--pf-card);
+  border: 1px solid var(--dk-rule);
+  border-radius: var(--dk-radius);
+  list-style: none;
+}
+
+.docs-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+/* The front page's disclosure arrow: a gold triangle that turns. */
+.docs-menu summary::after {
+  content: "";
+  width: 0;
+  height: 0;
+  border-block: 5px solid transparent;
+  border-left: 7px solid var(--gold);
+}
+
+.docs-menu[open] summary::after {
+  transform: rotate(90deg);
+}
+
+.docs-menu[open] > .docs-nav {
+  padding: .75rem 0 .5rem;
+}
+
+/* ------------------------------------------------------------- 5. article */
+
+.docs-article {
+  font-family: var(--body);
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: var(--dk-ink);
+}
+
+.docs-article h1,
+.docs-article h2,
+.docs-article h3,
+.docs-article h4 {
+  font-family: var(--display);
+  font-weight: 700;
+  text-wrap: balance;
+}
+
+.docs-article h1 {
+  margin: 0 0 1.6rem;
+  font-size: clamp(2.1rem, 1.5rem + 2.4vw, 3.1rem);
+  line-height: 1.08;
+  letter-spacing: .01em;
+  color: var(--pf-title);
+}
+
+/* Under every title, the runway threshold stripes from the footer: you are
+   lined up and cleared. Decoration only, so it is a background, not text. */
+.docs-article h1::after {
+  content: "";
+  display: block;
+  width: 9.5rem;
+  height: 10px;
+  margin-top: .85rem;
+  background: repeating-linear-gradient(90deg, var(--pf-title) 0 14px, transparent 14px 22px);
+  -webkit-mask: linear-gradient(90deg, #000 70%, transparent);
+  mask: linear-gradient(90deg, #000 70%, transparent);
+}
+
+/* The overview opens with the README's screenshot: give the title air under it. */
+.docs-article * + h1 {
+  margin-top: 1.75rem;
+}
+
+.docs-article h2 {
+  margin: 2.8rem 0 .9rem;
+  padding-bottom: .45rem;
+  font-size: clamp(1.45rem, 1.2rem + .9vw, 1.9rem);
+  line-height: 1.15;
+  letter-spacing: .01em;
+  color: var(--pf-h2);
+  border-bottom: 1px solid var(--dk-rule);
+}
+
+.docs-article h3 {
+  margin: 2rem 0 .5rem;
+  font-size: 1.2rem;
+  line-height: 1.3;
+  color: var(--pf-strong);
+}
+
+.docs-article h4 {
+  margin: 1.6rem 0 .4rem;
+  font-family: var(--mono);
+  font-size: .82rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--pf-label);
+}
+
+.docs-article :is(h1, h2, h3) code {
+  font-size: .82em;
+}
+
+.docs-heading-link {
+  color: var(--dk-muted);
+}
+
+.docs-article a {
+  color: var(--dk-accent);
+  text-underline-offset: 4px;
+}
+
+.docs-article a:hover {
+  text-decoration-thickness: 3px;
+  text-decoration-color: var(--gold);
+}
+
+.docs-article strong {
+  color: var(--pf-strong);
+}
+
+.docs-article :is(ul, ol) {
+  padding-inline-start: 1.4rem;
+}
+
+.docs-article li {
+  margin-block: .3rem;
+}
+
+.docs-article li::marker {
+  color: var(--dk-accent);
+}
+
+.docs-article ol > li::marker {
+  font-family: var(--mono);
+  font-weight: 700;
+  color: var(--pf-label);
+}
+
+.docs-article img {
+  max-width: 100%;
+  height: auto;
+}
+
+.docs-article hr {
+  margin-block: 2.5rem;
+  border: 0;
+  border-top: 1px solid var(--dk-rule);
+}
+
+/* A quotation is the hero's definition: gold margin rule on paper. */
+.docs-article blockquote {
+  margin: 1.5rem 0;
+  padding: .7rem 1rem .7rem 1.1rem;
+  color: var(--dk-muted);
+  background: var(--pf-here);
+  border-left: 4px solid var(--gold);
+  border-radius: 0 10px 10px 0;
+}
+
+.docs-article blockquote > :last-child {
+  margin-bottom: 0;
+}
+
+/* ---------------------------------------------------------------- 6. code */
+
+.docs-article code {
+  padding: .06em .32em;
+  font-family: var(--code);
+  font-size: .88em;
+  color: var(--dk-ink);
+  background: var(--dk-code-bg);
+  border-radius: 4px;
+  overflow-wrap: anywhere;
+}
+
+/* What you type: the quickstart slab. Lines keep their shape and a long one
+   scrolls; docs.js makes a scrolling block focusable. */
+.docs-article pre {
+  margin: 1.1rem 0 1.4rem;
+  padding: 1rem 1.1rem 1.1rem;
+  font-family: var(--code);
+  font-size: .86rem;
+  line-height: 1.6;
+  color: var(--pf-slab-ink);
+  background: var(--pf-slab);
+  border: 1px solid var(--pf-slab-edge);
+  border-radius: var(--dk-radius);
+  tab-size: 4;
+  scrollbar-color: #2b5a52 transparent;
+}
+
+.docs-article pre code {
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+  background: none;
+  border-radius: 0;
+  overflow-wrap: normal;
+}
+
+/* With docs.js the block sits in .docs-copy: the slab moves to the wrapper,
+   which gets the quickstart's top band, its file label on the left and the
+   Copy key on the right, so the key never covers a line of code. */
+.docs-copy {
+  margin: 1.1rem 0 1.4rem;
+  padding-top: 2.3rem;
+  background: var(--pf-slab);
+  border: 1px solid var(--pf-slab-edge);
+  border-radius: var(--dk-radius);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .06) inset, 0 12px 28px -18px rgba(10, 47, 41, .55);
+}
+
+.docs-copy > pre {
+  margin: 0;
+  padding-top: .15rem;
+  background: transparent;
+  border: 0;
+  border-radius: 0 0 var(--dk-radius) var(--dk-radius);
+}
+
+/* The band's label, as the quickstart's ".gitlab-ci.yml". Decorative: the
+   alt text after the slash is empty, so screen readers skip it. */
+.docs-copy::before {
+  position: absolute;
+  top: .7rem;
+  left: 1.1rem;
+  font-family: var(--mono);
+  font-size: .72rem;
+  letter-spacing: .1em;
+  color: var(--pf-slab-label);
+  pointer-events: none;
+}
+
+.docs-copy:has(> pre > code.language-yaml)::before { content: "YAML"; content: "YAML" / ""; }
+.docs-copy:has(> pre > code.language-yml)::before { content: "YAML"; content: "YAML" / ""; }
+.docs-copy:has(> pre > code.language-sh)::before { content: "SHELL"; content: "SHELL" / ""; }
+.docs-copy:has(> pre > code.language-bash)::before { content: "SHELL"; content: "SHELL" / ""; }
+.docs-copy:has(> pre > code.language-powershell)::before { content: "POWERSHELL"; content: "POWERSHELL" / ""; }
+.docs-copy:has(> pre > code.language-json)::before { content: "JSON"; content: "JSON" / ""; }
+.docs-copy:has(> pre > code.language-php)::before { content: "PHP"; content: "PHP" / ""; }
+
+/* The Copy key: a cream key with a hard shadow, gold when it has copied. */
+.docs-copy__button {
+  top: .45rem;
+  right: .5rem;
+  min-height: 30px;
+  padding: .3rem .65rem;
+  font-family: var(--mono);
+  font-size: .74rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--pf-key-ink);
+  background: var(--pf-key);
+  border: 0;
+  border-radius: 6px;
+  box-shadow: 0 2px 0 var(--pf-key-shadow);
+}
+
+.docs-copy__button:hover {
+  color: var(--pf-key-ink);
+  background: var(--pf-key-hover);
+}
+
+/* On the dark slab a blue ring would vanish: gold, the slab's own accent. */
+.docs-copy__button:focus-visible,
+.docs-article pre:focus-visible {
+  outline: 3px solid var(--gold);
+}
+
+.docs-article pre:focus-visible {
+  outline-offset: -4px;
+}
+
+/* ---------------------------------------------------------------- 7. tabs */
+
+/* The front page's OS tabs: B612 Mono, a gold bar under the chosen one. */
+.docs-tabs__tablist {
+  gap: 0 .25rem;
+  margin-bottom: 0;
+  border-bottom: 1px solid var(--dk-rule);
+}
+
+.docs-tabs__tab {
+  min-height: 44px;
+  padding: .4rem .9rem;
+  font-family: var(--mono);
+  font-size: .8rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--dk-muted);
+  background: transparent;
+  border: 0;
+  border-radius: 6px 6px 0 0;
+}
+
+.docs-tabs__tab:hover {
+  color: var(--pf-title);
+  background: var(--pf-here);
+}
+
+.docs-tabs__tab[aria-selected="true"] {
+  color: var(--pf-title);
+  background: transparent;
+  box-shadow: inset 0 -3px 0 0 var(--gold);
+}
+
+.docs-tabs__label {
+  font-family: var(--mono);
+  font-size: .74rem;
+  letter-spacing: .14em;
+  color: var(--pf-label);
+}
+
+.docs-tabs__panel {
+  border-radius: var(--dk-radius);
+}
+
+.docs-tabs__panel > .docs-copy:first-child,
+.docs-tabs__panel > pre:first-child {
+  margin-top: .75rem;
+}
+
+/* ------------------------------------- 8. handbook boxes, tables, tasks */
+
+/* Callouts are the front page's handbook boxes: a hard frame and a caps band
+   across the top. NOTE in blue, TIP in green, WARNING as the amber CAUTION,
+   DANGER as the red WARNING. */
+.docs-callout {
+  margin: 1.5rem 0;
+  padding: 0 1.1rem 1rem;
+  color: var(--dk-ink);
+  background: var(--pf-card);
+  border: 2px solid var(--pf-box-ink);
+  border-radius: 2px;
+}
+
+.docs-callout .docs-callout__label {
+  margin: 0 -1.1rem .8rem;
+  padding: .35rem 1rem;
+  font-family: var(--display);
+  font-size: .95rem;
+  font-weight: 700;
+  letter-spacing: .3em;
+  text-align: center;
+  text-transform: uppercase;
+  color: #ffffff;
+  background: var(--pf-box-ink);
+}
+
+.docs-callout > p:not(.docs-callout__label) {
+  margin: .5rem 0 0;
+  font-size: .98rem;
+}
+
+.docs-callout > :is(ul, ol, pre, .docs-copy) {
+  margin-bottom: 0;
+}
+
+.docs-callout--note { border-color: var(--blue); }
+.docs-callout--note .docs-callout__label { color: #ffffff; background: var(--blue); }
+.docs-callout--tip { border-color: var(--green); }
+.docs-callout--tip .docs-callout__label { color: #ffffff; background: var(--green); }
+.docs-callout--warning { border-color: #c99400; }
+.docs-callout--warning .docs-callout__label { color: var(--ink); background: var(--amber); }
+.docs-callout--danger { border-color: var(--red); }
+.docs-callout--danger .docs-callout__label { color: #ffffff; background: var(--red); }
+
+/* Tables are flight-plan forms: a blue frame, field names on the blue band. */
+.docs-table {
+  margin: 1.25rem 0 1.5rem;
+  background: var(--pf-card);
+  border: 2px solid var(--pf-frame);
+  border-radius: 4px;
+}
+
+.docs-article table {
+  font-size: .95rem;
+  line-height: 1.5;
+}
+
+.docs-article th {
+  font-family: var(--mono);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--pf-band-ink);
+  background: var(--pf-band);
+  border-bottom: 1px solid var(--pf-frame);
+}
+
+.docs-article th,
+.docs-article td {
+  padding: .6rem .9rem;
+  vertical-align: top;
+}
+
+.docs-article td {
+  border-bottom: 1px dashed var(--dk-rule);
+}
+
+/* An id or command keeps its shape in a cell and only breaks if it would
+   spill out of the table. */
+.docs-article td code {
+  overflow-wrap: break-word;
+}
+
+.docs-article tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+/* Task lists are the self-check card: a square box per line, signed by you. */
+.docs-article li:has(> label.docs-task) {
+  list-style: none;
+}
+
+.docs-article ul:has(> li > label.docs-task) {
+  padding-inline-start: 0;
+  border-top: 2px solid var(--pf-title);
+}
+
+.docs-article li:has(> label.docs-task) {
+  margin: 0;
+  padding: .55rem 0;
+  border-bottom: 1px dashed var(--dk-rule);
+}
+
+/* The label holds the box and the line's inline text, so it stays a block
+   (a grid would stack every inline element) and the box hangs in its margin. */
+label.docs-task {
+  position: relative;
+  display: block;
+  padding-left: 1.9rem;
+}
+
+label.docs-task > input[type="checkbox"] {
+  position: absolute;
+  top: .3rem;
+  left: .1rem;
+  appearance: none;
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  background: var(--pf-card);
+  border: 2px solid var(--pf-title);
+  border-radius: 4px;
+}
+
+label.docs-task > input[type="checkbox"]:checked {
+  background: linear-gradient(45deg, transparent 0 40%, var(--pf-title) 40% 60%, transparent 60%), var(--pf-card);
+}
+
+/* ------------------------------------------------ 9. toc, pager, footer */
+
+.docs-toc__title {
+  font-family: var(--mono);
+  font-size: .74rem;
+  font-weight: 700;
+  letter-spacing: .14em;
+  color: var(--pf-label);
+}
+
+.docs-toc__list {
+  border-left: 2px solid var(--dk-rule);
+}
+
+.docs-toc__item a {
+  margin-left: -2px;
+  font-size: .92rem;
+  line-height: 1.4;
+  border-left: 2px solid transparent;
+}
+
+.docs-toc__item a:hover {
+  color: var(--pf-title);
+  border-left-color: var(--gold);
+}
+
+.docs-toc__item--sub a {
+  padding-left: 1.5rem;
+  font-size: .88rem;
+}
+
+/* Previous and next are two flight plans: blue frame, the field band on top. */
+.docs-pager {
+  gap: 1rem;
+  margin-top: 3rem;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.docs-pager__link {
+  position: relative;
+  box-sizing: border-box;
+  flex: 1 1 0;
+  max-width: 22rem;
+  padding: 2.5rem 1rem 1rem;
+  background: var(--pf-card);
+  border: 2px solid var(--pf-frame);
+  border-radius: 4px;
+}
+
+.docs-pager__link--next {
+  margin-left: auto;
+}
+
+.docs-pager__dir {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: .3rem .8rem;
+  font-family: var(--mono);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--pf-band-ink);
+  background: var(--pf-band);
+  border-bottom: 1px solid var(--pf-frame);
+}
+
+.docs-pager__title {
+  display: block;
+  font-family: var(--display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--pf-title);
+  text-decoration: none;
+}
+
+.docs-pager__link:hover .docs-pager__title {
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+  text-decoration-color: var(--gold);
+  text-underline-offset: 4px;
+}
+
+/* The front page's footer: green, full bleed, runway threshold stripes. */
+.docs-footer {
+  position: relative;
+  flex-wrap: wrap;
+  padding: 3rem var(--dk-gap) 1.6rem;
+  color: var(--pf-foot-muted);
+  background: var(--pf-foot);
+  border-top: 0;
+  box-shadow: 0 0 0 100vmax var(--pf-foot);
+  clip-path: inset(0 -100vmax);
+}
+
+.docs-footer::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 12px;
+  height: 16px;
+  background: repeating-linear-gradient(90deg, transparent 0 18px, rgba(244, 241, 234, .9) 18px 44px, transparent 44px 62px);
+  -webkit-mask: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent);
+  mask: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent);
+}
+
+.docs-footer a {
+  color: var(--pf-foot-ink);
+  text-underline-offset: 3px;
+}
+
+.docs-footer a:hover {
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--gold);
+}
+
+.docs-footer :focus-visible {
+  outline-color: var(--gold);
+}
+
+/* ---------------------------------------------------------------- 10. dark */
+
+/* Derived from the front page's instrument panel: the glass ground, the deck
+   edge for cards and code, panel-light text, the annunciator's lit green for
+   titles, links and focus. Applied for readers whose system is dark and who
+   have not chosen light, and for an explicit data-theme="dark". */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --pf-ground: #121a1d;
+    --pf-card: #1a2529;
+    --pf-title: #6cf2a6;
+    --pf-h2: #f4f1ea;
+    --pf-strong: #f4f1ea;
+    --pf-label: #b9c4c8;
+    --pf-frame: #3a5d6e;
+    --pf-band: #16262e;
+    --pf-band-ink: #c9d7dc;
+    --pf-here: #1a2529;
+    --pf-code-inline: #1f2d32;
+    --pf-slab: #0d1416;
+    --pf-slab-ink: #e6eef0;
+    --pf-slab-label: #8e9ba0;
+    --pf-slab-edge: #26343a;
+    --pf-key: #e6eef0;
+    --pf-key-hover: #ffffff;
+    --pf-key-ink: #121a1d;
+    --pf-key-shadow: #0a0f11;
+    --pf-box-ink: #8e9ba0;
+    --pf-foot: var(--green-deep);
+    --pf-foot-ink: var(--cream);
+    --pf-foot-muted: #cfe3dd;
+
+    --dk-ink: #e6eef0;
+    --dk-muted: #9fabb0;
+    --dk-rule: #26343a;
+    --dk-accent: #6cf2a6;
+    --dk-on-accent: #121a1d;
+    --dk-note: #8fc7e3;
+    --dk-tip: #6cf2a6;
+    --dk-warning: #ffc94a;
+    --dk-danger: #ff6b5e;
+    --dk-focus: #6cf2a6;
+
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --pf-ground: #121a1d;
+  --pf-card: #1a2529;
+  --pf-title: #6cf2a6;
+  --pf-h2: #f4f1ea;
+  --pf-strong: #f4f1ea;
+  --pf-label: #b9c4c8;
+  --pf-frame: #3a5d6e;
+  --pf-band: #16262e;
+  --pf-band-ink: #c9d7dc;
+  --pf-here: #1a2529;
+  --pf-code-inline: #1f2d32;
+  --pf-slab: #0d1416;
+  --pf-slab-ink: #e6eef0;
+  --pf-slab-label: #8e9ba0;
+  --pf-slab-edge: #26343a;
+  --pf-key: #e6eef0;
+  --pf-key-hover: #ffffff;
+  --pf-key-ink: #121a1d;
+  --pf-key-shadow: #0a0f11;
+  --pf-box-ink: #8e9ba0;
+  --pf-foot: var(--green-deep);
+  --pf-foot-ink: var(--cream);
+  --pf-foot-muted: #cfe3dd;
+
+  --dk-ink: #e6eef0;
+  --dk-muted: #9fabb0;
+  --dk-rule: #26343a;
+  --dk-accent: #6cf2a6;
+  --dk-on-accent: #121a1d;
+  --dk-note: #8fc7e3;
+  --dk-tip: #6cf2a6;
+  --dk-warning: #ffc94a;
+  --dk-danger: #ff6b5e;
+  --dk-focus: #6cf2a6;
+
+  color-scheme: dark;
+}
+
+/* In the dark, the handbook bands keep their colors; their body text is the
+   panel's, and the default band reads ink on panel grey. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .docs-callout .docs-callout__label { color: #121a1d; }
+  :root:not([data-theme="light"]) .docs-callout--note .docs-callout__label,
+  :root:not([data-theme="light"]) .docs-callout--tip .docs-callout__label,
+  :root:not([data-theme="light"]) .docs-callout--danger .docs-callout__label { color: #ffffff; }
+  :root:not([data-theme="light"]) .docs-callout--warning .docs-callout__label { color: var(--ink); }
+  :root:not([data-theme="light"]) .topbar { background: #1a2529; }
+}
+
+:root[data-theme="dark"] .docs-callout .docs-callout__label { color: #121a1d; }
+:root[data-theme="dark"] .docs-callout--note .docs-callout__label,
+:root[data-theme="dark"] .docs-callout--tip .docs-callout__label,
+:root[data-theme="dark"] .docs-callout--danger .docs-callout__label { color: #ffffff; }
+:root[data-theme="dark"] .docs-callout--warning .docs-callout__label { color: var(--ink); }
+:root[data-theme="dark"] .topbar { background: #1a2529; }
+
+/* --------------------------------------------------------- 11. responsive */
+
+@media (min-width: 760px) {
+  /* The sidebar rides along while the page scrolls. */
+  .docs-nav--sidebar {
+    position: sticky;
+    top: 1.25rem;
+    max-height: calc(100vh - 2.5rem);
+    overflow-y: auto;
+    padding-right: .25rem;
+    scrollbar-width: thin;
+  }
+}
+
+@media (min-width: 1200px) {
+  .docs-layout--toc .docs-toc {
+    top: 1.25rem;
+  }
+}
+
+/* Tablet: the front page's section links give way to the docs' own. */
+@media (max-width: 1100px) {
+  .topnav .topnav__section {
+    display: none;
+  }
+}
+
+/* Phone: the brand, Docs and Proof; the docs menu below carries the rest. */
+@media (max-width: 640px) {
+  :root {
+    --dk-gap: 1rem;
+  }
+
+  .topnav {
+    gap: 0 1rem;
+  }
+
+  .docs-layout {
+    padding-block-start: 1rem;
+  }
+
+  .docs-article pre {
+    font-size: .8125rem;
+  }
+
+  .docs-pager {
+    flex-direction: column;
+    gap: .75rem;
+  }
+
+  .docs-pager__link {
+    max-width: none;
+  }
+
+  .docs-pager__link--next {
+    text-align: left;
+  }
+}
+
+@media (max-width: 420px) {
+  .brand__tail {
+    display: none;
+  }
+}
+
+/* ------------------------------------------- 12. motion (no-preference) */
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* A gentle bank to the left, as on the front page. */
+  .brand img {
+    transition: transform .5s var(--ease-spring);
+  }
+
+  .brand:hover img {
+    transform: rotate(-8deg);
+  }
+
+  .topnav a {
+    transition: background-size .3s var(--ease-out), color .2s;
+  }
+
+  /* The title lights up once, like the hero's letters on the front page. */
+  .docs-article h1 {
+    animation: pf-panel-light .8s var(--ease-out) .1s both;
+  }
+
+  /* The threshold stripes roll out under it. */
+  .docs-article h1::after {
+    transform-origin: left center;
+    animation: pf-roll .7s var(--ease-out) .45s both;
+  }
+
+  .docs-pager__link {
+    transition: transform .25s var(--ease-spring), box-shadow .25s;
+  }
+
+  .docs-pager__link:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 26px -20px rgba(10, 63, 88, .7);
+  }
+
+  .docs-copy__button {
+    transition: transform .12s, box-shadow .12s, background-color .2s;
+  }
+
+  .docs-copy__button:active {
+    transform: translateY(2px);
+    box-shadow: 0 0 0 var(--pf-key-shadow);
+  }
+
+  .docs-nav a,
+  .docs-tabs__tab {
+    transition: background-color .15s, color .15s;
+  }
+}
+
+@keyframes pf-panel-light {
+  0% { color: transparent; -webkit-text-stroke: 1.5px var(--pf-title); transform: translateY(.12em); }
+  55% { -webkit-text-stroke: 0 transparent; text-shadow: 0 0 22px rgba(255, 204, 51, .55); transform: none; }
+  100% { color: var(--pf-title); text-shadow: none; }
+}
+
+@keyframes pf-roll {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* -------------------------------------------------------------- 13. print */
+
+@media print {
+  .topnav {
+    display: none;
+  }
+
+  .docs-article pre,
+  .docs-copy {
+    color: #16211f;
+    background: #ffffff;
+    border-color: #cfc8b8;
+    box-shadow: none;
+  }
+
+  .docs-copy__button,
+  .docs-copy::before {
+    display: none;
+  }
+
+  .docs-footer {
+    box-shadow: none;
+    clip-path: none;
+  }
+
+  .docs-footer::before {
+    content: none;
+  }
+}
