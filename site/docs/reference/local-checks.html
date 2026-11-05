@@ -31,12 +31,12 @@
 <aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>Maintainers: how to build, test and release this project, and where its data comes from, is in <a rel="noopener" href="https://nougat.snu.gs/enterprise-apps/preflight/-/blob/main/MAINTAINING.md">MAINTAINING.md</a> on the canonical repository.</p></aside>
 <h2 id="the-full-gate">The full gate<a class="docs-heading-link" aria-label="Link to this section" href="#the-full-gate">#</a></h2>
 <p>Run the template lint and the fixture tests with Docker:</p>
-<pre><code class="language-sh">docker run --rm -v &quot;$(pwd):/app&quot; -w /app composer:2 composer install
+<div class="docs-tabs" data-tabs="linux|windows"><div class="docs-tabs__panel" data-tab-label="linux"><p class="docs-tabs__label">linux</p><pre><code class="language-sh">docker run --rm -v &quot;$(pwd):/app&quot; -w /app composer:2 composer install
 docker run --rm -v &quot;$(pwd):/app&quot; -w /app composer:2 composer ci
-</code></pre>
-<pre><code class="language-powershell">docker run --rm -v &quot;${PWD}:/app&quot; -w /app composer:2 composer install
+</code></pre></div>
+<div class="docs-tabs__panel" data-tab-label="windows"><p class="docs-tabs__label">windows</p><pre><code class="language-powershell">docker run --rm -v &quot;${PWD}:/app&quot; -w /app composer:2 composer install
 docker run --rm -v &quot;${PWD}:/app&quot; -w /app composer:2 composer ci
-</code></pre>
+</code></pre></div></div>
 <p>In PowerShell, use <code>${PWD}</code> instead of <code>$(pwd)</code>. <code>composer ci</code> is the whole gate: it runs the template lint, the fixture tests, Pint, PHPStan, the agent-ready file check and the docs site check, in that order.</p>
 <h2 id="composer-scripts">Composer scripts<a class="docs-heading-link" aria-label="Link to this section" href="#composer-scripts">#</a></h2>
 <p>The scripts from <code>composer.json</code>:</p>
@@ -116,10 +116,10 @@ docker run --rm -v &quot;$(pwd)/tests/fixture-app:/app&quot; -w /app php:8.4-cli
 </code></pre>
 <h2 id="the-portability-fixtures">The portability fixtures<a class="docs-heading-link" aria-label="Link to this section" href="#the-portability-fixtures">#</a></h2>
 <p>Run the portability fixtures with Docker; they build and boot the three fixtures under <code>tests/portability</code> the strict way and exit 0 only when <code>good</code> passes and both <code>bad-*</code> fixtures fail:</p>
-<pre><code class="language-sh">sh tests/check-portability.sh
-</code></pre>
-<pre><code class="language-powershell">pwsh -File tests/check-portability.ps1
-</code></pre>
+<div class="docs-tabs" data-tabs="linux|windows"><div class="docs-tabs__panel" data-tab-label="linux"><p class="docs-tabs__label">linux</p><pre><code class="language-sh">sh tests/check-portability.sh
+</code></pre></div>
+<div class="docs-tabs__panel" data-tab-label="windows"><p class="docs-tabs__label">windows</p><pre><code class="language-powershell">pwsh -File tests/check-portability.ps1
+</code></pre></div></div>
 <h2 id="proof">Proof<a class="docs-heading-link" aria-label="Link to this section" href="#proof">#</a></h2>
 <p>Proof runs against real Wayne State applications are on a private site, <a rel="noopener" href="https://proof.apps.wayne.edu/preflight/">proof.apps.wayne.edu/preflight</a>, behind a Wayne State employee sign-in.</p>
 <h2 id="docs">Docs<a class="docs-heading-link" aria-label="Link to this section" href="#docs">#</a></h2>
