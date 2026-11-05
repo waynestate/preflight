@@ -70,12 +70,27 @@
 <td><code>.</code></td>
 <td>Directory to run composer audit in, relative to the project root.</td>
 </tr>
+<tr>
+<td><code>abandoned</code></td>
+<td>string</td>
+<td><code>fail</code></td>
+<td>How composer audit treats abandoned packages: fail (default), report (list them, do not fail) or ignore.</td>
+</tr>
 </tbody>
 </table></div>
-<aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>The template adds regexes to two inputs: <code>job_name</code> must match <code>^[A-Za-z0-9_][A-Za-z0-9_.-]*$</code> and <code>working_dir</code> must match <code>^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$</code>.</p></aside>
+<aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>The template adds regexes to three inputs: <code>job_name</code> must match <code>^[A-Za-z0-9_][A-Za-z0-9_.-]*$</code>, <code>working_dir</code> must match <code>^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$</code> and <code>abandoned</code> must match <code>^(fail|report|ignore)$</code>.</p></aside>
 <h2 id="what-the-job-does">What the job does<a class="docs-heading-link" aria-label="Link to this section" href="#what-the-job-does">#</a></h2>
-<p>The <code>composer:2</code> image already ships Composer, so no install step is needed. The job is <code>interruptible: true</code> with a <code>timeout: 30 minutes</code>. Its script changes into <code>working_dir</code> and runs <code>composer audit --locked</code>. The command exits non-zero when it finds advisories, which fails the job.</p>
+<p>The <code>composer:2</code> image already ships Composer, so no install step is needed. The job is <code>interruptible: true</code> with a <code>timeout: 30 minutes</code>. Its script changes into <code>working_dir</code> and runs <code>composer audit --locked</code> with <code>--abandoned</code> set to the <code>abandoned</code> input (see Abandoned packages below). The command exits non-zero when it finds advisories, which fails the job.</p>
 <aside class="docs-callout docs-callout--warning" role="note"><p class="docs-callout__label">Warning</p><p>The component carries no <code>allow_failure</code> input on purpose: a known advisory must fail the pipeline.</p></aside>
+<h2 id="abandoned-packages">Abandoned packages<a class="docs-heading-link" aria-label="Link to this section" href="#abandoned-packages">#</a></h2>
+<p>An abandoned package is one its author no longer maintains; Composer marks it in the lock file. By default an abandoned package in the lock fails the job, and the component keeps that default: <code>fail</code> is what the <code>abandoned</code> input holds when you set nothing.</p>
+<p>The three modes:</p>
+<ul>
+<li><code>fail</code> (default): the job fails when the lock holds an abandoned package.</li>
+<li><code>report</code>: the job lists the abandoned packages but does not fail on them.</li>
+<li><code>ignore</code>: the job does not look at abandoned packages at all.</li>
+</ul>
+<p><code>report</code> is the right choice for an old app that carries abandoned transitive packages it cannot upgrade yet: the pipeline stays green while the job log names every abandoned package, so the debt is visible instead of hidden. Advisories still fail the job in every mode: <code>abandoned</code> relaxes only the abandoned check, never the advisory check.</p>
 <h2 id="run-it-on-a-schedule">Run it on a schedule<a class="docs-heading-link" aria-label="Link to this section" href="#run-it-on-a-schedule">#</a></h2>
 <p>New advisories are published after code is merged, so a green pipeline today can be stale tomorrow. Create a weekly pipeline schedule on the default branch: project settings, Build, Pipeline schedules. The component needs nothing extra; it carries no <code>rules:</code> block, so it runs in scheduled pipelines like any other. Creating the schedule is a project setting, not a file in the app's repo, and someone with Maintainer rights on the app must do it. It is the one Preflight check that books its own flight time.</p>
 <h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
@@ -87,7 +102,7 @@
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../../docs/guides/component-php-test.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">The php-test component</span></a><a class="docs-pager__link docs-pager__link--next" href="../../docs/guides/component-sbom.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">The sbom component</span></a></nav>
   </div>
-  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#include-the-component">Include the component</a></li><li class="docs-toc__item"><a href="#inputs">Inputs</a></li><li class="docs-toc__item"><a href="#what-the-job-does">What the job does</a></li><li class="docs-toc__item"><a href="#run-it-on-a-schedule">Run it on a schedule</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#include-the-component">Include the component</a></li><li class="docs-toc__item"><a href="#inputs">Inputs</a></li><li class="docs-toc__item"><a href="#what-the-job-does">What the job does</a></li><li class="docs-toc__item"><a href="#abandoned-packages">Abandoned packages</a></li><li class="docs-toc__item"><a href="#run-it-on-a-schedule">Run it on a schedule</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
   <span>Documents Preflight <span data-docs-version>0.1.4</span></span>

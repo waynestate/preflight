@@ -12,6 +12,8 @@ are Git tags.
 ## Unreleased
 
 - Added: a Composer cache on the proctor component, keyed on composer.lock (BEST_PRACTICES 4.8); new test tests/check-proctor-cache.
+- Added: every component job prints a `Preflight component <name> <version> (ref <reference>, sha <sha>)` line as its first command, so a job log says which Preflight release produced it; each template declares `spec: component: [name, version, sha, reference]`. New tests `tests/check-component-version.sh` and `tests/check-component-version.ps1`; `tests/check-spec-keys` and the template lint allow `component` under `spec:`.
+- Changed: Preflight now needs GitLab 18.7 or later: `spec: component:` is generally available from 18.7, and pipeline creation fails on the unknown key on older instances.
 - Added: the docs site at `site/docs/`, built from `docs/` by Squire's shared docs builder (`bin/docs-site.php`), starting with the overview page. New composer scripts: `docs` builds it, `docs:check` fails when it is stale, and `ci` now runs the check.
 - Docs: component pins in the README and site examples now point at 0.1.4.
 - Changed: the front-page deploy layer pins HELMET ^0.3, PROCTOR ^0.4 and CREED ^0.1 (lock: HELMET 0.3.0, PROCTOR 0.4.0, CREED 0.1.6).
@@ -20,6 +22,7 @@ are Git tags.
 - Added: a tag-triggered `release` job in the repository's own pipeline: pushing a protected tag creates the GitLab Release through the Releases API with curl, and the release notes carry the tag's commit SHA so consumers can pin it (BEST_PRACTICES 1.3, 1.6); new test tests/check-release-job.
 - Added: a packageRule in `renovate/default.json` that restricts `quay.io/buildah/stable` to `-immutable` tags (regex versioning), so Renovate never moves a pin back to a mutable tag after Red Hat re-pushed one and garbage-collected the old digest; new test tests/check-renovate-buildah.
 - Changed: the portability component's `buildah_image` default moves to the immutable tag `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb`; Red Hat re-pushed the plain version tag and garbage-collected the old digest, so pipelines pinned to the mutable tag broke. New test tests/check-buildah-pin.
+- Added: an `abandoned` input on the composer-audit component (`fail`, `report` or `ignore`, default `fail`) so an app can relax how `composer audit` treats abandoned packages on purpose; the job now runs `composer audit --locked --abandoned=$[[ inputs.abandoned ]]`. New test tests/check-abandoned-input (and its `.ps1` twin) with the fixtures in tests/audit-fixtures.
 
 ## 0.1.4 (2026-11-03)
 

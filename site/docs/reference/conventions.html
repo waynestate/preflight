@@ -58,6 +58,8 @@ set one up or review one, so every project starts from the same baseline.</p>
 <h2 id="javascript-installs">JavaScript installs<a class="docs-heading-link" aria-label="Link to this section" href="#javascript-installs">#</a></h2>
 <p>JavaScript components install with <code>npm ci --ignore-scripts</code>. The job carries
 no token beyond <code>CI_JOB_TOKEN</code> (BEST_PRACTICES.md 4.12).</p>
+<h2 id="the-preflight-component-line">The Preflight component line<a class="docs-heading-link" aria-label="Link to this section" href="#the-preflight-component-line">#</a></h2>
+<p>Every Preflight job prints a <code>Preflight component &lt;name&gt; &lt;version&gt; (ref &lt;reference&gt;, sha &lt;sha&gt;)</code> line as its first command, before anything else runs. When a job misbehaves, read that line to see which Preflight release produced it: <code>&lt;name&gt;</code> is the component (for example <code>php-test</code>), <code>&lt;version&gt;</code> is the tag of the pinned release when the include is pinned by tag, <code>&lt;reference&gt;</code> is the ref the include points at, and <code>&lt;sha&gt;</code> is the commit SHA of the component template that ran. An include pinned by commit SHA shows that SHA in the line. The line needs GitLab 18.7 or later; on an older instance, pipeline creation fails on the unknown <code>spec: component:</code> key, so upgrade GitLab or pin an older Preflight tag.</p>
 <h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
 <ul>
 <li><a href="../guides/image-pins.html">Updating image pins</a>: why component images are digest-pinned and how to change a pin.</li>
@@ -67,7 +69,7 @@ no token beyond <code>CI_JOB_TOKEN</code> (BEST_PRACTICES.md 4.12).</p>
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../../docs/reference/components.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">Components</span></a><a class="docs-pager__link docs-pager__link--next" href="../../docs/reference/local-checks.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">Local checks</span></a></nav>
   </div>
-  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#conventions">Conventions</a></li><li class="docs-toc__item"><a href="#javascript-installs">JavaScript installs</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#conventions">Conventions</a></li><li class="docs-toc__item"><a href="#javascript-installs">JavaScript installs</a></li><li class="docs-toc__item"><a href="#the-preflight-component-line">The Preflight component line</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
   <span>Documents Preflight <span data-docs-version>0.1.4</span></span>

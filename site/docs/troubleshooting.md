@@ -56,6 +56,14 @@ Every component except `portability` takes a `job_name` input, whose default is 
 - **Fix:** set `job_name` on each include, for example `pint-app` and `pint-admin`. `job_name` ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release.
 - **Check:** the pipeline lists one job per include, with the names you set.
 
+### Pipeline creation fails on the unknown `spec: component:` key[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#pipeline-creation-fails-on-the-unknown-spec-component-key)
+
+Every Preflight component declares `spec: component:`, and GitLab only accepts that key from 18.7 on. On an older instance the pipeline never starts: creation fails with "header:spec config contains unknown keys".
+
+- **Cause:** the GitLab instance is older than 18.7.
+- **Fix:** upgrade GitLab to 18.7 or later, or pin an older Preflight tag that does not declare `spec: component:`.
+- **Check:** the instance banner shows 18.7 or later, and the pipeline creates and runs the component jobs.
+
 ### A fork merge request ran with protected variables[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#a-fork-merge-request-ran-with-protected-variables)
 
 A fork's merge request pipeline runs the fork's configuration.
@@ -65,6 +73,14 @@ A fork's merge request pipeline runs the fork's configuration.
 - **Check:** the fork pipeline's variable list does not include any protected variable.
 
 ## Job failures[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#job-failures)
+
+### A job misbehaves: which Preflight release ran?[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#a-job-misbehaves-which-preflight-release-ran)
+
+Every Preflight job prints a `Preflight component <name> <version> (ref <reference>, sha <sha>)` line before any other command. When a job fails or behaves unexpectedly, read that first line to see which Preflight release produced it: `<name>` is the component, `<version>` the pinned release tag, `<reference>` the ref the include points at, and `<sha>` the commit SHA of the template that ran. Compare it with the pin in the app's `.gitlab-ci.yml`; a mismatch means the include moved or the pipeline ran on an older pin.
+
+- **Cause:** the job log does not say which Preflight release ran, so the failure cannot be tied to a pin.
+- **Fix:** read the `Preflight component` line at the top of the job log. If the line is missing, the include is pinned to a Preflight release from before the line shipped; pin the current tag.
+- **Check:** the first line of the job log names the component, its version, reference and SHA, and they match the pin in the app's `.gitlab-ci.yml`.
 
 ### PROCTOR's preflight-pinned check warns[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#proctor-s-preflight-pinned-check-warns)
 
@@ -81,6 +97,14 @@ New advisories are published after code is merged, so a green pipeline today can
 - **Cause:** no pipeline has run since the advisory was published.
 - **Fix:** create a weekly pipeline schedule on the default branch: project settings, Build, Pipeline schedules. The component needs nothing extra. It carries no `rules:` block, so it runs in scheduled pipelines like any other. Someone with Maintainer rights on the app creates the schedule.
 - **Check:** the schedule appears under project settings, Build, Pipeline schedules, and its latest pipeline is green.
+
+### composer-audit fails on an abandoned package[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#composer-audit-fails-on-an-abandoned-package)
+
+The job log names an abandoned package in the lock. An abandoned package is one its author no longer maintains, and `composer audit` fails the job on one by default.
+
+- **Cause:** the lock holds a package marked abandoned, and the `abandoned` input is at its default, `fail`.
+- **Fix:** upgrade the package or move to its successor where the log names one. While that is not possible, set the `abandoned` input on the include: `report` lists the abandoned packages without failing the job (right for an old app with abandoned transitive packages), `ignore` does not look at them at all. Advisories still fail the job in every mode.
+- **Check:** with `report`, the job is green and its log lists the abandoned packages; with `fail`, the job fails until the lock no longer holds one.
 
 ### php-test-next is red[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#php-test-next-is-red)
 

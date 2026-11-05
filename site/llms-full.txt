@@ -125,6 +125,7 @@ include:
 | `job_name` | string | `composer-audit` | Name of the job. Set it when you include this component more than once. |
 | `image` | string | `composer:2@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. |
 | `working_dir` | string | `.` | Directory to run composer audit in, relative to the project root. |
+| `abandoned` | string | `fail` | How composer audit treats abandoned packages: fail (default), report (list them, do not fail) or ignore. |
 
 ##### Run it on a schedule
 
@@ -485,6 +486,10 @@ include:
 The `workflow:rules` block must live in the app's own file. A component
 cannot set the pipeline's `workflow:rules` for the project that includes it,
 so the `merge_request_event` rule goes in the app's `.gitlab-ci.yml`.
+
+### Which release ran
+
+Every Preflight job prints a `Preflight component   (ref , sha )` line before any other command, so when a job misbehaves, its log says which Preflight release produced it. The line needs GitLab 18.7 or later, where `spec: component:` is generally available; an include pinned by commit SHA shows that SHA in the line.
 
 ### What the components cannot force
 
@@ -1167,6 +1172,8 @@ All notable changes to PREFLIGHT are recorded here. Entries follow [Keep a Chang
 ### Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
 - Added: a Composer cache on the proctor component, keyed on composer.lock (BEST_PRACTICES 4.8); new test tests/check-proctor-cache.
+- Added: every component job prints a `Preflight component <name> <version> (ref <reference>, sha <sha>)` line as its first command, so a job log says which Preflight release produced it; each template declares `spec: component: [name, version, sha, reference]`. New tests `tests/check-component-version.sh` and `tests/check-component-version.ps1`; `tests/check-spec-keys` and the template lint allow `component` under `spec:`.
+- Changed: Preflight now needs GitLab 18.7 or later: `spec: component:` is generally available from 18.7, and pipeline creation fails on the unknown key on older instances.
 - Added: the docs site at `site/docs/`, built from `docs/` by Squire's shared docs builder (`bin/docs-site.php`), starting with the overview page. New composer scripts: `docs` builds it, `docs:check` fails when it is stale, and `ci` now runs the check.
 - Docs: component pins in the README and site examples now point at 0.1.4.
 - Changed: the front-page deploy layer pins HELMET ^0.3, PROCTOR ^0.4 and CREED ^0.1 (lock: HELMET 0.3.0, PROCTOR 0.4.0, CREED 0.1.6).
@@ -1175,6 +1182,7 @@ All notable changes to PREFLIGHT are recorded here. Entries follow [Keep a Chang
 - Added: a tag-triggered `release` job in the repository's own pipeline: pushing a protected tag creates the GitLab Release through the Releases API with curl, and the release notes carry the tag's commit SHA so consumers can pin it (BEST_PRACTICES 1.3, 1.6); new test tests/check-release-job.
 - Added: a packageRule in `renovate/default.json` that restricts `quay.io/buildah/stable` to `-immutable` tags (regex versioning), so Renovate never moves a pin back to a mutable tag after Red Hat re-pushed one and garbage-collected the old digest; new test tests/check-renovate-buildah.
 - Changed: the portability component's `buildah_image` default moves to the immutable tag `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb`; Red Hat re-pushed the plain version tag and garbage-collected the old digest, so pipelines pinned to the mutable tag broke. New test tests/check-buildah-pin.
+- Added: an `abandoned` input on the composer-audit component (`fail`, `report` or `ignore`, default `fail`) so an app can relax how `composer audit` treats abandoned packages on purpose; the job now runs `composer audit --locked --abandoned=$[[ inputs.abandoned ]]`. New test tests/check-abandoned-input (and its `.ps1` twin) with the fixtures in tests/audit-fixtures.
 
 ### 0.1.4 (2026-11-03)[#](https://preflight.apps.wayne.edu/docs/changelog.html#0-1-4-2026-11-03)
 
@@ -1283,18 +1291,31 @@ include:
 | `job_name` | string | `composer-audit` | Name of the job. Set it when you include this component more than once. |
 | `image` | string | `composer:2@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. |
 | `working_dir` | string | `.` | Directory to run composer audit in, relative to the project root. |
+| `abandoned` | string | `fail` | How composer audit treats abandoned packages: fail (default), report (list them, do not fail) or ignore. |
 
 Note
 
-The template adds regexes to two inputs: `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$` and `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$`.
+The template adds regexes to three inputs: `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`, `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$` and `abandoned` must match `^(fail|report|ignore)$`.
 
 ### What the job does[#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#what-the-job-does)
 
-The `composer:2` image already ships Composer, so no install step is needed. The job is `interruptible: true` with a `timeout: 30 minutes`. Its script changes into `working_dir` and runs `composer audit --locked`. The command exits non-zero when it finds advisories, which fails the job.
+The `composer:2` image already ships Composer, so no install step is needed. The job is `interruptible: true` with a `timeout: 30 minutes`. Its script changes into `working_dir` and runs `composer audit --locked` with `--abandoned` set to the `abandoned` input (see Abandoned packages below). The command exits non-zero when it finds advisories, which fails the job.
 
 Warning
 
 The component carries no `allow_failure` input on purpose: a known advisory must fail the pipeline.
+
+### Abandoned packages[#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#abandoned-packages)
+
+An abandoned package is one its author no longer maintains; Composer marks it in the lock file. By default an abandoned package in the lock fails the job, and the component keeps that default: `fail` is what the `abandoned` input holds when you set nothing.
+
+The three modes:
+
+- `fail` (default): the job fails when the lock holds an abandoned package.
+- `report`: the job lists the abandoned packages but does not fail on them.
+- `ignore`: the job does not look at abandoned packages at all.
+
+`report` is the right choice for an old app that carries abandoned transitive packages it cannot upgrade yet: the pipeline stays green while the job log names every abandoned package, so the debt is visible instead of hidden. Advisories still fail the job in every mode: `abandoned` relaxes only the abandoned check, never the advisory check.
 
 ### Run it on a schedule[#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#run-it-on-a-schedule)
 
@@ -2632,8 +2653,9 @@ include:
 | `job_name` | string | `composer-audit` | Name of the job. Set it when you include this component more than once. |
 | `image` | string | `composer:2@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. |
 | `working_dir` | string | `.` | Directory to run composer audit in, relative to the project root. |
+| `abandoned` | string | `fail` | How composer audit treats abandoned packages: fail (default), report (list them, do not fail) or ignore. |
 
-From `templates/composer-audit/template.yml`: the `composer:2` image already ships Composer, so there is no install step. The job runs `composer audit --locked`, which exits non-zero when it finds advisories, and fails the job. There is no `allow_failure` input: advisories must fail. The job is `interruptible: true` with a timeout of 30 minutes.
+From `templates/composer-audit/template.yml`: the `composer:2` image already ships Composer, so there is no install step. The job runs `composer audit --locked` with `--abandoned` set to the `abandoned` input (`fail` by default, `report` or `ignore` to relax the abandoned check), which exits non-zero when it finds advisories, and fails the job. There is no `allow_failure` input: advisories must fail. The job is `interruptible: true` with a timeout of 30 minutes.
 
 #### Run it on a schedule[#](https://preflight.apps.wayne.edu/docs/reference/components.html#run-it-on-a-schedule)
 
@@ -2852,6 +2874,10 @@ Preflight itself ships these values in its `composer.json`: `waynestate/prefligh
 
 JavaScript components install with `npm ci --ignore-scripts`. The job carries no token beyond `CI_JOB_TOKEN` (BEST_PRACTICES.md 4.12).
 
+### The Preflight component line[#](https://preflight.apps.wayne.edu/docs/reference/conventions.html#the-preflight-component-line)
+
+Every Preflight job prints a `Preflight component <name> <version> (ref <reference>, sha <sha>)` line as its first command, before anything else runs. When a job misbehaves, read that line to see which Preflight release produced it: `<name>` is the component (for example `php-test`), `<version>` is the tag of the pinned release when the include is pinned by tag, `<reference>` is the ref the include points at, and `<sha>` is the commit SHA of the component template that ran. An include pinned by commit SHA shows that SHA in the line. The line needs GitLab 18.7 or later; on an older instance, pipeline creation fails on the unknown `spec: component:` key, so upgrade GitLab or pin an older Preflight tag.
+
 ### Related[#](https://preflight.apps.wayne.edu/docs/reference/conventions.html#related)
 
 - [Updating image pins](https://preflight.apps.wayne.edu/docs/guides/image-pins.html): why component images are digest-pinned and how to change a pin.
@@ -3018,6 +3044,14 @@ Every component except `portability` takes a `job_name` input, whose default is 
 - **Fix:** set `job_name` on each include, for example `pint-app` and `pint-admin`. `job_name` ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release.
 - **Check:** the pipeline lists one job per include, with the names you set.
 
+#### Pipeline creation fails on the unknown `spec: component:` key[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#pipeline-creation-fails-on-the-unknown-spec-component-key)
+
+Every Preflight component declares `spec: component:`, and GitLab only accepts that key from 18.7 on. On an older instance the pipeline never starts: creation fails with "header:spec config contains unknown keys".
+
+- **Cause:** the GitLab instance is older than 18.7.
+- **Fix:** upgrade GitLab to 18.7 or later, or pin an older Preflight tag that does not declare `spec: component:`.
+- **Check:** the instance banner shows 18.7 or later, and the pipeline creates and runs the component jobs.
+
 #### A fork merge request ran with protected variables[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#a-fork-merge-request-ran-with-protected-variables)
 
 A fork's merge request pipeline runs the fork's configuration.
@@ -3027,6 +3061,14 @@ A fork's merge request pipeline runs the fork's configuration.
 - **Check:** the fork pipeline's variable list does not include any protected variable.
 
 ### Job failures[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#job-failures)
+
+#### A job misbehaves: which Preflight release ran?[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#a-job-misbehaves-which-preflight-release-ran)
+
+Every Preflight job prints a `Preflight component <name> <version> (ref <reference>, sha <sha>)` line before any other command. When a job fails or behaves unexpectedly, read that first line to see which Preflight release produced it: `<name>` is the component, `<version>` the pinned release tag, `<reference>` the ref the include points at, and `<sha>` the commit SHA of the template that ran. Compare it with the pin in the app's `.gitlab-ci.yml`; a mismatch means the include moved or the pipeline ran on an older pin.
+
+- **Cause:** the job log does not say which Preflight release ran, so the failure cannot be tied to a pin.
+- **Fix:** read the `Preflight component` line at the top of the job log. If the line is missing, the include is pinned to a Preflight release from before the line shipped; pin the current tag.
+- **Check:** the first line of the job log names the component, its version, reference and SHA, and they match the pin in the app's `.gitlab-ci.yml`.
 
 #### PROCTOR's preflight-pinned check warns[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#proctor-s-preflight-pinned-check-warns)
 
@@ -3043,6 +3085,14 @@ New advisories are published after code is merged, so a green pipeline today can
 - **Cause:** no pipeline has run since the advisory was published.
 - **Fix:** create a weekly pipeline schedule on the default branch: project settings, Build, Pipeline schedules. The component needs nothing extra. It carries no `rules:` block, so it runs in scheduled pipelines like any other. Someone with Maintainer rights on the app creates the schedule.
 - **Check:** the schedule appears under project settings, Build, Pipeline schedules, and its latest pipeline is green.
+
+#### composer-audit fails on an abandoned package[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#composer-audit-fails-on-an-abandoned-package)
+
+The job log names an abandoned package in the lock. An abandoned package is one its author no longer maintains, and `composer audit` fails the job on one by default.
+
+- **Cause:** the lock holds a package marked abandoned, and the `abandoned` input is at its default, `fail`.
+- **Fix:** upgrade the package or move to its successor where the log names one. While that is not possible, set the `abandoned` input on the include: `report` lists the abandoned packages without failing the job (right for an old app with abandoned transitive packages), `ignore` does not look at them at all. Advisories still fail the job in every mode.
+- **Check:** with `report`, the job is green and its log lists the abandoned packages; with `fail`, the job fails until the lock no longer holds one.
 
 #### php-test-next is red[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#php-test-next-is-red)
 
@@ -3145,7 +3195,7 @@ This page is the checklist for moving an app from one Preflight pin to the next,
 
 #### Changed[#](https://preflight.apps.wayne.edu/docs/upgrading.html#changed)
 
-The `portability` component's `buildah_image` default moved from the plain version tag to the immutable tag `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb`: Red Hat re-pushed the plain version tag and garbage-collected the old digest, so a pipeline pinned to it broke. If your app overrides `buildah_image`, point it at an `-immutable` tag pinned by digest too.
+The `portability` component's `buildah_image` default moved from the plain version tag to the immutable tag `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb`: Red Hat re-pushed the plain version tag and garbage-collected the old digest, so a pipeline pinned to it broke. If your app overrides `buildah_image`, point it at an `-immutable` tag pinned by digest too. The `composer-audit` component gains an `abandoned` input (`fail`, `report` or `ignore`) for how `composer audit` treats abandoned packages. No action needed: the default is `fail`, which is what the component already did, so existing pipelines behave exactly as before. This release needs GitLab 18.7 or later: every component now declares `spec: component:` and prints a `Preflight component` line as its first command, and GitLab accepts that spec key only from 18.7 on. On an older instance, pipeline creation fails on the unknown key, so upgrade GitLab or pin an older Preflight tag.
 
 ### 0.1.4[#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-1-4)
 

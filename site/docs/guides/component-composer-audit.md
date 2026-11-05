@@ -29,18 +29,31 @@ include:
 | `job_name` | string | `composer-audit` | Name of the job. Set it when you include this component more than once. |
 | `image` | string | `composer:2@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. |
 | `working_dir` | string | `.` | Directory to run composer audit in, relative to the project root. |
+| `abandoned` | string | `fail` | How composer audit treats abandoned packages: fail (default), report (list them, do not fail) or ignore. |
 
 Note
 
-The template adds regexes to two inputs: `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$` and `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$`.
+The template adds regexes to three inputs: `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`, `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$` and `abandoned` must match `^(fail|report|ignore)$`.
 
 ## What the job does[#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#what-the-job-does)
 
-The `composer:2` image already ships Composer, so no install step is needed. The job is `interruptible: true` with a `timeout: 30 minutes`. Its script changes into `working_dir` and runs `composer audit --locked`. The command exits non-zero when it finds advisories, which fails the job.
+The `composer:2` image already ships Composer, so no install step is needed. The job is `interruptible: true` with a `timeout: 30 minutes`. Its script changes into `working_dir` and runs `composer audit --locked` with `--abandoned` set to the `abandoned` input (see Abandoned packages below). The command exits non-zero when it finds advisories, which fails the job.
 
 Warning
 
 The component carries no `allow_failure` input on purpose: a known advisory must fail the pipeline.
+
+## Abandoned packages[#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#abandoned-packages)
+
+An abandoned package is one its author no longer maintains; Composer marks it in the lock file. By default an abandoned package in the lock fails the job, and the component keeps that default: `fail` is what the `abandoned` input holds when you set nothing.
+
+The three modes:
+
+- `fail` (default): the job fails when the lock holds an abandoned package.
+- `report`: the job lists the abandoned packages but does not fail on them.
+- `ignore`: the job does not look at abandoned packages at all.
+
+`report` is the right choice for an old app that carries abandoned transitive packages it cannot upgrade yet: the pipeline stays green while the job log names every abandoned package, so the debt is visible instead of hidden. Advisories still fail the job in every mode: `abandoned` relaxes only the abandoned check, never the advisory check.
 
 ## Run it on a schedule[#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#run-it-on-a-schedule)
 
