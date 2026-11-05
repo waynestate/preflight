@@ -18,10 +18,14 @@ Maintainers: how to build, test and release this project, and where its data com
 
 Run the template lint and the fixture tests with Docker:
 
+linux
+
 ```sh
 docker run --rm -v "$(pwd):/app" -w /app composer:2 composer install
 docker run --rm -v "$(pwd):/app" -w /app composer:2 composer ci
 ```
+
+windows
 
 ```powershell
 docker run --rm -v "${PWD}:/app" -w /app composer:2 composer install
@@ -78,9 +82,13 @@ docker run --rm -v "$(pwd)/tests/fixture-app:/app" -w /app php:8.4-cli vendor/bi
 
 Run the portability fixtures with Docker; they build and boot the three fixtures under `tests/portability` the strict way and exit 0 only when `good` passes and both `bad-*` fixtures fail:
 
+linux
+
 ```sh
 sh tests/check-portability.sh
 ```
+
+windows
 
 ```powershell
 pwsh -File tests/check-portability.ps1
@@ -98,6 +106,8 @@ The full documentation lives at [preflight.apps.wayne.edu/docs/](https://preflig
 - `composer docs:check` fails when the built site is stale; `composer ci` runs it.
 
 The pages are committed because the deploy server serves `site/` without building. Every page links back to its Markdown, and the footer stamps the version the docs describe. Cleared for takeoff: the flight manual flies with the aircraft.
+
+The pages wear the front page's flight deck: `docs/_header.html` is the front page's top bar and `docs/theme/preflight.css` maps its palette and B612 type onto the docs kit, with a dark mode taken from the instrument panel. `docs/docs.json` names both under `theme`. Restyle the docs in those two files, never in `site/assets/docs.css` or `bin/docs-site.php`: those are Squire's bytes.
 
 ## Related[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#related)
 

@@ -621,6 +621,8 @@ The full documentation lives at [preflight.apps.wayne.edu/docs/](https://preflig
 
 The pages are committed because the deploy server serves `site/` without building. Every page links back to its Markdown, and the footer stamps the version the docs describe. Cleared for takeoff: the flight manual flies with the aircraft.
 
+The pages wear the front page's flight deck: `docs/_header.html` is the front page's top bar and `docs/theme/preflight.css` maps its palette and B612 type onto the docs kit, with a dark mode taken from the instrument panel. `docs/docs.json` names both under `theme`. Restyle the docs in those two files, never in `site/assets/docs.css` or `bin/docs-site.php`: those are Squire's bytes.
+
 ### Local checks
 
 Maintainers: how to build, test and release this project, and where its data comes from, is in [MAINTAINING.md](https://nougat.snu.gs/enterprise-apps/preflight/blob/HEAD/MAINTAINING.md).
@@ -1171,6 +1173,8 @@ All notable changes to PREFLIGHT are recorded here. Entries follow [Keep a Chang
 
 ### Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Changed: the docs pages wear the front page's look: its top bar and main menu (Docs marked current), B612 and B612 Mono, the cream chart page, commands on the quickstart's slab with its Copy key, callouts as the handbook's NOTE, CAUTION and WARNING boxes, tables and the pager as flight-plan forms, and the green runway footer; dark mode follows the instrument panel. New `docs/_header.html` and `docs/theme/preflight.css`, named under `theme` in `docs/docs.json`.
+- Changed: the docs builder and kit are Squire's 0778fed: the theme hook, callouts, code tabs, task-list checkbox labels (fixes the axe `label` failures on the protection checklist) and a keyboard-reachable scrolling code block.
 - Added: a Composer cache on the proctor component, keyed on composer.lock (BEST_PRACTICES 4.8); new test tests/check-proctor-cache.
 - Added: every component job prints a `Preflight component <name> <version> (ref <reference>, sha <sha>)` line as its first command, so a job log says which Preflight release produced it; each template declares `spec: component: [name, version, sha, reference]`. New tests `tests/check-component-version.sh` and `tests/check-component-version.ps1`; `tests/check-spec-keys` and the template lint allow `component` under `spec:`.
 - Changed: Preflight now needs GitLab 18.7 or later: `spec: component:` is generally available from 18.7, and pipeline creation fails on the unknown key on older instances.
@@ -2406,12 +2410,6 @@ No template adds a global key such as `default:`, `variables:`, `workflow:` or `
 
 A pilot signs each line of the checklist; the plane does not sign for you. Five project settings make the gates harder to skip, and every one of them works on GitLab Community Edition:
 
-- **Protect the default branch** and require a merge request to change it. Every change to `.gitlab-ci.yml` then gets a reviewer. (Code owner approval needs Premium, so on Community Edition the reviewer is whoever merges.)
-- **Protect the release tags.** Protect `*` or the release tag pattern so only maintainers can create or move a tag. A component ref is a tag, so whoever can move it controls every pipeline that pins it.
-- **Set merge request approvals to at least one** for changes to the default branch. Approvals are available on every tier, but code owner rules within them need Premium, so on Community Edition the approval rests with whoever has merge rights: rely on the merger as the reviewer.
-- **Set "Minimum role to use pipeline variables" to `no_one_allowed`** unless the project needs pipeline variables. The components take inputs, which are fixed and type checked for the whole run. Self-managed GitLab defaults this setting to `maintainer`.
-- **Keep secrets away from fork merge requests.** A fork's merge request pipeline runs the fork's configuration. Review a fork's `.gitlab-ci.yml` before running its pipeline, and never give it protected variables.
-
 Note
 
 These are project settings Preflight cannot create or check, and a read-only token drift report was considered and left out on purpose: it would trade a token for a warning, and the checklist costs nothing to keep.
@@ -2899,10 +2897,14 @@ Maintainers: how to build, test and release this project, and where its data com
 
 Run the template lint and the fixture tests with Docker:
 
+linux
+
 ```sh
 docker run --rm -v "$(pwd):/app" -w /app composer:2 composer install
 docker run --rm -v "$(pwd):/app" -w /app composer:2 composer ci
 ```
+
+windows
 
 ```powershell
 docker run --rm -v "${PWD}:/app" -w /app composer:2 composer install
@@ -2959,9 +2961,13 @@ docker run --rm -v "$(pwd)/tests/fixture-app:/app" -w /app php:8.4-cli vendor/bi
 
 Run the portability fixtures with Docker; they build and boot the three fixtures under `tests/portability` the strict way and exit 0 only when `good` passes and both `bad-*` fixtures fail:
 
+linux
+
 ```sh
 sh tests/check-portability.sh
 ```
+
+windows
 
 ```powershell
 pwsh -File tests/check-portability.ps1
@@ -2979,6 +2985,8 @@ The full documentation lives at [preflight.apps.wayne.edu/docs/](https://preflig
 - `composer docs:check` fails when the built site is stale; `composer ci` runs it.
 
 The pages are committed because the deploy server serves `site/` without building. Every page links back to its Markdown, and the footer stamps the version the docs describe. Cleared for takeoff: the flight manual flies with the aircraft.
+
+The pages wear the front page's flight deck: `docs/_header.html` is the front page's top bar and `docs/theme/preflight.css` maps its palette and B612 type onto the docs kit, with a dark mode taken from the instrument panel. `docs/docs.json` names both under `theme`. Restyle the docs in those two files, never in `site/assets/docs.css` or `bin/docs-site.php`: those are Squire's bytes.
 
 ### Related[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#related)
 
