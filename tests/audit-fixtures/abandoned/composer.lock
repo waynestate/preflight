@@ -1,0 +1,60 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Use `composer update` to change the locked dependency versions.",
+        "This file is part of the Preflight test fixtures; it is not generated."
+    ],
+    "content-hash": "78f7fb41d376691c8f998bc4bcd6d5ac",
+    "packages": [
+        {
+            "name": "phpunit/php-token-stream",
+            "version": "3.1.3",
+            "version_normalized": "3.1.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sebastianbergmann/php-token-stream.git",
+                "reference": "4bbfe01b05ceb7ec4babab61f5c6c5dd5e77d4d3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-token-stream/zipball/4bbfe01b05ceb7ec4babab61f5c6c5dd5e77d4d3",
+                "reference": "4bbfe01b05ceb7ec4babab61f5c6c5dd5e77d4d3",
+                "shasum": ""
+            },
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "classmap": [
+                    "src/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Sebastian Bergmann",
+                    "email": "sebastian@phpunit.de",
+                    "role": "lead"
+                }
+            ],
+            "description": "A small library for converting tokenized PHP source code into XML and metadata.",
+            "homepage": "https://github.com/sebastianbergmann/php-token-stream",
+            "support": {
+                "issues": "https://github.com/sebastianbergmann/php-token-stream/issues",
+                "source": "https://github.com/sebastianbergmann/php-token-stream/tree/3.1.3"
+            },
+            "time": "2021-07-26T05:45:09+00:00",
+            "abandoned": true
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": []
+}

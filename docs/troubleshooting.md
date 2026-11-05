@@ -78,6 +78,14 @@ New advisories are published after code is merged, so a green pipeline today can
 - **Fix:** create a weekly pipeline schedule on the default branch: project settings, Build, Pipeline schedules. The component needs nothing extra. It carries no `rules:` block, so it runs in scheduled pipelines like any other. Someone with Maintainer rights on the app creates the schedule.
 - **Check:** the schedule appears under project settings, Build, Pipeline schedules, and its latest pipeline is green.
 
+### composer-audit fails on an abandoned package
+
+The job log names an abandoned package in the lock. An abandoned package is one its author no longer maintains, and `composer audit` fails the job on one by default.
+
+- **Cause:** the lock holds a package marked abandoned, and the `abandoned` input is at its default, `fail`.
+- **Fix:** upgrade the package or move to its successor where the log names one. While that is not possible, set the `abandoned` input on the include: `report` lists the abandoned packages without failing the job (right for an old app with abandoned transitive packages), `ignore` does not look at them at all. Advisories still fail the job in every mode.
+- **Check:** with `report`, the job is green and its log lists the abandoned packages; with `fail`, the job fails until the lock no longer holds one.
+
 ### php-test-next is red
 
 A red `php-test-next` job is an early warning, not a stop. It is the second `php-test` include that tries the PHP release that is not supported yet, with `allow_failure: true` in the app's own file.

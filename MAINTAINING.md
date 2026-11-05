@@ -32,6 +32,8 @@ copy (see "Same instance only" in the README).
 Each contract test comes as a `.sh` and `.ps1` pair that check the same thing (`check-contract`, `check-spec-keys`,
 `check-image-inputs`, `check-php-test-cache`, `check-working-dir-regex`, `check-path-input-regex`, `check-github-workflow`,
 `check-proctor-install-flags`, `check-secret-detection`, `check-renovate-review`, `check-renovate-buildah`, `check-sha-pins`, `check-release-job`). CI runs the `.sh` ones.
+`check-proctor-install-flags`, `check-secret-detection`, `check-renovate-review`, `check-sha-pins`, `check-release-job`,
+`check-abandoned-input`). CI runs the `.sh` ones, except `check-abandoned-input`: the contract job's yq image has no Docker, and the test runs composer in the composer:2.10.3 image, so it stays out of the contract job's script list in `.gitlab-ci.yml`.
 Keep both in step when you change one.
 
 `tests/check-portability.sh` (and `tests/check-portability.ps1`) is a local check that needs Docker and runs the

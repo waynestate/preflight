@@ -1,0 +1,7 @@
+{
+    "name": "preflight/audit-fixture-advisory",
+    "description": "Preflight test fixture: the lock holds a package version with a known advisory.",
+    "require": {
+        "laravel/framework": "^9.0"
+    }
+}

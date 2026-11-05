@@ -1,0 +1,7 @@
+{
+    "name": "preflight/audit-fixture-abandoned",
+    "description": "Preflight test fixture: the lock holds one abandoned package.",
+    "require": {
+        "phpunit/php-token-stream": "^3.1"
+    }
+}

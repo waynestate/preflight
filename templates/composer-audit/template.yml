@@ -18,15 +18,23 @@ spec:
       type: string
       default: "."
       regex: '^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$'
+    abandoned:
+      description: "How composer audit treats abandoned packages: fail (default), report (list them, do not fail) or ignore."
+      type: string
+      default: fail
+      regex: '^(fail|report|ignore)$'
 ---
 "$[[ inputs.job_name ]]":
   stage: $[[ inputs.stage ]]
   # The composer:2 image already ships Composer, so no install step is
   # needed. composer audit --locked exits non-zero when it finds advisories,
-  # which fails the job. No allow_failure input: advisories must fail.
+  # which fails the job. Abandoned packages fail by default (Composer's own
+  # default); the abandoned input relaxes that on purpose: report lists them
+  # without failing, ignore skips them. No allow_failure input: advisories
+  # must fail.
   image: $[[ inputs.image ]]
   interruptible: true
   timeout: 30 minutes
   script:
     - cd "$[[ inputs.working_dir ]]"
-    - composer audit --locked
+    - composer audit --locked --abandoned=$[[ inputs.abandoned ]]
