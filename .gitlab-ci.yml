@@ -54,6 +54,7 @@ contract:
     - sh tests/check-working-dir-regex.sh
     - sh tests/check-path-input-regex.sh
     - sh tests/check-spec-keys.sh
+    - sh tests/check-component-version.sh
     - sh tests/check-job-names.sh
     - sh tests/check-proctor-install-flags.sh
     - sh tests/check-secret-detection.sh
