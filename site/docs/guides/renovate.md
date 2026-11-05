@@ -41,6 +41,10 @@ Updates that change an image digest inside the templates, the contract, or this 
 
 The `mysql` and `haproxy` images mirror the versions Citadel actually runs, not the newest releases in the world. Bumping their tags would drift the apps away from production, so only digest updates are enabled for them: the same tag, the exact image. `citadel/php-apache` is disabled entirely, because Squire's own data owns that image.
 
+## Pinned to immutable tags[#](https://preflight.apps.wayne.edu/docs/guides/renovate.html#pinned-to-immutable-tags)
+
+The `quay.io/buildah/stable` image (the `buildah_image` default of the portability component) is matched to `-immutable` tags only. Red Hat re-pushed v1.43.5 under the mutable tag and garbage-collected the old digest, which broke an image job, so DRAWBRIDGE and SQUIRE now pin the immutable form, `v1.43.5-immutable@sha256:...`. The preset carries a packageRule for `quay.io/buildah/stable` with a regex versioning that only matches `vX.Y.Z-immutable` tags, so Renovate proposes updates within the immutable tags and never moves a pin back to a mutable one. Digests stay pinned as before (`docker:pinDigests`).
+
 ## Set up (the user does this)[#](https://preflight.apps.wayne.edu/docs/guides/renovate.html#set-up-the-user-does-this)
 
 This repository ships the preset and the component, and creates nothing else. A person must set up:

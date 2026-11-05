@@ -301,7 +301,7 @@ and tar.
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the portability jobs. |
 | `image` | string | `$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA` | App image the portability-run job starts and validates. The default is what portability-build pushes; GitLab expands the CI variables at job time. |
-| `buildah_image` | string | `quay.io/buildah/stable:v1.41.5@sha256:37fa3027bd4b1d76a0001c6bb7349b63c48ebbaee8fa5f47e6097f5e88f6447c` | Buildah image for the portability-build job; it builds and pushes the app image. |
+| `buildah_image` | string | `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb` | Buildah image for the portability-build job; it builds and pushes the app image. |
 | `dockerfile` | string | `Dockerfile` | Dockerfile to build, relative to the context. |
 | `context` | string | `.` | Build context, relative to the project root. |
 | `app_root` | string | `/app` | Directory inside the image where the app lives. |
@@ -311,6 +311,8 @@ and tar.
 | `uid` | number | `100123` | Numeric uid the app runs as. The gid is always 0. |
 | `start_command` | string | none | Command that starts the app inside the image. It is app-specific, so it is required and has no default. |
 | `boot_timeout` | number | `60` | Seconds goss retries the health check while the app boots. |
+
+The default is an immutable tag (`-immutable`) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.
 
 ### Same instance only
 
@@ -388,7 +390,9 @@ auto-merges the same way. Every merge request carries the `auto-deps` label.
 The exception is Preflight's own pins: an update that touches the templates,
 the contract or this repository's own pipeline, a bump of a component include
 version, and a bump of the recorded Squire kit version, never auto-merge (see
-What waits for review).
+What waits for review). One image gets a narrower rule: `quay.io/buildah/stable`
+only ever matches `-immutable` tags, because Red Hat re-pushed a mutable tag
+and garbage-collected the old digest, which broke an image job.
 
 #### What waits
 
@@ -400,7 +404,7 @@ label and waits for a person.
 Updates that change an image digest inside the templates, the contract, or
 this repository's own pipeline, bumps of a Preflight component version in an
 app's `component:` include, and bumps of the recorded Squire kit version
-(labelled `squire-kit`) carry the `needs-review` label and never auto-merge.
+(labeled `squire-kit`) carry the `needs-review` label and never auto-merge.
 They wait for a person because those pins are what every app pipeline runs:
 a changed digest here changes what every consuming pipeline executes, so it
 earns a human eye even when its own pipeline is green. The Squire kit version
@@ -1169,6 +1173,8 @@ All notable changes to PREFLIGHT are recorded here. Entries follow [Keep a Chang
 - Changed: the deploy layer sets minimum-stability to stable.
 - Changed: phpstan config and memory_limit, pint config and sbom output now carry an input regex (relative paths and PHP sizes only); a value outside it stops the pipeline at creation. New test tests/check-path-input-regex.
 - Added: a tag-triggered `release` job in the repository's own pipeline: pushing a protected tag creates the GitLab Release through the Releases API with curl, and the release notes carry the tag's commit SHA so consumers can pin it (BEST_PRACTICES 1.3, 1.6); new test tests/check-release-job.
+- Added: a packageRule in `renovate/default.json` that restricts `quay.io/buildah/stable` to `-immutable` tags (regex versioning), so Renovate never moves a pin back to a mutable tag after Red Hat re-pushed one and garbage-collected the old digest; new test tests/check-renovate-buildah.
+- Changed: the portability component's `buildah_image` default moves to the immutable tag `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb`; Red Hat re-pushed the plain version tag and garbage-collected the old digest, so pipelines pinned to the mutable tag broke. New test tests/check-buildah-pin.
 
 ### 0.1.4 (2026-11-03)[#](https://preflight.apps.wayne.edu/docs/changelog.html#0-1-4-2026-11-03)
 
@@ -1742,7 +1748,7 @@ goss sends the method as written, so the health check uses upper case `GET`.
 | --- | --- | --- | --- |
 | `stage` | string | `test` | Pipeline stage for the portability jobs. |
 | `image` | string | `$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA` | App image the portability-run job starts and validates. The default is what portability-build pushes; GitLab expands the CI variables at job time. |
-| `buildah_image` | string | `quay.io/buildah/stable:v1.41.5@sha256:37fa3027bd4b1d76a0001c6bb7349b63c48ebbaee8fa5f47e6097f5e88f6447c` | Buildah image for the portability-build job; it builds and pushes the app image. |
+| `buildah_image` | string | `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb` | Buildah image for the portability-build job; it builds and pushes the app image. |
 | `dockerfile` | string | `Dockerfile` | Dockerfile to build, relative to the context. |
 | `context` | string | `.` | Build context, relative to the project root. |
 | `app_root` | string | `/app` | Directory inside the image where the app lives. |
@@ -1752,6 +1758,8 @@ goss sends the method as written, so the health check uses upper case `GET`.
 | `uid` | number | `100123` | Numeric uid the app runs as. The gid is always 0. |
 | `start_command` | string | none | Command that starts the app inside the image. It is app-specific, so it is required and has no default. |
 | `boot_timeout` | number | `60` | Seconds goss retries the health check while the app boots. |
+
+The default is an immutable tag (`-immutable`) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.
 
 ### Verify locally[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#verify-locally)
 
@@ -2252,6 +2260,10 @@ Updates that change an image digest inside the templates, the contract, or this 
 ### Why MySQL and HA-Proxy get digests only[#](https://preflight.apps.wayne.edu/docs/guides/renovate.html#why-mysql-and-ha-proxy-get-digests-only)
 
 The `mysql` and `haproxy` images mirror the versions Citadel actually runs, not the newest releases in the world. Bumping their tags would drift the apps away from production, so only digest updates are enabled for them: the same tag, the exact image. `citadel/php-apache` is disabled entirely, because Squire's own data owns that image.
+
+### Pinned to immutable tags[#](https://preflight.apps.wayne.edu/docs/guides/renovate.html#pinned-to-immutable-tags)
+
+The `quay.io/buildah/stable` image (the `buildah_image` default of the portability component) is matched to `-immutable` tags only. Red Hat re-pushed v1.43.5 under the mutable tag and garbage-collected the old digest, which broke an image job, so DRAWBRIDGE and SQUIRE now pin the immutable form, `v1.43.5-immutable@sha256:...`. The preset carries a packageRule for `quay.io/buildah/stable` with a regex versioning that only matches `vX.Y.Z-immutable` tags, so Renovate proposes updates within the immutable tags and never moves a pin back to a mutable one. Digests stay pinned as before (`docker:pinDigests`).
 
 ### Set up (the user does this)[#](https://preflight.apps.wayne.edu/docs/guides/renovate.html#set-up-the-user-does-this)
 
@@ -2787,7 +2799,7 @@ Portability ships in 0.1.4 and later (0.1.3 does not include it), so pin the `0.
 | --- | --- | --- | --- |
 | `stage` | string | `test` | Pipeline stage for the portability jobs. |
 | `image` | string | `$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA` | App image the portability-run job starts and validates. The default is what portability-build pushes; GitLab expands the CI variables at job time. |
-| `buildah_image` | string | `quay.io/buildah/stable:v1.41.5@sha256:37fa3027bd4b1d76a0001c6bb7349b63c48ebbaee8fa5f47e6097f5e88f6447c` | Buildah image for the portability-build job; it builds and pushes the app image. |
+| `buildah_image` | string | `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb` | Buildah image for the portability-build job; it builds and pushes the app image. |
 | `dockerfile` | string | `Dockerfile` | Dockerfile to build, relative to the context. |
 | `context` | string | `.` | Build context, relative to the project root. |
 | `app_root` | string | `/app` | Directory inside the image where the app lives. |
@@ -2797,6 +2809,8 @@ Portability ships in 0.1.4 and later (0.1.3 does not include it), so pin the `0.
 | `uid` | number | `100123` | Numeric uid the app runs as. The gid is always 0. |
 | `start_command` | string | none | Command that starts the app inside the image. It is app-specific, so it is required and has no default. |
 | `boot_timeout` | number | `60` | Seconds goss retries the health check while the app boots. |
+
+The default is an immutable tag (`-immutable`) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.
 
 From `templates/portability/template.yml`: the component defines two jobs with fixed names. `portability-build` runs in the `buildah_image`, sets `STORAGE_DRIVER: vfs` (the vfs driver needs no special kernel support and runs in an ordinary container), builds the image with `buildah bud`, logs in to the project's container registry, and pushes `$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA`. `portability-run` needs `portability-build`, generates a goss file from the inputs (the goss template is inlined in the job, because a component only ships its `template.yml` to the including project), downloads goss pinned by version and checksum, starts the app with `start_command`, and runs `goss validate` with `--retry-timeout` set to `boot_timeout` seconds. goss runs as the app user (the declared uid, gid 0), so its command checks see the same permissions the app has. Both jobs are `interruptible: true` with a timeout of 30 minutes.
 
@@ -3126,6 +3140,12 @@ Source: https://preflight.apps.wayne.edu/docs/upgrading.html
 ## Upgrading[#](https://preflight.apps.wayne.edu/docs/upgrading.html#upgrading)
 
 This page is the checklist for moving an app from one Preflight pin to the next, one released version at a time, newest first; every section follows `CHANGELOG.md`. Read the section for the version you are moving to, apply its steps, and verify on the next pipeline. Like a real preflight, the walk takes a few minutes and earns its keep: move the pin only after you have read the version notes.
+
+### Unreleased[#](https://preflight.apps.wayne.edu/docs/upgrading.html#unreleased)
+
+#### Changed[#](https://preflight.apps.wayne.edu/docs/upgrading.html#changed)
+
+The `portability` component's `buildah_image` default moved from the plain version tag to the immutable tag `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb`: Red Hat re-pushed the plain version tag and garbage-collected the old digest, so a pipeline pinned to it broke. If your app overrides `buildah_image`, point it at an `-immutable` tag pinned by digest too.
 
 ### 0.1.4[#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-1-4)
 

@@ -116,7 +116,7 @@
 <tr>
 <td><code>buildah_image</code></td>
 <td>string</td>
-<td><code>quay.io/buildah/stable:v1.41.5@sha256:37fa3027bd4b1d76a0001c6bb7349b63c48ebbaee8fa5f47e6097f5e88f6447c</code></td>
+<td><code>quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb</code></td>
 <td>Buildah image for the portability-build job; it builds and pushes the app image.</td>
 </tr>
 <tr>
@@ -175,6 +175,7 @@
 </tr>
 </tbody>
 </table></div>
+<p>The default is an immutable tag (<code>-immutable</code>) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.</p>
 <h2 id="verify-locally">Verify locally<a class="docs-heading-link" aria-label="Link to this section" href="#verify-locally">#</a></h2>
 <p>The goss template is the same file the local checks use. <code>tests/check-portability.sh</code> (and its <code>.ps1</code> twin) do the placeholder replacement for the fixtures and build and boot the three fixtures under <code>tests/portability</code> the strict way; they exit 0 only when <code>good</code> passes and both <code>bad-*</code> fixtures fail. See <a href="../reference/local-checks.html">Local checks</a> for the commands.</p>
 <h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>

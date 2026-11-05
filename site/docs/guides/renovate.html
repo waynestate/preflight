@@ -72,6 +72,16 @@ not the newest releases in the world. Bumping their tags would drift the apps
 away from production, so only digest updates are enabled for them: the same
 tag, the exact image. <code>citadel/php-apache</code> is disabled entirely, because
 Squire's own data owns that image.</p>
+<h2 id="pinned-to-immutable-tags">Pinned to immutable tags<a class="docs-heading-link" aria-label="Link to this section" href="#pinned-to-immutable-tags">#</a></h2>
+<p>The <code>quay.io/buildah/stable</code> image (the <code>buildah_image</code> default of the
+portability component) is matched to <code>-immutable</code> tags only. Red Hat re-pushed
+v1.43.5 under the mutable tag and garbage-collected the old digest, which broke
+an image job, so DRAWBRIDGE and SQUIRE now pin the immutable form,
+<code>v1.43.5-immutable@sha256:...</code>. The preset carries a packageRule for
+<code>quay.io/buildah/stable</code> with a regex versioning that only matches
+<code>vX.Y.Z-immutable</code> tags, so Renovate proposes updates within the immutable tags
+and never moves a pin back to a mutable one. Digests stay pinned as before
+(<code>docker:pinDigests</code>).</p>
 <h2 id="set-up-the-user-does-this">Set up (the user does this)<a class="docs-heading-link" aria-label="Link to this section" href="#set-up-the-user-does-this">#</a></h2>
 <p>This repository ships the preset and the component, and creates nothing else.
 A person must set up:</p>
@@ -126,7 +136,7 @@ variable. No hostname is stored in this repository.</p>
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../../docs/guides/instance-runner.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">Strongly recommended: a git.wayne.edu instance runner</span></a><a class="docs-pager__link docs-pager__link--next" href="../../docs/guides/when-components-run.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">When the components run</span></a></nav>
   </div>
-  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#how-it-works">How it works</a></li><li class="docs-toc__item"><a href="#what-auto-merges">What auto-merges</a></li><li class="docs-toc__item"><a href="#what-waits">What waits</a></li><li class="docs-toc__item"><a href="#what-waits-for-review">What waits for review</a></li><li class="docs-toc__item"><a href="#why-mysql-and-ha-proxy-get-digests-only">Why MySQL and HA-Proxy get digests only</a></li><li class="docs-toc__item"><a href="#set-up-the-user-does-this">Set up (the user does this)</a></li><li class="docs-toc__item"><a href="#the-runner-project">The runner project</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#how-it-works">How it works</a></li><li class="docs-toc__item"><a href="#what-auto-merges">What auto-merges</a></li><li class="docs-toc__item"><a href="#what-waits">What waits</a></li><li class="docs-toc__item"><a href="#what-waits-for-review">What waits for review</a></li><li class="docs-toc__item"><a href="#why-mysql-and-ha-proxy-get-digests-only">Why MySQL and HA-Proxy get digests only</a></li><li class="docs-toc__item"><a href="#pinned-to-immutable-tags">Pinned to immutable tags</a></li><li class="docs-toc__item"><a href="#set-up-the-user-does-this">Set up (the user does this)</a></li><li class="docs-toc__item"><a href="#the-runner-project">The runner project</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
   <span>Documents Preflight <span data-docs-version>0.1.4</span></span>

@@ -625,7 +625,7 @@ php-test-next:
 <tr>
 <td><code>buildah_image</code></td>
 <td>string</td>
-<td><code>quay.io/buildah/stable:v1.41.5@sha256:37fa3027bd4b1d76a0001c6bb7349b63c48ebbaee8fa5f47e6097f5e88f6447c</code></td>
+<td><code>quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb</code></td>
 <td>Buildah image for the portability-build job; it builds and pushes the app image.</td>
 </tr>
 <tr>
@@ -684,6 +684,7 @@ php-test-next:
 </tr>
 </tbody>
 </table></div>
+<p>The default is an immutable tag (<code>-immutable</code>) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.</p>
 <p>From <code>templates/portability/template.yml</code>: the component defines two jobs with fixed names. <code>portability-build</code> runs in the <code>buildah_image</code>, sets <code>STORAGE_DRIVER: vfs</code> (the vfs driver needs no special kernel support and runs in an ordinary container), builds the image with <code>buildah bud</code>, logs in to the project's container registry, and pushes <code>$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA</code>. <code>portability-run</code> needs <code>portability-build</code>, generates a goss file from the inputs (the goss template is inlined in the job, because a component only ships its <code>template.yml</code> to the including project), downloads goss pinned by version and checksum, starts the app with <code>start_command</code>, and runs <code>goss validate</code> with <code>--retry-timeout</code> set to <code>boot_timeout</code> seconds. goss runs as the app user (the declared uid, gid 0), so its command checks see the same permissions the app has. Both jobs are <code>interruptible: true</code> with a timeout of 30 minutes.</p>
 <h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
 <ul>
