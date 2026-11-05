@@ -29,7 +29,7 @@ spec:
     buildah_image:
       description: Buildah image that builds and pushes the app image.
       type: string
-      default: quay.io/buildah/stable:v1.41.5@sha256:37fa3027bd4b1d76a0001c6bb7349b63c48ebbaee8fa5f47e6097f5e88f6447c
+      default: quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb
     dockerfile:
       description: Dockerfile to build, relative to the context.
       type: string
