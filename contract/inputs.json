@@ -100,7 +100,7 @@
       "inputs": [
         { "name": "stage", "type": "string", "default": "test" },
         { "name": "image", "type": "string", "default": "$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA" },
-        { "name": "buildah_image", "type": "string", "default": "quay.io/buildah/stable:v1.41.5@sha256:37fa3027bd4b1d76a0001c6bb7349b63c48ebbaee8fa5f47e6097f5e88f6447c" },
+        { "name": "buildah_image", "type": "string", "default": "quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb" },
         { "name": "dockerfile", "type": "string", "default": "Dockerfile" },
         { "name": "context", "type": "string", "default": "." },
         { "name": "app_root", "type": "string", "default": "/app" },

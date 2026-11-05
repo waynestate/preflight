@@ -311,7 +311,7 @@ and tar.
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the portability jobs. |
 | `image` | string | `$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA` | App image the portability-run job starts and validates. The default is what portability-build pushes; GitLab expands the CI variables at job time. |
-| `buildah_image` | string | `quay.io/buildah/stable:v1.41.5@sha256:37fa3027bd4b1d76a0001c6bb7349b63c48ebbaee8fa5f47e6097f5e88f6447c` | Buildah image for the portability-build job; it builds and pushes the app image. |
+| `buildah_image` | string | `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb` | Buildah image for the portability-build job; it builds and pushes the app image. |
 | `dockerfile` | string | `Dockerfile` | Dockerfile to build, relative to the context. |
 | `context` | string | `.` | Build context, relative to the project root. |
 | `app_root` | string | `/app` | Directory inside the image where the app lives. |
@@ -321,6 +321,8 @@ and tar.
 | `uid` | number | `100123` | Numeric uid the app runs as. The gid is always 0. |
 | `start_command` | string | none | Command that starts the app inside the image. It is app-specific, so it is required and has no default. |
 | `boot_timeout` | number | `60` | Seconds goss retries the health check while the app boots. |
+
+The default is an immutable tag (`-immutable`) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.
 
 ## Same instance only
 
