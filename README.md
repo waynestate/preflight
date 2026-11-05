@@ -497,6 +497,10 @@ The `workflow:rules` block must live in the app's own file. A component
 cannot set the pipeline's `workflow:rules` for the project that includes it,
 so the `merge_request_event` rule goes in the app's `.gitlab-ci.yml`.
 
+## Which release ran
+
+Every Preflight job prints a `Preflight component <name> <version> (ref <reference>, sha <sha>)` line before any other command, so when a job misbehaves, its log says which Preflight release produced it. The line needs GitLab 18.7 or later, where `spec: component:` is generally available; an include pinned by commit SHA shows that SHA in the line.
+
 ## What the components cannot force
 
 An included component is a set of ordinary jobs. The app's own `.gitlab-ci.yml` is merged over them, so an app can

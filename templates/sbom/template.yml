@@ -1,4 +1,5 @@
 spec:
+  component: [name, version, sha, reference]
   inputs:
     stage:
       description: Pipeline stage for the sbom job.
@@ -32,6 +33,7 @@ spec:
   interruptible: true
   timeout: 30 minutes
   script:
+    - echo "Preflight component $[[ component.name ]] $[[ component.version ]] (ref $[[ component.reference ]], sha $[[ component.sha ]])"
     - composer install --no-interaction --no-progress --prefer-dist
     - composer global config --no-plugins allow-plugins.cyclonedx/cyclonedx-php-composer true
     - composer global require cyclonedx/cyclonedx-php-composer:^6.2

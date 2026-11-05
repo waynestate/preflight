@@ -1,4 +1,5 @@
 spec:
+  component: [name, version, sha, reference]
   inputs:
     stage:
       description: Pipeline stage for the composer-audit job.
@@ -36,5 +37,6 @@ spec:
   interruptible: true
   timeout: 30 minutes
   script:
+    - echo "Preflight component $[[ component.name ]] $[[ component.version ]] (ref $[[ component.reference ]], sha $[[ component.sha ]])"
     - cd "$[[ inputs.working_dir ]]"
     - composer audit --locked --abandoned=$[[ inputs.abandoned ]]

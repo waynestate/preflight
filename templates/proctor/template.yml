@@ -1,4 +1,5 @@
 spec:
+  component: [name, version, sha, reference]
   inputs:
     stage:
       description: Pipeline stage for the proctor job.
@@ -55,6 +56,7 @@ spec:
   variables:
     COMPOSER_CACHE_DIR: "$CI_PROJECT_DIR/.composer-cache"
   script:
+    - echo "Preflight component $[[ component.name ]] $[[ component.version ]] (ref $[[ component.reference ]], sha $[[ component.sha ]])"
     # php:8.4-cli-trixie does not ship Composer, unzip or git. The image is
     # Debian-based, so apt is used.
     # Composer is installed with the official getcomposer.org installer;

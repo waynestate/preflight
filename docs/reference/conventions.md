@@ -25,6 +25,10 @@ Preflight itself ships these values in its `composer.json`:
 JavaScript components install with `npm ci --ignore-scripts`. The job carries
 no token beyond `CI_JOB_TOKEN` (BEST_PRACTICES.md 4.12).
 
+## The Preflight component line
+
+Every Preflight job prints a `Preflight component <name> <version> (ref <reference>, sha <sha>)` line as its first command, before anything else runs. When a job misbehaves, read that line to see which Preflight release produced it: `<name>` is the component (for example `php-test`), `<version>` is the tag of the pinned release when the include is pinned by tag, `<reference>` is the ref the include points at, and `<sha>` is the commit SHA of the component template that ran. An include pinned by commit SHA shows that SHA in the line. The line needs GitLab 18.7 or later; on an older instance, pipeline creation fails on the unknown `spec: component:` key, so upgrade GitLab or pin an older Preflight tag.
+
 ## Related
 
 - [Updating image pins](../guides/image-pins.md): why component images are digest-pinned and how to change a pin.

@@ -1,0 +1,12 @@
+spec:
+  component: [name, sha]
+  category: x
+  inputs:
+    stage:
+      type: string
+      default: test
+---
+job:
+  stage: $[[ inputs.stage ]]
+  script:
+    - echo ok

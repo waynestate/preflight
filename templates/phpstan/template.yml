@@ -6,6 +6,7 @@
 # and ship a phpstan.neon (or point `config` at its own file).
 ---
 spec:
+  component: [name, version, sha, reference]
   description: "Run the app's own PHPStan and fail on static analysis errors."
   inputs:
     stage:
@@ -43,6 +44,7 @@ spec:
   interruptible: true
   timeout: 10m
   script:
+    - echo "Preflight component $[[ component.name ]] $[[ component.version ]] (ref $[[ component.reference ]], sha $[[ component.sha ]])"
     - cd "$[[ inputs.working_dir ]]"
     - composer install --no-interaction --no-progress --prefer-dist
     - vendor/bin/phpstan analyse --no-progress --error-format=gitlab --memory-limit=$[[ inputs.memory_limit ]] -c $[[ inputs.config ]] > "$CI_PROJECT_DIR/phpstan-report.json"

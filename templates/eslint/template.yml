@@ -7,6 +7,7 @@
 # files).
 ---
 spec:
+  component: [name, version, sha, reference]
   description: "Run the app's own ESLint and Prettier and fail on lint or format errors."
   inputs:
     stage:
@@ -48,6 +49,7 @@ spec:
     paths:
       - .npm-cache/
   script:
+    - echo "Preflight component $[[ component.name ]] $[[ component.version ]] (ref $[[ component.reference ]], sha $[[ component.sha ]])"
     - cd "$[[ inputs.working_dir ]]"
     - npm ci --ignore-scripts --cache .npm-cache
     - npx --no-install eslint $[[ inputs.eslint_args ]]
