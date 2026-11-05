@@ -30,7 +30,8 @@
         { "name": "stage", "type": "string", "default": "test" },
         { "name": "job_name", "type": "string", "default": "composer-audit", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
         { "name": "image", "type": "string", "default": "composer:2@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc" },
-        { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" }
+        { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" },
+        { "name": "abandoned", "type": "string", "default": "fail", "regex": "^(fail|report|ignore)$" }
       ],
       "jobs": ["composer-audit"]
     },
