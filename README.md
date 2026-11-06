@@ -49,8 +49,9 @@ the same GitLab instance that hosts this project.
 
 Runs `vendor/bin/proctor check --format=codequality` and publishes the
 result as a GitLab Code Quality report. The job installs the app's
-dependencies with `composer install --no-plugins --no-scripts`, so the
-app's plugins and scripts never run inside the job.
+dependencies with `composer install --no-plugins --no-scripts --ignore-platform-reqs`, so the
+app's plugins and scripts never run inside the job, and an app locked to an
+older PHP or needing an extension the image lacks still gets its report.
 
 ```yaml
 include:
@@ -621,7 +622,7 @@ decision, not a silence. The preflight checklist checks the checklist.
 
 ## Proof
 
-Proof runs against real Wayne State applications are on a private site, [proof.apps.wayne.edu/preflight](https://proof.apps.wayne.edu/preflight/), behind a Wayne State employee sign-in.
+Proof runs against real Wayne State applications are on a private site, [proof.apps.wayne.edu/preflight](https://proof.apps.wayne.edu/preflight/), behind a Wayne State employee sign-in. What was run on 82 apps on 2026-11-05, what held and what it caught in Preflight itself is on the public [Proof](https://preflight.apps.wayne.edu/docs/reference/proof.html) page.
 
 ## Docs
 

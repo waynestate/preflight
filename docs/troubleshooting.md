@@ -102,6 +102,30 @@ The job log names an abandoned package in the lock. An abandoned package is one 
 - **Fix:** upgrade the package or move to its successor where the log names one. While that is not possible, set the `abandoned` input on the include: `report` lists the abandoned packages without failing the job (right for an old app with abandoned transitive packages), `ignore` does not look at them at all. Advisories still fail the job in every mode.
 - **Check:** with `report`, the job is green and its log lists the abandoned packages; with `fail`, the job fails until the lock no longer holds one.
 
+### composer install stops: the lock needs another PHP or an extension
+
+The job log stops at `composer install` with `your php version (8.4.x) does not satisfy that requirement`, or with `requires ext-gd * -> it is missing from your system` (gd, oci8 and ldap are the usual ones). The `php-test`, `pint` and `phpstan` jobs install the app to run it, so they need what the app needs.
+
+- **Cause:** the lock was built for an older PHP, or the app needs a PHP extension that the default image does not have. The default `php:*-cli` and `composer` images carry only the extensions PHP builds in.
+- **Fix:** for an old PHP, upgrade the app: that red job is the finding, not a fault in Preflight. For an extension, set the job's `image` input to an image that has the same extensions as the app's Citadel image, for example one built `FROM php:8.4-cli-trixie` with `docker-php-ext-install gd`. The `proctor` and `sbom` jobs never run the app, so they install with `--ignore-platform-reqs` and need neither.
+- **Check:** the `composer install` step of the job passes, and the job fails, if at all, on its own check.
+
+### composer install cannot clone a private package
+
+The job log shows `Failed to execute git clone --mirror` for a repository on the app's own GitLab instance, or `Could not connect to server`.
+
+- **Cause:** the lock installs a package straight from a private Git repository, and the job has no credential for it. A local `auth.json` never reaches CI.
+- **Fix:** give Composer a credential in the pipeline, for example a masked CI/CD variable `COMPOSER_AUTH` holding an `http-basic` entry for the instance with a deploy token that can read the package's project. Prefer publishing the package to the GitLab package registry and listing only that project in the job token allowlist; see [Keep the job token allowlist short](guides/job-token-allowlist.md).
+- **Check:** the `composer install` step passes in a pipeline on a branch.
+
+### eslint stops at npm ci
+
+The `eslint` job stops at `npm ci` with the usage text, before ESLint runs.
+
+- **Cause:** `npm ci` needs a `package-lock.json`, and the app keeps only a `yarn.lock` or a `pnpm-lock.yaml`.
+- **Fix:** commit a `package-lock.json` (run `npm install` once), or leave the `eslint` component out until the app moves to npm.
+- **Check:** `npm ci --ignore-scripts` passes locally from a clean checkout.
+
 ### php-test-next is red
 
 A red `php-test-next` job is an early warning, not a stop. It is the second `php-test` include that tries the PHP release that is not supported yet, with `allow_failure: true` in the app's own file.

@@ -39,8 +39,9 @@ the same GitLab instance that hosts this project.
 
 Runs `vendor/bin/proctor check --format=codequality` and publishes the
 result as a GitLab Code Quality report. The job installs the app's
-dependencies with `composer install --no-plugins --no-scripts`, so the
-app's plugins and scripts never run inside the job.
+dependencies with `composer install --no-plugins --no-scripts --ignore-platform-reqs`, so the
+app's plugins and scripts never run inside the job, and an app locked to an
+older PHP or needing an extension the image lacks still gets its report.
 
 ```yaml
 include:
@@ -610,7 +611,7 @@ decision, not a silence. The preflight checklist checks the checklist.
 
 ### Proof
 
-Proof runs against real Wayne State applications are on a private site, [proof.apps.wayne.edu/preflight](https://proof.apps.wayne.edu/preflight/), behind a Wayne State employee sign-in.
+Proof runs against real Wayne State applications are on a private site, [proof.apps.wayne.edu/preflight](https://proof.apps.wayne.edu/preflight/), behind a Wayne State employee sign-in. What was run on 82 apps on 2026-11-05, what held and what it caught in Preflight itself is on the public [Proof](https://preflight.apps.wayne.edu/docs/reference/proof.html) page.
 
 ### Docs
 
@@ -1177,6 +1178,10 @@ All notable changes to PREFLIGHT are recorded here. Entries follow [Keep a Chang
 
 ### Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Fixed: the proctor and sbom jobs install the app with `--ignore-platform-reqs`. Both only read the app, yet a lock built for an older PHP or one needing gd, oci8 or ldap stopped them before PROCTOR or CycloneDX ran, so the oldest apps got no report. The sbom job also passes `--no-scripts`, so the app's Composer scripts no longer run in it. Found by the 2026-11-05 proof run; `tests/check-proctor-install-flags` (sh and ps1) now checks both lines.
+- Added: a public Proof page (`docs/reference/proof.md`, under Reference): the components run against 82 Wayne State applications, what held, what the run caught in Preflight, and what it does not prove. Local checks and the README link to it.
+- Added: troubleshooting entries for an install that stops on another PHP or a missing extension, a private package with no credential, and `npm ci` without a `package-lock.json`.
+- Security: the front-page deploy layer moves to Symfony 7.4.23 (symfony/http-foundation and symfony/yaml advisories, including CVE-2026-118514).
 - Changed: the docs theme carries the hero's sectional chart (its grid and contour rings) faintly under the top of every page, frames the overview's picture of the front page like the hero's instrument, and sets the badges in a row. Dark mode now really is the instrument panel: the kit's dark block had been winning for the page and inline code backgrounds, which left WayneUI's dark green surface everywhere; titles are panel light and the lit green is kept to links, the current page and focus.
 - Changed: the docs pages wear the front page's look: its top bar and main menu (Docs marked current), B612 and B612 Mono, the cream chart page, commands on the quickstart's slab with its Copy key, callouts as the handbook's NOTE, CAUTION and WARNING boxes, tables and the pager as flight-plan forms, and the green runway footer; dark mode follows the instrument panel. New `docs/_header.html` and `docs/theme/preflight.css`, named under `theme` in `docs/docs.json`.
 - Changed: the docs builder and kit are Squire's 0778fed: the theme hook, callouts, code tabs, task-list checkbox labels (fixes the axe `label` failures on the protection checklist) and a keyboard-reachable scrolling code block.
@@ -1821,7 +1826,7 @@ include:
       proctor_command: vendor/bin/proctor check --format=codequality
 ```
 
-The job installs the app's dependencies with `composer install --no-plugins --no-scripts`, so the app's plugins and scripts never run inside the job.
+The job installs the app's dependencies with `composer install --no-plugins --no-scripts --ignore-platform-reqs`, so the app's plugins and scripts never run inside the job, and an app locked to an older PHP or needing an extension the image lacks (gd, oci8, ldap) still gets its report: the job reads the app and never runs it.
 
 Note
 
@@ -1850,7 +1855,7 @@ The job is `interruptible: true` with a `timeout: 30 minutes`. Its script:
 1. Installs `unzip` and `git` with `apt-get`, because the `php:8.4-cli-trixie` image does not ship them (the image is Debian-based, so `apt` is used).
 2. Copies the official Composer installer from `getcomposer.org` and verifies its SHA-384 against the signature fetched at runtime from `composer.github.io/installer.sig`. On a mismatch the check deletes the installer and exits 1. No `$` variables appear in the `php -r` code, so GitLab CI variable expansion cannot corrupt it.
 3. Runs the installer quietly with `--install-dir=/usr/local/bin --filename=composer` and the pinned `composer_version`, so Composer lands on PATH, then removes `composer-setup.php`.
-4. Changes into `working_dir` and runs `composer install --no-interaction --no-progress --no-plugins --no-scripts`.
+4. Changes into `working_dir` and runs `composer install --no-interaction --no-progress --no-plugins --no-scripts --ignore-platform-reqs`.
 5. Runs `proctor_command` and redirects the output to `"$CI_PROJECT_DIR/gl-code-quality-report.json"`. A plain redirect (not `tee`) keeps proctor's exit code as the job result, and the report is written at the project root so the artifact path is the same for every `working_dir`, including `.`.
 
 The job keeps Composer downloads in a cache under `.composer-cache/`, keyed on `composer.lock`, so repeat runs skip the download when the lock is unchanged.
@@ -1950,9 +1955,9 @@ The job lands in the `test` stage by default, is `interruptible: true`, and has 
 
 1. Install the app's dependencies:
    ```sh
-   composer install --no-interaction --no-progress --prefer-dist
+   composer install --no-interaction --no-progress --prefer-dist --no-scripts --ignore-platform-reqs
    ```
-   The default image is a composer image, which already ships Composer, so no install step for Composer itself is needed.
+   The default image is a composer image, which already ships Composer, so no install step for Composer itself is needed. The SBOM lists what the lock installs, so the app's Composer scripts never run here, and the app's PHP version and extensions are not required.
 2. Allow the CycloneDX plugin:
    ```sh
    composer global config --no-plugins allow-plugins.cyclonedx/cyclonedx-php-composer true
@@ -2584,7 +2589,7 @@ Every job the templates define is `interruptible: true`. Every component except 
 
 ### proctor[#](https://preflight.apps.wayne.edu/docs/reference/components.html#proctor)
 
-Runs `vendor/bin/proctor check --format=codequality` and publishes the result as a GitLab Code Quality report. The job installs the app's dependencies with `composer install --no-plugins --no-scripts`, so the app's plugins and scripts never run inside the job.
+Runs `vendor/bin/proctor check --format=codequality` and publishes the result as a GitLab Code Quality report. The job installs the app's dependencies with `composer install --no-plugins --no-scripts --ignore-platform-reqs`, so the app's plugins and scripts never run inside the job, and an app locked to an older PHP or needing an extension the image lacks still gets its report.
 
 ```yaml
 include:
@@ -2603,7 +2608,7 @@ include:
 | `proctor_command` | string | `vendor/bin/proctor check --format=codequality` | The proctor command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
 
-From `templates/proctor/template.yml`: the single job (named by `job_name`) runs in the `test` stage by default, is `interruptible: true`, and has a timeout of 30 minutes. It installs Composer with the official getcomposer.org installer, verifies the installer's SHA-384 against composer.github.io/installer.sig, and pins the installed version to `composer_version`. It then runs `composer install --no-interaction --no-progress --no-plugins --no-scripts`, so the app's plugins and scripts never run with the job's access. The command's output goes through a plain redirect (not `tee`) to `gl-code-quality-report.json` at the project root, which keeps PROCTOR's exit code as the job result and gives the artifact the same path for every `working_dir`, including `.`. The report is published as a Code Quality report with `when: always`.
+From `templates/proctor/template.yml`: the single job (named by `job_name`) runs in the `test` stage by default, is `interruptible: true`, and has a timeout of 30 minutes. It installs Composer with the official getcomposer.org installer, verifies the installer's SHA-384 against composer.github.io/installer.sig, and pins the installed version to `composer_version`. It then runs `composer install --no-interaction --no-progress --no-plugins --no-scripts --ignore-platform-reqs`, so the app's plugins and scripts never run with the job's access and the app's PHP version and extensions are not required. The command's output goes through a plain redirect (not `tee`) to `gl-code-quality-report.json` at the project root, which keeps PROCTOR's exit code as the job result and gives the artifact the same path for every `working_dir`, including `.`. The report is published as a Code Quality report with `when: always`.
 
 ### php-test[#](https://preflight.apps.wayne.edu/docs/reference/components.html#php-test)
 
@@ -2695,7 +2700,7 @@ include:
 | `omit_dev` | boolean | `true` | Whether to omit dev dependencies from the SBOM. |
 | `output` | string | `sbom.cdx.json` | Path of the SBOM file to publish, relative to the project root. |
 
-From `templates/sbom/template.yml`: the job runs `composer install --no-interaction --no-progress --prefer-dist`, allows the plugin globally with `composer global config --no-plugins allow-plugins.cyclonedx/cyclonedx-php-composer true`, installs `cyclonedx/cyclonedx-php-composer:^6.2` globally, and then runs `composer CycloneDX:make-sbom --output-format=JSON --output-reproducible --validate` with `--omit=dev` added while `omit_dev` is true, writing to the `output` path. The `--validate` flag fails the job on an invalid SBOM. The SBOM file is published as an artifact with `expire_in: 30 days`. The job is `interruptible: true` with a timeout of 30 minutes.
+From `templates/sbom/template.yml`: the job runs `composer install --no-interaction --no-progress --prefer-dist --no-scripts --ignore-platform-reqs` (the app's scripts never run, and its PHP version and extensions are not required), allows the plugin globally with `composer global config --no-plugins allow-plugins.cyclonedx/cyclonedx-php-composer true`, installs `cyclonedx/cyclonedx-php-composer:^6.2` globally, and then runs `composer CycloneDX:make-sbom --output-format=JSON --output-reproducible --validate` with `--omit=dev` added while `omit_dev` is true, writing to the `output` path. The `--validate` flag fails the job on an invalid SBOM. The SBOM file is published as an artifact with `expire_in: 30 days`. The job is `interruptible: true` with a timeout of 30 minutes.
 
 ### pint[#](https://preflight.apps.wayne.edu/docs/reference/components.html#pint)
 
@@ -2992,7 +2997,7 @@ pwsh -File tests/check-portability.ps1
 
 ### Proof[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#proof)
 
-Proof runs against real Wayne State applications are on a private site, [proof.apps.wayne.edu/preflight](https://proof.apps.wayne.edu/preflight/), behind a Wayne State employee sign-in.
+Proof runs against real Wayne State applications are on a private site, [proof.apps.wayne.edu/preflight](https://proof.apps.wayne.edu/preflight/), behind a Wayne State employee sign-in. What was run, what held and what it caught in Preflight itself is on the public [Proof](https://preflight.apps.wayne.edu/docs/reference/proof.html) page.
 
 ### Docs[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#docs)
 
@@ -3014,6 +3019,102 @@ The pages wear the front page's flight deck: `docs/_header.html` is the front pa
 - [Troubleshooting](https://preflight.apps.wayne.edu/docs/troubleshooting.html)
 - [Changelog](https://preflight.apps.wayne.edu/docs/changelog.html)
 - [Upgrading](https://preflight.apps.wayne.edu/docs/upgrading.html)
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/reference/proof.html
+
+## Proof[#](https://preflight.apps.wayne.edu/docs/reference/proof.html#proof)
+
+This page says how Preflight's components were proven on real Wayne State applications: what ran, what held, what the run caught in Preflight itself, and what it does not prove yet. Next, see [Components](https://preflight.apps.wayne.edu/docs/reference/components.html) for every input and [Troubleshooting](https://preflight.apps.wayne.edu/docs/troubleshooting.html) for the fixes the run added.
+
+A preflight check is only worth something on the aircraft you are about to fly. So on 2026-11-05 every component that can run without a registry or a token was flown against every PHP application in the stack's shared proof corpus, the same set PROCTOR and Squire are measured on.
+
+### What ran[#](https://preflight.apps.wayne.edu/docs/reference/proof.html#what-ran)
+
+Preflight from `main` (0.1.4 plus the Unreleased changes), with the install-line change described below. The 82 applications are 64 raw PHP apps (33 with a `composer.json`, 31 without one), 17 Laravel apps from 5.8 to 13, and 1 Slim 2 app.
+
+No GitLab pipeline ran. Instead, each component's `template.yml` was read, its default inputs applied, and its own `script:` lines written out as a shell script, exactly what a runner would execute. Each job then ran in the component's own default image, one container per job, on a throwaway copy of the app's default branch, checked out with Linux line endings, with `.env` files, `auth.json` and `config.files/` removed. Packagist, Debian and npm were reachable; every Wayne State host was mapped to `127.0.0.1`, and no job had a token or a Composer credential.
+
+A job ran on an app when the app has what the component works on:
+
+| Component | Runs when the app has | Apps |
+| --- | --- | --- |
+| composer-audit | `composer.lock` | 51 |
+| proctor | `composer.json` | 51 |
+| sbom | `composer.json` | 51 |
+| php-test (8.3, 8.4, 8.5) | `tests/` or `phpunit.xml` | 17 |
+| pint | `laravel/pint` in require-dev | 9 |
+| phpstan | PHPStan or Larastan in require-dev | 1 |
+| eslint | `eslint` in `package.json` | 2 |
+
+The proctor job ran the stack's PROCTOR in place of `vendor/bin/proctor`, because none of the apps requires PROCTOR yet; the rest of that job is the template's. portability, renovate and package-publish did not run: they need a registry, a token or a release tag.
+
+A job **passes** when it exits 0. It is **flagged** when it reached its own check and that check reported findings, or when the app's own `composer install` or `npm ci` stopped, with the reason in the log. A **tool error** is Preflight breaking: a step the component owns failing, a timeout, or a report that is not valid.
+
+### Results[#](https://preflight.apps.wayne.edu/docs/reference/proof.html#results)
+
+| Component | Jobs | Pass | Flagged at its check | Stopped at the app's install | Tool error |
+| --- | --- | --- | --- | --- | --- |
+| composer-audit | 51 | 27 | 24 | 0 | 0 |
+| proctor | 51 | 0 | 15 | 36 | 0 |
+| sbom | 51 | 15 | 0 | 36 | 0 |
+| php-test 8.3 | 17 | 0 | 1 | 16 | 0 |
+| php-test 8.4 | 17 | 0 | 2 | 15 | 0 |
+| php-test 8.5 | 17 | 0 | 1 | 16 | 0 |
+| pint | 9 | 1 | 0 | 8 | 0 |
+| phpstan | 1 | 1 | 0 | 0 | 0 |
+| eslint | 2 | 0 | 1 | 1 | 0 |
+
+- **No tool errors** in 216 jobs. Every PROCTOR report was valid Code Quality JSON, and every SBOM passed CycloneDX's own validation.
+- composer-audit read every lock, including the oldest, in about a second.
+- An app's install stopped for one of these reasons (an app can meet more than one): a package installed straight from a private Git repository on the app's own GitLab instance (35 apps), a lock built for another PHP (15), an extension the default image lacks (oci8 7, gd 4, ldap 1), a package from Subversion (1), and only a `yarn.lock` for `npm ci` (1). Each job stopped at that step with Composer's or npm's own message.
+- Where php-test reached the tests, the failures were the apps' own setups: a test suite that needs built front-end assets, and one that needs a database.
+- The median job took 1 to 7 seconds; most of that is installing.
+
+### What it caught in Preflight[#](https://preflight.apps.wayne.edu/docs/reference/proof.html#what-it-caught-in-preflight)
+
+A run that only finds praise was not looking hard enough. This one found these, and every finding is about Preflight, not the apps:
+
+- **Fixed: proctor and sbom asked for the app's PHP.** Both jobs only read the app, yet their `composer install` refused a lock built for PHP 7 or one that needs gd or oci8. So the proctor job could not report on the old apps PROCTOR exists to flag. Both now install with `--ignore-platform-reqs`. On the same apps, PROCTOR reports went from 13 to 15 and SBOMs from 12 to 15, and no app went from passing to failing; the other platform-blocked apps then met a private package, which only a credential fixes.
+- **Fixed: the sbom job ran the app's Composer scripts.** Its install had no `--no-scripts`, so a Laravel app's `artisan package:discover` ran inside the job. Listing packages never needs them, and the job now skips them.
+- **Documented: what stops an install.** [Troubleshooting](https://preflight.apps.wayne.edu/docs/troubleshooting.html) now covers a lock for another PHP or a missing extension (set the `image` input), a private package (give Composer a credential), and `npm ci` without a `package-lock.json`.
+- **Open: an app without `composer.json` gets nothing.** 31 of the 82 apps have no `composer.json`, and every PHP component starts from one, PROCTOR's included. Committing a `composer.json` and a lock, which Squire's `init` now asks for, is the way in today.
+- **Open: Yarn.** The eslint component installs with `npm ci` only.
+- **Not Preflight:** the first pass failed `apt-get update` in two PHP images. The proof machine's local copies were stale; fresh pulls of the same tags worked, and the jobs were run again on them.
+
+### What this does not prove[#](https://preflight.apps.wayne.edu/docs/reference/proof.html#what-this-does-not-prove)
+
+- No GitLab pipeline ran, so include resolution, `spec:` inputs, `rules`, caches, artifacts and the Code Quality widget were not exercised. The scripts are the templates' own lines with default inputs.
+- No job had a credential, so the 35 apps that install a private package were measured only up to that point.
+- portability, renovate and package-publish did not run.
+- The per-app record names the applications and stays in the stack's internal notes.
+
+### Run it on your app[#](https://preflight.apps.wayne.edu/docs/reference/proof.html#run-it-on-your-app)
+
+Include the components in your app's `.gitlab-ci.yml` as the [Quick start](https://preflight.apps.wayne.edu/docs/guides/quick-start.html) shows, push a branch, and read each job's log. To try the PROCTOR job's steps on your machine first, from the app's root (the first line adds PROCTOR to require-dev, which the proctor component expects):
+
+Linux / macOS
+
+```sh
+docker run --rm -v "$(pwd):/app" -w /app composer:2 composer require --dev waynestate/proctor --no-scripts --ignore-platform-reqs
+docker run --rm -v "$(pwd):/app" -w /app composer:2 composer install --no-plugins --no-scripts --ignore-platform-reqs
+docker run --rm -v "$(pwd):/app" -w /app composer:2 vendor/bin/proctor check
+```
+
+Windows
+
+```powershell
+docker run --rm -v "${PWD}:/app" -w /app composer:2 composer require --dev waynestate/proctor --no-scripts --ignore-platform-reqs
+docker run --rm -v "${PWD}:/app" -w /app composer:2 composer install --no-plugins --no-scripts --ignore-platform-reqs
+docker run --rm -v "${PWD}:/app" -w /app composer:2 vendor/bin/proctor check
+```
+
+### Related[#](https://preflight.apps.wayne.edu/docs/reference/proof.html#related)
+
+- [Components](https://preflight.apps.wayne.edu/docs/reference/components.html)
+- [Local checks](https://preflight.apps.wayne.edu/docs/reference/local-checks.html)
+- [Troubleshooting](https://preflight.apps.wayne.edu/docs/troubleshooting.html)
 
 ---
 
@@ -3118,6 +3219,30 @@ The job log names an abandoned package in the lock. An abandoned package is one 
 - **Cause:** the lock holds a package marked abandoned, and the `abandoned` input is at its default, `fail`.
 - **Fix:** upgrade the package or move to its successor where the log names one. While that is not possible, set the `abandoned` input on the include: `report` lists the abandoned packages without failing the job (right for an old app with abandoned transitive packages), `ignore` does not look at them at all. Advisories still fail the job in every mode.
 - **Check:** with `report`, the job is green and its log lists the abandoned packages; with `fail`, the job fails until the lock no longer holds one.
+
+#### composer install stops: the lock needs another PHP or an extension[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#composer-install-stops-the-lock-needs-another-php-or-an-extension)
+
+The job log stops at `composer install` with `your php version (8.4.x) does not satisfy that requirement`, or with `requires ext-gd * -> it is missing from your system` (gd, oci8 and ldap are the usual ones). The `php-test`, `pint` and `phpstan` jobs install the app to run it, so they need what the app needs.
+
+- **Cause:** the lock was built for an older PHP, or the app needs a PHP extension that the default image does not have. The default `php:*-cli` and `composer` images carry only the extensions PHP builds in.
+- **Fix:** for an old PHP, upgrade the app: that red job is the finding, not a fault in Preflight. For an extension, set the job's `image` input to an image that has the same extensions as the app's Citadel image, for example one built `FROM php:8.4-cli-trixie` with `docker-php-ext-install gd`. The `proctor` and `sbom` jobs never run the app, so they install with `--ignore-platform-reqs` and need neither.
+- **Check:** the `composer install` step of the job passes, and the job fails, if at all, on its own check.
+
+#### composer install cannot clone a private package[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#composer-install-cannot-clone-a-private-package)
+
+The job log shows `Failed to execute git clone --mirror` for a repository on the app's own GitLab instance, or `Could not connect to server`.
+
+- **Cause:** the lock installs a package straight from a private Git repository, and the job has no credential for it. A local `auth.json` never reaches CI.
+- **Fix:** give Composer a credential in the pipeline, for example a masked CI/CD variable `COMPOSER_AUTH` holding an `http-basic` entry for the instance with a deploy token that can read the package's project. Prefer publishing the package to the GitLab package registry and listing only that project in the job token allowlist; see [Keep the job token allowlist short](https://preflight.apps.wayne.edu/docs/guides/job-token-allowlist.html).
+- **Check:** the `composer install` step passes in a pipeline on a branch.
+
+#### eslint stops at npm ci[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#eslint-stops-at-npm-ci)
+
+The `eslint` job stops at `npm ci` with the usage text, before ESLint runs.
+
+- **Cause:** `npm ci` needs a `package-lock.json`, and the app keeps only a `yarn.lock` or a `pnpm-lock.yaml`.
+- **Fix:** commit a `package-lock.json` (run `npm install` once), or leave the `eslint` component out until the app moves to npm.
+- **Check:** `npm ci --ignore-scripts` passes locally from a clean checkout.
 
 #### php-test-next is red[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#php-test-next-is-red)
 

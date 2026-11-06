@@ -118,6 +118,10 @@
         {
           "title": "Local checks",
           "path": "reference/local-checks"
+        },
+        {
+          "title": "Proof",
+          "path": "reference/proof"
         }
       ]
     },

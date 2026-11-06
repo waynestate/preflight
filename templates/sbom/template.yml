@@ -34,7 +34,9 @@ spec:
   timeout: 30 minutes
   script:
     - echo "Preflight component $[[ component.name ]] $[[ component.version ]] (ref $[[ component.reference ]], sha $[[ component.sha ]])"
-    - composer install --no-interaction --no-progress --prefer-dist
+    # The SBOM lists what the lock installs, so the app's scripts never need to
+    # run here, and the app's PHP version and extensions are not required.
+    - composer install --no-interaction --no-progress --prefer-dist --no-scripts --ignore-platform-reqs
     - composer global config --no-plugins allow-plugins.cyclonedx/cyclonedx-php-composer true
     - composer global require cyclonedx/cyclonedx-php-composer:^6.2
     - if [ "$[[ inputs.omit_dev ]]" = "true" ]; then composer CycloneDX:make-sbom --output-format=JSON --output-reproducible --validate --omit=dev --output-file=$[[ inputs.output ]]; else composer CycloneDX:make-sbom --output-format=JSON --output-reproducible --validate --output-file=$[[ inputs.output ]]; fi

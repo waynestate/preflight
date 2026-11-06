@@ -28,7 +28,7 @@ Every job the templates define is `interruptible: true`. Every component except 
 
 ## proctor
 
-Runs `vendor/bin/proctor check --format=codequality` and publishes the result as a GitLab Code Quality report. The job installs the app's dependencies with `composer install --no-plugins --no-scripts`, so the app's plugins and scripts never run inside the job.
+Runs `vendor/bin/proctor check --format=codequality` and publishes the result as a GitLab Code Quality report. The job installs the app's dependencies with `composer install --no-plugins --no-scripts --ignore-platform-reqs`, so the app's plugins and scripts never run inside the job, and an app locked to an older PHP or needing an extension the image lacks still gets its report.
 
 ```yaml
 include:
@@ -47,7 +47,7 @@ include:
 | `proctor_command` | string | `vendor/bin/proctor check --format=codequality` | The proctor command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
 
-From `templates/proctor/template.yml`: the single job (named by `job_name`) runs in the `test` stage by default, is `interruptible: true`, and has a timeout of 30 minutes. It installs Composer with the official getcomposer.org installer, verifies the installer's SHA-384 against composer.github.io/installer.sig, and pins the installed version to `composer_version`. It then runs `composer install --no-interaction --no-progress --no-plugins --no-scripts`, so the app's plugins and scripts never run with the job's access. The command's output goes through a plain redirect (not `tee`) to `gl-code-quality-report.json` at the project root, which keeps PROCTOR's exit code as the job result and gives the artifact the same path for every `working_dir`, including `.`. The report is published as a Code Quality report with `when: always`.
+From `templates/proctor/template.yml`: the single job (named by `job_name`) runs in the `test` stage by default, is `interruptible: true`, and has a timeout of 30 minutes. It installs Composer with the official getcomposer.org installer, verifies the installer's SHA-384 against composer.github.io/installer.sig, and pins the installed version to `composer_version`. It then runs `composer install --no-interaction --no-progress --no-plugins --no-scripts --ignore-platform-reqs`, so the app's plugins and scripts never run with the job's access and the app's PHP version and extensions are not required. The command's output goes through a plain redirect (not `tee`) to `gl-code-quality-report.json` at the project root, which keeps PROCTOR's exit code as the job result and gives the artifact the same path for every `working_dir`, including `.`. The report is published as a Code Quality report with `when: always`.
 
 ## php-test
 
@@ -139,7 +139,7 @@ include:
 | `omit_dev` | boolean | `true` | Whether to omit dev dependencies from the SBOM. |
 | `output` | string | `sbom.cdx.json` | Path of the SBOM file to publish, relative to the project root. |
 
-From `templates/sbom/template.yml`: the job runs `composer install --no-interaction --no-progress --prefer-dist`, allows the plugin globally with `composer global config --no-plugins allow-plugins.cyclonedx/cyclonedx-php-composer true`, installs `cyclonedx/cyclonedx-php-composer:^6.2` globally, and then runs `composer CycloneDX:make-sbom --output-format=JSON --output-reproducible --validate` with `--omit=dev` added while `omit_dev` is true, writing to the `output` path. The `--validate` flag fails the job on an invalid SBOM. The SBOM file is published as an artifact with `expire_in: 30 days`. The job is `interruptible: true` with a timeout of 30 minutes.
+From `templates/sbom/template.yml`: the job runs `composer install --no-interaction --no-progress --prefer-dist --no-scripts --ignore-platform-reqs` (the app's scripts never run, and its PHP version and extensions are not required), allows the plugin globally with `composer global config --no-plugins allow-plugins.cyclonedx/cyclonedx-php-composer true`, installs `cyclonedx/cyclonedx-php-composer:^6.2` globally, and then runs `composer CycloneDX:make-sbom --output-format=JSON --output-reproducible --validate` with `--omit=dev` added while `omit_dev` is true, writing to the `output` path. The `--validate` flag fails the job on an invalid SBOM. The SBOM file is published as an artifact with `expire_in: 30 days`. The job is `interruptible: true` with a timeout of 30 minutes.
 
 ## pint
 

@@ -21,7 +21,7 @@ include:
       proctor_command: vendor/bin/proctor check --format=codequality
 ```
 
-The job installs the app's dependencies with `composer install --no-plugins --no-scripts`, so the app's plugins and scripts never run inside the job.
+The job installs the app's dependencies with `composer install --no-plugins --no-scripts --ignore-platform-reqs`, so the app's plugins and scripts never run inside the job, and an app locked to an older PHP or needing an extension the image lacks (gd, oci8, ldap) still gets its report: the job reads the app and never runs it.
 
 Note
 
@@ -50,7 +50,7 @@ The job is `interruptible: true` with a `timeout: 30 minutes`. Its script:
 1. Installs `unzip` and `git` with `apt-get`, because the `php:8.4-cli-trixie` image does not ship them (the image is Debian-based, so `apt` is used).
 2. Copies the official Composer installer from `getcomposer.org` and verifies its SHA-384 against the signature fetched at runtime from `composer.github.io/installer.sig`. On a mismatch the check deletes the installer and exits 1. No `$` variables appear in the `php -r` code, so GitLab CI variable expansion cannot corrupt it.
 3. Runs the installer quietly with `--install-dir=/usr/local/bin --filename=composer` and the pinned `composer_version`, so Composer lands on PATH, then removes `composer-setup.php`.
-4. Changes into `working_dir` and runs `composer install --no-interaction --no-progress --no-plugins --no-scripts`.
+4. Changes into `working_dir` and runs `composer install --no-interaction --no-progress --no-plugins --no-scripts --ignore-platform-reqs`.
 5. Runs `proctor_command` and redirects the output to `"$CI_PROJECT_DIR/gl-code-quality-report.json"`. A plain redirect (not `tee`) keeps proctor's exit code as the job result, and the report is written at the project root so the artifact path is the same for every `working_dir`, including `.`.
 
 The job keeps Composer downloads in a cache under `.composer-cache/`, keyed on `composer.lock`, so repeat runs skip the download when the lock is unchanged.

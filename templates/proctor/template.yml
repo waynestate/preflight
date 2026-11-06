@@ -74,8 +74,10 @@ spec:
     - rm composer-setup.php
     - cd "$[[ inputs.working_dir ]]"
     # The job only inspects the app, so the app's plugins and scripts must not
-    # run with the job's access.
-    - composer install --no-interaction --no-progress --no-plugins --no-scripts
+    # run with the job's access. It never runs the app either, so the app's
+    # PHP version and extensions are not required here: an app locked to
+    # PHP 7, or needing gd or oci8, still gets its report.
+    - composer install --no-interaction --no-progress --no-plugins --no-scripts --ignore-platform-reqs
     # A plain redirect (not tee) keeps proctor's exit code as the job result.
     # The report is written at the project root so the artifact path is the
     # same for every working_dir, including ".".

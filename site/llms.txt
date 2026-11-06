@@ -46,6 +46,7 @@ Every page below is Markdown. The HTML pages send the same Markdown to a client 
 - [Components | Preflight docs](https://preflight.apps.wayne.edu/docs/reference/components.md): Every component, with its include example, inputs and defaults.
 - [Shared conventions | Preflight docs](https://preflight.apps.wayne.edu/docs/reference/conventions.md): The conventions the stack shares: Composer vendor, license, PHP floor and JavaScript installs.
 - [Local checks | Preflight docs](https://preflight.apps.wayne.edu/docs/reference/local-checks.md): How maintainers build, test and release this project with Docker.
+- [Proof | Preflight docs](https://preflight.apps.wayne.edu/docs/reference/proof.md): Preflight's components run against 82 Wayne State applications on 2026-11-05: what ran, what held, what it caught in Preflight itself, what it does not prove, and how to run the same on your app.
 - [Troubleshooting | Preflight docs](https://preflight.apps.wayne.edu/docs/troubleshooting.md): What to do when a Preflight job fails or a gate behaves unexpectedly.
 - [Upgrading | Preflight docs](https://preflight.apps.wayne.edu/docs/upgrading.md): How to move an app from one Preflight pin to the next.
 

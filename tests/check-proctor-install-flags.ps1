@@ -4,7 +4,9 @@
 # The proctor job only inspects the app, so the app's plugins and scripts must
 # not run with the job's access. A hostile composer.json could otherwise use
 # them to execute code inside the job, so the composer install line must carry
-# both --no-plugins and --no-scripts. This script checks the line with plain
+# both --no-plugins and --no-scripts. Neither the proctor job nor the sbom job
+# runs the app, so both install with --ignore-platform-reqs, and the sbom job
+# with --no-scripts. This script checks the lines with plain
 # string matching, so it needs no modules, no yq and no Docker.
 
 $ErrorActionPreference = "Stop"
@@ -36,6 +38,26 @@ if ($installLine -notmatch '--no-plugins') {
 }
 if ($installLine -notmatch '--no-scripts') {
   Fail "proctor: the composer install line is missing --no-scripts"
+}
+# The job never runs the app, so an app locked to an older PHP, or needing an
+# extension the image lacks, must still get its report (proof run 2026-11-05).
+if ($installLine -notmatch '--ignore-platform-reqs') {
+  Fail "proctor: the composer install line is missing --ignore-platform-reqs"
+}
+
+# The sbom job only lists what the lock installs: no app scripts, no platform
+# requirements.
+$sbom = Join-Path $Root "templates\sbom\template.yml"
+$sbomLine = @(Get-Content -LiteralPath $sbom) | Where-Object { $_ -match 'composer\s+install' } | Select-Object -First 1
+if ($null -eq $sbomLine) {
+  Fail "sbom: no composer install line found in templates/sbom/template.yml"
+} else {
+  if ($sbomLine -notmatch '--no-scripts') {
+    Fail "sbom: the composer install line is missing --no-scripts"
+  }
+  if ($sbomLine -notmatch '--ignore-platform-reqs') {
+    Fail "sbom: the composer install line is missing --ignore-platform-reqs"
+  }
 }
 
 if ($status -eq 0) {

@@ -27,10 +27,10 @@ The job lands in the `test` stage by default, is `interruptible: true`, and has 
 1. Install the app's dependencies:
 
    ```sh
-   composer install --no-interaction --no-progress --prefer-dist
+   composer install --no-interaction --no-progress --prefer-dist --no-scripts --ignore-platform-reqs
    ```
 
-   The default image is a composer image, which already ships Composer, so no install step for Composer itself is needed.
+   The default image is a composer image, which already ships Composer, so no install step for Composer itself is needed. The SBOM lists what the lock installs, so the app's Composer scripts never run here, and the app's PHP version and extensions are not required.
 
 2. Allow the CycloneDX plugin:
 
