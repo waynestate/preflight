@@ -6,6 +6,7 @@ are Git tags.
 
 ## Unreleased
 
+- Security: the front-page deploy layer moves to Symfony 7.4.23 (symfony/http-foundation and symfony/yaml advisories, including CVE-2026-118514).
 - Changed: the docs theme carries the hero's sectional chart (its grid and contour rings) faintly under the top of every page, frames the overview's picture of the front page like the hero's instrument, and sets the badges in a row. Dark mode now really is the instrument panel: the kit's dark block had been winning for the page and inline code backgrounds, which left WayneUI's dark green surface everywhere; titles are panel light and the lit green is kept to links, the current page and focus.
 - Changed: the docs pages wear the front page's look: its top bar and main menu (Docs marked current), B612 and B612 Mono, the cream chart page, commands on the quickstart's slab with its Copy key, callouts as the handbook's NOTE, CAUTION and WARNING boxes, tables and the pager as flight-plan forms, and the green runway footer; dark mode follows the instrument panel. New `docs/_header.html` and `docs/theme/preflight.css`, named under `theme` in `docs/docs.json`.
 - Changed: the docs builder and kit are Squire's 0778fed: the theme hook, callouts, code tabs, task-list checkbox labels (fixes the axe `label` failures on the protection checklist) and a keyboard-reachable scrolling code block.
