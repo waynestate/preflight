@@ -672,6 +672,7 @@ sh tests/check-portability.sh
 pwsh -File tests/check-portability.ps1
 ```
 
+The site's pages have an accessibility gate (axe-core in Playwright with the WCAG 2.2 AA tag set, run in Docker so no host browser is needed): `sh scripts/a11y.sh` on Linux and macOS, `scripts/a11y.ps1` in PowerShell on Windows. It checks the front page and every docs page in light and dark mode at 360 px and 1280 px, and fails on any violation.
 
 <details>
 <summary><b>The brand board</b>: the runway mark, lockups, palette and type</summary>

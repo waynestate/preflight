@@ -47,6 +47,7 @@
 are Git tags.</p>
 <h2 id="unreleased">Unreleased<a class="docs-heading-link" aria-label="Link to this section" href="#unreleased">#</a></h2>
 <ul>
+<li>Added: a site accessibility gate (axe-core in Playwright with the WCAG 2.2 AA tag set, run in Docker so no host browser is needed): <code>scripts/a11y.sh</code> on Linux and macOS and <code>scripts/a11y.ps1</code> on Windows check the front page and every docs page in light and dark mode at 360 px and 1280 px, and fail on any violation; all pages pass clean.</li>
 <li>Fixed: the proctor and sbom jobs install the app with <code>--ignore-platform-reqs</code>. Both only read the app, yet a lock built for an older PHP or one needing gd, oci8 or ldap stopped them before PROCTOR or CycloneDX ran, so the oldest apps got no report. The sbom job also passes <code>--no-scripts</code>, so the app's Composer scripts no longer run in it. Found by the 2026-11-05 proof run; <code>tests/check-proctor-install-flags</code> (sh and ps1) now checks both lines.</li>
 <li>Added: a public Proof page (<code>docs/reference/proof.md</code>, under Reference): the components run against 82 Wayne State applications, what held, what the run caught in Preflight, and what it does not prove. Local checks and the README link to it.</li>
 <li>Added: troubleshooting entries for an install that stops on another PHP or a missing extension, a private package with no credential, and <code>npm ci</code> without a <code>package-lock.json</code>.</li>
