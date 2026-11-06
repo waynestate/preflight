@@ -49,11 +49,9 @@ prefix="$prefix:"
 while IFS= read -r rel; do
   [ -n "$rel" ] || continue
   # Changelog history may quote the old tag; the generated site/ tree is
-  # rebuilt from docs/, so neither is checked. .delegate-context holds
-  # harness-provided reference copies, not repository content, so it is not
-  # checked either.
+  # rebuilt from docs/, so neither is checked.
   case $rel in
-    CHANGELOG.md|docs/changelog.md|site/*|.delegate-context/*) continue ;;
+    CHANGELOG.md|docs/changelog.md|site/*) continue ;;
   esac
   [ -f "$ROOT/$rel" ] || continue
   # grep -I skips binary files (images, fonts); the check is about text.
