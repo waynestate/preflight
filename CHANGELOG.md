@@ -6,6 +6,7 @@ are Git tags.
 
 ## Unreleased
 
+- Fixed: the contract job's Buildah pin check no longer needs git, which the mikefarah/yq image does not have; when git is missing or fails it scans regular files with find instead, skipping .git, vendor/ and node_modules/.
 - Added: a Composer cache on the proctor component, keyed on composer.lock (BEST_PRACTICES 4.8); new test tests/check-proctor-cache.
 - Added: every component job prints a `Preflight component <name> <version> (ref <reference>, sha <sha>)` line as its first command, so a job log says which Preflight release produced it; each template declares `spec: component: [name, version, sha, reference]`. New tests `tests/check-component-version.sh` and `tests/check-component-version.ps1`; `tests/check-spec-keys` and the template lint allow `component` under `spec:`.
 - Changed: Preflight now needs GitLab 18.7 or later: `spec: component:` is generally available from 18.7, and pipeline creation fails on the unknown key on older instances.

@@ -6,12 +6,16 @@
 # tag broke. Every reference to that image in the repository must now name an
 # -immutable tag pinned by digest.
 #
-# The script lists the tracked files with git ls-files and scans their text
-# for a reference to that image whose tag is missing or does not end in
-# -immutable@sha256:. Changelog history is exempt (CHANGELOG.md,
-# docs/changelog.md and site/docs/changelog.*), and so is the generated site/
-# tree, which the lead rebuilds from docs/. It needs no yq and runs in the
-# mikefarah/yq image and on any Linux or macOS box.
+# The script lists the files to scan with git ls-files when git is available
+# and works in the repository root, and otherwise falls back to a POSIX find
+# over the working tree (regular files, skipping the .git, vendor/ and
+# node_modules/ directories, paths relative to the root with no leading ./,
+# the same form git ls-files uses). It scans each file's text for a reference
+# to that image whose tag is missing or does not end in -immutable@sha256:.
+# Changelog history is exempt (CHANGELOG.md, docs/changelog.md and
+# site/docs/changelog.*), and so is the generated site/ tree, which the lead
+# rebuilds from docs/. It needs no yq and runs with or without git, in the
+# mikefarah/yq image (which has no git) and on any Linux or macOS box.
 
 set -u
 
@@ -24,9 +28,16 @@ fail() {
   status=1
 }
 
-if ! files=$(git -C "$ROOT" ls-files 2>/dev/null); then
-  fail "git ls-files failed in $ROOT"
-  exit 1
+# Prefer git ls-files. When git is missing (the mikefarah/yq image has
+# none) or cannot list $ROOT, fall back to find over the working tree. Both
+# list paths relative to $ROOT with no leading ./, so the exemptions below
+# match either way. The fallback notices on stderr but does not fail the
+# check by itself; command -v keeps the shell quiet when git is absent.
+if command -v git >/dev/null 2>&1 && files=$(git -C "$ROOT" ls-files 2>/dev/null); then
+  :
+else
+  echo "check-buildah-pin: git unavailable, scanning files with find" >&2
+  files=$(cd -- "$ROOT" && find . \( -name .git -o -name vendor -o -name node_modules \) -prune -o -type f -print | sed 's|^\./||')
 fi
 
 # An acceptable tag ends in -immutable@sha256:<hex>. The image name is built
@@ -38,9 +49,11 @@ prefix="$prefix:"
 while IFS= read -r rel; do
   [ -n "$rel" ] || continue
   # Changelog history may quote the old tag; the generated site/ tree is
-  # rebuilt from docs/, so neither is checked.
+  # rebuilt from docs/, so neither is checked. .delegate-context holds
+  # harness-provided reference copies, not repository content, so it is not
+  # checked either.
   case $rel in
-    CHANGELOG.md|docs/changelog.md|site/*) continue ;;
+    CHANGELOG.md|docs/changelog.md|site/*|.delegate-context/*) continue ;;
   esac
   [ -f "$ROOT/$rel" ] || continue
   # grep -I skips binary files (images, fonts); the check is about text.
