@@ -17,9 +17,16 @@
    --dk-* tokens and the rules below win without !important. The kit's
    docs.css stays byte for byte Squire's.
 
+   The hero's sectional chart (grid and contour rings) lies faintly under the
+   top of every page and fades out before the reading gets long; the
+   overview's picture of the front page sits in an instrument bezel.
+
    The front page has no dark mode, so the dark set is the front page's own
-   instrument panel: glass ground, panel-light text, the annunciator's lit
-   green for links and focus.
+   instrument panel: glass ground, panel-light text and titles, the
+   annunciator's lit green only for links, the current page and focus. The
+   kit's dark block sets --dk-bg and --dk-code-bg with more specificity than
+   :root, so the dark blocks below set them again or the page would fall
+   back to WayneUI's dark green surface.
 
    Motion only under prefers-reduced-motion: no-preference: the page title
    lights up like the hero's letters, once; the mark banks on hover; the pager
@@ -88,6 +95,10 @@
   --pf-foot: var(--green);
   --pf-foot-ink: var(--cream);
   --pf-foot-muted: #cfe3dd;
+  --pf-mark: var(--green);            /* the current-page bar, task boxes */
+  --pf-chart-line: rgba(14, 90, 125, .06);  /* the hero's chart grid */
+  --pf-chart-ring: rgba(14, 90, 125, .07);  /* and its contour rings */
+  --pf-frame-shadow: 0 18px 36px -26px rgba(10, 47, 41, .55);
 
   /* The kit's tokens, set from the palette above. */
   --dk-bg: var(--pf-ground);
@@ -121,10 +132,30 @@ html {
 }
 
 body {
+  position: relative;
+  isolation: isolate;
   margin: 0;
   color: var(--dk-ink);
   background: var(--dk-bg);
   font-family: var(--body);
+}
+
+/* The front page hero's sectional chart: the faint lat/long grid and the
+   contour rings, laid under the top of every page and faded out before the
+   reading gets long. It sits behind everything and catches no clicks. */
+body::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 0 auto;
+  height: 34rem;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at calc(100% - 9rem) 11rem, transparent 0 13rem, var(--pf-chart-ring) 13rem calc(13rem + 1.5px), transparent calc(13rem + 2px) 18rem, var(--pf-chart-ring) 18rem calc(18rem + 1.5px), transparent calc(18rem + 2px) 23rem, var(--pf-chart-ring) 23rem calc(23rem + 1.5px), transparent calc(23rem + 2px)),
+    linear-gradient(var(--pf-chart-line) 1px, transparent 1px) 0 0 / 64px 64px,
+    linear-gradient(90deg, var(--pf-chart-line) 1px, transparent 1px) 0 0 / 64px 64px;
+  -webkit-mask: linear-gradient(#000 35%, transparent);
+  mask: linear-gradient(#000 35%, transparent);
 }
 
 :where(a, button, summary, [tabindex]):focus-visible {
@@ -274,7 +305,7 @@ body {
   font-weight: 700;
   color: var(--pf-title);
   background: var(--pf-here);
-  box-shadow: inset 3px 0 0 var(--pf-title);
+  box-shadow: inset 3px 0 0 var(--pf-mark);
 }
 
 .docs-menu summary {
@@ -430,6 +461,33 @@ body {
 .docs-article img {
   max-width: 100%;
   height: auto;
+}
+
+/* The README's centered blocks: the badges sit in one row under the title,
+   as on a placard, not stacked down the middle of the page. */
+.docs-article div[align] {
+  margin-block: 0 1.4rem;
+  text-align: left;
+}
+
+.docs-article div[align] > img {
+  display: inline-block;
+  margin: 0 .35rem .35rem 0;
+  vertical-align: middle;
+}
+
+/* The overview's picture of the front page, framed like the hero's
+   instrument: a rounded bezel and a soft drop onto the chart. */
+.docs-article div[align] > a:has(> img) {
+  display: block;
+  border-radius: 12px;
+}
+
+.docs-article div[align] > a > img {
+  display: block;
+  border: 1px solid var(--dk-rule);
+  border-radius: 12px;
+  box-shadow: var(--pf-frame-shadow);
 }
 
 .docs-article hr {
@@ -883,7 +941,7 @@ label.docs-task > input[type="checkbox"]:checked {
   :root:not([data-theme="light"]) {
     --pf-ground: #121a1d;
     --pf-card: #1a2529;
-    --pf-title: #6cf2a6;
+    --pf-title: #f4f1ea;
     --pf-h2: #f4f1ea;
     --pf-strong: #f4f1ea;
     --pf-label: #b9c4c8;
@@ -904,7 +962,13 @@ label.docs-task > input[type="checkbox"]:checked {
     --pf-foot: var(--green-deep);
     --pf-foot-ink: var(--cream);
     --pf-foot-muted: #cfe3dd;
+    --pf-mark: #6cf2a6;
+    --pf-chart-line: rgba(230, 238, 240, .045);
+    --pf-chart-ring: rgba(230, 238, 240, .06);
+    --pf-frame-shadow: 0 18px 36px -24px rgba(0, 0, 0, .8);
 
+    --dk-bg: var(--pf-ground);
+    --dk-code-bg: var(--pf-code-inline);
     --dk-ink: #e6eef0;
     --dk-muted: #9fabb0;
     --dk-rule: #26343a;
@@ -923,7 +987,7 @@ label.docs-task > input[type="checkbox"]:checked {
 :root[data-theme="dark"] {
   --pf-ground: #121a1d;
   --pf-card: #1a2529;
-  --pf-title: #6cf2a6;
+  --pf-title: #f4f1ea;
   --pf-h2: #f4f1ea;
   --pf-strong: #f4f1ea;
   --pf-label: #b9c4c8;
@@ -944,7 +1008,13 @@ label.docs-task > input[type="checkbox"]:checked {
   --pf-foot: var(--green-deep);
   --pf-foot-ink: var(--cream);
   --pf-foot-muted: #cfe3dd;
+  --pf-mark: #6cf2a6;
+  --pf-chart-line: rgba(230, 238, 240, .045);
+  --pf-chart-ring: rgba(230, 238, 240, .06);
+  --pf-frame-shadow: 0 18px 36px -24px rgba(0, 0, 0, .8);
 
+  --dk-bg: var(--pf-ground);
+  --dk-code-bg: var(--pf-code-inline);
   --dk-ink: #e6eef0;
   --dk-muted: #9fabb0;
   --dk-rule: #26343a;
