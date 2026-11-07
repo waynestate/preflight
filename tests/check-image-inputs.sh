@@ -47,14 +47,40 @@ for tpl in "$ROOT"/templates/*/template.yml; do
   jobs=$(awk -v n="$sep" 'NR > n' "$tpl")
 
   # 2.10: every job image: is the image input. The job a line belongs to is
-  # the most recent top-level key before it in the jobs document. One
-  # exemption only: the portability component runs two images, Buildah in
+  # the most recent top-level key before it in the jobs document. An image
+  # may be written inline (`image: $[[ inputs.image ]]`) or as a block
+  # (`image:` then `name:`, as secret-detection does to also override the
+  # entrypoint); either way the reference must be the input. One exemption
+  # only: the portability component runs two images, Buildah in
   # portability-build and the app image in portability-run (whose image
   # input defaults to what the build job pushes), so portability-build alone
   # may take inputs.buildah_image. Every other job and value fails.
   image_report=$(printf '%s\n' "$jobs" | awk '
-    /^[A-Za-z0-9_-]+:/ { job = $0; sub(/:.*$/, "", job) }
-    /^  image:/ {
+    /^[A-Za-z0-9_-]+:/ {
+      if (pending != "") print "job image block has no name: (" pending ")"
+      pending = ""
+      job = $0
+      sub(/:.*$/, "", job)
+    }
+    /^  image:[ \t]*$/ {
+      count++
+      pending = job
+      next
+    }
+    pending != "" {
+      if ($0 ~ /^    name:[ \t]*/) {
+        value = $0
+        sub(/^    name:[ \t]*/, "", value)
+        if (value == "$[[ inputs.image ]]") { pending = ""; next }
+        if (job == "portability-build" && value == "$[[ inputs.buildah_image ]]") { pending = ""; next }
+        print "job image is not the image input (" job "): " value
+      } else {
+        print "job image block must start with name: (" job "): " $0
+      }
+      pending = ""
+      next
+    }
+    /^  image:[ \t]+/ {
       count++
       value = $0
       sub(/^  image:[ \t]*/, "", value)
@@ -62,7 +88,10 @@ for tpl in "$ROOT"/templates/*/template.yml; do
       if (job == "portability-build" && value == "$[[ inputs.buildah_image ]]") next
       print "job image is not the image input (" job "): " value
     }
-    END { if (count == 0) print "no job image: line found" }')
+    END {
+      if (count == 0) print "no job image: line found"
+      if (pending != "") print "job image block has no name: (" pending ")"
+    }')
   if [ -n "$image_report" ]; then
     while IFS= read -r line; do
       [ -n "$line" ] || continue

@@ -51,18 +51,41 @@ Get-ChildItem -Path (Join-Path $Root "templates") -Directory | ForEach-Object {
   $jobs = @($lines[($sepIndex + 1)..($lines.Count - 1)])
 
   # 2.10: every job image: is the image input. The job a line belongs to is
-  # the most recent top-level key before it in the jobs document. One
-  # exemption only: the portability component runs two images, Buildah in
+  # the most recent top-level key before it in the jobs document. An image
+  # may be written inline (`image: $[[ inputs.image ]]`) or as a block
+  # (`image:` then `name:`, as secret-detection does to also override the
+  # entrypoint); either way the reference must be the input. One exemption
+  # only: the portability component runs two images, Buildah in
   # portability-build and the app image in portability-run (whose image
   # input defaults to what the build job pushes), so portability-build alone
   # may take inputs.buildah_image. Every other job and value fails.
   $jobName = $null
   $imageCount = 0
+  $pendingJob = $null
   foreach ($line in $jobs) {
     if ($line -match '^[A-Za-z0-9_-]+:') {
+      if ($null -ne $pendingJob) { Fail "${name}: job image block has no name: ($pendingJob)" }
+      $pendingJob = $null
       $jobName = ($line -replace ':.*$', '')
     }
-    if ($line -match '^  image:') {
+    if ($line -match '^  image:[ \t]*$') {
+      $imageCount++
+      $pendingJob = $jobName
+      continue
+    }
+    if ($null -ne $pendingJob) {
+      if ($line -match '^    name:[ \t]*(.*)$') {
+        $value = $Matches[1]
+        if ($value -eq '$[[ inputs.image ]]') { $pendingJob = $null; continue }
+        if ($jobName -eq 'portability-build' -and $value -eq '$[[ inputs.buildah_image ]]') { $pendingJob = $null; continue }
+        Fail "${name}: job image is not the image input ($jobName): $value"
+      } else {
+        Fail "${name}: job image block must start with name: ($jobName): $line"
+      }
+      $pendingJob = $null
+      continue
+    }
+    if ($line -match '^  image:[ \t]+') {
       $imageCount++
       $value = ($line -replace '^  image:[ \t]*', '')
       if ($value -eq '$[[ inputs.image ]]') { continue }
@@ -72,6 +95,9 @@ Get-ChildItem -Path (Join-Path $Root "templates") -Directory | ForEach-Object {
   }
   if ($imageCount -eq 0) {
     Fail "${name}: no job image: line found"
+  }
+  if ($null -ne $pendingJob) {
+    Fail "${name}: job image block has no name: ($pendingJob)"
   }
 
   # The spec must define the image input with a default.

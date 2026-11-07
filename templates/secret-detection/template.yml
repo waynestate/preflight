@@ -26,13 +26,19 @@ spec:
 ---
 "$[[ inputs.job_name ]]":
   stage: $[[ inputs.stage ]]
-  # The gitleaks image's entrypoint is the gitleaks binary itself, so the
-  # script calls its subcommands directly. The default is v8.30.1 (published
-  # 2026-03-21) pinned by digest: the digest is a multi-arch manifest list
-  # holding linux/amd64 and linux/arm64, confirmed on 2026-11-06 with
-  # docker buildx imagetools inspect, so the arm64 CI runner pulls the right
-  # architecture.
-  image: $[[ inputs.image ]]
+  # The gitleaks image's ENTRYPOINT is the gitleaks binary itself, and
+  # GitLab's Docker executor passes the job script to the image's entrypoint,
+  # so the job overrides it with an empty entrypoint and the script runs
+  # through /bin/sh. The image is Alpine-based with /bin/sh (checked
+  # 2026-11-06: sh -c 'echo ok; gitleaks version' prints ok and v8.30.1),
+  # and the script below is plain POSIX sh. The default is v8.30.1
+  # (published 2026-03-21) pinned by digest: the digest is a multi-arch
+  # manifest list holding linux/amd64 and linux/arm64, confirmed on
+  # 2026-11-06 with docker buildx imagetools inspect, so the arm64 CI runner
+  # pulls the right architecture.
+  image:
+    name: $[[ inputs.image ]]
+    entrypoint: [""]
   # Boolean input interpolated as a real YAML boolean (docs: an input that
   # replaces an entire YAML value is interpolated as its specified type).
   allow_failure: $[[ inputs.allow_failure ]]
