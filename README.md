@@ -333,14 +333,14 @@ No takeoff without a clean pre-flight.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@<full-commit-sha> # <tag, once one ships>
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@<full-commit-sha> # 0.2.0
     inputs:
       env: ["APP_KEY=${PORTABILITY_APP_KEY}", "APP_URL=https://myapp.example.edu"]
       session_login_path: /_portability/login
       session_check_path: /_portability/me
 ```
 
-The one-job form ships in the first release after 0.1.4 (0.1.4 carries the
+The one-job form ships in 0.2.0 (0.1.4 carries the
 earlier two-job form, `portability-build` and `portability-run`). The runner
 must allow user namespaces, which ordinary unprivileged Docker-executor
 runners do. The guide (`docs/guides/component-portability.md`) has a test
@@ -723,7 +723,7 @@ include:
 ```
 
 `job_name` ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release. `portability` gained it with its
-one-job form, in the first release after 0.1.4.
+one-job form, in 0.2.0.
 
 ## Shared conventions
 

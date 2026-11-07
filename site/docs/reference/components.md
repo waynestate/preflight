@@ -301,14 +301,14 @@ Proves the app image runs the way OpenShift, Coolify and plain Docker run it, no
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@<full-commit-sha> # <tag, once one ships>
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@<full-commit-sha> # 0.2.0
     inputs:
       env: ["APP_KEY=${PORTABILITY_APP_KEY}", "APP_URL=https://myapp.example.edu"]
       session_login_path: /_portability/login
       session_check_path: /_portability/me
 ```
 
-The one-job form ships in the first release after 0.1.4; 0.1.4 carries the earlier two-job form (`portability-build`, `portability-run`). The runner must allow user namespaces, which ordinary unprivileged Docker-executor runners do.
+The one-job form ships in 0.2.0; 0.1.4 carries the earlier two-job form (`portability-build`, `portability-run`). The runner must allow user namespaces, which ordinary unprivileged Docker-executor runners do.
 
 | Input | Type | Default | What it does |
 | --- | --- | --- | --- |

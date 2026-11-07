@@ -30,7 +30,7 @@ The job prints one `portability: <check>: problem: ...` line per problem as it f
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@<full-commit-sha> # <tag, once one ships>
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@<full-commit-sha> # 0.2.0
     inputs:
       env: ["APP_KEY=${PORTABILITY_APP_KEY}", "APP_URL=https://myapp.example.edu", "SESSION_DRIVER=cookie", "LOG_CHANNEL=stderr"]
       session_login_path: /_portability/login
@@ -39,7 +39,7 @@ include:
 
 Note
 
-The one-job component on this page ships in the first release after 0.1.4. 0.1.4 carries an earlier two-job version (`portability-build` and `portability-run`, checked with goss); see [Upgrading](https://preflight.apps.wayne.edu/docs/upgrading.html). Until the release, pin the full commit SHA.
+The one-job component on this page ships in 0.2.0. 0.1.4 carries an earlier two-job version (`portability-build` and `portability-run`, checked with goss); see [Upgrading](https://preflight.apps.wayne.edu/docs/upgrading.html). Until the release, pin the full commit SHA.
 
 With no `start_command`, the job runs the image's own `ENTRYPOINT` and `CMD`, exactly as the platforms do. Put secrets such as `APP_KEY` in CI/CD variables and name them in `env`: `$NAME` and `${NAME}` in `env` and `build_args` values are replaced from the job's variables.
 

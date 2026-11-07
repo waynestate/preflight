@@ -30,7 +30,7 @@ Expected: the pipeline runs two separately named jobs, `pint-app` and `pint-admi
 
 Note
 
-`job_name` ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release. `portability` gained it with its one-job form, in the first release after 0.1.4.
+`job_name` ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release. `portability` gained it with its one-job form, in 0.2.0.
 
 ## Another use: the next PHP release[#](https://preflight.apps.wayne.edu/docs/guides/include-twice.html#another-use-the-next-php-release)
 

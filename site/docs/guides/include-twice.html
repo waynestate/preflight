@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Include a component twice | Preflight docs</title>
 <meta name="description" content="Set the `job_name` input when one project includes the same component more than once.">
-<meta name="docs-version" content="0.1.4">
+<meta name="docs-version" content="0.2.0">
 <link rel="stylesheet" href="../../assets/wayne-ui/wayne-ui.css">
 <link rel="stylesheet" href="../../assets/docs.css">
 <link rel="stylesheet" href="../../docs/theme/preflight.css">
@@ -20,7 +20,7 @@
     <a class="brand" href="../../index.html">
       <img src="../../brand/preflight-avatar-256.png" width="36" height="36" alt="">
       <span class="brand__name">PREFLIGHT</span>
-      <span class="brand__tail">0.1.4</span>
+      <span class="brand__tail">0.2.0</span>
     </a>
     <nav class="topnav" aria-label="Site">
       <a class="topnav__section" href="../../index.html#checklist">Checklist</a>
@@ -55,7 +55,7 @@
       job_name: pint-admin
 </code></pre>
 <p>Expected: the pipeline runs two separately named jobs, <code>pint-app</code> and <code>pint-admin</code>, instead of two jobs that merge into one.</p>
-<aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p><code>job_name</code> ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release. <code>portability</code> gained it with its one-job form, in the first release after 0.1.4.</p></aside>
+<aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p><code>job_name</code> ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release. <code>portability</code> gained it with its one-job form, in 0.2.0.</p></aside>
 <h2 id="another-use-the-next-php-release">Another use: the next PHP release<a class="docs-heading-link" aria-label="Link to this section" href="#another-use-the-next-php-release">#</a></h2>
 <p>Including a component twice is also how you try a PHP release before it is supported. Include <code>php-test</code> a second time for the release that is not supported yet, name that job, and let it fail. The name is what lets your own <code>.gitlab-ci.yml</code> loosen only that job:</p>
 <pre tabindex="0"><code class="language-yaml">include:
@@ -84,7 +84,7 @@ php-test-next:
   <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#set-job-name">Set job_name</a></li><li class="docs-toc__item"><a href="#another-use-the-next-php-release">Another use: the next PHP release</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
-  <span>Documents Preflight <span data-docs-version>0.1.4</span></span>
+  <span>Documents Preflight <span data-docs-version>0.2.0</span></span>
   <span><a rel="noopener" href="https://github.com/waynestate/preflight">Source</a> <a href="include-twice.md">Markdown</a></span>
 </footer>
 </body>
