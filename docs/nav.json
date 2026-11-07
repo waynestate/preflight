@@ -51,6 +51,10 @@
           "path": "guides/component-eslint"
         },
         {
+          "title": "The secret-detection component",
+          "path": "guides/component-secret-detection"
+        },
+        {
           "title": "The package-publish component",
           "path": "guides/component-package-publish"
         },

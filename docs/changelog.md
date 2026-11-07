@@ -14,6 +14,7 @@ are Git tags.
 ## Unreleased
 
 - Added: a site accessibility gate (axe-core in Playwright with the WCAG 2.2 AA tag set, run in Docker so no host browser is needed): `scripts/a11y.sh` on Linux and macOS and `scripts/a11y.ps1` on Windows check the front page and every docs page in light and dark mode at 360 px and 1280 px, and fail on any violation; all pages pass clean.
+- Added: a secret-detection component (Gitleaks over the checked-out tree with `--redact`, a `gitleaks.json` report artifact uploaded even on failure, `config_path` and `allow_failure` inputs), so every stack repo gets committed-secret scanning from one include line; the first release carrying it is 0.2.0.
 - Fixed: the proctor and sbom jobs install the app with `--ignore-platform-reqs`. Both only read the app, yet a lock built for an older PHP or one needing gd, oci8 or ldap stopped them before PROCTOR or CycloneDX ran, so the oldest apps got no report. The sbom job also passes `--no-scripts`, so the app's Composer scripts no longer run in it. Found by the 2026-11-05 proof run; `tests/check-proctor-install-flags` (sh and ps1) now checks both lines.
 - Added: a public Proof page (`docs/reference/proof.md`, under Reference): the components run against 82 Wayne State applications, what held, what the run caught in Preflight, and what it does not prove. Local checks and the README link to it.
 - Added: troubleshooting entries for an install that stops on another PHP or a missing extension, a private package with no credential, and `npm ci` without a `package-lock.json`.

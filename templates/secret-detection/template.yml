@@ -1,0 +1,53 @@
+spec:
+  component: [name, version, sha, reference]
+  inputs:
+    stage:
+      description: Pipeline stage for the secret-detection job.
+      type: string
+      default: test
+    job_name:
+      type: string
+      default: secret-detection
+      description: "Name of the job. Set it when you include this component more than once."
+      regex: '^[A-Za-z0-9_][A-Za-z0-9_.-]*$'
+    image:
+      description: Docker image for the secret-detection job.
+      type: string
+      default: zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+    config_path:
+      description: Path to a .gitleaks.toml config file, relative to the project root. Empty uses Gitleaks' built-in rules.
+      type: string
+      default: ""
+      regex: '^([A-Za-z0-9_-][A-Za-z0-9._/-]*)?$'
+    allow_failure:
+      description: Whether the secret-detection job can fail without failing the pipeline.
+      type: boolean
+      default: false
+---
+"$[[ inputs.job_name ]]":
+  stage: $[[ inputs.stage ]]
+  # The gitleaks image's entrypoint is the gitleaks binary itself, so the
+  # script calls its subcommands directly. The default is v8.30.1 (published
+  # 2026-03-21) pinned by digest: the digest is a multi-arch manifest list
+  # holding linux/amd64 and linux/arm64, confirmed on 2026-11-06 with
+  # docker buildx imagetools inspect, so the arm64 CI runner pulls the right
+  # architecture.
+  image: $[[ inputs.image ]]
+  # Boolean input interpolated as a real YAML boolean (docs: an input that
+  # replaces an entire YAML value is interpolated as its specified type).
+  allow_failure: $[[ inputs.allow_failure ]]
+  interruptible: true
+  timeout: 30 minutes
+  script:
+    - echo "Preflight component $[[ component.name ]] $[[ component.version ]] (ref $[[ component.reference ]], sha $[[ component.sha ]])"
+    # --redact keeps any found secret out of the job log and the report: only
+    # the rule, file and line are shown. The JSON report is written at the
+    # project root even when the tree is clean, so the artifact path is the
+    # same for every checkout. In dir mode Gitleaks reads a .gitleaksignore
+    # at the project root without an extra flag.
+    - if [ -n "$[[ inputs.config_path ]]" ]; then gitleaks dir --redact --no-banner --config="$[[ inputs.config_path ]]" --report-format=json --report-path="$CI_PROJECT_DIR/gitleaks.json" .; else gitleaks dir --redact --no-banner --report-format=json --report-path="$CI_PROJECT_DIR/gitleaks.json" .; fi
+  artifacts:
+    when: always
+    paths:
+      - gitleaks.json
+    expire_in: 30 days
