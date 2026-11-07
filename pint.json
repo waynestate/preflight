@@ -3,6 +3,7 @@
     "exclude": [
         "tests/fixture-app",
         "tests/portability",
+        "tests/squire-kit-fixture",
         "bin/docs-site.php"
     ],
     "notPath": [

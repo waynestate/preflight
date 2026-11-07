@@ -40,6 +40,13 @@ include:
       site_dir: site
       pages: ["**/*.html"]
       wcag_tags: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]
+  # The squire-kit component at this commit, on a kit Squire wrote
+  # (tests/squire-kit-fixture, from squire init --target=raw). Renovate moves
+  # the fixture with each Squire release, like any kit.
+  - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/squire-kit@$CI_COMMIT_SHA
+    inputs:
+      working_dir: tests/squire-kit-fixture
+      image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc
   - template: Jobs/Secret-Detection.gitlab-ci.yml
 
 stages:
@@ -75,6 +82,7 @@ contract:
     - sh tests/check-release-job.sh
     - sh tests/check-a11y-inline.sh
     - sh tests/check-renovate-squire-kit.sh
+    - sh tests/check-squire-kit.sh
 
 # Advisory for now: secret detection is new here. Dated 2026-11-02: make this
 # job blocking (remove allow_failure) after one week of green pipelines.

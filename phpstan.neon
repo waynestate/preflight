@@ -8,6 +8,7 @@ parameters:
         - tests
     excludePaths:
         - tests/fixture-app
+        - tests/squire-kit-fixture
         - bin/docs-site.php
     phpVersion:
         min: 80300

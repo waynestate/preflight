@@ -1,0 +1,83 @@
+# squire-kit: fail the pipeline when a Squire deploy kit drifts from the
+# Squire release it records.
+#
+# Squire writes the deploy kit (build.sh, the release script, the health
+# check, the local parity files) and records the version it used and a
+# SHA-256 of every file in .squire.json. This job installs that exact Squire
+# release from Packagist into a temporary folder outside the project and runs
+# `squire init --check` on the kit folder. It passes only when every kit file
+# is the template of that release, untouched; a file someone edited, one that
+# is missing, or a recorded version bumped without `squire update` fails it.
+#
+# A new Squire never turns a green main red by itself: the job checks the
+# version the kit records, and Renovate's waynestate/squire rule (Preflight's
+# preset) opens the merge request that moves it. A squire keeps the armor
+# polished; this job is the inspection before the joust.
+spec:
+  component: [name, version, sha, reference]
+  description: "Fail the pipeline when a Squire deploy kit drifts from the Squire release recorded in its .squire.json."
+  inputs:
+    stage:
+      type: string
+      default: test
+      description: "Pipeline stage for the squire-kit job."
+    job_name:
+      type: string
+      default: squire-kit
+      description: "Name of the job. Set it when you include this component more than once."
+      regex: '^[A-Za-z0-9_][A-Za-z0-9_.-]*$'
+    image:
+      type: string
+      default: "composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc"
+      description: "Container image for the job. It needs PHP 8.3 or later and Composer."
+    working_dir:
+      type: string
+      default: "."
+      description: "The kit folder: the one holding .squire.json, relative to the repository root (deploy in the stack's own repos)."
+      regex: '^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$'
+    squire_version:
+      type: string
+      default: ""
+      description: "Squire release to check against. Empty reads the version recorded in .squire.json."
+      regex: '^([0-9]+\.[0-9]+\.[0-9]+)?$'
+    allow_failure:
+      type: boolean
+      default: false
+      description: "Whether the job can fail without failing the pipeline, for a repository cleaning up its first findings."
+---
+"$[[ inputs.job_name ]]":
+  stage: $[[ inputs.stage ]]
+  image: $[[ inputs.image ]]
+  allow_failure: $[[ inputs.allow_failure ]]
+  interruptible: true
+  timeout: 10 minutes
+  script:
+    - echo "Preflight component $[[ component.name ]] $[[ component.version ]] (ref $[[ component.reference ]], sha $[[ component.sha ]])"
+    - cd "$[[ inputs.working_dir ]]"
+    # Exit codes follow Squire's: 0 the kit matches, 1 it drifted, 2 the
+    # check could not run (no .squire.json, no version, no such release).
+    - |
+      if [ ! -f .squire.json ]; then
+        echo "squire-kit: no .squire.json in $[[ inputs.working_dir ]]; set working_dir to the folder Squire wrote the kit into" >&2
+        exit 2
+      fi
+      version="$[[ inputs.squire_version ]]"
+      if [ -z "$version" ]; then
+        version=$(php -r '$m = json_decode((string) file_get_contents(".squire.json"), true); echo is_array($m) && is_string($m["version"] ?? null) ? $m["version"] : "";')
+      fi
+      if ! printf '%s\n' "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+        echo "squire-kit: .squire.json records no released Squire version (found '$version'); set the squire_version input" >&2
+        exit 2
+      fi
+      squire_home=$(mktemp -d)
+      if ! composer create-project --no-dev --no-interaction --no-progress --no-scripts --quiet waynestate/squire "$squire_home/squire" "$version"; then
+        echo "squire-kit: could not install waynestate/squire $version from Packagist" >&2
+        exit 2
+      fi
+      echo "Checking the kit in $[[ inputs.working_dir ]] against Squire $version"
+      status=0
+      php "$squire_home/squire/bin/squire" init --check --path=. || status=$?
+      if [ "$status" -eq 1 ]; then
+        echo "squire-kit: the kit drifted from Squire $version. outdated or missing: run vendor/bin/squire update, then vendor/bin/squire init, on this folder and commit the result. modified: restore Squire's file (vendor/bin/squire init --force) and send the change to Squire instead." >&2
+      fi
+      exit "$status"
