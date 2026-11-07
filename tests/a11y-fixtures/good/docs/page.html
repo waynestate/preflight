@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Good fixture docs page: the a11y component</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { margin: 0; font: 16px/1.5 system-ui, sans-serif; background: #ffffff; color: #1a1a1a; }
+    main { padding: 1rem; max-width: 40rem; margin: 0 auto; }
+    a { color: #0c5132; }
+    pre { overflow-x: auto; background: #f2f2f2; padding: 0.5rem; }
+    @media (prefers-color-scheme: dark) {
+      body { background: #101418; color: #e8ecef; }
+      a { color: #8fd3b0; }
+      pre { background: #1d2329; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>A docs page</h1>
+    <p>A long line of code scrolls inside its own box, so the page itself still reflows at 320 pixels.</p>
+    <pre tabindex="0" aria-label="Example include"><code>include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@&lt;full commit SHA&gt; # &lt;tag&gt;</code></pre>
+    <p><a href="../index.html">Back to the front page</a></p>
+  </main>
+</body>
+</html>

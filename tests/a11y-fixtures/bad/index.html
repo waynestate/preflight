@@ -1,0 +1,30 @@
+<!doctype html>
+<!-- Known bad on purpose: every flaw below is one tests/check-a11y expects
+     the a11y component to report. No lang (html-has-lang), an image with no
+     alt (image-alt), an input with no label (label), grey on grey text
+     (color-contrast) and a fixed-width banner that makes the page scroll
+     sideways at 320 px (preflight-reflow). -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bad fixture: the a11y component</title>
+  <style>
+    body { margin: 0; font: 16px/1.5 system-ui, sans-serif; background: #ffffff; color: #1a1a1a; }
+    main { padding: 1rem; }
+    .faint { color: #bbbbbb; }
+    .banner { width: 600px; background: #0c5132; color: #ffffff; padding: 0.5rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Not cleared</h1>
+    <div class="banner">A banner that never learned to wrap.</div>
+    <p class="faint">Text nobody on the ramp can read.</p>
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='40'/%3E" width="200" height="40">
+    <form>
+      <input name="callsign" type="text">
+    </form>
+  </main>
+</body>
+</html>

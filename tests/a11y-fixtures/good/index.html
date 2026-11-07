@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Good fixture: the a11y component</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { margin: 0; font: 16px/1.5 system-ui, sans-serif; background: #ffffff; color: #1a1a1a; }
+    header, main, footer { padding: 1rem; max-width: 40rem; margin: 0 auto; }
+    a { color: #0c5132; }
+    img { max-width: 100%; height: auto; }
+    @media (prefers-color-scheme: dark) {
+      body { background: #101418; color: #e8ecef; }
+      a { color: #8fd3b0; }
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .reveal { animation: rise 0.4s ease-out both; }
+      @keyframes rise { from { opacity: 0; } to { opacity: 1; } }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="docs/page.html">Docs</a>
+    </nav>
+  </header>
+  <main>
+    <h1 class="reveal">Cleared for takeoff</h1>
+    <p>Every check on this page passes: a language, a title, one heading, labeled controls and enough contrast in both color schemes.</p>
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='40'/%3E" width="200" height="40" alt="A blank runway marker">
+    <form>
+      <label for="callsign">Call sign</label>
+      <input id="callsign" name="callsign" type="text">
+      <button type="submit">Request clearance</button>
+    </form>
+  </main>
+  <footer>
+    <p>A fixture for tests/check-a11y.</p>
+  </footer>
+</body>
+</html>

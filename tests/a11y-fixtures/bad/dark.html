@@ -1,0 +1,26 @@
+<!doctype html>
+<!-- Known bad in dark mode only: clean in light, but the dark palette sets
+     grey on near black (color-contrast). tests/check-a11y expects the light
+     checks to pass and the dark checks to fail, which proves both color
+     schemes really run. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bad in the dark: the a11y component</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { margin: 0; font: 16px/1.5 system-ui, sans-serif; background: #ffffff; color: #1a1a1a; }
+    main { padding: 1rem; }
+    @media (prefers-color-scheme: dark) {
+      body { background: #111111; color: #444444; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Night flight</h1>
+    <p>Readable by day, lost at night.</p>
+  </main>
+</body>
+</html>
