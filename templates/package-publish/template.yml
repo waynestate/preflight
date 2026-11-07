@@ -14,6 +14,12 @@ spec:
       description: Docker image for the package-publish job. The default ships curl and PHP, which the job uses for the registry round trip.
       type: string
       default: composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc
+    image_prefix:
+      description: "Registry path put in front of the image input. The default is this group's GitLab Dependency Proxy, so Docker Hub images are pulled once and then served from GitLab's cache. On a GitLab or group without the proxy, set it to docker.io."
+      type: string
+      default: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}"
+      # No trailing slash: the job joins the two as image_prefix/image.
+      regex: '^[^/\s](\S*[^/\s])?$'
     group_id:
       description: Numeric id of the GitLab group whose built-in Composer registry hosts the package.
       type: string
@@ -28,7 +34,7 @@ spec:
   # with different contents, so the job checks the registry first and refuses
   # a moved version. Once a version is on the manifest, it stays on the
   # manifest: no go-arounds.
-  image: $[[ inputs.image ]]
+  image: $[[ inputs.image_prefix ]]/$[[ inputs.image ]]
   interruptible: true
   timeout: 30 minutes
   rules:

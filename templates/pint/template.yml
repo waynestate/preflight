@@ -22,6 +22,12 @@ spec:
       type: string
       default: "composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc"
       description: "Container image used to run Pint."
+    image_prefix:
+      description: "Registry path put in front of the image input. The default is this group's GitLab Dependency Proxy, so Docker Hub images are pulled once and then served from GitLab's cache. On a GitLab or group without the proxy, set it to docker.io."
+      type: string
+      default: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}"
+      # No trailing slash: the job joins the two as image_prefix/image.
+      regex: '^[^/\s](\S*[^/\s])?$'
     config:
       type: string
       default: "pint.json"
@@ -35,9 +41,22 @@ spec:
 ---
 "$[[ inputs.job_name ]]":
   stage: $[[ inputs.stage ]]
-  image: $[[ inputs.image ]]
+  image: $[[ inputs.image_prefix ]]/$[[ inputs.image ]]
   interruptible: true
   timeout: 10m
+  # The cache is always on. COMPOSER_CACHE_DIR points Composer at a path
+  # inside the project so GitLab can cache it. The key depends on
+  # composer.lock, so a dependency change invalidates the cache.
+  cache:
+    key:
+      files:
+        - composer.lock
+      prefix: pint
+    paths:
+      - .composer-cache/
+    policy: pull-push
+  variables:
+    COMPOSER_CACHE_DIR: "$CI_PROJECT_DIR/.composer-cache"
   script:
     - echo "Preflight component $[[ component.name ]] $[[ component.version ]] (ref $[[ component.reference ]], sha $[[ component.sha ]])"
     - cd "$[[ inputs.working_dir ]]"

@@ -55,7 +55,10 @@ Get-ChildItem -Path (Join-Path $Root "templates") -Directory | ForEach-Object {
   # may be written inline (`image: $[[ inputs.image ]]`) or as a block
   # (`image:` then `name:`, as secret-detection does to also override the
   # entrypoint); either way the reference must be the input. No exemptions:
-  # every job and value that is not the image input fails.
+  # every job and value that is not the image input fails. The image input
+  # may follow the image_prefix input (`$[[ inputs.image_prefix ]]/...`),
+  # which check-dependency-cache requires for Docker Hub images.
+  $imageValues = @('$[[ inputs.image ]]', '$[[ inputs.image_prefix ]]/$[[ inputs.image ]]')
   $jobName = $null
   $imageCount = 0
   $pendingJob = $null
@@ -73,7 +76,7 @@ Get-ChildItem -Path (Join-Path $Root "templates") -Directory | ForEach-Object {
     if ($null -ne $pendingJob) {
       if ($line -match '^    name:[ \t]*(.*)$') {
         $value = $Matches[1]
-        if ($value -eq '$[[ inputs.image ]]') { $pendingJob = $null; continue }
+        if ($imageValues -contains $value) { $pendingJob = $null; continue }
         Fail "${name}: job image is not the image input ($jobName): $value"
       } else {
         Fail "${name}: job image block must start with name: ($jobName): $line"
@@ -84,7 +87,7 @@ Get-ChildItem -Path (Join-Path $Root "templates") -Directory | ForEach-Object {
     if ($line -match '^  image:[ \t]+') {
       $imageCount++
       $value = ($line -replace '^  image:[ \t]*', '')
-      if ($value -eq '$[[ inputs.image ]]') { continue }
+      if ($imageValues -contains $value) { continue }
       Fail "${name}: job image is not the image input ($jobName): $value"
     }
   }

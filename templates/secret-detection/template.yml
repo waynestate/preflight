@@ -14,6 +14,12 @@ spec:
       description: Docker image for the secret-detection job.
       type: string
       default: zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+    image_prefix:
+      description: "Registry path put in front of the image input. The default is this group's GitLab Dependency Proxy, so Docker Hub images are pulled once and then served from GitLab's cache. On a GitLab or group without the proxy, set it to docker.io."
+      type: string
+      default: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}"
+      # No trailing slash: the job joins the two as image_prefix/image.
+      regex: '^[^/\s](\S*[^/\s])?$'
     config_path:
       description: Path to a .gitleaks.toml config file, relative to the project root. Empty uses the built-in rules plus a path allowlist for vendor/ and node_modules/. When set, your file replaces the default, so add the same vendor and node_modules path allowlist to it.
       type: string
@@ -37,7 +43,7 @@ spec:
   # 2026-11-06 with docker buildx imagetools inspect, so the arm64 CI runner
   # pulls the right architecture.
   image:
-    name: $[[ inputs.image ]]
+    name: $[[ inputs.image_prefix ]]/$[[ inputs.image ]]
     entrypoint: [""]
   # Boolean input interpolated as a real YAML boolean (docs: an input that
   # replaces an entire YAML value is interpolated as its specified type).

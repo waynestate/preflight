@@ -2,36 +2,32 @@
 # Note: $CI_COMMIT_SHA testing requires this project to be on the same
 # GitLab instance as the runner. Components cannot be used across instances.
 # Docker Hub images in this repo's own pipeline go through the GitLab
-# Dependency Proxy to avoid the anonymous pull limit. Component defaults
-# stay unprefixed because other GitLab instances may have no proxy.
+# Dependency Proxy to avoid the anonymous pull limit. The components put
+# their image_prefix input (default: the proxy) in front of their image, so
+# the includes below pass no image; tests/check-dependency-cache.sh fails
+# if one does, or if a job here pulls from Docker Hub directly.
 include:
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/proctor@$CI_COMMIT_SHA
     inputs:
       working_dir: tests/fixture-app
       proctor_command: bin/proctor check --format=codequality
-      image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/php:8.4-cli-trixie@sha256:9cf851bc2c1b37c3e59dfd677a3c3e56d485af5a47c93f629424bb039eafcb69
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/php-test@$CI_COMMIT_SHA
     inputs:
       working_dir: tests/fixture-app
       test_command: vendor/bin/phpunit
-      image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/php:${PHP_VERSION}-cli-trixie
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/composer-audit@$CI_COMMIT_SHA
     inputs:
       stage: audit
       working_dir: tests/fixture-app
-      image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/sbom@$CI_COMMIT_SHA
     inputs:
       stage: audit
-      image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/pint@$CI_COMMIT_SHA
     inputs:
       working_dir: tests/fixture-app
-      image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/phpstan@$CI_COMMIT_SHA
     inputs:
       working_dir: tests/fixture-app
-      image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc
   # Preflight's own front page and docs, checked by the a11y component at
   # this commit with the stack's floor, WCAG 2.2 AA. The Playwright image is
   # on Microsoft's registry, not Docker Hub, so it skips the Dependency Proxy.
@@ -46,7 +42,6 @@ include:
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/squire-kit@$CI_COMMIT_SHA
     inputs:
       working_dir: tests/squire-kit-fixture
-      image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc
   # The portability component at this commit, on the clean fixture: it must
   # pass. must-fail-portability below proves each flaw still fails. The
   # fixture's base image comes through the Dependency Proxy; the probe
@@ -79,6 +74,7 @@ contract:
     - sh tests/check-proctor-cache.sh
     - sh tests/check-proctor-fails.sh
     - sh tests/check-image-inputs.sh
+    - sh tests/check-dependency-cache.sh
     - sh tests/check-buildah-pin.sh
     - sh tests/check-working-dir-regex.sh
     - sh tests/check-path-input-regex.sh

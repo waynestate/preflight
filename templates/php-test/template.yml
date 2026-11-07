@@ -14,6 +14,12 @@ spec:
       description: Docker image for each php-test job. The default carries the literal ${PHP_VERSION}, which GitLab expands in the image at job time, so the matrix keeps working.
       type: string
       default: php:${PHP_VERSION}-cli-trixie
+    image_prefix:
+      description: "Registry path put in front of the image input. The default is this group's GitLab Dependency Proxy, so Docker Hub images are pulled once and then served from GitLab's cache. On a GitLab or group without the proxy, set it to docker.io."
+      type: string
+      default: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}"
+      # No trailing slash: the job joins the two as image_prefix/image.
+      regex: '^[^/\s](\S*[^/\s])?$'
     php_versions:
       description: PHP versions to test against, one job per entry (for example "8.3"). Each job runs the newest patch release of that version.
       type: array
@@ -45,7 +51,7 @@ spec:
   parallel:
     matrix:
       - PHP_VERSION: $[[ inputs.php_versions ]]
-  image: $[[ inputs.image ]]
+  image: $[[ inputs.image_prefix ]]/$[[ inputs.image ]]
   interruptible: true
   timeout: 30 minutes
   # The cache is always on. COMPOSER_CACHE_DIR points Composer at a path
