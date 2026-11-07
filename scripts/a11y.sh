@@ -9,11 +9,17 @@
 #   sh scripts/a11y.sh                    Preflight's front page and docs, WCAG 2.2 AA
 #   sh scripts/a11y.sh --site=DIR --pages='["index.html", "docs/**/*.html"]' \
 #     --tags='["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]' --report=DIR
+#   sh scripts/a11y.sh --base-url=http://host.docker.internal:8000 --pages='["/", "/apps"]'
 #
 # --site is relative to the repo root; --pages and --tags are JSON lists;
-# --report keeps gl-a11y-junit.xml and gl-a11y-report.json in DIR. The color
-# schemes and widths are the component's defaults. Exit 0 clean, 1 a
-# violation or a page that did not load, 2 a tool or configuration error.
+# --report keeps gl-a11y-junit.xml and gl-a11y-report.json in DIR. --base-url
+# checks a running site instead of a folder of HTML (default: the A11Y_BASE_URL
+# environment variable, or empty). The color schemes and widths are the
+# component's defaults. Exit 0 clean, 1 a violation or a page that did not
+# load, 2 a tool or configuration error.
+#
+# localhost inside the container is the container itself, so a site on the
+# host is reached as host.docker.internal.
 #
 # The repo is mounted read-only; npm's cache lives in a named volume, so
 # later runs install from it.
@@ -25,14 +31,16 @@ SITE=site
 PAGES='["**/*.html"]'
 TAGS='["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]'
 REPORT=""
+BASE_URL="${A11Y_BASE_URL:-}"
 for arg in "$@"; do
   case $arg in
     --site=*) SITE=${arg#--site=} ;;
     --pages=*) PAGES=${arg#--pages=} ;;
     --tags=*) TAGS=${arg#--tags=} ;;
     --report=*) REPORT=${arg#--report=} ;;
+    --base-url=*) BASE_URL=${arg#--base-url=} ;;
     *)
-      echo "usage: sh scripts/a11y.sh [--site=DIR] [--pages=JSON] [--tags=JSON] [--report=DIR]" >&2
+      echo "usage: sh scripts/a11y.sh [--site=DIR] [--pages=JSON] [--tags=JSON] [--report=DIR] [--base-url=URL]" >&2
       exit 2
       ;;
   esac
@@ -73,8 +81,10 @@ else
 fi
 
 # The docker mounts, collected as positional parameters so a path with a
-# space survives. The options above are already parsed.
-set -- -v "${REPO}:/work:ro" -v preflight-a11y-npm-cache:/root/.npm
+# space survives. The options above are already parsed. --add-host makes
+# host.docker.internal reach the host on Linux too; Docker Desktop already
+# has it.
+set -- --add-host=host.docker.internal:host-gateway -v "${REPO}:/work:ro" -v preflight-a11y-npm-cache:/root/.npm
 REPORT_DIR=/tmp/preflight-a11y/out
 if [ -n "$REPORT" ]; then
   mkdir -p "$REPORT"
@@ -85,6 +95,13 @@ if [ -n "$REPORT" ]; then
   fi
   set -- "$@" -v "${REPORT_HOST}:/report"
   REPORT_DIR=/report
+fi
+
+# A non-empty base URL goes to the checker as the component's base_url input;
+# the checker refuses anything that is not http or https (exit 2), so no
+# validation here.
+if [ -n "$BASE_URL" ]; then
+  set -- "$@" -e "A11Y_BASE_URL=$BASE_URL"
 fi
 
 # scripts/a11y-container.sh runs the component job's steps inside the image.

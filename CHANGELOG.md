@@ -12,6 +12,7 @@ are Git tags.
 - Added: `tests/check-dependency-cache` (sh and ps1), run in the `contract` job. It fails when a Docker Hub component skips `image_prefix`, when a component installs Composer or npm packages without a cache, or when Preflight's own `.gitlab-ci.yml` pulls from Docker Hub without the proxy or passes a component an image that already carries it. Preflight's own includes no longer pass `image`.
 - Added: docs page Dependency caching (Guides), and an `image_prefix` row in every Docker Hub component's input table.
 - Fixed: the `portability` probe's `sigterm` check no longer fails, now and then, an app that stops at once. It checked whether the main process was still running in two steps (is its status file there, then is it a zombie), and a process reaped between the two read as running, so a clean exit could be reported as "still running 10s after SIGTERM" without any wait. It now reads the status once, takes its verdict from the same check that ended the wait, and no longer prints a stray `/proc/<pid>/cmdline` error when a process ends while the probe looks at it.
+- Added: `scripts/a11y.sh --base-url` and `scripts/a11y.ps1 -BaseUrl` (or `A11Y_BASE_URL`) check a running site locally, as the component's `base_url` input does in CI.
 
 ## 0.2.0 (2026-11-07)
 
@@ -49,6 +50,7 @@ are Git tags.
 - Added: a packageRule in `renovate/default.json` that restricts `quay.io/buildah/stable` to `-immutable` tags (regex versioning), so Renovate never moves a pin back to a mutable tag after Red Hat re-pushed one and garbage-collected the old digest; new test tests/check-renovate-buildah.
 - Changed: the portability component's `buildah_image` default moves to the immutable tag `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb`; Red Hat re-pushed the plain version tag and garbage-collected the old digest, so pipelines pinned to the mutable tag broke. New test tests/check-buildah-pin.
 - Added: an `abandoned` input on the composer-audit component (`fail`, `report` or `ignore`, default `fail`) so an app can relax how `composer audit` treats abandoned packages on purpose; the job now runs `composer audit --locked --abandoned=$[[ inputs.abandoned ]]`. New test tests/check-abandoned-input (and its `.ps1` twin) with the fixtures in tests/audit-fixtures.
+- Fixed: the `portability` probe's `sigterm` check no longer fails, now and then, an app that stops at once. It checked whether the main process was still running in two steps (is its status file there, then is it a zombie), and a process reaped between the two read as running, so a clean exit could be reported as "still running 10s after SIGTERM" without any wait. It now reads the status once, takes its verdict from the same check that ended the wait, and no longer prints a stray `/proc/<pid>/cmdline` error when a process ends while the probe looks at it.
 
 ## 0.1.4 (2026-11-03)
 
