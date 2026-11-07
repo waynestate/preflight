@@ -248,6 +248,7 @@ uses: waynestate/preflight/.github/workflows/php-package.yml@79029cc2300702d0d45
 On the list, not yet on board. Nothing to include until they land.
 
 - Next tagAccessibility suiteBuilt: the `a11y` component runs axe-core in Playwright, light and dark, at 320 and 1280 px. WCAG 2.1 Level AA by default; one input adds 2.2 AA, the floor WayneUI's own gate uses. A manual review is still owed.
+- Next tagSquire kit checkBuilt: the `squire-kit` component runs `squire init --check` on the deploy kit, so a file that drifted from its Squire release fails the pipeline. Renovate's merge request for each new Squire can carry the refreshed kit.
 - Coming soonContract suiteNamed in the best practices as coming later. Not built yet.
 - Coming soonSite freshnessPlanned. Not in this repo yet.
 

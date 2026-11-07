@@ -293,6 +293,7 @@ include:
 | `autodiscover_filter` | string | `$CI_PROJECT_NAMESPACE/*` | Glob limiting which projects Renovate discovers, relative to the runner project's namespace. |
 | `dry_run` | string | `"null"` | Dry run mode: `null` (disabled), `lookup` or `full`. |
 | `git_author` | string | none | Author of the commits and merge requests Renovate creates, in the form `Name `. Required. |
+| `squire_kit_tasks` | boolean | `false` | Allow the Squire kit commands of Preflight's preset (install the new `waynestate/squire` from Packagist, then `squire update` on the kit folder), so a Squire kit merge request arrives with its files refreshed. Off, the merge request bumps the version only and shows an artifact error. |
 
 #### portability
 
@@ -379,6 +380,37 @@ The job installs the three npm packages at exact versions with `--ignore-scripts
 the app. The checker is `templates/a11y/check.mjs`, inlined in the template because a component ships only its
 `template.yml`; `tests/check-a11y-inline` keeps the two byte for byte. Renovate bumps the image and the two axe-core
 packages (as one group), and the bumps wait for review like every template pin.
+
+#### squire-kit
+
+Version 1 · Category: Testing/Validation · Tags: squire,deploy,drift
+
+Installs the Squire release a deploy kit records in its `.squire.json` and runs `squire init --check` on the kit
+folder, so the pipeline fails when a kit file was edited, is missing, or is not that release's template. It checks the
+recorded version, so a new Squire never turns main red by itself: Renovate's Squire rule moves the version (see
+[Squire kits](#squire-kits)). A squire keeps the armor polished; this job is the inspection before the joust.
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@<full commit SHA> # 0.2.0
+    inputs:
+      working_dir: deploy
+```
+
+squire-kit ships in 0.2.0 (0.1.4 does not include it). Run `vendor/bin/squire init --check --path=deploy` first; while
+a repository cleans up its first findings, set `allow_failure: true`.
+
+| Input | Type | Default | What it does |
+|-------|------|---------|--------------|
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `squire-kit` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. It needs PHP 8.3 or later and Composer. |
+| `working_dir` | string | `.` | The kit folder: the one holding `.squire.json`, relative to the project root. |
+| `squire_version` | string | `""` | Squire release to check against, `x.y.z`. Empty reads the version recorded in `.squire.json`. |
+| `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline, for a repository cleaning up its first findings. |
+
+The job installs Squire with `composer create-project --no-dev --no-scripts` into a temporary folder, never into the
+app. It exits 0 when the kit matches, 1 when it drifted, and 2 when the check could not run.
 
 ### Same instance only
 
@@ -474,9 +506,35 @@ app's `component:` include, and bumps of the recorded Squire kit version
 They wait for a person because those pins are what every app pipeline runs:
 a changed digest here changes what every consuming pipeline executes, so it
 earns a human eye even when its own pipeline is green. The Squire kit version
-bump is refreshed by a person who runs `squire update` (with the right path
-for the repo), reviews the diff and commits it to the branch; the runner runs
-no commands, so the merge request carries no postUpgradeTasks.
+bump also changes the kit's files; see [Squire kits](#squire-kits).
+
+#### Squire kits
+
+A Squire deploy kit (the `deploy` folder in the stack's repos) is files Squire
+wrote, recorded with their hashes in `deploy/.squire.json`. Two rules in the
+preset keep it equal to a Squire release:
+
+- **A new Squire refreshes the kit.** The custom manager reads the version in
+  `.squire.json` and opens a merge request for each new `waynestate/squire`
+  on Packagist. Its `postUpgradeTasks` install that release into a folder
+  under `/tmp` (outside the repository, `--no-dev --no-scripts`) and run
+  `squire update` on the kit folder, so the merge request carries the
+  refreshed files. It waits for review (`squire-kit`, `needs-review`).
+- **Renovate leaves kit files alone.** Updates to `docker-compose.squire.yml`
+  and anything under `.squire/` are turned off outside Squire's own
+  `templates/` folders. A digest or tag bump there is an edit to a file Squire
+  owns: the kit drifts from its release, and the next `squire update` refuses
+  to overwrite it. Change the image in Squire's templates instead.
+
+Renovate only runs a post-upgrade command its runner allows. The renovate
+component's `squire_kit_tasks` input (default `false`) writes the allow-list
+into the runner's `config.js`: two anchored patterns that match the exact
+`composer create-project` and `squire update` commands. No shell runs them.
+Without the input, the merge request bumps the version only and shows an
+artifact error; refresh it by hand with `vendor/bin/squire update
+--path=deploy`, review the diff and commit it to the branch. A release that
+adds a kit file also needs `vendor/bin/squire init --path=deploy`, and the
+`squire-kit` component catches both cases in the pipeline.
 
 #### Why MySQL and HA-Proxy get digests only
 
@@ -497,6 +555,8 @@ A person must set up:
   `GITHUB_COM_TOKEN`.
 - A pipeline schedule on that project so the job runs regularly; weekly on
   Monday is a sensible default.
+- To let Squire kit merge requests arrive refreshed, `squire_kit_tasks: true`
+  under the include's `inputs:`, on a Preflight version that has the input.
 
 #### The runner project
 
@@ -565,10 +625,11 @@ if the pilot reads it.
 
 #### Which jobs may be allowed to fail
 
-Three components take an `allow_failure` input, all defaulting to `false`: `proctor`, `secret-detection` and `a11y`. A
-policy finding is a warning while an app adopts PROCTOR's rules, a secret finding while a repo allowlists its first false
-positives, and an accessibility finding while a site fixes what the gate found on its first run, so each job may fail
-without failing the pipeline during adoption; all three still write their reports. `composer-audit` has no such input on purpose: a known advisory must fail the pipeline. The other jobs have no
+Four components take an `allow_failure` input, all defaulting to `false`: `proctor`, `secret-detection`, `a11y` and
+`squire-kit`. A policy finding is a warning while an app adopts PROCTOR's rules, a secret finding while a repo
+allowlists its first false positives, an accessibility finding while a site fixes what the gate found on its first run,
+and a kit finding while a repo puts its deploy kit back to Squire's files, so each job may fail without failing the
+pipeline during adoption; the first three still write their reports. `composer-audit` has no such input on purpose: a known advisory must fail the pipeline. The other jobs have no
 `allow_failure` input either.
 
 No template adds a global key such as `default:`, `variables:`, `workflow:` or `stages:`. `tests/check-contract.sh`
@@ -977,6 +1038,7 @@ uses: waynestate/preflight/.github/workflows/php-package.yml@79029cc2300702d0d45
 On the list, not yet on board. Nothing to include until they land.
 
 - Next tagAccessibility suiteBuilt: the `a11y` component runs axe-core in Playwright, light and dark, at 320 and 1280 px. WCAG 2.1 Level AA by default; one input adds 2.2 AA, the floor WayneUI's own gate uses. A manual review is still owed.
+- Next tagSquire kit checkBuilt: the `squire-kit` component runs `squire init --check` on the deploy kit, so a file that drifted from its Squire release fails the pipeline. Renovate's merge request for each new Squire can carry the refreshed kit.
 - Coming soonContract suiteNamed in the best practices as coming later. Not built yet.
 - Coming soonSite freshnessPlanned. Not in this repo yet.
 
@@ -1246,6 +1308,9 @@ All notable changes to PREFLIGHT are recorded here. Entries follow [Keep a Chang
 
 ### Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Added: the `squire-kit` component (`templates/squire-kit/template.yml`), which fails the pipeline when a Squire deploy kit drifts from the Squire release its `.squire.json` records. It installs that release from Packagist into a temporary folder (`--no-dev --no-scripts`) and runs `squire init --check` on `working_dir`; exit 0 the kit matches, 1 it drifted, 2 the check could not run. Inputs: `stage`, `job_name`, `image`, `working_dir`, `squire_version` (empty or `x.y.z`) and `allow_failure` (default `false`). It checks the recorded version, so a new Squire never turns main red by itself. Preflight's own pipeline runs it on `tests/squire-kit-fixture`, a kit written by `squire init --target=raw`. New contract test `tests/check-squire-kit` (sh and ps1). New docs page: The squire-kit component.
+- Added: the preset's `waynestate/squire` rule runs `postUpgradeTasks`: it installs the new Squire into a folder under `/tmp` and runs `squire update` on the kit folder, so the merge request for a new Squire carries the refreshed kit. The renovate component gains a `squire_kit_tasks` input (boolean, default `false`) that writes the two allowed command patterns into the runner's `config.js` (`allowedCommands`); with it off the merge request bumps the version only and shows an artifact error. No shell executor is turned on. New contract test `tests/check-renovate-squire-kit` (sh and ps1) pins the commands, the patterns and 22 hostile variants they must refuse; `tests/check-renovate-review` no longer forbids `postUpgradeTasks`.
+- Fixed: Renovate no longer updates files inside a Squire kit (`docker-compose.squire.yml` and `.squire/**`, outside Squire's own `templates/`). Its digest and tag bumps edited files Squire owns, which left every stack kit drifted from its recorded release and made `squire update` refuse to refresh them. Change those images in Squire's templates instead.
 - Added: the `a11y` component (`templates/a11y/template.yml`), accessibility as a gate with one include. It opens a site's pages in Chromium with Playwright and runs axe-core through `@axe-core/playwright` in light and dark mode at 320 px and 1280 px, and fails on any violation; at 320 px or less it also checks WCAG 1.4.10 Reflow, which axe-core cannot. The default tags are WCAG 2.1 AA (the ADA Title II level); `wcag22aa` adds 2.2 AA. It serves `site_dir` on a local port or checks a running site at `base_url`, takes paths or globs in `pages` (a glob that matches nothing is a configuration error, a missing page fails with HTTP 404), and writes `gl-a11y-junit.xml` (the merge request's test summary) and `gl-a11y-report.json` (every finding, plus the count axe-core left for a person to review). The image is the multi-arch Playwright image pinned by index digest; the playwright npm version comes from its tag, axe-core and @axe-core/playwright are pinned inputs, and the job fails if a different axe-core ran. `allow_failure` (default `false`) lets a site adopt it while fixing its first findings. The checker is `templates/a11y/check.mjs`, inlined in the template; new contract test `tests/check-a11y-inline` (sh and ps1) keeps the two byte for byte, and `tests/check-a11y` (sh and ps1, Docker) proves it passes a clean fixture site and fails a known-bad one with each flaw named (`tests/a11y-fixtures`). Preflight's own pipeline includes it at WCAG 2.2 AA. `renovate/default.json` bumps the two axe-core packages as one group, waiting for review. New docs page: The a11y component.
 - Added: a site accessibility gate: `scripts/a11y.sh` on Linux and macOS and `scripts/a11y.ps1` on Windows run the `a11y` component's checker in Docker (same image and versions as the template, so no host browser is needed) on the front page and every docs page at WCAG 2.2 AA, in light and dark mode at 320 px and 1280 px with the reflow check, and fail on any violation; all pages pass clean. Options pick the folder, pages, tags and a report folder. The earlier copy under `tools/a11y/` is gone.
 - Added: a secret-detection component (Gitleaks over the checked-out tree with `--redact`, a `gitleaks.json` report artifact uploaded even on failure, `config_path` and `allow_failure` inputs), so every stack repo gets committed-secret scanning from one include line; the first release carrying it is 0.2.0.
@@ -2099,6 +2164,7 @@ Under the hood, the job:
 - Points Renovate at the instance: `RENOVATE_PLATFORM` is `gitlab` and `RENOVATE_ENDPOINT` is `$CI_API_V4_URL`.
 - Turns on autodiscovery (`RENOVATE_AUTODISCOVER: "true"`), limited to the `autodiscover_filter` glob, default `$CI_PROJECT_NAMESPACE/*`, relative to the runner project's namespace.
 - Writes its `config.js` at job time. The `registryAliases` entry for the GitLab instance comes from the predefined `CI_SERVER_FQDN` variable: GitLab expands the key before the shell runs, and Node resolves the value when Renovate loads `config.js`. No hostname is stored in the template, so the public mirror stays clean.
+- Adds the Squire kit commands to the `config.js` `allowedCommands` list when `squire_kit_tasks` is `true`, so the preset's Squire rule can refresh a kit in its merge request (see [Squire kits](https://preflight.apps.wayne.edu/docs/guides/renovate.html#squire-kits)). The list is empty otherwise.
 - Passes `git_author` through as `RENOVATE_GIT_AUTHOR` and `dry_run` through as `RENOVATE_DRY_RUN`.
 - Is interruptible and times out after 1 hour.
 
@@ -2126,6 +2192,7 @@ include:
 | `autodiscover_filter` | string | `$CI_PROJECT_NAMESPACE/*` | Glob limiting which projects Renovate discovers, relative to the runner project's namespace. |
 | `dry_run` | string | `"null"` | Dry run mode: `null` (disabled), `lookup` or `full`. |
 | `git_author` | string | none | Author of the commits and merge requests Renovate creates, in the form `Name <email>`. Required. |
+| `squire_kit_tasks` | boolean | `false` | Allow the Squire kit commands of Preflight's preset (install the new `waynestate/squire` from Packagist, then `squire update` on the kit folder), so a Squire kit merge request arrives with its files refreshed. Off, the merge request bumps the version only and shows an artifact error. |
 
 ### Verify[#](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html#verify)
 
@@ -2134,6 +2201,7 @@ Start the job manually from the web, or wait for the schedule. Expected: the job
 ### Related[#](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html#related)
 
 - [Renovate](https://preflight.apps.wayne.edu/docs/guides/renovate.html): the shared preset, and what auto-merges, what waits and what waits for review.
+- [The squire-kit component](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html): the pipeline check that a kit matches the Squire release it records.
 - [Include a component twice](https://preflight.apps.wayne.edu/docs/guides/include-twice.html): the `job_name` input in action.
 - [Quick start](https://preflight.apps.wayne.edu/docs/guides/quick-start.html): wire one component into an app and watch the pipeline run it.
 - [Reference](https://preflight.apps.wayne.edu/docs/reference/components.html): every component, with its inputs and defaults.
@@ -2293,6 +2361,105 @@ Push the change. The `secret-detection` job lands in the `test` stage by default
 - [Quick start](https://preflight.apps.wayne.edu/docs/guides/quick-start.html): wire one component into an app and watch the pipeline run it.
 - [Install](https://preflight.apps.wayne.edu/docs/install.html): the requirements, the include snippet, and how to verify.
 - [Include a component twice](https://preflight.apps.wayne.edu/docs/guides/include-twice.html): the `job_name` input in action.
+- [Reference](https://preflight.apps.wayne.edu/docs/reference/components.html): every component, with its inputs and defaults.
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html
+
+## The squire-kit component[#](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html#the-squire-kit-component)
+
+This page covers the `squire-kit` component: what the job checks, how to include it, every input it takes, and what to do when it goes red. Goal: a deploy kit that [Squire](https://github.com/waynestate/squire) wrote stays exactly what Squire wrote, so a fix to the kit reaches every app the day Squire ships it. A squire keeps the armor polished; this job is the inspection before the joust.
+
+Version 1 · Category: Testing/Validation · Tags: squire,deploy,drift
+
+### What the job checks[#](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html#what-the-job-checks)
+
+Squire writes the deploy kit (`build.sh`, the release script, the health check, the local parity files) and records the Squire version it used and a SHA-256 of every file in `.squire.json`. The job:
+
+1. Moves to the kit folder given by `working_dir` (the stack's own repos keep the kit in `deploy`).
+2. Reads the version recorded in `.squire.json`, unless `squire_version` names one.
+3. Installs that exact Squire release from Packagist into a temporary folder outside the project, with `--no-dev` and `--no-scripts`, so nothing from the project and none of Squire's dev tools run.
+4. Runs `squire init --check` on the kit folder.
+
+It passes only when every kit file is that release's template, untouched. The exit codes are Squire's:
+
+| Exit | Meaning |
+| --- | --- |
+| 0 | The kit matches the recorded release. |
+| 1 | The kit drifted: a file was edited (`modified`), is missing, is not the template of the recorded release (`outdated`), or is new in the kit's groups (`untracked`). |
+| 2 | The check could not run: no `.squire.json` in `working_dir`, no released `x.y.z` version recorded, or no such release on Packagist. |
+
+The job checks the version the kit records, not the newest Squire, so a new Squire release never turns a green main red by itself. Renovate moves the version: the [Renovate](https://preflight.apps.wayne.edu/docs/guides/renovate.html) preset opens a merge request for each new Squire, and on a runner that allows it, that merge request already carries the refreshed kit.
+
+### Include the component[#](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html#include-the-component)
+
+Add the include to the app's `.gitlab-ci.yml`, pinned to a full commit SHA with the tag in a trailing comment:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@<full commit SHA> # 0.2.0
+    inputs:
+      working_dir: deploy
+```
+
+Note
+
+The squire-kit component ships in Preflight 0.2.0; 0.1.4 does not include it. Pin that tag's full commit SHA, or the full commit SHA of a commit at or after it.
+
+Run `vendor/bin/squire init --check --path=deploy` on your desk first. Include the component once it passes, or turn on `allow_failure` while you clean up (below).
+
+### Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html#inputs)
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `squire-kit` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. It needs PHP 8.3 or later and Composer. |
+| `working_dir` | string | `.` | The kit folder: the one holding `.squire.json`, relative to the project root. |
+| `squire_version` | string | `""` | Squire release to check against. Empty reads the version recorded in `.squire.json`. |
+| `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline, for a repository cleaning up its first findings. |
+
+`job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`, `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$`, and `squire_version` must be empty or match `^[0-9]+\.[0-9]+\.[0-9]+$`. GitLab refuses the pipeline at creation when a value does not match.
+
+### When the job is red[#](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html#when-the-job-is-red)
+
+The log lists every kit file with its state; the last lines name what to do.
+
+- **`outdated` or `missing`.** The kit records a version whose templates it does not carry. Run `vendor/bin/squire update --path=deploy`, then `vendor/bin/squire init --path=deploy` (a release that adds a kit file needs `init` to write it), review the diff and commit it.
+- **`modified`.** Someone, or a bot, edited a file Squire owns. Put Squire's file back with `vendor/bin/squire init --force --path=deploy` and send the change to Squire instead, so every app gets it.
+- **`untracked`.** A file sits in one of the kit's groups but not in `.squire.json`. Remove it, or run `squire init` so Squire records it.
+
+> \[!CAUTION\] Renovate's digest and tag bumps were what made the stack's kits drift: a bump to a base image inside `.squire/` or to `docker-compose.squire.yml` is an edit to a file Squire owns. Preflight's preset now leaves those files alone; update the image in Squire's templates and let the next Squire release carry it.
+
+### Adopt it with findings[#](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html#adopt-it-with-findings)
+
+To include the component before the kit is clean, let the job fail without failing the pipeline:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@<full commit SHA> # 0.2.0
+    inputs:
+      working_dir: deploy
+      allow_failure: true # until 2026-12-01: kit cleanup
+```
+
+While `allow_failure` is `true`, a red job shows as a warning. Remove the input once the job is green, and leave a date in a comment so the warning does not become the new normal.
+
+### Verify[#](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html#verify)
+
+Push the change. The `squire-kit` job lands in the `test` stage by default and its last line reads `RESULT: pass (0 of N files need attention)` when the kit matches. Preflight's own pipeline runs it on `tests/squire-kit-fixture`, a kit written by `squire init --target=raw`.
+
+Note
+
+The job needs Packagist (to install the recorded Squire release). It needs no token and no Docker socket.
+
+### Related[#](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html#related)
+
+- [Renovate](https://preflight.apps.wayne.edu/docs/guides/renovate.html): the preset's Squire rule, which opens the merge request that moves the kit to a new release.
+- [The renovate component](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html): the `squire_kit_tasks` input, which lets that merge request carry the refreshed kit.
+- [Include a component twice](https://preflight.apps.wayne.edu/docs/guides/include-twice.html): check two kits in one project with `job_name`.
+- [Troubleshooting](https://preflight.apps.wayne.edu/docs/troubleshooting.html): the squire-kit job's error messages.
 - [Reference](https://preflight.apps.wayne.edu/docs/reference/components.html): every component, with its inputs and defaults.
 
 ---
@@ -2569,7 +2736,18 @@ Major version bumps never auto-merge. The merge request carries the `major` labe
 
 ### What waits for review[#](https://preflight.apps.wayne.edu/docs/guides/renovate.html#what-waits-for-review)
 
-Updates that change an image digest inside the templates, the contract, or this repository's own pipeline, bumps of a Preflight component version in an app's `component:` include, and bumps of the recorded Squire kit version (labeled `squire-kit`) carry the `needs-review` label and never auto-merge. They wait for a person because those pins are what every app pipeline runs: a changed digest here changes what every consuming pipeline executes, so it earns a human eye even when its own pipeline is green. The Squire kit version bump is refreshed by a person who runs `squire update` (with the right path for the repo), reviews the diff and commits it to the branch; the runner runs no commands, so the merge request carries no postUpgradeTasks.
+Updates that change an image digest inside the templates, the contract, or this repository's own pipeline, bumps of a Preflight component version in an app's `component:` include, and bumps of the recorded Squire kit version (labeled `squire-kit`) carry the `needs-review` label and never auto-merge. They wait for a person because those pins are what every app pipeline runs: a changed digest here changes what every consuming pipeline executes, so it earns a human eye even when its own pipeline is green. The Squire kit version bump also changes the kit's files; see [Squire kits](https://preflight.apps.wayne.edu/docs/guides/renovate.html#squire-kits).
+
+### Squire kits[#](https://preflight.apps.wayne.edu/docs/guides/renovate.html#squire-kits)
+
+A Squire deploy kit (the `deploy` folder in the stack's repos) is files Squire wrote, recorded with their hashes in `deploy/.squire.json`. Two rules in the preset keep it equal to a Squire release:
+
+- **A new Squire refreshes the kit.** The custom manager reads the version in `.squire.json` and opens a merge request for each new `waynestate/squire` on Packagist. Its `postUpgradeTasks` install that release into a folder under `/tmp` (outside the repository, `--no-dev --no-scripts`) and run `squire update` on the kit folder, so the merge request carries the refreshed files. It waits for review (`squire-kit`, `needs-review`).
+- **Renovate leaves kit files alone.** Updates to `docker-compose.squire.yml` and anything under `.squire/` are turned off outside Squire's own `templates/` folders. A digest or tag bump there is an edit to a file Squire owns: the kit drifts from its release, and the next `squire update` refuses to overwrite it. Change the image in Squire's templates instead; the next Squire release carries it to every kit.
+
+Renovate only runs a post-upgrade command its runner allows. The [`renovate` component](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html)'s `squire_kit_tasks` input (default `false`) writes the allow-list into the runner's `config.js`: two anchored patterns that match the exact `composer create-project` and `squire update` commands, with the version and paths limited to safe characters. No shell runs the commands. Without the input, the merge request bumps the version only and shows an artifact error; refresh it by hand with `vendor/bin/squire update --path=deploy`, review the diff and commit it to the branch.
+
+A Squire release that adds a kit file needs `vendor/bin/squire init --path=deploy` as well: `squire update` refreshes the files the kit already lists and does not write new ones. The [`squire-kit` component](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html) catches both cases, and any hand edit, by running `squire init --check` in the pipeline.
 
 ### Why MySQL and HA-Proxy get digests only[#](https://preflight.apps.wayne.edu/docs/guides/renovate.html#why-mysql-and-ha-proxy-get-digests-only)
 
@@ -2586,6 +2764,7 @@ This repository ships the preset and the component, and creates nothing else. A 
 - A private runner project that includes the `renovate` component on a schedule (see [The runner project](https://preflight.apps.wayne.edu/docs/guides/renovate.html#the-runner-project)).
 - The `RENOVATE_TOKEN` masked CI variable in that project, and optionally `GITHUB_COM_TOKEN`.
 - A pipeline schedule on that project so the job runs regularly; weekly on Monday is a sensible default.
+- To let Squire kit merge requests arrive refreshed, `squire_kit_tasks: true` under the include's `inputs:`, on a Preflight version that has the input (see [Squire kits](https://preflight.apps.wayne.edu/docs/guides/renovate.html#squire-kits)).
 
 ### The runner project[#](https://preflight.apps.wayne.edu/docs/guides/renovate.html#the-runner-project)
 
@@ -2607,6 +2786,7 @@ The component writes its `config.js` at job time, so the `registryAliases` entry
 ### Related[#](https://preflight.apps.wayne.edu/docs/guides/renovate.html#related)
 
 - [The `renovate` component](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html)
+- [The `squire-kit` component](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html)
 - [GitHub mirrors](https://preflight.apps.wayne.edu/docs/guides/github-mirrors.html)
 - [Image pins](https://preflight.apps.wayne.edu/docs/guides/image-pins.html)
 - [Quick start](https://preflight.apps.wayne.edu/docs/guides/quick-start.html)
@@ -2691,7 +2871,7 @@ An included component is a set of ordinary jobs. The app's own `.gitlab-ci.yml` 
 
 ### Which jobs may be allowed to fail[#](https://preflight.apps.wayne.edu/docs/guides/what-components-cannot-force.html#which-jobs-may-be-allowed-to-fail)
 
-Three components take an `allow_failure` input, all defaulting to `false`: `proctor`, `secret-detection` and `a11y`. A policy finding is a warning while an app adopts PROCTOR's rules, a secret finding while a repo allowlists its first false positives, and an accessibility finding while a site fixes what the gate found on its first run, so each job may fail without failing the pipeline during adoption; all three still write their reports. `composer-audit` has no such input on purpose: a known advisory must fail the pipeline. The other jobs have no `allow_failure` input either.
+Four components take an `allow_failure` input, all defaulting to `false`: `proctor`, `secret-detection`, `a11y` and `squire-kit`. A policy finding is a warning while an app adopts PROCTOR's rules, a secret finding while a repo allowlists its first false positives, an accessibility finding while a site fixes what the gate found on its first run, and a kit finding while a repo puts its deploy kit back to Squire's files, so each job may fail without failing the pipeline during adoption; the first three still write their reports. `composer-audit` has no such input on purpose: a known advisory must fail the pipeline. The other jobs have no `allow_failure` input either.
 
 No template adds a global key such as `default:`, `variables:`, `workflow:` or `stages:`. `tests/check-contract.sh` (and its `.ps1` twin) fails on any top-level key in a template that is not a job named in `contract/inputs.json`, so a global key fails `composer ci`.
 
@@ -2836,6 +3016,7 @@ Push the change. The components are ordinary jobs, so they run whenever the app'
 - [When the components run](https://preflight.apps.wayne.edu/docs/guides/when-components-run.html): the `workflow:rules` block that belongs in the app's own file.
 - [The php-test component](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html): inputs, caching, and trying the next PHP release.
 - [The a11y component](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html): the accessibility gate for a site's pages, in 0.2.0.
+- [The squire-kit component](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html): the check that a deploy kit still matches its Squire release, in 0.2.0.
 - [Reference](https://preflight.apps.wayne.edu/docs/reference/components.html): every component, with its inputs and defaults.
 
 ---
@@ -2864,11 +3045,12 @@ The checklist, item by item, with each item's job and timeout read from `templat
 | 6 | PHPStan | `phpstan` | 10m |
 | 7 | ESLint and Prettier | `eslint` | 15m |
 
-The `a11y` component is the next item on the card. It ships in 0.2.0, so the picture above, drawn before it, still marks it coming soon:
+The `a11y` and `squire-kit` components are the next items on the card. They ship in 0.2.0, so the picture above, drawn before them, does not show them yet:
 
 | # | Item | Job | Timeout |
 | --- | --- | --- | --- |
 | 8 | Accessibility, WCAG 2.1 AA by default | `a11y` | 30 minutes |
+| 9 | Squire deploy kit matches its release | `squire-kit` | 10 minutes |
 
 Every job the templates define is `interruptible: true`. Every component except `portability` takes a `job_name` input whose default is the job's usual name; set it when one project includes the same component more than once. `portability` keeps its two fixed job names, because `portability-run` waits on `portability-build`.
 
@@ -3125,8 +3307,9 @@ include:
 | `autodiscover_filter` | string | `$CI_PROJECT_NAMESPACE/*` | Glob limiting which projects Renovate discovers, relative to the runner project's namespace. |
 | `dry_run` | string | `"null"` | Dry run mode: `null` (disabled), `lookup` or `full`. |
 | `git_author` | string | none | Author of the commits and merge requests Renovate creates, in the form `Name <email>`. Required. |
+| `squire_kit_tasks` | boolean | `false` | Allow the Squire kit commands of Preflight's preset (install the new `waynestate/squire` from Packagist, then `squire update` on the kit folder), so a Squire kit merge request arrives with its files refreshed. Off, the merge request bumps the version only and shows an artifact error. |
 
-From `templates/renovate/template.yml`: the job has no `stage` input and sets no stage. It runs only on scheduled and manual pipelines (`$CI_PIPELINE_SOURCE == "schedule"` or `"web"`). It writes its `config.js` at job time, so the `registryAliases` entry for the GitLab instance comes from the predefined `CI_SERVER_FQDN` variable; no hostname is stored in the repository, so the public mirror stays clean. It does not set `RENOVATE_TOKEN` or `GITHUB_COM_TOKEN` in the job `variables:` on purpose: a self-reference such as `X: $X` arrives as literal text on GitLab 19.5 and would shadow the masked project CI/CD variables, so the job reads both tokens straight from the project. The job is `interruptible: true` with a timeout of 1 hour.
+From `templates/renovate/template.yml`: the job has no `stage` input and sets no stage. It runs only on scheduled and manual pipelines (`$CI_PIPELINE_SOURCE == "schedule"` or `"web"`). It writes its `config.js` at job time, so the `registryAliases` entry for the GitLab instance comes from the predefined `CI_SERVER_FQDN` variable; no hostname is stored in the repository, so the public mirror stays clean. It does not set `RENOVATE_TOKEN` or `GITHUB_COM_TOKEN` in the job `variables:` on purpose: a self-reference such as `X: $X` arrives as literal text on GitLab 19.5 and would shadow the masked project CI/CD variables, so the job reads both tokens straight from the project. With `squire_kit_tasks` set to `true`, `config.js` also carries an `allowedCommands` list of two anchored patterns, the exact `composer create-project` and `squire update` commands of the preset's Squire rule, with the version and paths limited to safe characters; otherwise the list is empty. The job is `interruptible: true` with a timeout of 1 hour.
 
 ### portability[#](https://preflight.apps.wayne.edu/docs/reference/components.html#portability)
 
@@ -3194,6 +3377,30 @@ include:
 
 From `templates/a11y/template.yml`: the single job (named by `job_name`) runs in the `test` stage by default, is `interruptible: true`, and has a timeout of 30 minutes. It reads the Playwright version from the image tag, installs `playwright`, `@axe-core/playwright` and `axe-core` at exact versions with `npm install --ignore-scripts` into a temporary folder outside the project, writes the inputs as JSON and the checker (inlined from `templates/a11y/check.mjs`, because a component ships only its `template.yml`), and runs it from the project root with every check at reduced motion. It writes `gl-a11y-junit.xml` (published as a JUnit report) and `gl-a11y-report.json`, kept as artifacts for 30 days with `when: always`. It exits 0 clean, 1 on a violation or a page that did not load, and 2 on a tool or configuration error. `allow_failure` is interpolated as a real YAML boolean.
 
+### squire-kit[#](https://preflight.apps.wayne.edu/docs/reference/components.html#squire-kit)
+
+Version 1 · Category: Testing/Validation · Tags: squire,deploy,drift
+
+Installs the Squire release a deploy kit records in its `.squire.json` and runs `squire init --check` on the kit folder, so the pipeline fails when a kit file was edited, is missing or is not that release's template. It checks the recorded version, so a new Squire release never turns main red by itself; Renovate's Squire rule moves the version. See [The squire-kit component](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html).
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@<full commit SHA> # 0.2.0
+    inputs:
+      working_dir: deploy
+```
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `squire-kit` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. It needs PHP 8.3 or later and Composer. |
+| `working_dir` | string | `.` | The kit folder: the one holding `.squire.json`, relative to the project root. |
+| `squire_version` | string | `""` | Squire release to check against, `x.y.z`. Empty reads the version recorded in `.squire.json`. |
+| `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline, for a repository cleaning up its first findings. |
+
+From `templates/squire-kit/template.yml`: the single job (named by `job_name`) runs in the `test` stage by default, is `interruptible: true`, and has a timeout of 10 minutes. It installs `waynestate/squire` at the recorded version with `composer create-project --no-dev --no-scripts` into a temporary folder outside the project and runs `squire init --check --path=.` in `working_dir`. It exits 0 when the kit matches, 1 when it drifted, and 2 when the check could not run (no `.squire.json`, no released version recorded, or no such release). `allow_failure` is interpolated as a real YAML boolean.
+
 ### Related[#](https://preflight.apps.wayne.edu/docs/reference/components.html#related)
 
 - [The proctor component](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html)
@@ -3208,6 +3415,7 @@ From `templates/a11y/template.yml`: the single job (named by `job_name`) runs in
 - [The renovate component](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html)
 - [The portability component](https://preflight.apps.wayne.edu/docs/guides/component-portability.html)
 - [The a11y component](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html)
+- [The squire-kit component](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html)
 - [Shared conventions](https://preflight.apps.wayne.edu/docs/reference/conventions.html)
 - [Local checks](https://preflight.apps.wayne.edu/docs/reference/local-checks.html)
 - [Troubleshooting](https://preflight.apps.wayne.edu/docs/troubleshooting.html)
@@ -3370,6 +3578,10 @@ pwsh -File tests/check-a11y.ps1
 ```
 
 `tests/check-a11y-inline.sh` (and `.ps1`) checks that the heredoc in the template is a byte-for-byte copy of `templates/a11y/check.mjs`; the contract job runs it. After editing `check.mjs`, run `sh tests/check-a11y-inline.sh --write` (PowerShell: `tests\check-a11y-inline.ps1 -Write`) to copy it into the template.
+
+### The Squire kit checks[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#the-squire-kit-checks)
+
+`tests/check-renovate-squire-kit.sh` (and `.ps1`) checks the preset's Squire rule: the exact two post-upgrade commands, the kit-files rule, and the `squire_kit_tasks` allow-list the renovate component writes. It compiles the commands for sample upgrades and checks that each one matches an allowed pattern, and that 22 hostile variants (shell operators, `..` paths, another package or tool, an extra flag) match none. `tests/check-squire-kit.sh` (and `.ps1`) checks the `squire-kit` template: the version it reads, the install flags, `squire init --check` and its exit codes. The contract job runs both `.sh` files; the job itself runs on `tests/squire-kit-fixture` in Preflight's own pipeline.
 
 ### Proof[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#proof)
 
@@ -3682,6 +3894,29 @@ Exit 2 means the job never judged a page: an input or a tool is wrong.
 - **Fix:** correct the input the message names: fix the glob or `site_dir`, set `playwright_version` to the Playwright release in the image, or move `axe_core_version` and `axe_playwright_version` together (Renovate bumps them as one group).
 - **Check:** the job log's second line names the site or URL and the Playwright version, and the summary line names the axe-core version that ran.
 
+#### squire-kit fails: the kit drifted (exit 1)[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#squire-kit-fails-the-kit-drifted-exit-1)
+
+The job installs the Squire release the kit records and runs `squire init --check`; the log lists every kit file with its state.
+
+- **Cause:** one of the states below.
+  - `modified`: someone, or a bot, edited a file Squire owns. Renovate's digest and tag bumps to `.squire/` files and `docker-compose.squire.yml` were the usual culprit before the preset turned them off.
+  - `outdated`: the file is untouched but is not the template of the recorded release, usually because `.squire.json` was bumped without `squire update`.
+  - `missing`: a kit file is gone, or the release added one that `squire update` does not write.
+  - `untracked`: a file sits in one of the kit's groups but is not recorded in `.squire.json`.
+- **Fix:** for `outdated` and `missing`, run `vendor/bin/squire update --path=deploy`, then `vendor/bin/squire init --path=deploy`, review the diff and commit it. For `modified`, put Squire's file back with `vendor/bin/squire init --force --path=deploy` and send the change to Squire instead, so every kit gets it. While a repository works through its first findings, set `allow_failure: true` on the include and remove it once the job is green.
+- **Check:** `vendor/bin/squire init --check --path=deploy` prints `RESULT: pass`, and so does the job's last line.
+
+#### squire-kit stops before checking (exit 2)[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#squire-kit-stops-before-checking-exit-2)
+
+Exit 2 means the job never compared a file.
+
+- **Cause:** one of the messages below.
+  - `no .squire.json in ...`: `working_dir` is not the kit folder. The stack's repos keep the kit in `deploy`.
+  - `.squire.json records no released Squire version`: the manifest is damaged or records a branch.
+  - `could not install waynestate/squire X from Packagist`: no such release, or the job cannot reach Packagist.
+- **Fix:** set `working_dir` to the folder holding `.squire.json`, set `squire_version` to the release the kit was written with, or let the job reach Packagist.
+- **Check:** the job log prints `Checking the kit in ... against Squire X` before the file list.
+
 ### Renovate[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#renovate)
 
 #### Renovate sees literal text instead of a token[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#renovate-sees-literal-text-instead-of-a-token)
@@ -3699,6 +3934,14 @@ In refs before 0.1.4 the component-rule manager name in `renovate/default.json` 
 - **Cause:** the shared preset comes from a ref before the 0.1.4 fix.
 - **Fix:** point the repositories' `renovate.json` at the shared preset from 0.1.4 or later. Component version bumps now carry the `needs-review` label and never auto-merge.
 - **Check:** the merge request carries the `needs-review` label.
+
+#### A Squire kit merge request shows an artifact error[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#a-squire-kit-merge-request-shows-an-artifact-error)
+
+The preset's Squire rule runs two commands after it bumps `.squire.json`: it installs the new Squire into `/tmp` and runs `squire update` on the kit folder. The merge request reports an artifact error when it could not.
+
+- **Cause:** the runner does not allow the commands (the message says the command `has not been added to the allowed list in allowedCommands`; the renovate component's `squire_kit_tasks` input is off), or `squire update` refused a kit file someone edited (the message names the file), or the release needs PHP or a network the runner lacks.
+- **Fix:** check out the branch, run `vendor/bin/squire update --path=deploy` (and `vendor/bin/squire init --path=deploy` for a release that adds a file), review the diff and commit it to the branch. For an edited file, restore it first with `vendor/bin/squire init --force --path=deploy`. To let the runner do this itself, set `squire_kit_tasks: true` on its renovate include.
+- **Check:** the `squire-kit` job on the merge request is green.
 
 ### Local checks[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#local-checks)
 
@@ -3743,7 +3986,7 @@ This page is the checklist for moving an app from one Preflight pin to the next,
 
 #### Changed[#](https://preflight.apps.wayne.edu/docs/upgrading.html#changed)
 
-The `portability` component's `buildah_image` default moved from the plain version tag to the immutable tag `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb`: Red Hat re-pushed the plain version tag and garbage-collected the old digest, so a pipeline pinned to it broke. If your app overrides `buildah_image`, point it at an `-immutable` tag pinned by digest too. The `composer-audit` component gains an `abandoned` input (`fail`, `report` or `ignore`) for how `composer audit` treats abandoned packages. No action needed: the default is `fail`, which is what the component already did, so existing pipelines behave exactly as before. A new `a11y` component checks a site's pages with axe-core in Playwright (WCAG 2.1 AA by default; add `wcag22aa` for 2.2 AA). It is opt-in: add its include to start the gate, with `allow_failure: true` while the site fixes its first findings. See [The a11y component](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html). Preflight's own local gate (`scripts/a11y.sh`, `scripts/a11y.ps1`) now runs the component's checker, at 320 px instead of 360 px, with the reflow check; `tools/a11y/` is gone. This release needs GitLab 18.7 or later: every component now declares `spec: component:` and prints a `Preflight component` line as its first command, and GitLab accepts that spec key only from 18.7 on. On an older instance, pipeline creation fails on the unknown key, so upgrade GitLab or pin an older Preflight tag.
+The `portability` component's `buildah_image` default moved from the plain version tag to the immutable tag `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb`: Red Hat re-pushed the plain version tag and garbage-collected the old digest, so a pipeline pinned to it broke. If your app overrides `buildah_image`, point it at an `-immutable` tag pinned by digest too. The `composer-audit` component gains an `abandoned` input (`fail`, `report` or `ignore`) for how `composer audit` treats abandoned packages. No action needed: the default is `fail`, which is what the component already did, so existing pipelines behave exactly as before. A new `a11y` component checks a site's pages with axe-core in Playwright (WCAG 2.1 AA by default; add `wcag22aa` for 2.2 AA). It is opt-in: add its include to start the gate, with `allow_failure: true` while the site fixes its first findings. See [The a11y component](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html). Preflight's own local gate (`scripts/a11y.sh`, `scripts/a11y.ps1`) now runs the component's checker, at 320 px instead of 360 px, with the reflow check; `tools/a11y/` is gone. A new `squire-kit` component fails the pipeline when a Squire deploy kit drifts from the Squire release its `.squire.json` records (`squire init --check`). It is opt-in: run `vendor/bin/squire init --check --path=deploy` first, clean up what it reports, then add the include with `working_dir: deploy`. See [The squire-kit component](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html). The Renovate preset no longer updates files inside a Squire kit (`docker-compose.squire.yml` and `.squire/**`, outside Squire's own `templates/`): those bumps made every kit drift. Its Squire rule now runs `squire update` on the kit in the merge request it opens for a new Squire. The runner must allow those commands: set `squire_kit_tasks: true` on the runner project's `renovate` include. Until it does, each Squire merge request shows an artifact error and needs `vendor/bin/squire update --path=deploy` run by hand, as before. See [Squire kits](https://preflight.apps.wayne.edu/docs/guides/renovate.html#squire-kits). This release needs GitLab 18.7 or later: every component now declares `spec: component:` and prints a `Preflight component` line as its first command, and GitLab accepts that spec key only from 18.7 on. On an older instance, pipeline creation fails on the unknown key, so upgrade GitLab or pin an older Preflight tag.
 
 ### 0.1.4[#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-1-4)
 

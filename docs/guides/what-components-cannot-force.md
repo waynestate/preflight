@@ -15,12 +15,13 @@ harder to skip.
 
 ## Which jobs may be allowed to fail
 
-Three components take an `allow_failure` input, all defaulting to `false`:
-`proctor`, `secret-detection` and `a11y`. A policy finding is a warning while
-an app adopts PROCTOR's rules, a secret finding while a repo allowlists its
-first false positives, and an accessibility finding while a site fixes what the
-gate found on its first run, so each job may fail without failing the pipeline
-during adoption; all three still write their reports. `composer-audit` has
+Four components take an `allow_failure` input, all defaulting to `false`:
+`proctor`, `secret-detection`, `a11y` and `squire-kit`. A policy finding is a
+warning while an app adopts PROCTOR's rules, a secret finding while a repo
+allowlists its first false positives, an accessibility finding while a site
+fixes what the gate found on its first run, and a kit finding while a repo puts
+its deploy kit back to Squire's files, so each job may fail without failing the
+pipeline during adoption; the first three still write their reports. `composer-audit` has
 no such input on purpose: a known advisory must fail the pipeline. The other
 jobs have no `allow_failure` input either.
 

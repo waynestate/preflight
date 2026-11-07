@@ -28,11 +28,12 @@ The checklist, item by item, with each item's job and timeout read from `templat
 | 6 | PHPStan | `phpstan` | 10m |
 | 7 | ESLint and Prettier | `eslint` | 15m |
 
-The `a11y` component is the next item on the card. It ships in 0.2.0, so the picture above, drawn before it, still marks it coming soon:
+The `a11y` and `squire-kit` components are the next items on the card. They ship in 0.2.0, so the picture above, drawn before them, does not show them yet:
 
 | # | Item | Job | Timeout |
 | --- | --- | --- | --- |
 | 8 | Accessibility, WCAG 2.1 AA by default | `a11y` | 30 minutes |
+| 9 | Squire deploy kit matches its release | `squire-kit` | 10 minutes |
 
 Every job the templates define is `interruptible: true`. Every component except `portability` takes a `job_name` input whose default is the job's usual name; set it when one project includes the same component more than once. `portability` keeps its two fixed job names, because `portability-run` waits on `portability-build`.
 
@@ -289,8 +290,9 @@ include:
 | `autodiscover_filter` | string | `$CI_PROJECT_NAMESPACE/*` | Glob limiting which projects Renovate discovers, relative to the runner project's namespace. |
 | `dry_run` | string | `"null"` | Dry run mode: `null` (disabled), `lookup` or `full`. |
 | `git_author` | string | none | Author of the commits and merge requests Renovate creates, in the form `Name <email>`. Required. |
+| `squire_kit_tasks` | boolean | `false` | Allow the Squire kit commands of Preflight's preset (install the new `waynestate/squire` from Packagist, then `squire update` on the kit folder), so a Squire kit merge request arrives with its files refreshed. Off, the merge request bumps the version only and shows an artifact error. |
 
-From `templates/renovate/template.yml`: the job has no `stage` input and sets no stage. It runs only on scheduled and manual pipelines (`$CI_PIPELINE_SOURCE == "schedule"` or `"web"`). It writes its `config.js` at job time, so the `registryAliases` entry for the GitLab instance comes from the predefined `CI_SERVER_FQDN` variable; no hostname is stored in the repository, so the public mirror stays clean. It does not set `RENOVATE_TOKEN` or `GITHUB_COM_TOKEN` in the job `variables:` on purpose: a self-reference such as `X: $X` arrives as literal text on GitLab 19.5 and would shadow the masked project CI/CD variables, so the job reads both tokens straight from the project. The job is `interruptible: true` with a timeout of 1 hour.
+From `templates/renovate/template.yml`: the job has no `stage` input and sets no stage. It runs only on scheduled and manual pipelines (`$CI_PIPELINE_SOURCE == "schedule"` or `"web"`). It writes its `config.js` at job time, so the `registryAliases` entry for the GitLab instance comes from the predefined `CI_SERVER_FQDN` variable; no hostname is stored in the repository, so the public mirror stays clean. It does not set `RENOVATE_TOKEN` or `GITHUB_COM_TOKEN` in the job `variables:` on purpose: a self-reference such as `X: $X` arrives as literal text on GitLab 19.5 and would shadow the masked project CI/CD variables, so the job reads both tokens straight from the project. With `squire_kit_tasks` set to `true`, `config.js` also carries an `allowedCommands` list of two anchored patterns, the exact `composer create-project` and `squire update` commands of the preset's Squire rule, with the version and paths limited to safe characters; otherwise the list is empty. The job is `interruptible: true` with a timeout of 1 hour.
 
 ## portability[#](https://preflight.apps.wayne.edu/docs/reference/components.html#portability)
 
@@ -358,6 +360,30 @@ include:
 
 From `templates/a11y/template.yml`: the single job (named by `job_name`) runs in the `test` stage by default, is `interruptible: true`, and has a timeout of 30 minutes. It reads the Playwright version from the image tag, installs `playwright`, `@axe-core/playwright` and `axe-core` at exact versions with `npm install --ignore-scripts` into a temporary folder outside the project, writes the inputs as JSON and the checker (inlined from `templates/a11y/check.mjs`, because a component ships only its `template.yml`), and runs it from the project root with every check at reduced motion. It writes `gl-a11y-junit.xml` (published as a JUnit report) and `gl-a11y-report.json`, kept as artifacts for 30 days with `when: always`. It exits 0 clean, 1 on a violation or a page that did not load, and 2 on a tool or configuration error. `allow_failure` is interpolated as a real YAML boolean.
 
+## squire-kit[#](https://preflight.apps.wayne.edu/docs/reference/components.html#squire-kit)
+
+Version 1 · Category: Testing/Validation · Tags: squire,deploy,drift
+
+Installs the Squire release a deploy kit records in its `.squire.json` and runs `squire init --check` on the kit folder, so the pipeline fails when a kit file was edited, is missing or is not that release's template. It checks the recorded version, so a new Squire release never turns main red by itself; Renovate's Squire rule moves the version. See [The squire-kit component](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html).
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@<full commit SHA> # 0.2.0
+    inputs:
+      working_dir: deploy
+```
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `squire-kit` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. It needs PHP 8.3 or later and Composer. |
+| `working_dir` | string | `.` | The kit folder: the one holding `.squire.json`, relative to the project root. |
+| `squire_version` | string | `""` | Squire release to check against, `x.y.z`. Empty reads the version recorded in `.squire.json`. |
+| `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline, for a repository cleaning up its first findings. |
+
+From `templates/squire-kit/template.yml`: the single job (named by `job_name`) runs in the `test` stage by default, is `interruptible: true`, and has a timeout of 10 minutes. It installs `waynestate/squire` at the recorded version with `composer create-project --no-dev --no-scripts` into a temporary folder outside the project and runs `squire init --check --path=.` in `working_dir`. It exits 0 when the kit matches, 1 when it drifted, and 2 when the check could not run (no `.squire.json`, no released version recorded, or no such release). `allow_failure` is interpolated as a real YAML boolean.
+
 ## Related[#](https://preflight.apps.wayne.edu/docs/reference/components.html#related)
 
 - [The proctor component](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html)
@@ -372,6 +398,7 @@ From `templates/a11y/template.yml`: the single job (named by `job_name`) runs in
 - [The renovate component](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html)
 - [The portability component](https://preflight.apps.wayne.edu/docs/guides/component-portability.html)
 - [The a11y component](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html)
+- [The squire-kit component](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html)
 - [Shared conventions](https://preflight.apps.wayne.edu/docs/reference/conventions.html)
 - [Local checks](https://preflight.apps.wayne.edu/docs/reference/local-checks.html)
 - [Troubleshooting](https://preflight.apps.wayne.edu/docs/troubleshooting.html)

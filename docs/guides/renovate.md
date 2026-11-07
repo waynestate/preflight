@@ -53,9 +53,42 @@ app's `component:` include, and bumps of the recorded Squire kit version
 They wait for a person because those pins are what every app pipeline runs:
 a changed digest here changes what every consuming pipeline executes, so it
 earns a human eye even when its own pipeline is green. The Squire kit version
-bump is refreshed by a person who runs `squire update` (with the right path
-for the repo), reviews the diff and commits it to the branch; the runner runs
-no commands, so the merge request carries no postUpgradeTasks.
+bump also changes the kit's files; see [Squire kits](#squire-kits).
+
+## Squire kits
+
+A Squire deploy kit (the `deploy` folder in the stack's repos) is files Squire
+wrote, recorded with their hashes in `deploy/.squire.json`. Two rules in the
+preset keep it equal to a Squire release:
+
+- **A new Squire refreshes the kit.** The custom manager reads the version in
+  `.squire.json` and opens a merge request for each new `waynestate/squire`
+  on Packagist. Its `postUpgradeTasks` install that release into a folder
+  under `/tmp` (outside the repository, `--no-dev --no-scripts`) and run
+  `squire update` on the kit folder, so the merge request carries the
+  refreshed files. It waits for review (`squire-kit`, `needs-review`).
+- **Renovate leaves kit files alone.** Updates to `docker-compose.squire.yml`
+  and anything under `.squire/` are turned off outside Squire's own
+  `templates/` folders. A digest or tag bump there is an edit to a file Squire
+  owns: the kit drifts from its release, and the next `squire update` refuses
+  to overwrite it. Change the image in Squire's templates instead; the next
+  Squire release carries it to every kit.
+
+Renovate only runs a post-upgrade command its runner allows. The
+[`renovate` component](./component-renovate.md)'s `squire_kit_tasks` input
+(default `false`) writes the allow-list into the runner's `config.js`: two
+anchored patterns that match the exact `composer create-project` and
+`squire update` commands, with the version and paths limited to safe
+characters. No shell runs the commands. Without the input, the merge request
+bumps the version only and shows an artifact error; refresh it by hand with
+`vendor/bin/squire update --path=deploy`, review the diff and commit it to the
+branch.
+
+A Squire release that adds a kit file needs `vendor/bin/squire init
+--path=deploy` as well: `squire update` refreshes the files the kit already
+lists and does not write new ones. The
+[`squire-kit` component](./component-squire-kit.md) catches both cases, and
+any hand edit, by running `squire init --check` in the pipeline.
 
 ## Why MySQL and HA-Proxy get digests only
 
@@ -88,6 +121,9 @@ A person must set up:
   `GITHUB_COM_TOKEN`.
 - A pipeline schedule on that project so the job runs regularly; weekly on
   Monday is a sensible default.
+- To let Squire kit merge requests arrive refreshed, `squire_kit_tasks: true`
+  under the include's `inputs:`, on a Preflight version that has the input
+  (see [Squire kits](#squire-kits)).
 
 ## The runner project
 
@@ -114,6 +150,7 @@ variable. No hostname is stored in this repository.
 ## Related
 
 - [The `renovate` component](./component-renovate.md)
+- [The `squire-kit` component](./component-squire-kit.md)
 - [GitHub mirrors](./github-mirrors.md)
 - [Image pins](./image-pins.md)
 - [Quick start](./quick-start.md)
