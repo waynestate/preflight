@@ -23,6 +23,10 @@ spec:
     git_author:
       description: Author of the commits and merge requests Renovate creates, in the form Name <email>. Required; the runner project sets it.
       type: string
+    squire_kit_tasks:
+      description: "Allow the Squire kit commands of Preflight's preset (install the new waynestate/squire from Packagist, then squire update on the kit folder), so a Squire kit merge request arrives with its files refreshed. Off, the merge request bumps the version only and shows an artifact error."
+      type: boolean
+      default: false
 ---
 "$[[ inputs.job_name ]]":
   image: $[[ inputs.image ]]
@@ -50,8 +54,25 @@ spec:
     # the shell runs, and Node resolves the value when Renovate loads
     # config.js. No hostname is stored in this file, so the public mirror
     # stays clean.
+    #
+    # allowedCommands lists the only commands a repository's postUpgradeTasks
+    # may run. With squire_kit_tasks on it holds exactly the two commands of
+    # the waynestate/squire rule in renovate/default.json, anchored at both
+    # ends: Composer installs the new Squire from Packagist into one folder
+    # under /tmp (a single safe path segment, never the repository), and that
+    # Squire runs `update` on the kit folder (a relative path, no dot-led
+    # segments, so no ../). Commands run without a shell, so pipes, ; and
+    # $(...) never reach one. tests/check-renovate-squire-kit keeps these
+    # patterns and the preset's commands in step.
     - |
       cat > config.js <<'EOF'
-      module.exports = { registryAliases: { "$CI_SERVER_FQDN": process.env.CI_SERVER_FQDN } };
+      const squireKitTasks = $[[ inputs.squire_kit_tasks ]];
+      module.exports = {
+        registryAliases: { "$CI_SERVER_FQDN": process.env.CI_SERVER_FQDN },
+        allowedCommands: squireKitTasks ? [
+          "^composer create-project --no-dev --no-interaction --no-progress --no-scripts waynestate/squire /tmp/renovate-squire/[A-Za-z0-9_-]+ [0-9]+\\.[0-9]+\\.[0-9]+$",
+          "^php /tmp/renovate-squire/[A-Za-z0-9_-]+/bin/squire update --path=([A-Za-z0-9_-][A-Za-z0-9._-]*(/[A-Za-z0-9_-][A-Za-z0-9._-]*)*)?$"
+        ] : []
+      };
       EOF
     - renovate

@@ -103,7 +103,8 @@
         { "name": "image", "type": "string", "default": "renovate/renovate:44.192.2@sha256:37960a62ba1faa9079a7c4eead9b3f4470748a64ecd207e06c09fd8858673e17" },
         { "name": "autodiscover_filter", "type": "string", "default": "$CI_PROJECT_NAMESPACE/*" },
         { "name": "dry_run", "type": "string", "default": "null" },
-        { "name": "git_author", "type": "string" }
+        { "name": "git_author", "type": "string" },
+        { "name": "squire_kit_tasks", "type": "boolean", "default": false }
       ],
       "jobs": ["renovate"]
     },
@@ -141,6 +142,17 @@
         { "name": "axe_playwright_version", "type": "string", "default": "4.14.0", "regex": "^[0-9]+\\.[0-9]+\\.[0-9]+$" }
       ],
       "jobs": ["a11y"]
+    },
+    "squire-kit": {
+      "inputs": [
+        { "name": "stage", "type": "string", "default": "test" },
+        { "name": "job_name", "type": "string", "default": "squire-kit", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
+        { "name": "image", "type": "string", "default": "composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc" },
+        { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" },
+        { "name": "squire_version", "type": "string", "default": "", "regex": "^([0-9]+\\.[0-9]+\\.[0-9]+)?$" },
+        { "name": "allow_failure", "type": "boolean", "default": false }
+      ],
+      "jobs": ["squire-kit"]
     }
   }
 }

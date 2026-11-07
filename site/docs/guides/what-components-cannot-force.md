@@ -12,7 +12,7 @@ An included component is a set of ordinary jobs. The app's own `.gitlab-ci.yml` 
 
 ## Which jobs may be allowed to fail[#](https://preflight.apps.wayne.edu/docs/guides/what-components-cannot-force.html#which-jobs-may-be-allowed-to-fail)
 
-Three components take an `allow_failure` input, all defaulting to `false`: `proctor`, `secret-detection` and `a11y`. A policy finding is a warning while an app adopts PROCTOR's rules, a secret finding while a repo allowlists its first false positives, and an accessibility finding while a site fixes what the gate found on its first run, so each job may fail without failing the pipeline during adoption; all three still write their reports. `composer-audit` has no such input on purpose: a known advisory must fail the pipeline. The other jobs have no `allow_failure` input either.
+Four components take an `allow_failure` input, all defaulting to `false`: `proctor`, `secret-detection`, `a11y` and `squire-kit`. A policy finding is a warning while an app adopts PROCTOR's rules, a secret finding while a repo allowlists its first false positives, an accessibility finding while a site fixes what the gate found on its first run, and a kit finding while a repo puts its deploy kit back to Squire's files, so each job may fail without failing the pipeline during adoption; the first three still write their reports. `composer-audit` has no such input on purpose: a known advisory must fail the pipeline. The other jobs have no `allow_failure` input either.
 
 No template adds a global key such as `default:`, `variables:`, `workflow:` or `stages:`. `tests/check-contract.sh` (and its `.ps1` twin) fails on any top-level key in a template that is not a job named in `contract/inputs.json`, so a global key fails `composer ci`.
 

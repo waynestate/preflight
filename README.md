@@ -303,6 +303,7 @@ include:
 | `autodiscover_filter` | string | `$CI_PROJECT_NAMESPACE/*` | Glob limiting which projects Renovate discovers, relative to the runner project's namespace. |
 | `dry_run` | string | `"null"` | Dry run mode: `null` (disabled), `lookup` or `full`. |
 | `git_author` | string | none | Author of the commits and merge requests Renovate creates, in the form `Name <email>`. Required. |
+| `squire_kit_tasks` | boolean | `false` | Allow the Squire kit commands of Preflight's preset (install the new `waynestate/squire` from Packagist, then `squire update` on the kit folder), so a Squire kit merge request arrives with its files refreshed. Off, the merge request bumps the version only and shows an artifact error. |
 
 ### portability
 
@@ -389,6 +390,37 @@ The job installs the three npm packages at exact versions with `--ignore-scripts
 the app. The checker is `templates/a11y/check.mjs`, inlined in the template because a component ships only its
 `template.yml`; `tests/check-a11y-inline` keeps the two byte for byte. Renovate bumps the image and the two axe-core
 packages (as one group), and the bumps wait for review like every template pin.
+
+### squire-kit
+
+Version 1 · Category: Testing/Validation · Tags: squire,deploy,drift
+
+Installs the Squire release a deploy kit records in its `.squire.json` and runs `squire init --check` on the kit
+folder, so the pipeline fails when a kit file was edited, is missing, or is not that release's template. It checks the
+recorded version, so a new Squire never turns main red by itself: Renovate's Squire rule moves the version (see
+[Squire kits](#squire-kits)). A squire keeps the armor polished; this job is the inspection before the joust.
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@<full commit SHA> # 0.2.0
+    inputs:
+      working_dir: deploy
+```
+
+squire-kit ships in 0.2.0 (0.1.4 does not include it). Run `vendor/bin/squire init --check --path=deploy` first; while
+a repository cleans up its first findings, set `allow_failure: true`.
+
+| Input | Type | Default | What it does |
+|-------|------|---------|--------------|
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `squire-kit` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. It needs PHP 8.3 or later and Composer. |
+| `working_dir` | string | `.` | The kit folder: the one holding `.squire.json`, relative to the project root. |
+| `squire_version` | string | `""` | Squire release to check against, `x.y.z`. Empty reads the version recorded in `.squire.json`. |
+| `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline, for a repository cleaning up its first findings. |
+
+The job installs Squire with `composer create-project --no-dev --no-scripts` into a temporary folder, never into the
+app. It exits 0 when the kit matches, 1 when it drifted, and 2 when the check could not run.
 
 ## Same instance only
 
@@ -484,9 +516,35 @@ app's `component:` include, and bumps of the recorded Squire kit version
 They wait for a person because those pins are what every app pipeline runs:
 a changed digest here changes what every consuming pipeline executes, so it
 earns a human eye even when its own pipeline is green. The Squire kit version
-bump is refreshed by a person who runs `squire update` (with the right path
-for the repo), reviews the diff and commits it to the branch; the runner runs
-no commands, so the merge request carries no postUpgradeTasks.
+bump also changes the kit's files; see [Squire kits](#squire-kits).
+
+### Squire kits
+
+A Squire deploy kit (the `deploy` folder in the stack's repos) is files Squire
+wrote, recorded with their hashes in `deploy/.squire.json`. Two rules in the
+preset keep it equal to a Squire release:
+
+- **A new Squire refreshes the kit.** The custom manager reads the version in
+  `.squire.json` and opens a merge request for each new `waynestate/squire`
+  on Packagist. Its `postUpgradeTasks` install that release into a folder
+  under `/tmp` (outside the repository, `--no-dev --no-scripts`) and run
+  `squire update` on the kit folder, so the merge request carries the
+  refreshed files. It waits for review (`squire-kit`, `needs-review`).
+- **Renovate leaves kit files alone.** Updates to `docker-compose.squire.yml`
+  and anything under `.squire/` are turned off outside Squire's own
+  `templates/` folders. A digest or tag bump there is an edit to a file Squire
+  owns: the kit drifts from its release, and the next `squire update` refuses
+  to overwrite it. Change the image in Squire's templates instead.
+
+Renovate only runs a post-upgrade command its runner allows. The renovate
+component's `squire_kit_tasks` input (default `false`) writes the allow-list
+into the runner's `config.js`: two anchored patterns that match the exact
+`composer create-project` and `squire update` commands. No shell runs them.
+Without the input, the merge request bumps the version only and shows an
+artifact error; refresh it by hand with `vendor/bin/squire update
+--path=deploy`, review the diff and commit it to the branch. A release that
+adds a kit file also needs `vendor/bin/squire init --path=deploy`, and the
+`squire-kit` component catches both cases in the pipeline.
 
 ### Why MySQL and HA-Proxy get digests only
 
@@ -507,6 +565,8 @@ A person must set up:
   `GITHUB_COM_TOKEN`.
 - A pipeline schedule on that project so the job runs regularly; weekly on
   Monday is a sensible default.
+- To let Squire kit merge requests arrive refreshed, `squire_kit_tasks: true`
+  under the include's `inputs:`, on a Preflight version that has the input.
 
 ### The runner project
 
@@ -575,10 +635,11 @@ if the pilot reads it.
 
 ### Which jobs may be allowed to fail
 
-Three components take an `allow_failure` input, all defaulting to `false`: `proctor`, `secret-detection` and `a11y`. A
-policy finding is a warning while an app adopts PROCTOR's rules, a secret finding while a repo allowlists its first false
-positives, and an accessibility finding while a site fixes what the gate found on its first run, so each job may fail
-without failing the pipeline during adoption; all three still write their reports. `composer-audit` has no such input on purpose: a known advisory must fail the pipeline. The other jobs have no
+Four components take an `allow_failure` input, all defaulting to `false`: `proctor`, `secret-detection`, `a11y` and
+`squire-kit`. A policy finding is a warning while an app adopts PROCTOR's rules, a secret finding while a repo
+allowlists its first false positives, an accessibility finding while a site fixes what the gate found on its first run,
+and a kit finding while a repo puts its deploy kit back to Squire's files, so each job may fail without failing the
+pipeline during adoption; the first three still write their reports. `composer-audit` has no such input on purpose: a known advisory must fail the pipeline. The other jobs have no
 `allow_failure` input either.
 
 No template adds a global key such as `default:`, `variables:`, `workflow:` or `stages:`. `tests/check-contract.sh`

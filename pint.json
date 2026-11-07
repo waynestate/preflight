@@ -6,6 +6,7 @@
         "tests/phpstan-fails",
         "tests/pint-fails",
         "tests/portability",
+        "tests/squire-kit-fixture",
         "bin/docs-site.php"
     ],
     "notPath": [

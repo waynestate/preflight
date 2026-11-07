@@ -71,6 +71,10 @@
           "path": "guides/component-a11y"
         },
         {
+          "title": "The squire-kit component",
+          "path": "guides/component-squire-kit"
+        },
+        {
           "title": "Include a component twice",
           "path": "guides/include-twice"
         },

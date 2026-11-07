@@ -11,6 +11,7 @@ parameters:
         - tests/php-test-fails
         - tests/phpstan-fails
         - tests/pint-fails
+        - tests/squire-kit-fixture
         - bin/docs-site.php
     phpVersion:
         min: 80300
