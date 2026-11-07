@@ -66,6 +66,7 @@ contract:
     - sh tests/check-contract.sh
     - sh tests/check-php-test-cache.sh
     - sh tests/check-proctor-cache.sh
+    - sh tests/check-proctor-fails.sh
     - sh tests/check-image-inputs.sh
     - sh tests/check-buildah-pin.sh
     - sh tests/check-working-dir-regex.sh

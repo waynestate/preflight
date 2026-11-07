@@ -1,0 +1,7 @@
+#!/bin/sh
+# Fake proctor that must fail: prints one blocking Code Quality finding
+# and exits 1. It is the must-fail case for the proctor component; the
+# clean case is tests/fixture-app. Like that stub it stands in for the
+# real PROCTOR (waynestate/proctor) and checks nothing.
+echo '[{"description":"Fixture: a blocking finding the component must fail on","check_name":"preflight-fixture","fingerprint":"preflight-fixture-blocker-1","severity":"blocker","location":{"path":"app/Example.php","lines":{"begin":1}}}]'
+exit 1

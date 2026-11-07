@@ -10,3 +10,7 @@ Code Quality report) and checks nothing.
 
 The proctor component is tested against this fake so the pipeline wiring
 works. The fake must be removed once PROCTOR is installed via Composer.
+
+The must-fail case lives in `tests/proctor-fails`: its fake prints one
+blocker finding and exits 1, and `tests/check-proctor-fails` runs both
+cases.

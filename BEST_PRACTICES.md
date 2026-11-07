@@ -958,13 +958,15 @@ Why: a component that never fails looks the same as one that works.
 
 Sources: [GitLab: components, testing](https://docs.gitlab.com/ci/components/).
 
-**How the stack holds it: Not yet.** The fixture's `bin/proctor` is a stub that prints `[]` and exits 0, so the
-`proctor` self-test cannot fail. The fixture has no advisory and no failing test.
-
-Second pass, checked in the main checkout: the stub is still a short shell script that prints `[]` and exits 0, and
-the fixture's `composer.json` requires `php ^8.3`, with `phpunit ^11.0`, `laravel/pint ^1.32` and `phpstan/phpstan ^2.3`
-in require-dev. Add fixtures for an advisory, an abandoned package and a malware-flagged version too (see 4.6 and 4.11),
-so each Composer policy result is recorded as a real exit code.
+**How the stack holds it: Partly.** Four components carry a fixture that must fail them, each kept in place by a
+check: `proctor` runs `tests/proctor-fails`, a fake proctor that prints one blocker finding and exits 1, against the
+clean stub in `tests/fixture-app` (`tests/check-proctor-fails`); `composer-audit` runs `composer audit` on
+`tests/audit-fixtures/advisory`, which fails in every mode, and `tests/audit-fixtures/abandoned`, which fails only in
+`fail` mode (`tests/check-abandoned-input`); `a11y` checks the bad site in `tests/a11y-fixtures/bad`, which fails with
+each flaw named (`tests/check-a11y`); and `portability` passes only when `tests/portability/bad-writes-root` and
+`tests/portability/bad-needs-root` both fail (`tests/check-portability`). Still missing: a malware-flagged version
+fixture for `composer-audit` (see 4.6 and 4.11), and a must-fail fixture for `eslint`, `package-publish`, `php-test`,
+`phpstan`, `pint`, `sbom` and `secret-detection`; `renovate` is a config, not a job, so it has nothing to fail.
 
 ### 7.3 Use the stack's own projects as the first users
 Each stack repo includes Preflight, pinned.
