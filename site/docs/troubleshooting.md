@@ -170,6 +170,27 @@ goss sends the HTTP method as written, and a lower-case one makes the server clo
 - **Fix:** pin 0.1.4 or a SHA at or after it.
 - **Check:** `goss validate` passes the health check instead of ending in EOF.
 
+### a11y fails on a page that looked fine[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#a11y-fails-on-a-page-that-looked-fine)
+
+The job checks each page in light and dark mode at 320 px and 1280 px, with reduced motion, so it sees layouts and palettes a quick look in one browser misses.
+
+- **Cause:** a fault that shows in one mode only, and the failing test case names that mode, for example `docs/index.html dark 320px`: a dark palette with weak contrast, a label hidden at phone width, or a fixed-width element that makes the page scroll sideways at 320 px (`preflight-reflow`, which names the element where the overflow starts).
+- **Fix:** open the page in that mode (dark color scheme, a 320 px window) and fix the element the report names; each axe-core rule links its help page. While a site works through its first findings, set `allow_failure: true` on the include and remove it once the job is green.
+- **Check:** the job's last line reads `a11y: clean`, and the merge request's test summary shows every case passing.
+
+### a11y stops with a configuration error (exit 2)[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#a11y-stops-with-a-configuration-error-exit-2)
+
+Exit 2 means the job never judged a page: an input or a tool is wrong.
+
+- **Cause:** one of the messages below.
+  - `no file under site matches the page pattern ...`: a glob in `pages` matched nothing, often because the docs folder moved. A literal page that is missing fails its check with HTTP 404 instead.
+  - `site folder not found`: `site_dir` does not exist in the job, for example because the site is built in another job and not passed as an artifact.
+  - `cannot read the Playwright version from the image tag`: `image` was overridden with an image whose tag does not carry `vX.Y.Z`.
+  - `Chromium did not start`: the playwright npm version does not match the browsers in the image.
+  - `axe-core X ran, but axe_core_version is Y`: `axe_playwright_version` names a bridge whose axe-core range does not include `axe_core_version`.
+- **Fix:** correct the input the message names: fix the glob or `site_dir`, set `playwright_version` to the Playwright release in the image, or move `axe_core_version` and `axe_playwright_version` together (Renovate bumps them as one group).
+- **Check:** the job log's second line names the site or URL and the Playwright version, and the summary line names the axe-core version that ran.
+
 ## Renovate[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#renovate)
 
 ### Renovate sees literal text instead of a token[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#renovate-sees-literal-text-instead-of-a-token)

@@ -67,6 +67,10 @@
           "path": "guides/component-portability"
         },
         {
+          "title": "The a11y component",
+          "path": "guides/component-a11y"
+        },
+        {
           "title": "Include a component twice",
           "path": "guides/include-twice"
         },

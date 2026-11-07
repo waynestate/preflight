@@ -14,7 +14,7 @@
 
 Preflight is a set of GitLab CI/CD components that give every WSU app the
 same checks: PROCTOR, PHP tests on each supported version, Composer audit,
-an SBOM, Pint, PHPStan and ESLint.
+an SBOM, Pint, PHPStan, ESLint, secret detection and an accessibility gate.
 
 **Not to be confused with:** Preflight is the CI pipeline; it runs Pinstripe's style checks and PROCTOR but sets neither.
 
@@ -345,6 +345,51 @@ and tar.
 
 The default is an immutable tag (`-immutable`) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.
 
+### a11y
+
+Version 1 · Category: Testing/Validation · Tags: accessibility,a11y,wcag,axe-core,playwright
+
+Opens the app's pages in a real Chromium browser with [Playwright](https://playwright.dev/) and runs
+[axe-core](https://github.com/dequelabs/axe-core) through `@axe-core/playwright`, in light and dark mode at 320 px and
+1280 px, and fails the pipeline on any violation. The default tags are WCAG 2.1 Level AA, the level the ADA Title II
+rule names; add `wcag22aa` for WCAG 2.2 AA, the floor WayneUI's gate and the stack's sites use. At 320 px it also checks
+WCAG 1.4.10 Reflow, which axe-core cannot. It serves `site/` on a local port (or checks a running site at `base_url`),
+and writes a JUnit report for the merge request's test summary and a JSON report with every finding. An automated
+check finds only some failures: a green job is not proof of conformance, and the report counts what axe-core left for a
+person to review. Every page gets a walk-round, in daylight and at night.
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@<full commit SHA> # 0.2.0
+    inputs:
+      pages: ["index.html", "docs/**/*.html"]
+      wcag_tags: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]
+```
+
+a11y ships in 0.2.0 (0.1.4 does not include it). While a site fixes its first findings, set
+`allow_failure: true`; the reports are written either way.
+
+| Input | Type | Default | What it does |
+|-------|------|---------|--------------|
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `a11y` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `mcr.microsoft.com/playwright:v1.65.0-noble@sha256:6e3fb709361521eb27161606e6da6d2674e5e89fa16516cb37d6fdd91372273d` | Playwright image the job runs in (amd64 and arm64). Its `vX.Y.Z` tag sets the playwright npm version. |
+| `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline, for a site fixing its first findings. |
+| `site_dir` | string | `site` | Static folder to serve, relative to the project root. Page globs expand in it. |
+| `pages` | array | `["**/*.html"]` | Pages to check, relative to the site root: paths (`index.html`, `docs/`) or globs (`docs/**/*.html`). A glob must match at least one file. |
+| `base_url` | string | `""` | Check a running site at this URL instead of serving `site_dir`, for example `$CI_ENVIRONMENT_URL`. |
+| `wcag_tags` | array | `["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]` | axe-core tags to run. Add `wcag22aa` for WCAG 2.2 AA. |
+| `color_schemes` | array | `["light", "dark"]` | Color schemes each page is checked in: `light`, `dark` or `no-preference`. |
+| `widths` | array | `[320, 1280]` | Viewport widths in CSS pixels. At 320 or less the job also checks reflow. |
+| `playwright_version` | string | `""` | playwright npm version. Empty reads it from the image tag. |
+| `axe_core_version` | string | `4.14.0` | axe-core version, the rules engine. The job fails if a different axe-core ran. |
+| `axe_playwright_version` | string | `4.14.0` | @axe-core/playwright version. Its axe-core range must include `axe_core_version`. |
+
+The job installs the three npm packages at exact versions with `--ignore-scripts` into a temporary folder, never into
+the app. The checker is `templates/a11y/check.mjs`, inlined in the template because a component ships only its
+`template.yml`; `tests/check-a11y-inline` keeps the two byte for byte. Renovate bumps the image and the two axe-core
+packages (as one group), and the bumps wait for review like every template pin.
+
 ## Same instance only
 
 Components work only inside the GitLab instance that hosts this project.
@@ -530,9 +575,11 @@ if the pilot reads it.
 
 ### Which jobs may be allowed to fail
 
-Only `proctor` takes an `allow_failure` input (default `false`). A policy finding is a warning while an app adopts
-PROCTOR's rules, so the job may fail without failing the pipeline during adoption. `composer-audit` has no such input
-on purpose: a known advisory must fail the pipeline. The other jobs have no `allow_failure` input either.
+Three components take an `allow_failure` input, all defaulting to `false`: `proctor`, `secret-detection` and `a11y`. A
+policy finding is a warning while an app adopts PROCTOR's rules, a secret finding while a repo allowlists its first false
+positives, and an accessibility finding while a site fixes what the gate found on its first run, so each job may fail
+without failing the pipeline during adoption; all three still write their reports. `composer-audit` has no such input on purpose: a known advisory must fail the pipeline. The other jobs have no
+`allow_failure` input either.
 
 No template adds a global key such as `default:`, `variables:`, `workflow:` or `stages:`. `tests/check-contract.sh`
 (and its `.ps1` twin) fails on any top-level key in a template that is not a job named in `contract/inputs.json`, so a
@@ -691,7 +738,7 @@ sh tests/check-portability.sh
 pwsh -File tests/check-portability.ps1
 ```
 
-The site's pages have an accessibility gate (axe-core in Playwright with the WCAG 2.2 AA tag set, run in Docker so no host browser is needed): `sh scripts/a11y.sh` on Linux and macOS, `scripts/a11y.ps1` in PowerShell on Windows. It checks the front page and every docs page in light and dark mode at 360 px and 1280 px, and fails on any violation.
+The site's pages have an accessibility gate: the `a11y` component's own checker, run in Docker with the image and versions pinned in its template, so no host browser is needed and a local run checks the same way as the pipeline. `sh scripts/a11y.sh` on Linux and macOS, `scripts/a11y.ps1` in PowerShell on Windows. It checks the front page and every docs page at WCAG 2.2 AA in light and dark mode at 320 px and 1280 px, with the reflow check, and fails on any violation. `tests/check-a11y.sh` (and `.ps1`) prove the checker passes a clean fixture site and fails a known-bad one.
 
 <details>
 <summary><b>The brand board</b>: the runway mark, lockups, palette and type</summary>

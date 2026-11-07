@@ -7,9 +7,9 @@ Status: draft, checked against sources on 2026-10-27, with a second research pas
 ## What this covers
 
 Preflight is a set of GitLab CI/CD components that every stack project and WSU app includes with
-`include: component:`. Today it has ten: `php-test` (PHP versions through `parallel:matrix`), `composer-audit`,
-`proctor`, `sbom`, `pint`, `phpstan`, `eslint`, `secret-detection`, `package-publish` and `renovate`.
-Accessibility and contract suites come later.
+`include: component:`. Today it has twelve: `php-test` (PHP versions through `parallel:matrix`), `composer-audit`,
+`proctor`, `sbom`, `pint`, `phpstan`, `eslint`, `secret-detection`, `a11y` (the accessibility suite, 6.5),
+`portability`, `package-publish` and `renovate`. A contract suite comes later.
 
 This guide is for two groups:
 
@@ -188,7 +188,7 @@ the run.
 Sources: [GitLab: CI/CD inputs](https://docs.gitlab.com/ci/inputs/);
 [GitLab: component examples](https://docs.gitlab.com/ci/components/examples/).
 
-**How the stack holds it: Enforced.** All ten templates use `spec:inputs` with types, descriptions and defaults.
+**How the stack holds it: Enforced.** All twelve templates use `spec:inputs` with types, descriptions and defaults.
 GitLab rejects a wrong type or an unknown input at pipeline creation. The first pipeline, back when Preflight had
 three components, passed all six jobs with the array input.
 
@@ -232,9 +232,9 @@ Why: global keys leak into the consuming pipeline.
 
 Sources: [GitLab: component examples](https://docs.gitlab.com/ci/components/examples/).
 
-**How the stack holds it: Enforced.** All ten templates follow it. `tests/check-contract.sh` fails on any top-level
+**How the stack holds it: Enforced.** All twelve templates follow it. `tests/check-contract.sh` fails on any top-level
 key that is not a job named in `contract/inputs.json`, so a template cannot add a global key. The README's "Which jobs
-may be allowed to fail" explains why only `proctor` takes `allow_failure`.
+may be allowed to fail" explains why only `proctor`, `secret-detection` and `a11y` take `allow_failure`.
 
 ### 2.4 Make the stage an input
 Consumers have their own stage lists.
@@ -254,13 +254,13 @@ Why: two jobs with the same name merge into one.
 Sources: [GitLab: component examples, dynamic job names](https://docs.gitlab.com/ci/components/examples/).
 
 **How the stack holds it: Enforced.** Every component except `portability` takes a `job_name` input whose default is the
-usual job name (`proctor`, `php-test`, `composer-audit`, `sbom`, `pint`, `phpstan`, `eslint`, `package-publish`,
-`renovate`), and `tests/check-job-names.sh` fails if a template builds its job key any other way. `tests/check-contract.sh`
+usual job name (`proctor`, `php-test`, `composer-audit`, `sbom`, `pint`, `phpstan`, `eslint`, `secret-detection`, `a11y`,
+`package-publish`, `renovate`), and `tests/check-job-names.sh` fails if a template builds its job key any other way. `tests/check-contract.sh`
 resolves the key to the default, so the job names stay stable inside a major version. `portability` is the one exception:
 `portability-run` has `needs:` on `portability-build`, so both names are fixed.
 
 ### 2.6 Offer a way to weaken a gate only where it is meant
-`composer-audit` has no `allow_failure` input, on purpose. `proctor` has one.
+`composer-audit` has no `allow_failure` input, on purpose. `proctor`, `secret-detection` and `a11y` have one, for adoption.
 
 Why: every switch is a way to ship around the standard.
 
@@ -306,9 +306,9 @@ A job timeout cannot exceed the runner's timeout.
 
 Sources: [GitLab: CI/CD YAML, `timeout` and `interruptible`](https://docs.gitlab.com/ci/yaml/).
 
-**How the stack holds it: Documented.** All ten templates set `interruptible: true` and a `timeout` of their own:
+**How the stack holds it: Documented.** All twelve templates set `interruptible: true` and a `timeout` of their own:
 `10m` for pint and phpstan, `15m` for eslint, `30 minutes` for composer-audit, package-publish, php-test, proctor,
-sbom and secret-detection, and `1 hour` for renovate. What stays open is the cancellation half: whether a superseded pipeline is actually
+sbom, secret-detection, a11y and both portability jobs, and `1 hour` for renovate. What stays open is the cancellation half: whether a superseded pipeline is actually
 canceled still needs `workflow:auto_cancel` in the app's own file, which a component cannot force (see 3.1).
 
 ### 2.10 Make every job image an input
@@ -431,7 +431,7 @@ by a hostile `composer.json`, which is exactly what a contributed branch can car
 Sources: [GitLab: merge request pipelines](https://docs.gitlab.com/ci/pipelines/merge_request_pipelines/);
 [GitLab: CI/CD variables](https://docs.gitlab.com/ci/variables/).
 
-**How the stack holds it: Documented.** All ten templates use no secrets, which limits the harm, and the README
+**How the stack holds it: Documented.** All twelve templates use no secrets, which limits the harm, and the README
 documents the rule: review a fork's `.gitlab-ci.yml` before running its pipeline, and never give it protected variables.
 
 ---
@@ -755,7 +755,7 @@ Sources: [GitLab: CI/CD variables](https://docs.gitlab.com/ci/variables/);
 [GitLab: pipeline security, secrets](https://docs.gitlab.com/ci/pipeline_security/);
 [OWASP CICD-SEC-6 Insufficient Credential Hygiene](https://owasp.org/www-project-top-10-ci-cd-security-risks/).
 
-**How the stack holds it: Documented.** The ten templates use no secrets, which is good. Nothing fails if a later
+**How the stack holds it: Documented.** The twelve templates use no secrets, which is good. Nothing fails if a later
 template adds one. The repository's own pipeline now runs GitLab's pipeline secret detection as an advisory job
 (`secret_detection` with `allow_failure: true`, kept in place by `tests/check-secret-detection.sh` and its `.ps1`
 twin); the plan is to make it blocking after a week of green pipelines. Whether it runs on the git.wayne.edu
@@ -930,9 +930,11 @@ that conforms to WCAG 2.2 also conforms to WCAG 2.1, so meeting the 2.2 floor al
 Sources: [Campus Technology: DOJ extends Title II deadline](https://campustechnology.com/articles/2026/04/27/doj-extends-deadline-for-ada-title-ii-compliance.aspx).
 The Federal Register text itself was not read in this pass.
 
-**How the stack holds it: Documented.** The scope note at the top of this guide says accessibility and contract suites
-come later, and no component exists yet. The front page (`site/index.md`) names WCAG 2.2 Level AA as the floor the
-suite will aim at, with a manual review step kept.
+**How the stack holds it: Enforced where included.** The `a11y` component runs axe-core in Playwright and fails on any
+violation. Its default tags are WCAG 2.1 Level AA, the rule's own level, so an app that adds the bare include meets the
+rule's floor; the stack's sites and Preflight's own pipeline pass `wcag22aa` for the 2.2 floor. Its JSON report counts
+the results axe-core marks for a person to review, which keeps the manual step in view, and the docs page says a green
+job is not proof of conformance.
 
 ---
 

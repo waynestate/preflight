@@ -6,7 +6,7 @@
 
 Preflight is a set of GitLab CI/CD components that give every WSU app the
 same checks: PROCTOR, PHP tests on each supported version, Composer audit,
-an SBOM, Pint, PHPStan and ESLint.
+an SBOM, Pint, PHPStan, ESLint, secret detection and an accessibility gate.
 
 **Not to be confused with:** Preflight is the CI pipeline; it runs Pinstripe's style checks and PROCTOR but sets neither.
 
@@ -20,6 +20,7 @@ Every page below is Markdown. The HTML pages send the same Markdown to a client 
 
 - [Preflight: Every push is cleared for takeoff.](https://preflight.apps.wayne.edu/index.md): Preflight is a set of GitLab CI/CD components for Wayne State apps. Include them and your pipeline runs PROCTOR, PHP tests on each supported version, a Composer audit, an SBOM, Pint, PHPStan and ESLint.
 - [Changelog | Preflight docs](https://preflight.apps.wayne.edu/docs/changelog.md): All notable changes to this project.
+- [The a11y component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-a11y.md): Opens the app's pages in a real browser and fails the pipeline on accessibility violations (axe-core in Playwright).
 - [The composer-audit component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.md): Runs `composer audit --locked` and fails on advisories.
 - [The eslint component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-eslint.md): Runs the app's own ESLint and Prettier and fails the pipeline on lint or format errors.
 - [The package-publish component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-package-publish.md): Publishes a semantic version tag to the GitLab group's built-in Composer registry.

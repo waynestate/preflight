@@ -74,7 +74,7 @@ Checklist complete. Tray tables up, tests green.
 - PINT
 - PHPSTAN
 - ESLINT
-- A11Ycoming soon
+- A11Ynext tag
 - CONTRACTcoming soon
 - FRESHNESScoming soon
 - CLEARED FOR TAKEOFF
@@ -247,7 +247,7 @@ uses: waynestate/preflight/.github/workflows/php-package.yml@79029cc2300702d0d45
 
 On the list, not yet on board. Nothing to include until they land.
 
-- Coming soonAccessibility suiteAimed at WCAG 2.2 Level AA, the floor WayneUI's own gate uses, with a manual review step kept.
+- Next tagAccessibility suiteBuilt: the `a11y` component runs axe-core in Playwright, light and dark, at 320 and 1280 px. WCAG 2.1 Level AA by default; one input adds 2.2 AA, the floor WayneUI's own gate uses. A manual review is still owed.
 - Coming soonContract suiteNamed in the best practices as coming later. Not built yet.
 - Coming soonSite freshnessPlanned. Not in this repo yet.
 
@@ -492,7 +492,7 @@ Wayne State app stack
 
 Preflight is one stop on the way to Citadel. Here is everyone else on the board.
 
-- [WayneUI](https://wayneui.apps.wayne.edu/) The interface. Its a11y floor is the one Preflight's accessibility suite will aim at.
+- [WayneUI](https://wayneui.apps.wayne.edu/) The interface. Its a11y floor, WCAG 2.2 AA, is the one the stack's sites hold in Preflight's a11y component.
 - [CREED](https://creed.apps.wayne.edu/) The written standards, and the policy every other part reads.
 - [Pinstripe](https://pinstripe.apps.wayne.edu/) The coding standard behind the Pint, PHPStan and ESLint jobs.
 - [PROCTOR](https://proctor.apps.wayne.edu/) One command that checks an app. First item on the checklist.

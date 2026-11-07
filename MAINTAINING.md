@@ -32,11 +32,18 @@ copy (see "Same instance only" in the README).
 Each contract test comes as a `.sh` and `.ps1` pair that check the same thing (`check-contract`, `check-spec-keys`,
 `check-image-inputs`, `check-php-test-cache`, `check-working-dir-regex`, `check-path-input-regex`, `check-github-workflow`,
 `check-proctor-install-flags`, `check-secret-detection`, `check-renovate-review`, `check-renovate-buildah`, `check-sha-pins`, `check-release-job`,
-`check-abandoned-input`, `check-component-version`). CI runs the `.sh` ones, except `check-abandoned-input`: the contract job's yq image has no Docker, and the test runs composer in the composer:2.10.3 image, so it stays out of the contract job's script list in `.gitlab-ci.yml`.
+`check-abandoned-input`, `check-component-version`, `check-a11y-inline`). CI runs the `.sh` ones, except `check-abandoned-input`: the contract job's yq image has no Docker, and the test runs composer in the composer:2.10.3 image, so it stays out of the contract job's script list in `.gitlab-ci.yml`.
 Keep both in step when you change one.
 
 `tests/check-portability.sh` (and `tests/check-portability.ps1`) is a local check that needs Docker and runs the
 three fixtures in `tests/portability`; the contract job does not run it.
+
+`tests/check-a11y.sh` (and `tests/check-a11y.ps1`) is a local check that needs Docker: it runs the `a11y` component's
+checker against the good and bad sites in `tests/a11y-fixtures` and passes only when the good one is clean and the bad
+one fails with each known flaw named. Run it after any change to `templates/a11y/check.mjs`, then
+`sh tests/check-a11y-inline.sh --write` (PowerShell: `tests\check-a11y-inline.ps1 -Write`) to copy the checker into
+the template; the contract job fails while the two differ. The site's own gate is `sh scripts/a11y.sh` (PowerShell:
+`scripts\a11y.ps1`).
 
 With only Docker:
 

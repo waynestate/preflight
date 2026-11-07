@@ -94,6 +94,42 @@ windows
 pwsh -File tests/check-portability.ps1
 ```
 
+## The accessibility gate[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#the-accessibility-gate)
+
+The site's pages have an accessibility gate: the `a11y` component's own checker (`templates/a11y/check.mjs`, axe-core in Playwright), run in Docker with the image and versions pinned in `templates/a11y/template.yml`, so no host browser is needed and a local run checks the same way as the pipeline. With no options it checks the front page and every docs page at WCAG 2.2 AA, in light and dark mode at 320 px and 1280 px, with the reflow check, and fails on any violation:
+
+linux
+
+```sh
+sh scripts/a11y.sh
+```
+
+windows
+
+```powershell
+scripts\a11y.ps1
+```
+
+Options pick another folder, pages, tags or a folder for the reports: `--site=DIR --pages='["index.html"]' --tags='["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]' --report=DIR` (PowerShell: `-Site`, `-Pages`, `-Tags`, `-Report`).
+
+## The accessibility fixtures[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#the-accessibility-fixtures)
+
+`tests/check-a11y.sh` (and `tests/check-a11y.ps1`) prove the checker still tells a clean site from a bad one. They run the gate against `tests/a11y-fixtures` at the component's default WCAG 2.1 AA and exit 0 only when the good site passes, the bad site fails with each known flaw named (a missing `lang`, an image with no `alt`, an unlabeled input, weak contrast, a page that scrolls sideways at 320 px, and a palette that fails in dark mode only), a missing page fails with HTTP 404, and a glob that matches nothing stops with a configuration error. They need Docker; the contract job does not run them.
+
+linux
+
+```sh
+sh tests/check-a11y.sh
+```
+
+windows
+
+```powershell
+pwsh -File tests/check-a11y.ps1
+```
+
+`tests/check-a11y-inline.sh` (and `.ps1`) checks that the heredoc in the template is a byte-for-byte copy of `templates/a11y/check.mjs`; the contract job runs it. After editing `check.mjs`, run `sh tests/check-a11y-inline.sh --write` (PowerShell: `tests\check-a11y-inline.ps1 -Write`) to copy it into the template.
+
 ## Proof[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#proof)
 
 Proof runs against real Wayne State applications are on a private site, [proof.apps.wayne.edu/preflight](https://proof.apps.wayne.edu/preflight/), behind a Wayne State employee sign-in. What was run, what held and what it caught in Preflight itself is on the public [Proof](https://preflight.apps.wayne.edu/docs/reference/proof.html) page.
@@ -112,6 +148,7 @@ The pages wear the front page's flight deck: `docs/_header.html` is the front pa
 ## Related[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#related)
 
 - [Components](https://preflight.apps.wayne.edu/docs/reference/components.html)
+- [The a11y component](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html)
 - [Shared conventions](https://preflight.apps.wayne.edu/docs/reference/conventions.html)
 - [Template lint](https://preflight.apps.wayne.edu/docs/guides/template-lint.html)
 - [Updating image pins](https://preflight.apps.wayne.edu/docs/guides/image-pins.html)

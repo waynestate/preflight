@@ -28,6 +28,12 @@ The checklist, item by item, with each item's job and timeout read from `templat
 | 6 | PHPStan | `phpstan` | 10m |
 | 7 | ESLint and Prettier | `eslint` | 15m |
 
+The `a11y` component is the next item on the card. It ships in 0.2.0, so the picture above, drawn before it, still marks it coming soon:
+
+| # | Item | Job | Timeout |
+| --- | --- | --- | --- |
+| 8 | Accessibility, WCAG 2.1 AA by default | `a11y` | 30 minutes |
+
 Every job the templates define is `interruptible: true`. Every component except `portability` takes a `job_name` input whose default is the job's usual name; set it when one project includes the same component more than once. `portability` keeps its two fixed job names, because `portability-run` waits on `portability-build`.
 
 ## proctor[#](https://preflight.apps.wayne.edu/docs/reference/components.html#proctor)
@@ -320,6 +326,38 @@ The default is an immutable tag (`-immutable`) pinned by digest, because the pla
 
 From `templates/portability/template.yml`: the component defines two jobs with fixed names. `portability-build` runs in the `buildah_image`, sets `STORAGE_DRIVER: vfs` (the vfs driver needs no special kernel support and runs in an ordinary container), builds the image with `buildah bud`, logs in to the project's container registry, and pushes `$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA`. `portability-run` needs `portability-build`, generates a goss file from the inputs (the goss template is inlined in the job, because a component only ships its `template.yml` to the including project), downloads goss pinned by version and checksum, starts the app with `start_command`, and runs `goss validate` with `--retry-timeout` set to `boot_timeout` seconds. goss runs as the app user (the declared uid, gid 0), so its command checks see the same permissions the app has. Both jobs are `interruptible: true` with a timeout of 30 minutes.
 
+## a11y[#](https://preflight.apps.wayne.edu/docs/reference/components.html#a11y)
+
+Version 1 · Category: Testing/Validation · Tags: accessibility,a11y,wcag,axe-core,playwright
+
+Opens the app's pages in a real Chromium browser with Playwright and runs axe-core through @axe-core/playwright, in light and dark mode at 320 px and 1280 px, and fails the pipeline on any violation. The default tags are WCAG 2.1 Level AA (the ADA Title II level); add `wcag22aa` for WCAG 2.2 AA, the stack's floor. At 320 px it also checks WCAG 1.4.10 Reflow, which axe-core cannot. It writes a JUnit report and a JSON report. See [The a11y component](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html).
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@<full commit SHA> # 0.2.0
+    inputs:
+      pages: ["index.html", "docs/**/*.html"]
+      wcag_tags: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]
+```
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `a11y` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `mcr.microsoft.com/playwright:v1.65.0-noble@sha256:6e3fb709361521eb27161606e6da6d2674e5e89fa16516cb37d6fdd91372273d` | Playwright image the job runs in (amd64 and arm64); its `vX.Y.Z` tag sets the playwright npm version. |
+| `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline, for a site fixing its first findings. |
+| `site_dir` | string | `site` | Static folder to serve, relative to the project root. Page globs expand in it. |
+| `pages` | array | `["**/*.html"]` | Pages to check, relative to the site root: paths or globs. A glob must match at least one file. |
+| `base_url` | string | `""` | Check a running site at this URL instead of serving `site_dir`. Empty serves `site_dir`. |
+| `wcag_tags` | array | `["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]` | axe-core tags to run; add `wcag22aa` for WCAG 2.2 AA. |
+| `color_schemes` | array | `["light", "dark"]` | Color schemes each page is checked in. |
+| `widths` | array | `[320, 1280]` | Viewport widths in CSS pixels; at 320 or less the job also checks reflow. |
+| `playwright_version` | string | `""` | playwright npm version. Empty reads it from the image tag. |
+| `axe_core_version` | string | `4.14.0` | axe-core version; the job fails if a different one ran. |
+| `axe_playwright_version` | string | `4.14.0` | @axe-core/playwright version; its axe-core range must include `axe_core_version`. |
+
+From `templates/a11y/template.yml`: the single job (named by `job_name`) runs in the `test` stage by default, is `interruptible: true`, and has a timeout of 30 minutes. It reads the Playwright version from the image tag, installs `playwright`, `@axe-core/playwright` and `axe-core` at exact versions with `npm install --ignore-scripts` into a temporary folder outside the project, writes the inputs as JSON and the checker (inlined from `templates/a11y/check.mjs`, because a component ships only its `template.yml`), and runs it from the project root with every check at reduced motion. It writes `gl-a11y-junit.xml` (published as a JUnit report) and `gl-a11y-report.json`, kept as artifacts for 30 days with `when: always`. It exits 0 clean, 1 on a violation or a page that did not load, and 2 on a tool or configuration error. `allow_failure` is interpolated as a real YAML boolean.
+
 ## Related[#](https://preflight.apps.wayne.edu/docs/reference/components.html#related)
 
 - [The proctor component](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html)
@@ -333,6 +371,7 @@ From `templates/portability/template.yml`: the component defines two jobs with f
 - [The package-publish component](https://preflight.apps.wayne.edu/docs/guides/component-package-publish.html)
 - [The renovate component](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html)
 - [The portability component](https://preflight.apps.wayne.edu/docs/guides/component-portability.html)
+- [The a11y component](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html)
 - [Shared conventions](https://preflight.apps.wayne.edu/docs/reference/conventions.html)
 - [Local checks](https://preflight.apps.wayne.edu/docs/reference/local-checks.html)
 - [Troubleshooting](https://preflight.apps.wayne.edu/docs/troubleshooting.html)

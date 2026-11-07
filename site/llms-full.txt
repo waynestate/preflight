@@ -16,7 +16,7 @@ Source: https://nougat.snu.gs/enterprise-apps/preflight/blob/HEAD/README.md
 
 Preflight is a set of GitLab CI/CD components that give every WSU app the
 same checks: PROCTOR, PHP tests on each supported version, Composer audit,
-an SBOM, Pint, PHPStan and ESLint.
+an SBOM, Pint, PHPStan, ESLint, secret detection and an accessibility gate.
 
 **Not to be confused with:** Preflight is the CI pipeline; it runs Pinstripe's style checks and PROCTOR but sets neither.
 
@@ -335,6 +335,51 @@ and tar.
 
 The default is an immutable tag (`-immutable`) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.
 
+#### a11y
+
+Version 1 · Category: Testing/Validation · Tags: accessibility,a11y,wcag,axe-core,playwright
+
+Opens the app's pages in a real Chromium browser with [Playwright](https://playwright.dev/) and runs
+[axe-core](https://github.com/dequelabs/axe-core) through `@axe-core/playwright`, in light and dark mode at 320 px and
+1280 px, and fails the pipeline on any violation. The default tags are WCAG 2.1 Level AA, the level the ADA Title II
+rule names; add `wcag22aa` for WCAG 2.2 AA, the floor WayneUI's gate and the stack's sites use. At 320 px it also checks
+WCAG 1.4.10 Reflow, which axe-core cannot. It serves `site/` on a local port (or checks a running site at `base_url`),
+and writes a JUnit report for the merge request's test summary and a JSON report with every finding. An automated
+check finds only some failures: a green job is not proof of conformance, and the report counts what axe-core left for a
+person to review. Every page gets a walk-round, in daylight and at night.
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@<full commit SHA> # 0.2.0
+    inputs:
+      pages: ["index.html", "docs/**/*.html"]
+      wcag_tags: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]
+```
+
+a11y ships in 0.2.0 (0.1.4 does not include it). While a site fixes its first findings, set
+`allow_failure: true`; the reports are written either way.
+
+| Input | Type | Default | What it does |
+|-------|------|---------|--------------|
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `a11y` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `mcr.microsoft.com/playwright:v1.65.0-noble@sha256:6e3fb709361521eb27161606e6da6d2674e5e89fa16516cb37d6fdd91372273d` | Playwright image the job runs in (amd64 and arm64). Its `vX.Y.Z` tag sets the playwright npm version. |
+| `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline, for a site fixing its first findings. |
+| `site_dir` | string | `site` | Static folder to serve, relative to the project root. Page globs expand in it. |
+| `pages` | array | `["**/*.html"]` | Pages to check, relative to the site root: paths (`index.html`, `docs/`) or globs (`docs/**/*.html`). A glob must match at least one file. |
+| `base_url` | string | `""` | Check a running site at this URL instead of serving `site_dir`, for example `$CI_ENVIRONMENT_URL`. |
+| `wcag_tags` | array | `["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]` | axe-core tags to run. Add `wcag22aa` for WCAG 2.2 AA. |
+| `color_schemes` | array | `["light", "dark"]` | Color schemes each page is checked in: `light`, `dark` or `no-preference`. |
+| `widths` | array | `[320, 1280]` | Viewport widths in CSS pixels. At 320 or less the job also checks reflow. |
+| `playwright_version` | string | `""` | playwright npm version. Empty reads it from the image tag. |
+| `axe_core_version` | string | `4.14.0` | axe-core version, the rules engine. The job fails if a different axe-core ran. |
+| `axe_playwright_version` | string | `4.14.0` | @axe-core/playwright version. Its axe-core range must include `axe_core_version`. |
+
+The job installs the three npm packages at exact versions with `--ignore-scripts` into a temporary folder, never into
+the app. The checker is `templates/a11y/check.mjs`, inlined in the template because a component ships only its
+`template.yml`; `tests/check-a11y-inline` keeps the two byte for byte. Renovate bumps the image and the two axe-core
+packages (as one group), and the bumps wait for review like every template pin.
+
 ### Same instance only
 
 Components work only inside the GitLab instance that hosts this project.
@@ -520,9 +565,11 @@ if the pilot reads it.
 
 #### Which jobs may be allowed to fail
 
-Only `proctor` takes an `allow_failure` input (default `false`). A policy finding is a warning while an app adopts
-PROCTOR's rules, so the job may fail without failing the pipeline during adoption. `composer-audit` has no such input
-on purpose: a known advisory must fail the pipeline. The other jobs have no `allow_failure` input either.
+Three components take an `allow_failure` input, all defaulting to `false`: `proctor`, `secret-detection` and `a11y`. A
+policy finding is a warning while an app adopts PROCTOR's rules, a secret finding while a repo allowlists its first false
+positives, and an accessibility finding while a site fixes what the gate found on its first run, so each job may fail
+without failing the pipeline during adoption; all three still write their reports. `composer-audit` has no such input on purpose: a known advisory must fail the pipeline. The other jobs have no
+`allow_failure` input either.
 
 No template adds a global key such as `default:`, `variables:`, `workflow:` or `stages:`. `tests/check-contract.sh`
 (and its `.ps1` twin) fails on any top-level key in a template that is not a job named in `contract/inputs.json`, so a
@@ -680,7 +727,7 @@ sh tests/check-portability.sh
 pwsh -File tests/check-portability.ps1
 ```
 
-The site's pages have an accessibility gate (axe-core in Playwright with the WCAG 2.2 AA tag set, run in Docker so no host browser is needed): `sh scripts/a11y.sh` on Linux and macOS, `scripts/a11y.ps1` in PowerShell on Windows. It checks the front page and every docs page in light and dark mode at 360 px and 1280 px, and fails on any violation.
+The site's pages have an accessibility gate: the `a11y` component's own checker, run in Docker with the image and versions pinned in its template, so no host browser is needed and a local run checks the same way as the pipeline. `sh scripts/a11y.sh` on Linux and macOS, `scripts/a11y.ps1` in PowerShell on Windows. It checks the front page and every docs page at WCAG 2.2 AA in light and dark mode at 320 px and 1280 px, with the reflow check, and fails on any violation. `tests/check-a11y.sh` (and `.ps1`) prove the checker passes a clean fixture site and fails a known-bad one.
 
 ### The cast
 
@@ -756,7 +803,7 @@ Checklist complete. Tray tables up, tests green.
 - PINT
 - PHPSTAN
 - ESLINT
-- A11Ycoming soon
+- A11Ynext tag
 - CONTRACTcoming soon
 - FRESHNESScoming soon
 - CLEARED FOR TAKEOFF
@@ -929,7 +976,7 @@ uses: waynestate/preflight/.github/workflows/php-package.yml@79029cc2300702d0d45
 
 On the list, not yet on board. Nothing to include until they land.
 
-- Coming soonAccessibility suiteAimed at WCAG 2.2 Level AA, the floor WayneUI's own gate uses, with a manual review step kept.
+- Next tagAccessibility suiteBuilt: the `a11y` component runs axe-core in Playwright, light and dark, at 320 and 1280 px. WCAG 2.1 Level AA by default; one input adds 2.2 AA, the floor WayneUI's own gate uses. A manual review is still owed.
 - Coming soonContract suiteNamed in the best practices as coming later. Not built yet.
 - Coming soonSite freshnessPlanned. Not in this repo yet.
 
@@ -1174,7 +1221,7 @@ Wayne State app stack
 
 Preflight is one stop on the way to Citadel. Here is everyone else on the board.
 
-- [WayneUI](https://wayneui.apps.wayne.edu/) The interface. Its a11y floor is the one Preflight's accessibility suite will aim at.
+- [WayneUI](https://wayneui.apps.wayne.edu/) The interface. Its a11y floor, WCAG 2.2 AA, is the one the stack's sites hold in Preflight's a11y component.
 - [CREED](https://creed.apps.wayne.edu/) The written standards, and the policy every other part reads.
 - [Pinstripe](https://pinstripe.apps.wayne.edu/) The coding standard behind the Pint, PHPStan and ESLint jobs.
 - [PROCTOR](https://proctor.apps.wayne.edu/) One command that checks an app. First item on the checklist.
@@ -1199,7 +1246,8 @@ All notable changes to PREFLIGHT are recorded here. Entries follow [Keep a Chang
 
 ### Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
-- Added: a site accessibility gate (axe-core in Playwright with the WCAG 2.2 AA tag set, run in Docker so no host browser is needed): `scripts/a11y.sh` on Linux and macOS and `scripts/a11y.ps1` on Windows check the front page and every docs page in light and dark mode at 360 px and 1280 px, and fail on any violation; all pages pass clean.
+- Added: the `a11y` component (`templates/a11y/template.yml`), accessibility as a gate with one include. It opens a site's pages in Chromium with Playwright and runs axe-core through `@axe-core/playwright` in light and dark mode at 320 px and 1280 px, and fails on any violation; at 320 px or less it also checks WCAG 1.4.10 Reflow, which axe-core cannot. The default tags are WCAG 2.1 AA (the ADA Title II level); `wcag22aa` adds 2.2 AA. It serves `site_dir` on a local port or checks a running site at `base_url`, takes paths or globs in `pages` (a glob that matches nothing is a configuration error, a missing page fails with HTTP 404), and writes `gl-a11y-junit.xml` (the merge request's test summary) and `gl-a11y-report.json` (every finding, plus the count axe-core left for a person to review). The image is the multi-arch Playwright image pinned by index digest; the playwright npm version comes from its tag, axe-core and @axe-core/playwright are pinned inputs, and the job fails if a different axe-core ran. `allow_failure` (default `false`) lets a site adopt it while fixing its first findings. The checker is `templates/a11y/check.mjs`, inlined in the template; new contract test `tests/check-a11y-inline` (sh and ps1) keeps the two byte for byte, and `tests/check-a11y` (sh and ps1, Docker) proves it passes a clean fixture site and fails a known-bad one with each flaw named (`tests/a11y-fixtures`). Preflight's own pipeline includes it at WCAG 2.2 AA. `renovate/default.json` bumps the two axe-core packages as one group, waiting for review. New docs page: The a11y component.
+- Added: a site accessibility gate: `scripts/a11y.sh` on Linux and macOS and `scripts/a11y.ps1` on Windows run the `a11y` component's checker in Docker (same image and versions as the template, so no host browser is needed) on the front page and every docs page at WCAG 2.2 AA, in light and dark mode at 320 px and 1280 px with the reflow check, and fail on any violation; all pages pass clean. Options pick the folder, pages, tags and a report folder. The earlier copy under `tools/a11y/` is gone.
 - Added: a secret-detection component (Gitleaks over the checked-out tree with `--redact`, a `gitleaks.json` report artifact uploaded even on failure, `config_path` and `allow_failure` inputs), so every stack repo gets committed-secret scanning from one include line; the first release carrying it is 0.2.0.
 - Fixed: the proctor and sbom jobs install the app with `--ignore-platform-reqs`. Both only read the app, yet a lock built for an older PHP or one needing gd, oci8 or ldap stopped them before PROCTOR or CycloneDX ran, so the oldest apps got no report. The sbom job also passes `--no-scripts`, so the app's Composer scripts no longer run in it. Found by the 2026-11-05 proof run; `tests/check-proctor-install-flags` (sh and ps1) now checks both lines.
 - Added: a public Proof page (`docs/reference/proof.md`, under Reference): the components run against 82 Wayne State applications, what held, what the run caught in Preflight, and what it does not prove. Local checks and the README link to it.
@@ -1301,6 +1349,143 @@ All notable changes to PREFLIGHT are recorded here. Entries follow [Keep a Chang
 ### 0.1.0 (2026-10-27)[#](https://preflight.apps.wayne.edu/docs/changelog.html#0-1-0-2026-10-27)
 
 - First tagged release.
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/guides/component-a11y.html
+
+## The a11y component[#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#the-a11y-component)
+
+This page covers the `a11y` component: what the job checks, how to include it, every input it takes, and how to roll it out on a site that already has findings. Goal: accessibility is a gate the pipeline runs, not a claim in a README. One include line gives any app or site the same check the stack's own sites run. A pilot walks round the aircraft before every flight; this job walks round every page, in daylight and at night.
+
+Version 1 · Category: Testing/Validation · Tags: accessibility,a11y,wcag,axe-core,playwright
+
+### What the job checks[#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#what-the-job-checks)
+
+The job opens each page in a real Chromium browser with [Playwright](https://playwright.dev/) and runs [axe-core](https://github.com/dequelabs/axe-core) on it through [@axe-core/playwright](https://www.npmjs.com/package/@axe-core/playwright). Every rule it applies is axe-core's; Preflight adds no rules of its own except one, below.
+
+- **The standard.** The default tags are `wcag2a`, `wcag2aa`, `wcag21a` and `wcag21aa`: WCAG 2.1 Level AA. The stack follows the ADA Title II rule, which names WCAG 2.1 Level AA, so that is the default; a repo may opt into WCAG 2.2 Level AA by adding `wcag22aa`, the floor WayneUI's own gate and the stack's sites use. Content that meets WCAG 2.2 AA also meets 2.1 AA.
+- **Every mode.** Each page is checked once per color scheme (light and dark by default) and once per viewport width (320 px and 1280 px by default), so a dark palette with weak contrast or a phone layout that hides a label is caught.
+- **Settled pages.** Every check runs with `prefers-reduced-motion: reduce`, the page's own settled state, so scroll reveals and transitions never hide content from axe-core.
+- **Reflow.** At 320 px or narrower, while the tags include `wcag21aa`, the job also checks WCAG 1.4.10 Reflow, which axe-core cannot test: the page must not scroll sideways. A failure is reported as `preflight-reflow` and names the elements where the overflow starts. A wide code block that scrolls inside its own box is fine.
+- **Pages that do not load.** A page that answers 404 (or any status of 400 or more), or does not load at all, fails its check.
+
+Warning
+
+An automated check finds only some accessibility failures. A green job means axe-core found nothing it can test; it does not prove the page conforms. Keyboard use, focus order, screen reader output and plain language still need a person. The report counts the items axe-core could not decide ("to review by hand") so that review has a list.
+
+### Include the component[#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#include-the-component)
+
+Add the include to the app's `.gitlab-ci.yml`, pinned to a full commit SHA with the tag in a trailing comment:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@<full commit SHA> # 0.2.0
+```
+
+With no inputs, the job serves the `site/` folder on a local port and checks every `.html` file in it at WCAG 2.1 AA.
+
+Note
+
+The a11y component ships in Preflight 0.2.0; 0.1.4 does not include it. Pin that tag's full commit SHA, or the full commit SHA of a commit at or after it.
+
+To hold the stack's floor, WCAG 2.2 AA, and to name the pages:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@<full commit SHA> # 0.2.0
+    inputs:
+      site_dir: site
+      pages: ["index.html", "docs/**/*.html"]
+      wcag_tags: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]
+```
+
+### Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#inputs)
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `a11y` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `mcr.microsoft.com/playwright:v1.65.0-noble@sha256:6e3fb709361521eb27161606e6da6d2674e5e89fa16516cb37d6fdd91372273d` | Playwright image the job runs in (amd64 and arm64). It carries Node and Chromium; its `vX.Y.Z` tag sets the playwright npm version. |
+| `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline. Set it to `true` while a site fixes its first findings. |
+| `site_dir` | string | `site` | Static folder to serve, relative to the project root. Page globs expand in it. A relative path; GitLab refuses the pipeline at creation if it is not. |
+| `pages` | array | `["**/*.html"]` | Pages to check, relative to the site root: paths (`index.html`, `docs/`) or globs (`docs/**/*.html`). A glob must match at least one file. |
+| `base_url` | string | `""` | Check a running site at this URL instead of serving `site_dir`, for example `$CI_ENVIRONMENT_URL`. Empty serves `site_dir`. |
+| `wcag_tags` | array | `["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]` | axe-core tags to run. The default is WCAG 2.1 AA; add `wcag22aa` for WCAG 2.2 AA. |
+| `color_schemes` | array | `["light", "dark"]` | Color schemes each page is checked in: `light`, `dark` or `no-preference`. |
+| `widths` | array | `[320, 1280]` | Viewport widths in CSS pixels. At 320 or less the job also checks reflow. |
+| `playwright_version` | string | `""` | playwright npm version. Empty reads it from the image tag; set it only for an image whose tag does not carry `vX.Y.Z`. |
+| `axe_core_version` | string | `4.14.0` | axe-core version, the rules engine. The job fails if a different axe-core ran. |
+| `axe_playwright_version` | string | `4.14.0` | @axe-core/playwright version, the bridge to Playwright. Its axe-core range must include `axe_core_version`. |
+
+A page glob uses `**` for any number of folders and `*` inside one folder name. Folders that start with a dot, `node_modules` and `vendor` are skipped. A literal page that is not there fails its check (HTTP 404); a glob that matches nothing stops the job as a configuration error, so a moved docs folder cannot quietly shrink the gate.
+
+### How the job works[#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#how-the-job-works)
+
+From `templates/a11y/template.yml`, the job (named by `job_name`) runs in the `test` stage by default, is `interruptible: true`, and has a timeout of 30 minutes. In order:
+
+1. Reads the Playwright version from the image tag (`playwright:v1.65.0-noble` gives `1.65.0`), unless `playwright_version` is set, so the npm package always matches the browsers in the image.
+2. Installs `playwright`, `@axe-core/playwright` and `axe-core` at those exact versions with `npm install --ignore-scripts` into a temporary folder outside the project. Nothing is added to the app's `package.json`, and no install script runs.
+3. Writes the inputs as JSON and the checker (`templates/a11y/check.mjs`, inlined in the template, because a component ships only its `template.yml`), then runs it from the project root.
+4. Serves `site_dir` on a local port (or uses `base_url`), opens each page in each mode, runs axe-core, and writes the reports.
+
+The job exits 0 when every check is clean, 1 when a page has a violation or did not load, and 2 on a tool or configuration error (an unknown color scheme, a glob that matches nothing, a different axe-core than the one pinned).
+
+### Reports[#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#reports)
+
+Both reports are written to the project root and kept as artifacts for 30 days, whether the job passes or fails:
+
+- `gl-a11y-junit.xml`, published as a JUnit report: the merge request's test summary lists one test case per page and mode (`docs/index.html dark 320px`), and a failed case carries each rule, its help link and the selectors it hit.
+- `gl-a11y-report.json`: the tool versions, tags, modes and every check with its violations (rule id, impact, help, help link, WCAG tags, selectors and axe-core's failure summary) and its count of items to review by hand.
+
+The job log prints one line per page and mode, then the details of every violation. It prints selectors, never page text.
+
+### Roll it out on a site with findings[#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#roll-it-out-on-a-site-with-findings)
+
+A site that has never been checked usually has a few findings. Land the gate first, fix the findings, then make it blocking:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@<full commit SHA> # 0.2.0
+    inputs:
+      allow_failure: true
+```
+
+While `allow_failure` is `true`, a red job shows as a warning and the pipeline still passes; the reports are written either way. Remove the input (or set it to `false`) once the job is green. Leave a date in a comment so the warning does not become wallpaper.
+
+### Check a running site[#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#check-a-running-site)
+
+For pages a static folder cannot hold (a Laravel or raw-PHP app), point the job at a running copy, such as a review app or a pre-production deploy, and list the paths:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@<full commit SHA> # 0.2.0
+    inputs:
+      base_url: $CI_ENVIRONMENT_URL
+      pages: ["/", "about", "apply"]
+```
+
+`base_url` goes into a job variable, so GitLab expands CI variables in it. Pages are paths under it. Globs still expand in `site_dir`, so with `base_url` and no local folder, list the pages by hand. The job must be able to reach the URL; put it in a stage after the deploy.
+
+### Run it on your desk[#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#run-it-on-your-desk)
+
+Preflight's own repository runs this checker locally with `scripts/a11y.sh` (Linux and macOS) or `scripts/a11y.ps1` (Windows), in Docker, with the image and versions pinned in the template. See [Local checks](https://preflight.apps.wayne.edu/docs/reference/local-checks.html).
+
+### Verify[#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#verify)
+
+Push the change. The `a11y` job lands in the `test` stage by default, and its last line reads `a11y: clean` when every page passes. Open the merge request's test summary to see each page and mode.
+
+Note
+
+The job needs the npm registry (to install the pinned packages) and, for `base_url`, the site it checks. It needs no token and no Docker socket.
+
+### Related[#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#related)
+
+- [Quick start](https://preflight.apps.wayne.edu/docs/guides/quick-start.html): wire one component into an app and watch the pipeline run it.
+- [Include a component twice](https://preflight.apps.wayne.edu/docs/guides/include-twice.html): check two sites in one project with `job_name`.
+- [What the components cannot force](https://preflight.apps.wayne.edu/docs/guides/what-components-cannot-force.html): which jobs may be allowed to fail.
+- [Troubleshooting](https://preflight.apps.wayne.edu/docs/troubleshooting.html): the a11y job's error messages.
+- [Reference](https://preflight.apps.wayne.edu/docs/reference/components.html): every component, with its inputs and defaults.
 
 ---
 
@@ -2505,7 +2690,7 @@ An included component is a set of ordinary jobs. The app's own `.gitlab-ci.yml` 
 
 ### Which jobs may be allowed to fail[#](https://preflight.apps.wayne.edu/docs/guides/what-components-cannot-force.html#which-jobs-may-be-allowed-to-fail)
 
-Only `proctor` takes an `allow_failure` input (default `false`). A policy finding is a warning while an app adopts PROCTOR's rules, so the job may fail without failing the pipeline during adoption. `composer-audit` has no such input on purpose: a known advisory must fail the pipeline. The other jobs have no `allow_failure` input either.
+Three components take an `allow_failure` input, all defaulting to `false`: `proctor`, `secret-detection` and `a11y`. A policy finding is a warning while an app adopts PROCTOR's rules, a secret finding while a repo allowlists its first false positives, and an accessibility finding while a site fixes what the gate found on its first run, so each job may fail without failing the pipeline during adoption; all three still write their reports. `composer-audit` has no such input on purpose: a known advisory must fail the pipeline. The other jobs have no `allow_failure` input either.
 
 No template adds a global key such as `default:`, `variables:`, `workflow:` or `stages:`. `tests/check-contract.sh` (and its `.ps1` twin) fails on any top-level key in a template that is not a job named in `contract/inputs.json`, so a global key fails `composer ci`.
 
@@ -2529,6 +2714,7 @@ These are project settings Preflight cannot create or check, and a read-only tok
 - [The job token allowlist](https://preflight.apps.wayne.edu/docs/guides/job-token-allowlist.html)
 - [GitHub mirrors](https://preflight.apps.wayne.edu/docs/guides/github-mirrors.html)
 - [The `proctor` component](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html)
+- [The `a11y` component](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html)
 
 ---
 
@@ -2648,6 +2834,7 @@ Push the change. The components are ordinary jobs, so they run whenever the app'
 - [Quick start](https://preflight.apps.wayne.edu/docs/guides/quick-start.html): the same install as numbered steps with expected results.
 - [When the components run](https://preflight.apps.wayne.edu/docs/guides/when-components-run.html): the `workflow:rules` block that belongs in the app's own file.
 - [The php-test component](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html): inputs, caching, and trying the next PHP release.
+- [The a11y component](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html): the accessibility gate for a site's pages, in 0.2.0.
 - [Reference](https://preflight.apps.wayne.edu/docs/reference/components.html): every component, with its inputs and defaults.
 
 ---
@@ -2675,6 +2862,12 @@ The checklist, item by item, with each item's job and timeout read from `templat
 | 5 | Pint | `pint` | 10m |
 | 6 | PHPStan | `phpstan` | 10m |
 | 7 | ESLint and Prettier | `eslint` | 15m |
+
+The `a11y` component is the next item on the card. It ships in 0.2.0, so the picture above, drawn before it, still marks it coming soon:
+
+| # | Item | Job | Timeout |
+| --- | --- | --- | --- |
+| 8 | Accessibility, WCAG 2.1 AA by default | `a11y` | 30 minutes |
 
 Every job the templates define is `interruptible: true`. Every component except `portability` takes a `job_name` input whose default is the job's usual name; set it when one project includes the same component more than once. `portability` keeps its two fixed job names, because `portability-run` waits on `portability-build`.
 
@@ -2968,6 +3161,38 @@ The default is an immutable tag (`-immutable`) pinned by digest, because the pla
 
 From `templates/portability/template.yml`: the component defines two jobs with fixed names. `portability-build` runs in the `buildah_image`, sets `STORAGE_DRIVER: vfs` (the vfs driver needs no special kernel support and runs in an ordinary container), builds the image with `buildah bud`, logs in to the project's container registry, and pushes `$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA`. `portability-run` needs `portability-build`, generates a goss file from the inputs (the goss template is inlined in the job, because a component only ships its `template.yml` to the including project), downloads goss pinned by version and checksum, starts the app with `start_command`, and runs `goss validate` with `--retry-timeout` set to `boot_timeout` seconds. goss runs as the app user (the declared uid, gid 0), so its command checks see the same permissions the app has. Both jobs are `interruptible: true` with a timeout of 30 minutes.
 
+### a11y[#](https://preflight.apps.wayne.edu/docs/reference/components.html#a11y)
+
+Version 1 · Category: Testing/Validation · Tags: accessibility,a11y,wcag,axe-core,playwright
+
+Opens the app's pages in a real Chromium browser with Playwright and runs axe-core through @axe-core/playwright, in light and dark mode at 320 px and 1280 px, and fails the pipeline on any violation. The default tags are WCAG 2.1 Level AA (the ADA Title II level); add `wcag22aa` for WCAG 2.2 AA, the stack's floor. At 320 px it also checks WCAG 1.4.10 Reflow, which axe-core cannot. It writes a JUnit report and a JSON report. See [The a11y component](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html).
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@<full commit SHA> # 0.2.0
+    inputs:
+      pages: ["index.html", "docs/**/*.html"]
+      wcag_tags: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]
+```
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `a11y` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `mcr.microsoft.com/playwright:v1.65.0-noble@sha256:6e3fb709361521eb27161606e6da6d2674e5e89fa16516cb37d6fdd91372273d` | Playwright image the job runs in (amd64 and arm64); its `vX.Y.Z` tag sets the playwright npm version. |
+| `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline, for a site fixing its first findings. |
+| `site_dir` | string | `site` | Static folder to serve, relative to the project root. Page globs expand in it. |
+| `pages` | array | `["**/*.html"]` | Pages to check, relative to the site root: paths or globs. A glob must match at least one file. |
+| `base_url` | string | `""` | Check a running site at this URL instead of serving `site_dir`. Empty serves `site_dir`. |
+| `wcag_tags` | array | `["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]` | axe-core tags to run; add `wcag22aa` for WCAG 2.2 AA. |
+| `color_schemes` | array | `["light", "dark"]` | Color schemes each page is checked in. |
+| `widths` | array | `[320, 1280]` | Viewport widths in CSS pixels; at 320 or less the job also checks reflow. |
+| `playwright_version` | string | `""` | playwright npm version. Empty reads it from the image tag. |
+| `axe_core_version` | string | `4.14.0` | axe-core version; the job fails if a different one ran. |
+| `axe_playwright_version` | string | `4.14.0` | @axe-core/playwright version; its axe-core range must include `axe_core_version`. |
+
+From `templates/a11y/template.yml`: the single job (named by `job_name`) runs in the `test` stage by default, is `interruptible: true`, and has a timeout of 30 minutes. It reads the Playwright version from the image tag, installs `playwright`, `@axe-core/playwright` and `axe-core` at exact versions with `npm install --ignore-scripts` into a temporary folder outside the project, writes the inputs as JSON and the checker (inlined from `templates/a11y/check.mjs`, because a component ships only its `template.yml`), and runs it from the project root with every check at reduced motion. It writes `gl-a11y-junit.xml` (published as a JUnit report) and `gl-a11y-report.json`, kept as artifacts for 30 days with `when: always`. It exits 0 clean, 1 on a violation or a page that did not load, and 2 on a tool or configuration error. `allow_failure` is interpolated as a real YAML boolean.
+
 ### Related[#](https://preflight.apps.wayne.edu/docs/reference/components.html#related)
 
 - [The proctor component](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html)
@@ -2981,6 +3206,7 @@ From `templates/portability/template.yml`: the component defines two jobs with f
 - [The package-publish component](https://preflight.apps.wayne.edu/docs/guides/component-package-publish.html)
 - [The renovate component](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html)
 - [The portability component](https://preflight.apps.wayne.edu/docs/guides/component-portability.html)
+- [The a11y component](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html)
 - [Shared conventions](https://preflight.apps.wayne.edu/docs/reference/conventions.html)
 - [Local checks](https://preflight.apps.wayne.edu/docs/reference/local-checks.html)
 - [Troubleshooting](https://preflight.apps.wayne.edu/docs/troubleshooting.html)
@@ -3108,6 +3334,42 @@ windows
 pwsh -File tests/check-portability.ps1
 ```
 
+### The accessibility gate[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#the-accessibility-gate)
+
+The site's pages have an accessibility gate: the `a11y` component's own checker (`templates/a11y/check.mjs`, axe-core in Playwright), run in Docker with the image and versions pinned in `templates/a11y/template.yml`, so no host browser is needed and a local run checks the same way as the pipeline. With no options it checks the front page and every docs page at WCAG 2.2 AA, in light and dark mode at 320 px and 1280 px, with the reflow check, and fails on any violation:
+
+linux
+
+```sh
+sh scripts/a11y.sh
+```
+
+windows
+
+```powershell
+scripts\a11y.ps1
+```
+
+Options pick another folder, pages, tags or a folder for the reports: `--site=DIR --pages='["index.html"]' --tags='["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]' --report=DIR` (PowerShell: `-Site`, `-Pages`, `-Tags`, `-Report`).
+
+### The accessibility fixtures[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#the-accessibility-fixtures)
+
+`tests/check-a11y.sh` (and `tests/check-a11y.ps1`) prove the checker still tells a clean site from a bad one. They run the gate against `tests/a11y-fixtures` at the component's default WCAG 2.1 AA and exit 0 only when the good site passes, the bad site fails with each known flaw named (a missing `lang`, an image with no `alt`, an unlabeled input, weak contrast, a page that scrolls sideways at 320 px, and a palette that fails in dark mode only), a missing page fails with HTTP 404, and a glob that matches nothing stops with a configuration error. They need Docker; the contract job does not run them.
+
+linux
+
+```sh
+sh tests/check-a11y.sh
+```
+
+windows
+
+```powershell
+pwsh -File tests/check-a11y.ps1
+```
+
+`tests/check-a11y-inline.sh` (and `.ps1`) checks that the heredoc in the template is a byte-for-byte copy of `templates/a11y/check.mjs`; the contract job runs it. After editing `check.mjs`, run `sh tests/check-a11y-inline.sh --write` (PowerShell: `tests\check-a11y-inline.ps1 -Write`) to copy it into the template.
+
 ### Proof[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#proof)
 
 Proof runs against real Wayne State applications are on a private site, [proof.apps.wayne.edu/preflight](https://proof.apps.wayne.edu/preflight/), behind a Wayne State employee sign-in. What was run, what held and what it caught in Preflight itself is on the public [Proof](https://preflight.apps.wayne.edu/docs/reference/proof.html) page.
@@ -3126,6 +3388,7 @@ The pages wear the front page's flight deck: `docs/_header.html` is the front pa
 ### Related[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#related)
 
 - [Components](https://preflight.apps.wayne.edu/docs/reference/components.html)
+- [The a11y component](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html)
 - [Shared conventions](https://preflight.apps.wayne.edu/docs/reference/conventions.html)
 - [Template lint](https://preflight.apps.wayne.edu/docs/guides/template-lint.html)
 - [Updating image pins](https://preflight.apps.wayne.edu/docs/guides/image-pins.html)
@@ -3397,6 +3660,27 @@ goss sends the HTTP method as written, and a lower-case one makes the server clo
 - **Fix:** pin 0.1.4 or a SHA at or after it.
 - **Check:** `goss validate` passes the health check instead of ending in EOF.
 
+#### a11y fails on a page that looked fine[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#a11y-fails-on-a-page-that-looked-fine)
+
+The job checks each page in light and dark mode at 320 px and 1280 px, with reduced motion, so it sees layouts and palettes a quick look in one browser misses.
+
+- **Cause:** a fault that shows in one mode only, and the failing test case names that mode, for example `docs/index.html dark 320px`: a dark palette with weak contrast, a label hidden at phone width, or a fixed-width element that makes the page scroll sideways at 320 px (`preflight-reflow`, which names the element where the overflow starts).
+- **Fix:** open the page in that mode (dark color scheme, a 320 px window) and fix the element the report names; each axe-core rule links its help page. While a site works through its first findings, set `allow_failure: true` on the include and remove it once the job is green.
+- **Check:** the job's last line reads `a11y: clean`, and the merge request's test summary shows every case passing.
+
+#### a11y stops with a configuration error (exit 2)[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#a11y-stops-with-a-configuration-error-exit-2)
+
+Exit 2 means the job never judged a page: an input or a tool is wrong.
+
+- **Cause:** one of the messages below.
+  - `no file under site matches the page pattern ...`: a glob in `pages` matched nothing, often because the docs folder moved. A literal page that is missing fails its check with HTTP 404 instead.
+  - `site folder not found`: `site_dir` does not exist in the job, for example because the site is built in another job and not passed as an artifact.
+  - `cannot read the Playwright version from the image tag`: `image` was overridden with an image whose tag does not carry `vX.Y.Z`.
+  - `Chromium did not start`: the playwright npm version does not match the browsers in the image.
+  - `axe-core X ran, but axe_core_version is Y`: `axe_playwright_version` names a bridge whose axe-core range does not include `axe_core_version`.
+- **Fix:** correct the input the message names: fix the glob or `site_dir`, set `playwright_version` to the Playwright release in the image, or move `axe_core_version` and `axe_playwright_version` together (Renovate bumps them as one group).
+- **Check:** the job log's second line names the site or URL and the Playwright version, and the summary line names the axe-core version that ran.
+
 ### Renovate[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#renovate)
 
 #### Renovate sees literal text instead of a token[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#renovate-sees-literal-text-instead-of-a-token)
@@ -3458,7 +3742,7 @@ This page is the checklist for moving an app from one Preflight pin to the next,
 
 #### Changed[#](https://preflight.apps.wayne.edu/docs/upgrading.html#changed)
 
-The `portability` component's `buildah_image` default moved from the plain version tag to the immutable tag `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb`: Red Hat re-pushed the plain version tag and garbage-collected the old digest, so a pipeline pinned to it broke. If your app overrides `buildah_image`, point it at an `-immutable` tag pinned by digest too. The `composer-audit` component gains an `abandoned` input (`fail`, `report` or `ignore`) for how `composer audit` treats abandoned packages. No action needed: the default is `fail`, which is what the component already did, so existing pipelines behave exactly as before. This release needs GitLab 18.7 or later: every component now declares `spec: component:` and prints a `Preflight component` line as its first command, and GitLab accepts that spec key only from 18.7 on. On an older instance, pipeline creation fails on the unknown key, so upgrade GitLab or pin an older Preflight tag.
+The `portability` component's `buildah_image` default moved from the plain version tag to the immutable tag `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb`: Red Hat re-pushed the plain version tag and garbage-collected the old digest, so a pipeline pinned to it broke. If your app overrides `buildah_image`, point it at an `-immutable` tag pinned by digest too. The `composer-audit` component gains an `abandoned` input (`fail`, `report` or `ignore`) for how `composer audit` treats abandoned packages. No action needed: the default is `fail`, which is what the component already did, so existing pipelines behave exactly as before. A new `a11y` component checks a site's pages with axe-core in Playwright (WCAG 2.1 AA by default; add `wcag22aa` for 2.2 AA). It is opt-in: add its include to start the gate, with `allow_failure: true` while the site fixes its first findings. See [The a11y component](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html). Preflight's own local gate (`scripts/a11y.sh`, `scripts/a11y.ps1`) now runs the component's checker, at 320 px instead of 360 px, with the reflow check; `tools/a11y/` is gone. This release needs GitLab 18.7 or later: every component now declares `spec: component:` and prints a `Preflight component` line as its first command, and GitLab accepts that spec key only from 18.7 on. On an older instance, pipeline creation fails on the unknown key, so upgrade GitLab or pin an older Preflight tag.
 
 ### 0.1.4[#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-1-4)
 

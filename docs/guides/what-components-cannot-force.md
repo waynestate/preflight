@@ -15,11 +15,14 @@ harder to skip.
 
 ## Which jobs may be allowed to fail
 
-Only `proctor` takes an `allow_failure` input (default `false`). A policy
-finding is a warning while an app adopts PROCTOR's rules, so the job may fail
-without failing the pipeline during adoption. `composer-audit` has no such
-input on purpose: a known advisory must fail the pipeline. The other jobs have
-no `allow_failure` input either.
+Three components take an `allow_failure` input, all defaulting to `false`:
+`proctor`, `secret-detection` and `a11y`. A policy finding is a warning while
+an app adopts PROCTOR's rules, a secret finding while a repo allowlists its
+first false positives, and an accessibility finding while a site fixes what the
+gate found on its first run, so each job may fail without failing the pipeline
+during adoption; all three still write their reports. `composer-audit` has
+no such input on purpose: a known advisory must fail the pipeline. The other
+jobs have no `allow_failure` input either.
 
 No template adds a global key such as `default:`, `variables:`, `workflow:` or
 `stages:`. `tests/check-contract.sh` (and its `.ps1` twin) fails on any
@@ -56,4 +59,5 @@ works on GitLab Community Edition:
 - [The job token allowlist](./job-token-allowlist.md)
 - [GitHub mirrors](./github-mirrors.md)
 - [The `proctor` component](./component-proctor.md)
+- [The `a11y` component](./component-a11y.md)
 
