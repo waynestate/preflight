@@ -12,7 +12,7 @@ Goal: run the same component more than once in one project, for example in a mon
 
 ## Set `job_name` [#](https://preflight.apps.wayne.edu/docs/guides/include-twice.html#set-job-name)
 
-Every component except `portability` takes a `job_name` input, whose default is the job's usual name. Set it when one project includes the same component more than once, for example in a monorepo with two apps; without it the two jobs would share a name and merge into one.
+Every component takes a `job_name` input, whose default is the job's usual name. Set it when one project includes the same component more than once, for example in a monorepo with two apps; without it the two jobs would share a name and merge into one.
 
 ```yaml
 include:
@@ -30,7 +30,7 @@ Expected: the pipeline runs two separately named jobs, `pint-app` and `pint-admi
 
 Note
 
-`job_name` ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release. `portability` keeps its two fixed job names, because `portability-run` waits on `portability-build`.
+`job_name` ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release. `portability` gained it with its one-job form, in the first release after 0.1.4.
 
 ## Another use: the next PHP release[#](https://preflight.apps.wayne.edu/docs/guides/include-twice.html#another-use-the-next-php-release)
 
@@ -54,6 +54,6 @@ A red `php-test-next` job is an early warning, not a stop. Drop the `allow_failu
 ## Related[#](https://preflight.apps.wayne.edu/docs/guides/include-twice.html#related)
 
 - [The php-test component](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html): inputs, caching, and the full next-release example.
-- [The portability component](https://preflight.apps.wayne.edu/docs/guides/component-portability.html): the one component without a `job_name` input.
+- [The portability component](https://preflight.apps.wayne.edu/docs/guides/component-portability.html): include it once per app image, each with its own `job_name`.
 - [When the components run](https://preflight.apps.wayne.edu/docs/guides/when-components-run.html): the `workflow:rules` block that belongs in the app's own file.
 - [Reference](https://preflight.apps.wayne.edu/docs/reference/components.html): every component, with its inputs and defaults.

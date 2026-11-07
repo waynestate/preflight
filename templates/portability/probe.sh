@@ -8,7 +8,7 @@
 #
 #   strict-boot        the uid has no passwd entry; the writable paths are
 #                      writable by uid:0 and the app root is not; the app
-#                      honours its port variable (replica B); during the run
+#                      honors its port variable (replica B); during the run
 #                      nothing is written outside the writable and runtime
 #                      paths (what a read-only root filesystem would refuse)
 #   health             the health path answers 200 to Host: 10.1.2.3:<port>,

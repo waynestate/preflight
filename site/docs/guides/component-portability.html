@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The portability component | Preflight docs</title>
-<meta name="description" content="Proves the app image meets the twelve-factor boot contract.">
+<meta name="description" content="Proves the app image runs the way OpenShift, Coolify and plain Docker run it, not only on Citadel.">
 <meta name="docs-version" content="0.1.4">
 <link rel="stylesheet" href="../../assets/wayne-ui/wayne-ui.css">
 <link rel="stylesheet" href="../../assets/docs.css">
@@ -41,69 +41,101 @@
   <div class="docs-content">
     <main id="main">
       <article class="docs-article"><h1 id="the-portability-component">The portability component<a class="docs-heading-link" aria-label="Link to this section" href="#the-portability-component">#</a></h1>
-<p>The portability component proves your app image meets the twelve-factor boot contract: it builds the image, boots it the strict way, and validates it before anything else gets to run it. Like the real pre-flight, it is a list of checks you finish on the ground before you are cleared for takeoff. Add the include below to your app's <code>.gitlab-ci.yml</code>, then read what the two jobs check.</p>
+<p>The portability component proves your app image runs anywhere a container platform runs it: OpenShift, Coolify, plain Docker, and Citadel too. It builds the image, boots it twice side by side as a stranger (an arbitrary uid with no name, in group 0, with no capabilities), and runs the six checks from ADR-0010. Like the real pre-flight, it is a list you finish on the ground: if one light is red, nobody taxis.</p>
 <h2 id="what-it-checks">What it checks<a class="docs-heading-link" aria-label="Link to this section" href="#what-it-checks">#</a></h2>
-<p>Proves the app image meets the twelve-factor boot contract. It builds the image with Buildah (no Docker daemon, no elevated runner), boots it the strict way, and validates it with goss: the health path answers 200 for a foreign Host, the root filesystem and the app root are not writable, the app runs as the declared uid, and each declared writable path is writable. No takeoff without a clean pre-flight.</p>
-<p>This is the twelve-factor boot check from ADR-0010: the app must start as a non-root user, write only to its declared paths, and answer its health path for any Host, not just its own.</p>
-<h2 id="add-the-include">Add the include<a class="docs-heading-link" aria-label="Link to this section" href="#add-the-include">#</a></h2>
-<pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@&lt;full-commit-sha&gt; # &lt;tag, once one ships&gt;
-    inputs:
-      dockerfile: Dockerfile
-      context: .
-      start_command: php -S 0.0.0.0:8080 -t public
-</code></pre>
-<aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>Portability ships in 0.1.4 and later (0.1.3 does not include it), so pin the <code>0.1.4</code> tag, or the full commit SHA of a commit at or after it.</p></aside>
-<aside class="docs-callout docs-callout--warning" role="note"><p class="docs-callout__label">Warning</p><p>The build job needs a runner that permits user namespaces (Buildah uses unshare for its storage); the run job needs only the project's container registry and an app image that carries curl, sha256sum and tar.</p></aside>
-<p><code>start_command</code> is the one input with no default: it is app-specific, so you must set it.</p>
-<h2 id="how-the-jobs-work">How the jobs work<a class="docs-heading-link" aria-label="Link to this section" href="#how-the-jobs-work">#</a></h2>
-<p>The component is two jobs.</p>
-<p><code>portability-build</code> builds the image with Buildah, which needs no Docker daemon, and pushes it to the project's container registry. Buildah stores its layers with the vfs driver, which needs no special kernel support and runs in an ordinary container. Both jobs are interruptible and carry <code>timeout: 30 minutes</code>.</p>
-<p><code>portability-run</code> pulls that image, starts the app as an arbitrary uid, and validates it with goss. In order, the job:</p>
-<ol>
-<li>Generates the goss file from the template and the inputs. The template is the same file the local checks use (<code>templates/portability/goss.yaml</code>); it is inlined in the component because a component only ships its <code>template.yml</code> to the including project. The <code>PORT</code>, <code>HEALTH_PATH</code>, <code>APP_ROOT</code> and <code>UID</code> placeholders are replaced with the inputs, and one command check per writable path is appended.</li>
-<li>Downloads goss, pinned by version and checksum (v0.4.10, verified with <code>sha256sum -c</code>).</li>
-<li>Starts the app in the background with <code>start_command</code>, then runs <code>goss validate</code> against the generated file, retrying the health check until the app answers or <code>boot_timeout</code> seconds expire.</li>
-</ol>
-<p>goss runs as the app user (uid, gid 0), so the command checks see the same permissions the app has.</p>
-<h3 id="the-goss-checks">The goss checks<a class="docs-heading-link" aria-label="Link to this section" href="#the-goss-checks">#</a></h3>
+<p>The strict boot comes first, because every other check stands on it. Then the six checks, each reported on its own line.</p>
 <div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
 <thead>
 <tr>
 <th>Check</th>
-<th>Command or request</th>
-<th>What it asserts</th>
+<th>What it does</th>
+<th>What a failure usually means</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Health path</td>
-<td><code>http://127.0.0.1:{{PORT}}{{HEALTH_PATH}}</code>, <code>method: GET</code>, request header <code>Host: portability-check.invalid</code></td>
-<td>The app answers 200 for a foreign Host, not just its own.</td>
+<td><code>strict-boot</code></td>
+<td>Starts the image as <code>uid:0</code> (default <code>100123:0</code>) with no <code>/etc/passwd</code> entry and every capability dropped. Fails if the app root is writable by that user, if a writable path is missing or not writable by group 0, if the second replica does not listen on the port its <code>port_env</code> variable names, or if the app wrote anywhere outside <code>writable_paths</code> and <code>runtime_paths</code> while it ran (what a read-only root filesystem would refuse).</td>
+<td>The image expects root, a named user, a fixed port, or writes caches next to the code.</td>
 </tr>
 <tr>
-<td><code>root-not-writable</code></td>
-<td><code>test ! -w /</code></td>
-<td>The app cannot write to the root of the filesystem.</td>
+<td><code>health</code></td>
+<td>Asks for <code>health_path</code> with <code>Host: 10.1.2.3:&lt;port&gt;</code>, no forwarded headers, at the job's own address, and expects 200. That is what a platform's probe sends.</td>
+<td>Trusted-host lists, HTTPS redirects, sessions or auth run before the health route.</td>
 </tr>
 <tr>
-<td><code>app-root-not-writable</code></td>
-<td><code>test ! -w {{APP_ROOT}}</code></td>
-<td>The app cannot write to its own root directory.</td>
+<td><code>env-only</code></td>
+<td>Fails on a <code>.env</code> file or a Laravel config cache (<code>bootstrap/cache/config.php</code>) baked into the image; the app must boot on the <code>env</code> input alone.</td>
+<td>Config was copied or cached at build time.</td>
 </tr>
 <tr>
-<td><code>runs-as-uid</code></td>
-<td><code>test &quot;$(id -u)&quot; = &quot;{{UID}}&quot;</code></td>
-<td>The app runs as the declared uid, not root.</td>
+<td><code>forwarded-headers</code></td>
+<td>Requests <code>probe_path</code> twice: plain, then with forged <code>X-Forwarded-Host</code>, <code>-Proto</code>, <code>-Port</code> and the <code>identity_header</code>, sent from an untrusted peer. Fails if the status or <code>Location</code> changes or a forged value shows up in the answer.</td>
+<td>The app trusts every proxy, so anyone can set its host, scheme or user.</td>
 </tr>
 <tr>
-<td>One <code>writable-...</code> check per entry of <code>writable_paths</code></td>
-<td><code>test -w &lt;app_root&gt;/&lt;path&gt;</code></td>
-<td>Each declared writable path is writable by the app user.</td>
+<td><code>logs</code></td>
+<td>Fails if nothing reached stdout or stderr during the run, or if anything was written under <code>logs_path</code> (default <code>storage/logs</code>).</td>
+<td>Logs go to files that vanish with the container.</td>
+</tr>
+<tr>
+<td><code>session-hop</code></td>
+<td>Signs in on replica A with <code>session_login_path</code>, then sends that cookie to replica B's <code>session_check_path</code> and expects 200. The replicas have separate disks.</td>
+<td>Sessions live in local files instead of a shared store or a signed cookie.</td>
+</tr>
+<tr>
+<td><code>sigterm</code></td>
+<td>Sends SIGTERM to the main process and expects it to exit by itself within <code>stop_timeout</code> seconds, as PID 1 must.</td>
+<td>The process has no SIGTERM handler (PID 1 ignores the signal by default), or the handler hangs.</td>
 </tr>
 </tbody>
 </table></div>
-<aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>goss sends the method as written, so the health check uses upper case <code>GET</code>.</p></aside>
+<p>The job prints one <code>portability: &lt;check&gt;: problem: ...</code> line per problem as it finds it, then a summary with <code>pass</code>, <code>FAIL</code> or <code>skipped</code> for every check, and passes only when every check that ran passed.</p>
+<h2 id="add-the-include">Add the include<a class="docs-heading-link" aria-label="Link to this section" href="#add-the-include">#</a></h2>
+<pre tabindex="0"><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@&lt;full-commit-sha&gt; # &lt;tag, once one ships&gt;
+    inputs:
+      env: [&quot;APP_KEY=${PORTABILITY_APP_KEY}&quot;, &quot;APP_URL=https://myapp.example.edu&quot;, &quot;SESSION_DRIVER=cookie&quot;, &quot;LOG_CHANNEL=stderr&quot;]
+      session_login_path: /_portability/login
+      session_check_path: /_portability/me
+</code></pre>
+<aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>The one-job component on this page ships in the first release after 0.1.4. 0.1.4 carries an earlier two-job version (<code>portability-build</code> and <code>portability-run</code>, checked with goss); see <a href="../upgrading.html">Upgrading</a>. Until the release, pin the full commit SHA.</p></aside>
+<p>With no <code>start_command</code>, the job runs the image's own <code>ENTRYPOINT</code> and <code>CMD</code>, exactly as the platforms do. Put secrets such as <code>APP_KEY</code> in CI/CD variables and name them in <code>env</code>: <code>$NAME</code> and <code>${NAME}</code> in <code>env</code> and <code>build_args</code> values are replaced from the job's variables.</p>
+<aside class="docs-callout docs-callout--warning" role="note"><p class="docs-callout__label">Warning</p><p>The runner must allow user namespaces, which Buildah's chroot isolation uses. Ordinary unprivileged Docker-executor runners do; no privileged mode, Docker-in-Docker or registry is needed.</p></aside>
+<h3 id="a-sign-in-route-for-session-hop">A sign-in route for session-hop<a class="docs-heading-link" aria-label="Link to this section" href="#a-sign-in-route-for-session-hop">#</a></h3>
+<p><code>session-hop</code> needs a GET route that signs in a test user and one that answers 200 only when signed in. Enable them with an environment variable that only this job sets, so they never exist in production. In Laravel (and a Sourdough or WELD app):</p>
+<pre tabindex="0"><code class="language-php">if (env('PORTABILITY_PROBE') === 'yes') {
+    Route::middleware('web')-&gt;group(function () {
+        Route::get('/_portability/login', function () {
+            Auth::login(User::firstOrCreate(['email' =&gt; 'portability@example.invalid'], ['name' =&gt; 'Portability', 'password' =&gt; Str::random(40)]));
+
+            return 'signed in';
+        });
+        Route::get('/_portability/me', fn () =&gt; Auth::check() ? 'ok' : abort(401));
+    });
+}
+</code></pre>
+<p>Add <code>&quot;PORTABILITY_PROBE=yes&quot;</code> to <code>env</code>. An app with no sign-in leaves <code>session-hop</code> out of <code>checks</code> on purpose; the other checks still run.</p>
+<h2 id="how-the-job-works">How the job works<a class="docs-heading-link" aria-label="Link to this section" href="#how-the-job-works">#</a></h2>
+<p>The component is one job, named by <code>job_name</code> (default <code>portability</code>). It runs in the Buildah image, pinned by digest, with <code>STORAGE_DRIVER=vfs</code> and <code>BUILDAH_ISOLATION=chroot</code>, <code>interruptible: true</code> and <code>timeout: 30 minutes</code>. In order, it:</p>
+<ol>
+<li>Builds the image with <code>buildah bud</code>, from <code>dockerfile</code> in <code>context</code>, with <code>build_args</code>. Nothing is pushed: the image stays in the job's own storage.</li>
+<li>Reads the image's <code>ENTRYPOINT</code> and <code>CMD</code>, makes two copies of its filesystem (replicas A and B) and runs the static parts of <code>strict-boot</code> and <code>env-only</code> on them.</li>
+<li>Starts both replicas with <code>buildah run --user &lt;uid&gt;:0 --cap-drop=ALL</code> and the <code>env</code> input; B gets <code>port + 1</code> through <code>port_env</code>.</li>
+<li>Waits up to <code>boot_timeout</code> seconds for each replica's health path, then runs <code>health</code>, <code>env-only</code>, <code>forwarded-headers</code>, <code>session-hop</code>, <code>logs</code> and <code>sigterm</code> with curl.</li>
+<li>Stops both replicas and compares what changed on disk against <code>writable_paths</code> and <code>runtime_paths</code>.</li>
+</ol>
+<p>The probe is <code>templates/portability/probe.sh</code>, inlined in the template byte for byte, because a component ships only its <code>template.yml</code>. The inputs reach it through a quoted heredoc as data; nothing in them is run except <code>start_command</code>.</p>
+<h3 id="why-buildah">Why Buildah<a class="docs-heading-link" aria-label="Link to this section" href="#why-buildah">#</a></h3>
+<p>The old runner allowed no Docker-in-Docker, and a privileged runner is a key to the building. Buildah is maintained by Red Hat, builds from a Dockerfile with no daemon, and can also run the image it built, as any uid, with no capabilities, inside an ordinary job. kaniko builds but cannot run a container, and Google archived it in 2025. A GitLab <code>services:</code> entry runs an image but cannot set its uid or drop its capabilities, and needs the image pushed to a registry first. Buildah needs neither a push nor a second job.</p>
+<h3 id="what-the-job-emulates">What the job emulates<a class="docs-heading-link" aria-label="Link to this section" href="#what-the-job-emulates">#</a></h3>
+<p>The checks run in an unprivileged job, so a few things are emulated rather than enforced by a kernel. Each one fails the same apps the real thing would.</p>
+<ul>
+<li><strong>Read-only root.</strong> The image is not mounted read-only; the job looks for files written outside the allowed paths after the run. A write is caught, not refused.</li>
+<li><strong>PID 1.</strong> <code>buildah run</code> starts no PID namespace, so the main process is not PID 1. The job checks that it handles SIGTERM, and fails it when it dies of the signal's default action, which PID 1 would ignore.</li>
+<li><strong>No new privileges.</strong> Every capability is dropped, but <code>buildah run</code> has no <code>no-new-privileges</code> flag. The uid has no passwd entry, so set-uid tools have little to grab.</li>
+<li><strong>Networking.</strong> Both replicas share the job's network namespace; the second one listens on <code>port + 1</code>.</li>
+</ul>
 <h2 id="inputs">Inputs<a class="docs-heading-link" aria-label="Link to this section" href="#inputs">#</a></h2>
 <div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
 <thead>
@@ -119,19 +151,19 @@
 <td><code>stage</code></td>
 <td>string</td>
 <td><code>test</code></td>
-<td>Pipeline stage for the portability jobs.</td>
+<td>Pipeline stage for the portability job.</td>
+</tr>
+<tr>
+<td><code>job_name</code></td>
+<td>string</td>
+<td><code>portability</code></td>
+<td>Name of the job. Set it when you include this component more than once.</td>
 </tr>
 <tr>
 <td><code>image</code></td>
 <td>string</td>
-<td><code>$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA</code></td>
-<td>App image the portability-run job starts and validates. The default is what portability-build pushes; GitLab expands the CI variables at job time.</td>
-</tr>
-<tr>
-<td><code>buildah_image</code></td>
-<td>string</td>
 <td><code>quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb</code></td>
-<td>Buildah image for the portability-build job; it builds and pushes the app image.</td>
+<td>Buildah image the job runs in. It builds the app image and runs the probe, so it needs buildah, curl, awk and find.</td>
 </tr>
 <tr>
 <td><code>dockerfile</code></td>
@@ -146,6 +178,12 @@
 <td>Build context, relative to the project root.</td>
 </tr>
 <tr>
+<td><code>build_args</code></td>
+<td>array</td>
+<td><code>[]</code></td>
+<td>Build arguments as <code>NAME=value</code>. <code>$NAME</code> and <code>${NAME}</code> in a value are replaced from the job's variables.</td>
+</tr>
+<tr>
 <td><code>app_root</code></td>
 <td>string</td>
 <td><code>/app</code></td>
@@ -155,46 +193,106 @@
 <td><code>writable_paths</code></td>
 <td>array</td>
 <td><code>[&quot;storage&quot;, &quot;bootstrap/cache&quot;]</code></td>
-<td>Paths the app may write to, relative to app_root. Each must be writable by the app user.</td>
+<td>Paths the app may write to, relative to <code>app_root</code>. Each must be writable by the uid in group 0.</td>
+</tr>
+<tr>
+<td><code>runtime_paths</code></td>
+<td>array</td>
+<td><code>[&quot;/tmp&quot;, &quot;/var/tmp&quot;, &quot;/run&quot;, &quot;/var/run&quot;]</code></td>
+<td>Absolute paths the platform mounts as tmpfs. Writes there are allowed.</td>
 </tr>
 <tr>
 <td><code>port</code></td>
 <td>number</td>
 <td><code>8080</code></td>
-<td>Port the app listens on inside the container.</td>
+<td>Port the app listens on by default. The second replica gets <code>port + 1</code> through <code>port_env</code>.</td>
+</tr>
+<tr>
+<td><code>port_env</code></td>
+<td>string</td>
+<td><code>PORT</code></td>
+<td>Environment variable that sets the app's listen port.</td>
 </tr>
 <tr>
 <td><code>health_path</code></td>
 <td>string</td>
 <td><code>/up</code></td>
-<td>Path the app must answer 200 on for any Host.</td>
+<td>Path that must answer 200 for any Host, before trusted hosts, HTTPS redirects, sessions and auth.</td>
 </tr>
 <tr>
 <td><code>uid</code></td>
 <td>number</td>
 <td><code>100123</code></td>
-<td>Numeric uid the app runs as. The gid is always 0.</td>
+<td>Numeric uid the app runs as, with no <code>/etc/passwd</code> entry. The gid is always 0.</td>
 </tr>
 <tr>
 <td><code>start_command</code></td>
 <td>string</td>
-<td>none</td>
-<td>Command that starts the app inside the image. It is app-specific, so it is required and has no default.</td>
+<td><code>&quot;&quot;</code></td>
+<td>Command that starts the app, run with <code>sh -c</code>. Empty runs the image's own <code>ENTRYPOINT</code> and <code>CMD</code>.</td>
+</tr>
+<tr>
+<td><code>env</code></td>
+<td>array</td>
+<td><code>[]</code></td>
+<td>Environment for both replicas, as <code>NAME=value</code> (or <code>NAME</code> to pass the job's variable through). Keep secrets in CI/CD variables.</td>
 </tr>
 <tr>
 <td><code>boot_timeout</code></td>
 <td>number</td>
 <td><code>60</code></td>
-<td>Seconds goss retries the health check while the app boots.</td>
+<td>Seconds each replica has to answer the health path.</td>
+</tr>
+<tr>
+<td><code>stop_timeout</code></td>
+<td>number</td>
+<td><code>10</code></td>
+<td>Seconds the main process has to exit after SIGTERM.</td>
+</tr>
+<tr>
+<td><code>probe_path</code></td>
+<td>string</td>
+<td><code>/</code></td>
+<td>Page probed with and without forged forwarded headers; one that redirects or builds absolute URLs shows the most.</td>
+</tr>
+<tr>
+<td><code>identity_header</code></td>
+<td>string</td>
+<td><code>X-Forwarded-User</code></td>
+<td>Identity header a gateway would set (forged in <code>forwarded-headers</code>).</td>
+</tr>
+<tr>
+<td><code>session_login_path</code></td>
+<td>string</td>
+<td><code>&quot;&quot;</code></td>
+<td>GET path that signs in a test user and sets the session cookie. Needed by <code>session-hop</code>.</td>
+</tr>
+<tr>
+<td><code>session_check_path</code></td>
+<td>string</td>
+<td><code>&quot;&quot;</code></td>
+<td>Path that answers 200 only for a signed-in user. Needed by <code>session-hop</code>.</td>
+</tr>
+<tr>
+<td><code>logs_path</code></td>
+<td>string</td>
+<td><code>storage/logs</code></td>
+<td>Directory, relative to <code>app_root</code>, where nothing may be written.</td>
+</tr>
+<tr>
+<td><code>checks</code></td>
+<td>array</td>
+<td><code>[&quot;health&quot;, &quot;env-only&quot;, &quot;forwarded-headers&quot;, &quot;logs&quot;, &quot;session-hop&quot;, &quot;sigterm&quot;]</code></td>
+<td>The checks to run. Leave one out only on purpose; the strict boot always runs.</td>
 </tr>
 </tbody>
 </table></div>
-<p>The default is an immutable tag (<code>-immutable</code>) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.</p>
+<p>The <code>image</code> default is an immutable tag (<code>-immutable</code>) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.</p>
 <h2 id="verify-locally">Verify locally<a class="docs-heading-link" aria-label="Link to this section" href="#verify-locally">#</a></h2>
-<p>The goss template is the same file the local checks use. <code>tests/check-portability.sh</code> (and its <code>.ps1</code> twin) do the placeholder replacement for the fixtures and build and boot the three fixtures under <code>tests/portability</code> the strict way; they exit 0 only when <code>good</code> passes and both <code>bad-*</code> fixtures fail. See <a href="../reference/local-checks.html">Local checks</a> for the commands.</p>
+<p><code>tests/check-portability.sh</code> (and its <code>.ps1</code> twin) run the same probe in the same Buildah image against <code>tests/portability/app</code>: once clean, where every check must pass, and once per flaw (needs root, writes outside its paths, fixed port, host-bound health, a baked <code>.env</code>, trusts any proxy, file logs, file sessions, no SIGTERM handler), where the targeted check must fail. Preflight's own pipeline runs the component on the clean fixture and this check as <code>must-fail-portability</code>. See <a href="../reference/local-checks.html">Local checks</a> for the commands.</p>
 <h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
 <ul>
-<li><a href="include-twice.html">Include a component twice</a>: the <code>job_name</code> input, and why <code>portability</code> keeps its two fixed job names instead.</li>
+<li><a href="include-twice.html">Include a component twice</a>: the <code>job_name</code> input.</li>
 <li><a href="same-instance-only.html">Same instance only</a>: components run only inside the GitLab instance that hosts this project.</li>
 <li><a href="when-components-run.html">When the components run</a>: the <code>workflow:rules</code> block that belongs in the app's own file.</li>
 <li><a href="../reference/components.html">Reference</a>: every component, with its inputs and defaults.</li>
@@ -203,7 +301,7 @@
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../../docs/guides/component-renovate.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">The renovate component</span></a><a class="docs-pager__link docs-pager__link--next" href="../../docs/guides/component-a11y.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">The a11y component</span></a></nav>
   </div>
-  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#what-it-checks">What it checks</a></li><li class="docs-toc__item"><a href="#add-the-include">Add the include</a></li><li class="docs-toc__item"><a href="#how-the-jobs-work">How the jobs work</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#the-goss-checks">The goss checks</a></li><li class="docs-toc__item"><a href="#inputs">Inputs</a></li><li class="docs-toc__item"><a href="#verify-locally">Verify locally</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#what-it-checks">What it checks</a></li><li class="docs-toc__item"><a href="#add-the-include">Add the include</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#a-sign-in-route-for-session-hop">A sign-in route for session-hop</a></li><li class="docs-toc__item"><a href="#how-the-job-works">How the job works</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#why-buildah">Why Buildah</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#what-the-job-emulates">What the job emulates</a></li><li class="docs-toc__item"><a href="#inputs">Inputs</a></li><li class="docs-toc__item"><a href="#verify-locally">Verify locally</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
   <span>Documents Preflight <span data-docs-version>0.1.4</span></span>

@@ -254,11 +254,10 @@ Why: two jobs with the same name merge into one.
 
 Sources: [GitLab: component examples, dynamic job names](https://docs.gitlab.com/ci/components/examples/).
 
-**How the stack holds it: Enforced.** Every component except `portability` takes a `job_name` input whose default is the
+**How the stack holds it: Enforced.** Every component takes a `job_name` input whose default is the
 usual job name (`proctor`, `php-test`, `composer-audit`, `sbom`, `pint`, `phpstan`, `eslint`, `secret-detection`, `a11y`,
-`package-publish`, `renovate`), and `tests/check-job-names.sh` fails if a template builds its job key any other way. `tests/check-contract.sh`
-resolves the key to the default, so the job names stay stable inside a major version. `portability` is the one exception:
-`portability-run` has `needs:` on `portability-build`, so both names are fixed.
+`package-publish`, `renovate`, `squire-kit`, `portability`), and `tests/check-job-names.sh` fails if a template builds its job key any other way. `tests/check-contract.sh`
+resolves the key to the default, so the job names stay stable inside a major version.
 
 ### 2.6 Offer a way to weaken a gate only where it is meant
 `composer-audit` has no `allow_failure` input, on purpose. `proctor`, `secret-detection` and `a11y` have one, for adoption.
@@ -309,7 +308,7 @@ Sources: [GitLab: CI/CD YAML, `timeout` and `interruptible`](https://docs.gitlab
 
 **How the stack holds it: Documented.** All thirteen templates set `interruptible: true` and a `timeout` of their own:
 `10m` for pint and phpstan, `10 minutes` for squire-kit, `15m` for eslint, `30 minutes` for composer-audit, package-publish, php-test, proctor,
-sbom, secret-detection, a11y and both portability jobs, and `1 hour` for renovate. What stays open is the cancellation half: whether a superseded pipeline is actually
+sbom, secret-detection, a11y and portability, and `1 hour` for renovate. What stays open is the cancellation half: whether a superseded pipeline is actually
 canceled still needs `workflow:auto_cancel` in the app's own file, which a component cannot force (see 3.1).
 
 ### 2.10 Make every job image an input
@@ -327,9 +326,8 @@ survives input interpolation, and GitLab expands it in the image at job time, so
 `tests/check-image-inputs.sh` (and its `.ps1` twin) fail if a job's `image:` stops being an input or a default
 `php:` tag loses its Debian release name.
 
-One exception: `portability-build` takes the Buildah image from `buildah_image` because it builds the image that
-`portability-run` then tests via `image`; the exemption is named in `tests/check-image-inputs.sh` (and its `.ps1`
-twin).
+There are no exemptions: `portability` builds and runs the app image inside its own job, so its `image` input is the
+Buildah image the job runs in, like every other component's.
 
 ### 2.11 Print which component version ran
 Use `spec:component` and `$[[ component.sha ]]` or `$[[ component.version ]]` to write the component's own version into
@@ -964,8 +962,10 @@ check: `proctor` runs `tests/proctor-fails`, a fake proctor that prints one bloc
 clean stub in `tests/fixture-app` (`tests/check-proctor-fails`); `composer-audit` runs `composer audit` on
 `tests/audit-fixtures/advisory`, which fails in every mode, and `tests/audit-fixtures/abandoned`, which fails only in
 `fail` mode (`tests/check-abandoned-input`); `a11y` checks the bad site in `tests/a11y-fixtures/bad`, which fails with
-each flaw named (`tests/check-a11y`); `portability` passes only when `tests/portability/bad-writes-root` and
-`tests/portability/bad-needs-root` both fail (`tests/check-portability`); `php-test` runs PHPUnit on
+each flaw named (`tests/check-a11y`); `portability` builds `tests/portability/app` once clean and once per flaw (needs root, writes outside its paths,
+fixed port, host-bound health, a baked `.env`, trusts any proxy, file logs, file sessions, no SIGTERM handler) and
+passes only when the clean build passes and each flaw fails the check it targets (`tests/check-portability`, run in
+CI by `must-fail-portability`); `php-test` runs PHPUnit on
 `tests/php-test-fails`, which carries a failing test, against the clean case in `tests/fixture-app`
 (`tests/check-php-test-fails`); `phpstan` runs PHPStan on `tests/phpstan-fails`, which carries a type error, against
 the clean case in `tests/fixture-app` (`tests/check-phpstan-fails`); and `pint` runs Pint in test mode on

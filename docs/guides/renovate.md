@@ -100,7 +100,7 @@ Squire's own data owns that image.
 
 ## Pinned to immutable tags
 
-The `quay.io/buildah/stable` image (the `buildah_image` default of the
+The `quay.io/buildah/stable` image (the `image` default of the
 portability component) is matched to `-immutable` tags only. Red Hat re-pushed
 v1.43.5 under the mutable tag and garbage-collected the old digest, which broke
 an image job, so DRAWBRIDGE and SQUIRE now pin the immutable form,

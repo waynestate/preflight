@@ -43,7 +43,7 @@
       <article class="docs-article"><h1 id="include-a-component-twice">Include a component twice<a class="docs-heading-link" aria-label="Link to this section" href="#include-a-component-twice">#</a></h1>
 <p>Goal: run the same component more than once in one project, for example in a monorepo with two apps, and keep the two jobs separate. Set the <code>job_name</code> input on each include, as shown below.</p>
 <h2 id="set-job-name">Set <code>job_name</code><a class="docs-heading-link" aria-label="Link to this section" href="#set-job-name">#</a></h2>
-<p>Every component except <code>portability</code> takes a <code>job_name</code> input, whose default is the job's usual name. Set it when one project includes the same component more than once, for example in a monorepo with two apps; without it the two jobs would share a name and merge into one.</p>
+<p>Every component takes a <code>job_name</code> input, whose default is the job's usual name. Set it when one project includes the same component more than once, for example in a monorepo with two apps; without it the two jobs would share a name and merge into one.</p>
 <pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@&lt;full commit SHA&gt; # &lt;tag&gt;
     inputs:
@@ -55,7 +55,7 @@
       job_name: pint-admin
 </code></pre>
 <p>Expected: the pipeline runs two separately named jobs, <code>pint-app</code> and <code>pint-admin</code>, instead of two jobs that merge into one.</p>
-<aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p><code>job_name</code> ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release. <code>portability</code> keeps its two fixed job names, because <code>portability-run</code> waits on <code>portability-build</code>.</p></aside>
+<aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p><code>job_name</code> ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release. <code>portability</code> gained it with its one-job form, in the first release after 0.1.4.</p></aside>
 <h2 id="another-use-the-next-php-release">Another use: the next PHP release<a class="docs-heading-link" aria-label="Link to this section" href="#another-use-the-next-php-release">#</a></h2>
 <p>Including a component twice is also how you try a PHP release before it is supported. Include <code>php-test</code> a second time for the release that is not supported yet, name that job, and let it fail. The name is what lets your own <code>.gitlab-ci.yml</code> loosen only that job:</p>
 <pre tabindex="0"><code class="language-yaml">include:
@@ -73,7 +73,7 @@ php-test-next:
 <h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
 <ul>
 <li><a href="component-php-test.html">The php-test component</a>: inputs, caching, and the full next-release example.</li>
-<li><a href="component-portability.html">The portability component</a>: the one component without a <code>job_name</code> input.</li>
+<li><a href="component-portability.html">The portability component</a>: include it once per app image, each with its own <code>job_name</code>.</li>
 <li><a href="when-components-run.html">When the components run</a>: the <code>workflow:rules</code> block that belongs in the app's own file.</li>
 <li><a href="../reference/components.html">Reference</a>: every component, with its inputs and defaults.</li>
 </ul>

@@ -27,7 +27,7 @@ Every page below is Markdown. The HTML pages send the same Markdown to a client 
 - [The php-test component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-php-test.md): Runs the test command on each supported PHP version through `parallel:matrix`.
 - [The phpstan component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.md): Runs the app's own PHPStan and fails the pipeline on static analysis errors, writing a GitLab Code Quality report.
 - [The pint component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-pint.md): Runs the app's own Laravel Pint in test mode and fails the pipeline on style errors.
-- [The portability component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-portability.md): Proves the app image meets the twelve-factor boot contract.
+- [The portability component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-portability.md): Proves the app image runs the way OpenShift, Coolify and plain Docker run it, not only on Citadel.
 - [The proctor component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-proctor.md): Runs `vendor/bin/proctor check --format=codequality` and publishes the result as a GitLab Code Quality report.
 - [The renovate component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-renovate.md): Runs Renovate as a scheduled or manual job that bumps versions across the group's repositories and merges the green ones itself.
 - [The sbom component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-sbom.md): Generates a CycloneDX SBOM, validates it, and publishes it as an artifact.

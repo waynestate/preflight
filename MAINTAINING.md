@@ -32,11 +32,18 @@ copy (see "Same instance only" in the README).
 Each contract test comes as a `.sh` and `.ps1` pair that check the same thing (`check-contract`, `check-spec-keys`,
 `check-image-inputs`, `check-php-test-cache`, `check-working-dir-regex`, `check-path-input-regex`, `check-github-workflow`,
 `check-proctor-install-flags`, `check-secret-detection`, `check-renovate-review`, `check-renovate-buildah`, `check-sha-pins`, `check-release-job`,
-`check-abandoned-input`, `check-component-version`, `check-input-interpolation`, `check-a11y-inline`, `check-renovate-squire-kit`, `check-squire-kit`). CI runs the `.sh` ones, except `check-abandoned-input`: the contract job's yq image has no Docker, and the test runs composer in the composer:2.10.3 image, so it stays out of the contract job's script list in `.gitlab-ci.yml`.
+`check-abandoned-input`, `check-component-version`, `check-input-interpolation`, `check-a11y-inline`, `check-portability-inline`, `check-renovate-squire-kit`, `check-squire-kit`). CI runs the `.sh` ones, except `check-abandoned-input`: the contract job's yq image has no Docker, and the test runs composer in the composer:2.10.3 image, so it stays out of the contract job's script list in `.gitlab-ci.yml`.
 Keep both in step when you change one.
 
-`tests/check-portability.sh` (and `tests/check-portability.ps1`) is a local check that needs Docker and runs the
-three fixtures in `tests/portability`; the contract job does not run it.
+`tests/check-portability.sh` runs the portability probe (`templates/portability/probe.sh`) on the fixture in
+`tests/portability/app`, once clean and once per flaw (`ARG FLAW` in its Dockerfile), and passes only when the clean
+build passes every check and each flaw fails the check it targets. It needs Buildah, so it runs inside the
+component's Buildah image: the `must-fail-portability` job runs it in CI, and `tests/check-portability.ps1` (or the
+`docker run` in the .sh header) runs it locally with `--security-opt seccomp=unconfined`, never `--privileged`.
+Preflight's pipeline also includes the component itself on the clean fixture. Change the probe in `probe.sh`, then run
+`sh tests/check-portability-inline.sh --write` (PowerShell: `tests\check-portability-inline.ps1 -Write`) to copy it into
+the template; the contract job fails while the two differ. A new flaw gets a branch in the fixture and a line in the
+case list of `tests/check-portability.sh`.
 
 `tests/check-a11y.sh` (and `tests/check-a11y.ps1`) is a local check that needs Docker: it runs the `a11y` component's
 checker against the good and bad sites in `tests/a11y-fixtures` and passes only when the good one is clean and the bad

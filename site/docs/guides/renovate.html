@@ -116,7 +116,7 @@ away from production, so only digest updates are enabled for them: the same
 tag, the exact image. <code>citadel/php-apache</code> is disabled entirely, because
 Squire's own data owns that image.</p>
 <h2 id="pinned-to-immutable-tags">Pinned to immutable tags<a class="docs-heading-link" aria-label="Link to this section" href="#pinned-to-immutable-tags">#</a></h2>
-<p>The <code>quay.io/buildah/stable</code> image (the <code>buildah_image</code> default of the
+<p>The <code>quay.io/buildah/stable</code> image (the <code>image</code> default of the
 portability component) is matched to <code>-immutable</code> tags only. Red Hat re-pushed
 v1.43.5 under the mutable tag and garbage-collected the old digest, which broke
 an image job, so DRAWBRIDGE and SQUIRE now pin the immutable form,

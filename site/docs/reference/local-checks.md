@@ -80,12 +80,14 @@ docker run --rm -v "$(pwd)/tests/fixture-app:/app" -w /app php:8.4-cli vendor/bi
 
 ## The portability fixtures[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#the-portability-fixtures)
 
-Run the portability fixtures with Docker; they build and boot the three fixtures under `tests/portability` the strict way and exit 0 only when `good` passes and both `bad-*` fixtures fail:
+Run the portability fixtures with Docker. The check runs the component's own probe in the component's own Buildah image against `tests/portability/app`, once clean and once per flaw, and exits 0 only when the clean build passes every check and each flaw fails the check it targets. It takes about two minutes. `--security-opt seccomp=unconfined` lets Buildah open the user namespace that Docker's default seccomp profile refuses; it grants no capabilities and is not `--privileged`.
 
 linux
 
 ```sh
-sh tests/check-portability.sh
+docker run --rm --security-opt seccomp=unconfined -v "$(pwd):/src:ro" -w /src \
+  quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb \
+  sh tests/check-portability.sh
 ```
 
 windows
@@ -93,6 +95,8 @@ windows
 ```powershell
 pwsh -File tests/check-portability.ps1
 ```
+
+To run some cases only, set `PORTABILITY_CASES` (for example `-e PORTABILITY_CASES="none sigterm"` on the `docker run`), or pass `-Cases none,sigterm` to the `.ps1`.
 
 ## The accessibility gate[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#the-accessibility-gate)
 
