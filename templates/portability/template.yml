@@ -153,7 +153,7 @@ portability-run:
       # Append one command check per writable path. writable_paths arrives as a
       # Ruby-inspect string, for example ["storage", "bootstrap/cache"]. Strip
       # the brackets and quotes, then turn each comma into a newline.
-      paths=$([[ inputs.writable_paths ]])
+      paths='$[[ inputs.writable_paths ]]'
       paths=$(printf '%s' "$paths" | tr -d '[]"' | tr ',' '\n')
       for p in $paths; do
         [ -n "$p" ] || continue
