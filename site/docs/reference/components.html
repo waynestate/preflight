@@ -102,7 +102,7 @@
 <p>Every job the templates define is <code>interruptible: true</code>. Every component except <code>portability</code> takes a <code>job_name</code> input whose default is the job's usual name; set it when one project includes the same component more than once. <code>portability</code> keeps its two fixed job names, because <code>portability-run</code> waits on <code>portability-build</code>.</p>
 <h2 id="proctor">proctor<a class="docs-heading-link" aria-label="Link to this section" href="#proctor">#</a></h2>
 <p>Runs <code>vendor/bin/proctor check --format=codequality</code> and publishes the result as a GitLab Code Quality report. The job installs the app's dependencies with <code>composer install --no-plugins --no-scripts --ignore-platform-reqs</code>, so the app's plugins and scripts never run inside the job, and an app locked to an older PHP or needing an extension the image lacks still gets its report.</p>
-<pre><code class="language-yaml">include:
+<pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
     inputs:
       proctor_command: vendor/bin/proctor check --format=codequality
@@ -164,7 +164,7 @@
 <p>From <code>templates/proctor/template.yml</code>: the single job (named by <code>job_name</code>) runs in the <code>test</code> stage by default, is <code>interruptible: true</code>, and has a timeout of 30 minutes. It installs Composer with the official getcomposer.org installer, verifies the installer's SHA-384 against composer.github.io/installer.sig, and pins the installed version to <code>composer_version</code>. It then runs <code>composer install --no-interaction --no-progress --no-plugins --no-scripts --ignore-platform-reqs</code>, so the app's plugins and scripts never run with the job's access and the app's PHP version and extensions are not required. The command's output goes through a plain redirect (not <code>tee</code>) to <code>gl-code-quality-report.json</code> at the project root, which keeps PROCTOR's exit code as the job result and gives the artifact the same path for every <code>working_dir</code>, including <code>.</code>. The report is published as a Code Quality report with <code>when: always</code>.</p>
 <h2 id="php-test">php-test<a class="docs-heading-link" aria-label="Link to this section" href="#php-test">#</a></h2>
 <p>Runs the test command on each supported PHP version through <code>parallel:matrix</code>.</p>
-<pre><code class="language-yaml">include:
+<pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
     inputs:
       test_command: vendor/bin/phpunit
@@ -228,7 +228,7 @@
 <p>The jobs always cache Composer downloads in <code>.composer-cache/</code> so repeat runs do not re-download every package. The cache key depends on <code>composer.lock</code> and is prefixed with the PHP version, so a dependency change invalidates the cache and each PHP version gets its own cache. The template sets <code>COMPOSER_CACHE_DIR</code> to <code>$CI_PROJECT_DIR/.composer-cache</code>, keys the cache on <code>composer.lock</code> with the prefix <code>php-${PHP_VERSION}</code>, caches the path <code>.composer-cache/</code>, and uses the policy <code>pull-push</code>.</p>
 <h3 id="try-the-next-php-release-without-breaking-the-pipeline">Try the next PHP release without breaking the pipeline<a class="docs-heading-link" aria-label="Link to this section" href="#try-the-next-php-release-without-breaking-the-pipeline">#</a></h3>
 <p>Include <code>php-test</code> a second time for the release that is not supported yet, name that job, and let it fail. The name is what lets your own <code>.gitlab-ci.yml</code> loosen only that job:</p>
-<pre><code class="language-yaml">include:
+<pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@&lt;full commit SHA&gt; # &lt;tag&gt;
     inputs:
       php_versions: [&quot;8.6&quot;]
@@ -242,7 +242,7 @@ php-test-next:
 <p>A red <code>php-test-next</code> job is an early warning, not a stop. Drop the <code>allow_failure</code> and move the version into the main <code>php_versions</code> list once the release is supported (the supported versions follow <code>policy.json</code>).</p>
 <h2 id="composer-audit">composer-audit<a class="docs-heading-link" aria-label="Link to this section" href="#composer-audit">#</a></h2>
 <p>Runs <code>composer audit --locked</code> and fails on advisories.</p>
-<pre><code class="language-yaml">include:
+<pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
     inputs:
       working_dir: .
@@ -294,7 +294,7 @@ php-test-next:
 <p>New advisories are published after code is merged, so a green pipeline today can be stale tomorrow. Create a weekly pipeline schedule on the default branch: project settings, Build, Pipeline schedules. The component needs nothing extra; it carries no <code>rules:</code> block, so it runs in scheduled pipelines like any other. Creating the schedule is a project setting, not a file in the app's repo, and someone with Maintainer rights on the app must do it. It is the one preflight check that books its own flight time.</p>
 <h2 id="sbom">sbom<a class="docs-heading-link" aria-label="Link to this section" href="#sbom">#</a></h2>
 <p>Generates a CycloneDX SBOM with <code>cyclonedx/cyclonedx-php-composer</code>, validates it, and publishes it as an artifact. The plugin is installed globally, so the app's <code>composer.json</code> is never touched.</p>
-<pre><code class="language-yaml">include:
+<pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
     inputs:
       output: sbom.cdx.json
@@ -345,7 +345,7 @@ php-test-next:
 <h2 id="pint">pint<a class="docs-heading-link" aria-label="Link to this section" href="#pint">#</a></h2>
 <p>Version 1 · Category: Testing/Validation · Tags: php,style,pint</p>
 <p>Runs the app's own <a rel="noopener" href="https://laravel.com/docs/12.x/pint">Laravel Pint</a> in test mode and fails the pipeline on style errors. The app must require <code>laravel/pint</code> as a dev dependency and ship a <code>pint.json</code> (or point <code>config</code> at its own file).</p>
-<pre><code class="language-yaml">include:
+<pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
     inputs:
       config: pint.json
@@ -396,7 +396,7 @@ php-test-next:
 <h2 id="phpstan">phpstan<a class="docs-heading-link" aria-label="Link to this section" href="#phpstan">#</a></h2>
 <p>Version 1 · Category: Testing/Validation · Tags: php,static-analysis,phpstan</p>
 <p>Runs the app's own <a rel="noopener" href="https://phpstan.org/">PHPStan</a> and fails the pipeline on static analysis errors, writing a GitLab Code Quality report. The app must require <code>phpstan/phpstan</code> as a dev dependency and ship a <code>phpstan.neon</code> (or point <code>config</code> at its own file).</p>
-<pre><code class="language-yaml">include:
+<pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
     inputs:
       config: phpstan.neon
@@ -454,7 +454,7 @@ php-test-next:
 <h2 id="eslint">eslint<a class="docs-heading-link" aria-label="Link to this section" href="#eslint">#</a></h2>
 <p>Version 1 · Category: Testing/Validation · Tags: javascript,style,eslint,prettier</p>
 <p>Runs the app's own <a rel="noopener" href="https://eslint.org/">ESLint</a> (and <a rel="noopener" href="https://prettier.io/">Prettier</a>) and fails the pipeline on lint or format errors. The app must require <code>@waynestate/pinstripe</code>, <code>eslint</code> and <code>prettier</code> as dev dependencies and ship an <code>eslint.config.js</code> (or point <code>eslint_args</code> at its own files).</p>
-<pre><code class="language-yaml">include:
+<pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
     inputs:
       eslint_args: .
@@ -511,7 +511,7 @@ php-test-next:
 <h2 id="package-publish">package-publish<a class="docs-heading-link" aria-label="Link to this section" href="#package-publish">#</a></h2>
 <p>Version 1 · Category: Release/Publishing · Tags: composer,publish,release</p>
 <p>Publishes a semantic version tag to the GitLab group's built-in Composer registry. The job runs only on tags, reads the registry first, and refuses a moved version: a version already published from this commit passes quietly, and a version published from a different commit fails the pipeline, because GitLab would otherwise overwrite it without a word. The default image ships curl and PHP, which the job uses for the registry round trip.</p>
-<pre><code class="language-yaml">include:
+<pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
     inputs:
       group_id: &quot;&lt;your group id&gt;&quot;
@@ -562,7 +562,7 @@ php-test-next:
 <p>From <code>templates/package-publish/template.yml</code>: the job runs only when <code>$CI_COMMIT_TAG</code> is set. The tag must be a semantic version, <code>1.2.3</code> or <code>v1.2.3</code> with an optional pre-release, or the job fails. The package name comes from <code>composer.json</code>, the file the registry serves. The job reads the masked CI variable named by <code>read_token_variable</code>, checks that <code>group_id</code> is numeric, reads the group's Composer registry index with the token, and follows the package metadata to the version already on the manifest. A version already published at this commit passes quietly (exit 0); a version published at a different commit fails (exit 1). Publishing posts the tag to the project's Composer packages endpoint with the job token. The job is <code>interruptible: true</code> with a timeout of 30 minutes.</p>
 <h2 id="renovate">renovate<a class="docs-heading-link" aria-label="Link to this section" href="#renovate">#</a></h2>
 <p>Runs <a rel="noopener" href="https://docs.renovatebot.com/">Renovate</a> as a scheduled or manual job that bumps image digests, GitHub action SHAs and package versions across the group's repositories, and merges the green ones itself. Bumps of <code>component:</code> include pins are covered by the preset and wait for review. Majors open a merge request and wait for a person. See <a href="../guides/renovate.html">Renovate</a> for what auto-merges and what waits.</p>
-<pre><code class="language-yaml">include:
+<pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
     inputs:
       git_author: &quot;Preflight Bot &lt;preflight-bot@example.com&gt;&quot;
@@ -612,7 +612,7 @@ php-test-next:
 <p>From <code>templates/renovate/template.yml</code>: the job has no <code>stage</code> input and sets no stage. It runs only on scheduled and manual pipelines (<code>$CI_PIPELINE_SOURCE == &quot;schedule&quot;</code> or <code>&quot;web&quot;</code>). It writes its <code>config.js</code> at job time, so the <code>registryAliases</code> entry for the GitLab instance comes from the predefined <code>CI_SERVER_FQDN</code> variable; no hostname is stored in the repository, so the public mirror stays clean. It does not set <code>RENOVATE_TOKEN</code> or <code>GITHUB_COM_TOKEN</code> in the job <code>variables:</code> on purpose: a self-reference such as <code>X: $X</code> arrives as literal text on GitLab 19.5 and would shadow the masked project CI/CD variables, so the job reads both tokens straight from the project. The job is <code>interruptible: true</code> with a timeout of 1 hour.</p>
 <h2 id="portability">portability<a class="docs-heading-link" aria-label="Link to this section" href="#portability">#</a></h2>
 <p>Proves the app image meets the twelve-factor boot contract. It builds the image with Buildah (no Docker daemon, no elevated runner), boots it the strict way, and validates it with goss: the health path answers 200 for a foreign Host, the root filesystem and the app root are not writable, the app runs as the declared uid, and each declared writable path is writable. No takeoff without a clean pre-flight.</p>
-<pre><code class="language-yaml">include:
+<pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@&lt;full-commit-sha&gt; # &lt;tag, once one ships&gt;
     inputs:
       dockerfile: Dockerfile

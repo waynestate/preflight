@@ -44,7 +44,7 @@
 <p>A proctor keeps an eye on the exam hall; this one keeps an eye on your app. This page shows how to add the <code>proctor</code> component to your app's <code>.gitlab-ci.yml</code> and what the job does once it runs. Next, add the <a href="component-php-test.html">php-test component</a> so the test suite runs on every supported PHP version.</p>
 <h2 id="include-the-component">Include the component<a class="docs-heading-link" aria-label="Link to this section" href="#include-the-component">#</a></h2>
 <p>Goal: your app's pipeline runs PROCTOR and publishes the result as a GitLab Code Quality report. Add the include to your app's <code>.gitlab-ci.yml</code>:</p>
-<pre><code class="language-yaml">include:
+<pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
     inputs:
       proctor_command: vendor/bin/proctor check --format=codequality

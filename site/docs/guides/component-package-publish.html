@@ -80,7 +80,7 @@ round trip. The job is interruptible and times out after 30 minutes.</p>
 <p>Add the include to the app's <code>.gitlab-ci.yml</code>, pinned to a full commit SHA
 with the tag in a trailing comment, and set <code>group_id</code> to the numeric id of
 the GitLab group whose built-in Composer registry hosts the package:</p>
-<pre><code class="language-yaml">include:
+<pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
     inputs:
       group_id: &quot;&lt;your group id&gt;&quot;

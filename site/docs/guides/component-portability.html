@@ -46,7 +46,7 @@
 <p>Proves the app image meets the twelve-factor boot contract. It builds the image with Buildah (no Docker daemon, no elevated runner), boots it the strict way, and validates it with goss: the health path answers 200 for a foreign Host, the root filesystem and the app root are not writable, the app runs as the declared uid, and each declared writable path is writable. No takeoff without a clean pre-flight.</p>
 <p>This is the twelve-factor boot check from ADR-0010: the app must start as a non-root user, write only to its declared paths, and answer its health path for any Host, not just its own.</p>
 <h2 id="add-the-include">Add the include<a class="docs-heading-link" aria-label="Link to this section" href="#add-the-include">#</a></h2>
-<pre><code class="language-yaml">include:
+<pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@&lt;full-commit-sha&gt; # &lt;tag, once one ships&gt;
     inputs:
       dockerfile: Dockerfile

@@ -44,7 +44,7 @@
 <p>Fresh eyes on the manifest: this component runs <code>composer audit --locked</code> and fails the pipeline on advisories. This page shows how to add the <code>composer-audit</code> component to your app's <code>.gitlab-ci.yml</code>, then how to run it on a weekly schedule so the check keeps running after code is merged.</p>
 <h2 id="include-the-component">Include the component<a class="docs-heading-link" aria-label="Link to this section" href="#include-the-component">#</a></h2>
 <p>Goal: your app's pipeline fails whenever a locked dependency has a known advisory. Add the include to your app's <code>.gitlab-ci.yml</code>:</p>
-<pre><code class="language-yaml">include:
+<pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
     inputs:
       working_dir: .

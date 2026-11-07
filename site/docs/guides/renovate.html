@@ -53,7 +53,7 @@ the filter, opens merge requests for outdated versions, and GitLab's native
 auto-merge takes in the ones whose pipeline is green.</p>
 <p>Every stack repository carries a <code>renovate.json</code> that extends the shared
 preset, so the rules change in one place:</p>
-<pre><code class="language-json">{
+<pre tabindex="0"><code class="language-json">{
   &quot;$schema&quot;: &quot;https://docs.renovatebot.com/renovate-schema.json&quot;,
   &quot;extends&quot;: [&quot;local&gt;enterprise-apps/preflight//renovate/default&quot;]
 }

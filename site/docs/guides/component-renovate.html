@@ -78,7 +78,7 @@ project and the masked values reach the job unchanged.</p></aside>
 <h2 id="include-the-component">Include the component<a class="docs-heading-link" aria-label="Link to this section" href="#include-the-component">#</a></h2>
 <p>Add the include to the runner project's <code>.gitlab-ci.yml</code>, pinned to a full
 commit SHA with the tag in a trailing comment, and set <code>git_author</code>:</p>
-<pre><code class="language-yaml">include:
+<pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
     inputs:
       git_author: &quot;Preflight Bot &lt;preflight-bot@example.com&gt;&quot;

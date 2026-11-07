@@ -54,7 +54,7 @@
 same checks: PROCTOR, PHP tests on each supported version, Composer audit,
 an SBOM, Pint, PHPStan and ESLint. One include per component, pinned to a
 commit SHA, and the same checklist flies on every push.</p>
-<pre><code class="language-yaml">include:
+<pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
     inputs:
       test_command: vendor/bin/phpunit

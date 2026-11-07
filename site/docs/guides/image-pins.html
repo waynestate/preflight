@@ -55,7 +55,7 @@ purpose, so those jobs run on the newest PHP patch release; every other
 component image is digest-pinned.</p></aside>
 <h2 id="look-up-the-digest">Look up the digest<a class="docs-heading-link" aria-label="Link to this section" href="#look-up-the-digest">#</a></h2>
 <p>To look up the digest for an image:</p>
-<pre><code class="language-sh">docker buildx imagetools inspect &lt;image&gt;:&lt;tag&gt;
+<pre tabindex="0"><code class="language-sh">docker buildx imagetools inspect &lt;image&gt;:&lt;tag&gt;
 </code></pre>
 <p>Use the top-level <code>Digest:</code> line (the multi-arch index digest), not a
 per-platform one. Without <code>buildx</code>, <code>docker manifest inspect -v &lt;image&gt;:&lt;tag&gt;</code>

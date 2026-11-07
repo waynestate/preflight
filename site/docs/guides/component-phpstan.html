@@ -51,7 +51,7 @@
 </ul>
 <h2 id="include-the-component">Include the component<a class="docs-heading-link" aria-label="Link to this section" href="#include-the-component">#</a></h2>
 <p>Add the include to the app's <code>.gitlab-ci.yml</code>, pinned to a commit SHA with the tag in a trailing comment:</p>
-<pre><code class="language-yaml">include:
+<pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
     inputs:
       config: phpstan.neon
@@ -66,12 +66,12 @@
 </li>
 <li>
 <p>Install the app's dependencies:</p>
-<pre><code class="language-sh">composer install --no-interaction --no-progress --prefer-dist
+<pre tabindex="0"><code class="language-sh">composer install --no-interaction --no-progress --prefer-dist
 </code></pre>
 </li>
 <li>
 <p>Run PHPStan against the app's own config:</p>
-<pre><code class="language-sh">vendor/bin/phpstan analyse --no-progress --error-format=gitlab --memory-limit=1G -c phpstan.neon &gt; &quot;$CI_PROJECT_DIR/phpstan-report.json&quot;
+<pre tabindex="0"><code class="language-sh">vendor/bin/phpstan analyse --no-progress --error-format=gitlab --memory-limit=1G -c phpstan.neon &gt; &quot;$CI_PROJECT_DIR/phpstan-report.json&quot;
 </code></pre>
 <ul>
 <li><code>--memory-limit</code> takes the <code>memory_limit</code> input (default <code>1G</code>).</li>
@@ -82,7 +82,7 @@
 </ol>
 <h2 id="report">Report<a class="docs-heading-link" aria-label="Link to this section" href="#report">#</a></h2>
 <p>The job publishes the report as a Code Quality report:</p>
-<pre><code class="language-yaml">artifacts:
+<pre tabindex="0"><code class="language-yaml">artifacts:
   when: always
   reports:
     codequality: phpstan-report.json

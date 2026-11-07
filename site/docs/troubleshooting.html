@@ -57,7 +57,7 @@
 <li><strong>Cause:</strong> the app's own <code>.gitlab-ci.yml</code> has no <code>workflow:rules</code> block with a <code>merge_request_event</code> rule.</li>
 <li><strong>Fix:</strong> add the block to the app's own file:</li>
 </ul>
-<pre><code class="language-yaml">workflow:
+<pre tabindex="0"><code class="language-yaml">workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == &quot;merge_request_event&quot;
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH

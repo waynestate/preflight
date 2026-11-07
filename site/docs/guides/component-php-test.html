@@ -44,7 +44,7 @@
 <p>Every engine gets its own check: this component runs your test command once per supported PHP version. This page shows how to add the <code>php-test</code> component to your app's <code>.gitlab-ci.yml</code>, how the matrix and the cache work, and how to trial the next PHP release. Next, add the <a href="component-composer-audit.html">composer-audit component</a>.</p>
 <h2 id="include-the-component">Include the component<a class="docs-heading-link" aria-label="Link to this section" href="#include-the-component">#</a></h2>
 <p>Goal: your app's test suite runs on each supported PHP version. The component runs the test command on each supported PHP version through <code>parallel:matrix</code>. Add the include to your app's <code>.gitlab-ci.yml</code>:</p>
-<pre><code class="language-yaml">include:
+<pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
     inputs:
       test_command: vendor/bin/phpunit
@@ -116,7 +116,7 @@
 </ol>
 <h2 id="caching">Caching<a class="docs-heading-link" aria-label="Link to this section" href="#caching">#</a></h2>
 <p>The jobs always cache Composer downloads in <code>.composer-cache/</code> so repeat runs do not re-download every package. The cache key depends on <code>composer.lock</code> and is prefixed with the PHP version, so a dependency change invalidates the cache and each PHP version gets its own cache:</p>
-<pre><code class="language-yaml">cache:
+<pre tabindex="0"><code class="language-yaml">cache:
   key:
     files:
       - composer.lock
@@ -130,7 +130,7 @@ variables:
 <p><code>COMPOSER_CACHE_DIR</code> points Composer at a path inside the project so GitLab can cache it.</p>
 <h2 id="try-the-next-php-release-without-breaking-the-pipeline">Try the next PHP release without breaking the pipeline<a class="docs-heading-link" aria-label="Link to this section" href="#try-the-next-php-release-without-breaking-the-pipeline">#</a></h2>
 <p>Include <code>php-test</code> a second time for the release that is not supported yet, name that job, and let it fail. The name is what lets your own <code>.gitlab-ci.yml</code> loosen only that job:</p>
-<pre><code class="language-yaml">include:
+<pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@&lt;full commit SHA&gt; # &lt;tag&gt;
     inputs:
       php_versions: [&quot;8.6&quot;]

@@ -51,7 +51,7 @@
 </ul>
 <h2 id="include-the-component">Include the component<a class="docs-heading-link" aria-label="Link to this section" href="#include-the-component">#</a></h2>
 <p>Add the include to the app's <code>.gitlab-ci.yml</code>, pinned to a commit SHA with the tag in a trailing comment:</p>
-<pre><code class="language-yaml">include:
+<pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
     inputs:
       config: pint.json
@@ -65,12 +65,12 @@
 </li>
 <li>
 <p>Install the app's dependencies:</p>
-<pre><code class="language-sh">composer install --no-interaction --no-progress --prefer-dist
+<pre tabindex="0"><code class="language-sh">composer install --no-interaction --no-progress --prefer-dist
 </code></pre>
 </li>
 <li>
 <p>Run Pint in test mode against the app's own config:</p>
-<pre><code class="language-sh">vendor/bin/pint --test --config=pint.json
+<pre tabindex="0"><code class="language-sh">vendor/bin/pint --test --config=pint.json
 </code></pre>
 <p><code>--config</code> takes the <code>config</code> input (default <code>pint.json</code>). A style error fails the job, and with it the pipeline.</p>
 </li>

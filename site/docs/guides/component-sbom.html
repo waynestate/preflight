@@ -44,7 +44,7 @@
 <p>This page shows how to add the <code>sbom</code> component to an app's <code>.gitlab-ci.yml</code>: it generates a CycloneDX SBOM with <code>cyclonedx/cyclonedx-php-composer</code>, validates it, and publishes it as an artifact. The SBOM is the aircraft's parts manifest (nothing flies that is not on the list); start with the include, then read what the job does and which inputs it takes.</p>
 <h2 id="include-the-component">Include the component<a class="docs-heading-link" aria-label="Link to this section" href="#include-the-component">#</a></h2>
 <p>Add the include to the app's <code>.gitlab-ci.yml</code>, pinned to a commit SHA with the tag in a trailing comment:</p>
-<pre><code class="language-yaml">include:
+<pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
     inputs:
       output: sbom.cdx.json
@@ -55,33 +55,33 @@
 <ol>
 <li>
 <p>Install the app's dependencies:</p>
-<pre><code class="language-sh">composer install --no-interaction --no-progress --prefer-dist --no-scripts --ignore-platform-reqs
+<pre tabindex="0"><code class="language-sh">composer install --no-interaction --no-progress --prefer-dist --no-scripts --ignore-platform-reqs
 </code></pre>
 <p>The default image is a composer image, which already ships Composer, so no install step for Composer itself is needed. The SBOM lists what the lock installs, so the app's Composer scripts never run here, and the app's PHP version and extensions are not required.</p>
 </li>
 <li>
 <p>Allow the CycloneDX plugin:</p>
-<pre><code class="language-sh">composer global config --no-plugins allow-plugins.cyclonedx/cyclonedx-php-composer true
+<pre tabindex="0"><code class="language-sh">composer global config --no-plugins allow-plugins.cyclonedx/cyclonedx-php-composer true
 </code></pre>
 </li>
 <li>
 <p>Install the plugin globally:</p>
-<pre><code class="language-sh">composer global require cyclonedx/cyclonedx-php-composer:^6.2
+<pre tabindex="0"><code class="language-sh">composer global require cyclonedx/cyclonedx-php-composer:^6.2
 </code></pre>
 <p>The plugin is installed globally, so the app's <code>composer.json</code> is never touched.</p>
 </li>
 <li>
 <p>Generate the SBOM. <code>--validate</code> fails the job on an invalid SBOM:</p>
-<div class="docs-tabs" data-tabs="omit_dev true (default)|omit_dev false"><div class="docs-tabs__panel" data-tab-label="omit_dev true (default)"><p class="docs-tabs__label">omit_dev true (default)</p><pre><code class="language-sh">composer CycloneDX:make-sbom --output-format=JSON --output-reproducible --validate --omit=dev --output-file=sbom.cdx.json
+<div class="docs-tabs" data-tabs="omit_dev true (default)|omit_dev false"><div class="docs-tabs__panel" data-tab-label="omit_dev true (default)"><p class="docs-tabs__label">omit_dev true (default)</p><pre tabindex="0"><code class="language-sh">composer CycloneDX:make-sbom --output-format=JSON --output-reproducible --validate --omit=dev --output-file=sbom.cdx.json
 </code></pre></div>
-<div class="docs-tabs__panel" data-tab-label="omit_dev false"><p class="docs-tabs__label">omit_dev false</p><pre><code class="language-sh">composer CycloneDX:make-sbom --output-format=JSON --output-reproducible --validate --output-file=sbom.cdx.json
+<div class="docs-tabs__panel" data-tab-label="omit_dev false"><p class="docs-tabs__label">omit_dev false</p><pre tabindex="0"><code class="language-sh">composer CycloneDX:make-sbom --output-format=JSON --output-reproducible --validate --output-file=sbom.cdx.json
 </code></pre></div></div>
 <p><code>--omit=dev</code> is present only when <code>omit_dev</code> is <code>true</code>; <code>--output-file</code> takes the <code>output</code> input (default <code>sbom.cdx.json</code>).</p>
 </li>
 </ol>
 <h2 id="artifacts">Artifacts<a class="docs-heading-link" aria-label="Link to this section" href="#artifacts">#</a></h2>
 <p>The job publishes the SBOM file as an artifact:</p>
-<pre><code class="language-yaml">artifacts:
+<pre tabindex="0"><code class="language-yaml">artifacts:
   paths:
     - sbom.cdx.json
   expire_in: 30 days

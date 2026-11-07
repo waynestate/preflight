@@ -48,7 +48,7 @@
 <p>Each package keeps its checks in a <code>ci</code> script in its <code>composer.json</code>; the workflow just calls <code>composer ci</code>, so the mirror runs whatever the package already runs on GitLab.</p>
 <h2 id="call-the-workflow-from-your-package">Call the workflow from your package<a class="docs-heading-link" aria-label="Link to this section" href="#call-the-workflow-from-your-package">#</a></h2>
 <p>The workflow lives at <code>.github/workflows/php-package.yml</code> in this repo. A mirrored package calls it from its own <code>.github/workflows/ci.yml</code>:</p>
-<pre><code class="language-yaml">name: CI
+<pre tabindex="0"><code class="language-yaml">name: CI
 
 on:
   push:

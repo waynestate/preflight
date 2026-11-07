@@ -53,7 +53,7 @@ components cannot run here.</p>
 </li>
 <li>
 <p><strong>Add the include</strong> to the app's <code>.gitlab-ci.yml</code>:</p>
-<pre><code class="language-yaml">include:
+<pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
   inputs:
     test_command: vendor/bin/phpunit
@@ -64,7 +64,7 @@ cannot.</p>
 </li>
 <li>
 <p><strong>Commit and push</strong> the change:</p>
-<pre><code class="language-sh">git push
+<pre tabindex="0"><code class="language-sh">git push
 </code></pre>
 <p>Expected: the next pipeline runs the <code>php-test</code> jobs, one per entry of
 <code>php_versions</code>, <code>8.3</code>, <code>8.4</code> and <code>8.5</code> by default, each in the <code>test</code>
