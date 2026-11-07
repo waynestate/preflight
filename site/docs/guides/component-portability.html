@@ -60,7 +60,7 @@
 </tr>
 <tr>
 <td><code>health</code></td>
-<td>Asks for <code>health_path</code> with <code>Host: 10.1.2.3:&lt;port&gt;</code>, no forwarded headers, at the job's own address, and expects 200. That is what a platform's probe sends.</td>
+<td>Asks for <code>health_path</code> with a bare IP address in <code>Host</code> (<code>Host: &lt;ip&gt;:&lt;port&gt;</code>), no forwarded headers, at the job's own address, and expects 200. That is what a platform's probe sends.</td>
 <td>Trusted-host lists, HTTPS redirects, sessions or auth run before the health route.</td>
 </tr>
 <tr>

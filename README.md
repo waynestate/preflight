@@ -322,7 +322,7 @@ no writes outside the allowed paths), and six checks must pass:
 
 | Check | Passes when |
 |-------|-------------|
-| `health` | The health path answers 200 to `Host: 10.1.2.3:<port>` with no forwarded headers. |
+| `health` | The health path answers 200 to a bare IP address and the port in `Host`, with no forwarded headers, the way a platform probe asks. |
 | `env-only` | No `.env` or config cache is baked in, and the app boots on the environment alone. |
 | `forwarded-headers` | Forged `X-Forwarded-*` and identity headers from an untrusted peer change nothing. |
 | `logs` | Logs reach stdout or stderr, and nothing is written under `logs_path`. |

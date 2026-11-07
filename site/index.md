@@ -460,7 +460,7 @@ A preflight checklist only works if the pilot reads it.
 
 Caution
 
-**Same instance only.** Components work only inside the GitLab instance that hosts Preflight, so another instance needs a mirror. git.wayne.edu has no runner yet, so for now CI runs on the instance that has one. **A git.wayne.edu instance runner is strongly recommended.**
+**Same instance only.** Components work only inside the GitLab instance that hosts Preflight, so another instance needs a mirror. git.wayne.edu now has an instance runner, and the stack's CI runs on it. **A git.wayne.edu instance runner is still strongly recommended**, so that capacity stays there.
 
 Note
 
@@ -505,5 +505,5 @@ Preflight is one stop on the way to Citadel. Here is everyone else on the board.
 - [SESAME](https://sesame.apps.wayne.edu/) Sign-in for the app.
 - [Drawbridge](https://drawbridge.apps.wayne.edu/) Signs people in through Entra ID before they reach a Citadel app.
 - [ADVISOR](https://advisor.apps.wayne.edu/) Ask what applies to your app, and what to do next.
-- [Sourdough](https://sourdough.apps.wayne.edu/) Starters you feed, with Preflight already in the pipeline.
+- [Sourdough](https://sourdough.apps.wayne.edu/) Starters you feed, in all five app shapes, with Preflight already in the pipeline.
 - [WELD](https://weld.apps.wayne.edu/) A Laravel app with Inertia and Vue, with every part already installed.

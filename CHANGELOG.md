@@ -6,6 +6,9 @@ are Git tags.
 
 ## Unreleased
 
+- Fixed: the README and docs describe the `portability` health check's `Host` as a bare IP address and the port (`Host: <ip>:<port>`) instead of printing a literal private address.
+- Fixed: the front page's "Same instance only" caution says git.wayne.edu has an instance runner and the stack's CI runs on it (it said git.wayne.edu had no runner yet), and its cast says Sourdough starts all five app shapes.
+
 ## 0.2.0 (2026-11-07)
 
 - Changed (breaking for 0.1.4 includes of `portability`): the `portability` component is one job that runs the six checks of ADR-0010 decision 5 instead of goss. It builds the image with Buildah (vfs storage, chroot isolation: no Docker daemon, no privileged runner, no registry push), boots it twice side by side as an arbitrary uid in group 0 with no capabilities and no passwd entry, and probes it with curl: the strict boot (app root not writable, writable paths writable by group 0, the port variable honored, no writes outside `writable_paths` and `runtime_paths`), then `health` (200 to `Host: 10.1.2.3:<port>`), `env-only` (no `.env` or config cache in the image), `forwarded-headers` (forged `X-Forwarded-*` and identity headers change nothing), `logs` (stdout or stderr, nothing under `logs_path`), `session-hop` (a sign-in survives a hop to the second replica) and `sigterm` (the main process handles SIGTERM and exits within `stop_timeout`). One `portability: <check>: pass|FAIL|skipped` line per check. The probe is `templates/portability/probe.sh`, inlined in the template byte for byte; new contract test `tests/check-portability-inline` (sh and ps1, with a write mode) keeps the two in step.

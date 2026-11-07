@@ -312,7 +312,7 @@ no writes outside the allowed paths), and six checks must pass:
 
 | Check | Passes when |
 |-------|-------------|
-| `health` | The health path answers 200 to `Host: 10.1.2.3:` with no forwarded headers. |
+| `health` | The health path answers 200 to a bare IP address and the port in `Host`, with no forwarded headers, the way a platform probe asks. |
 | `env-only` | No `.env` or config cache is baked in, and the app boots on the environment alone. |
 | `forwarded-headers` | Forged `X-Forwarded-*` and identity headers from an untrusted peer change nothing. |
 | `logs` | Logs reach stdout or stderr, and nothing is written under `logs_path`. |
@@ -1296,7 +1296,7 @@ A preflight checklist only works if the pilot reads it.
 
 Caution
 
-**Same instance only.** Components work only inside the GitLab instance that hosts Preflight, so another instance needs a mirror. git.wayne.edu has no runner yet, so for now CI runs on the instance that has one. **A git.wayne.edu instance runner is strongly recommended.**
+**Same instance only.** Components work only inside the GitLab instance that hosts Preflight, so another instance needs a mirror. git.wayne.edu now has an instance runner, and the stack's CI runs on it. **A git.wayne.edu instance runner is still strongly recommended**, so that capacity stays there.
 
 Note
 
@@ -1341,7 +1341,7 @@ Preflight is one stop on the way to Citadel. Here is everyone else on the board.
 - [SESAME](https://sesame.apps.wayne.edu/) Sign-in for the app.
 - [Drawbridge](https://drawbridge.apps.wayne.edu/) Signs people in through Entra ID before they reach a Citadel app.
 - [ADVISOR](https://advisor.apps.wayne.edu/) Ask what applies to your app, and what to do next.
-- [Sourdough](https://sourdough.apps.wayne.edu/) Starters you feed, with Preflight already in the pipeline.
+- [Sourdough](https://sourdough.apps.wayne.edu/) Starters you feed, in all five app shapes, with Preflight already in the pipeline.
 - [WELD](https://weld.apps.wayne.edu/) A Laravel app with Inertia and Vue, with every part already installed.
 
 ---
@@ -1353,6 +1353,9 @@ Source: https://preflight.apps.wayne.edu/docs/changelog.html
 All notable changes to PREFLIGHT are recorded here. Entries follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); released versions are Git tags.
 
 ### Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
+
+- Fixed: the README and docs describe the `portability` health check's `Host` as a bare IP address and the port (`Host: <ip>:<port>`) instead of printing a literal private address.
+- Fixed: the front page's "Same instance only" caution says git.wayne.edu has an instance runner and the stack's CI runs on it (it said git.wayne.edu had no runner yet), and its cast says Sourdough starts all five app shapes.
 
 ### 0.2.0 (2026-11-07)[#](https://preflight.apps.wayne.edu/docs/changelog.html#0-2-0-2026-11-07)
 
@@ -2060,7 +2063,7 @@ The strict boot comes first, because every other check stands on it. Then the si
 | Check | What it does | What a failure usually means |
 | --- | --- | --- |
 | `strict-boot` | Starts the image as `uid:0` (default `100123:0`) with no `/etc/passwd` entry and every capability dropped. Fails if the app root is writable by that user, if a writable path is missing or not writable by group 0, if the second replica does not listen on the port its `port_env` variable names, or if the app wrote anywhere outside `writable_paths` and `runtime_paths` while it ran (what a read-only root filesystem would refuse). | The image expects root, a named user, a fixed port, or writes caches next to the code. |
-| `health` | Asks for `health_path` with `Host: 10.1.2.3:<port>`, no forwarded headers, at the job's own address, and expects 200. That is what a platform's probe sends. | Trusted-host lists, HTTPS redirects, sessions or auth run before the health route. |
+| `health` | Asks for `health_path` with a bare IP address in `Host` (`Host: <ip>:<port>`), no forwarded headers, at the job's own address, and expects 200. That is what a platform's probe sends. | Trusted-host lists, HTTPS redirects, sessions or auth run before the health route. |
 | `env-only` | Fails on a `.env` file or a Laravel config cache (`bootstrap/cache/config.php`) baked into the image; the app must boot on the `env` input alone. | Config was copied or cached at build time. |
 | `forwarded-headers` | Requests `probe_path` twice: plain, then with forged `X-Forwarded-Host`, `-Proto`, `-Port` and the `identity_header`, sent from an untrusted peer. Fails if the status or `Location` changes or a forged value shows up in the answer. | The app trusts every proxy, so anyone can set its host, scheme or user. |
 | `logs` | Fails if nothing reached stdout or stderr during the run, or if anything was written under `logs_path` (default `storage/logs`). | Logs go to files that vanish with the container. |
@@ -3996,7 +3999,7 @@ Buildah's chroot isolation opens a user namespace.
 
 #### portability: health: FAIL on a Laravel app[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#portability-health-fail-on-a-laravel-app)
 
-The probe asks for the health path with `Host: 10.1.2.3:<port>`, the way a platform's probe does.
+The probe asks for the health path with a bare IP address in `Host` (`Host: <ip>:<port>`), the way a platform's probe does.
 
 - **Cause:** the trusted-hosts middleware, an HTTPS redirect, a session or an auth check runs before the health route.
 - **Fix:** answer the health route before those, for example Laravel's `health: '/up'` route in `bootstrap/app.php`, and exempt it from trusted hosts and HTTPS redirects.

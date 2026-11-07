@@ -160,7 +160,7 @@ Buildah's chroot isolation opens a user namespace.
 
 ### portability: health: FAIL on a Laravel app
 
-The probe asks for the health path with `Host: 10.1.2.3:<port>`, the way a platform's probe does.
+The probe asks for the health path with a bare IP address in `Host` (`Host: <ip>:<port>`), the way a platform's probe does.
 
 - **Cause:** the trusted-hosts middleware, an HTTPS redirect, a session or an auth check runs before the health route.
 - **Fix:** answer the health route before those, for example Laravel's `health: '/up'` route in `bootstrap/app.php`, and exempt it from trusted hosts and HTTPS redirects.

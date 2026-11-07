@@ -172,7 +172,7 @@
 <li><strong>Check:</strong> the log reaches <code>buildah bud</code> and prints the build steps.</li>
 </ul>
 <h3 id="portability-health-fail-on-a-laravel-app">portability: health: FAIL on a Laravel app<a class="docs-heading-link" aria-label="Link to this section" href="#portability-health-fail-on-a-laravel-app">#</a></h3>
-<p>The probe asks for the health path with <code>Host: 10.1.2.3:&lt;port&gt;</code>, the way a platform's probe does.</p>
+<p>The probe asks for the health path with a bare IP address in <code>Host</code> (<code>Host: &lt;ip&gt;:&lt;port&gt;</code>), the way a platform's probe does.</p>
 <ul>
 <li><strong>Cause:</strong> the trusted-hosts middleware, an HTTPS redirect, a session or an auth check runs before the health route.</li>
 <li><strong>Fix:</strong> answer the health route before those, for example Laravel's <code>health: '/up'</code> route in <code>bootstrap/app.php</code>, and exempt it from trusted hosts and HTTPS redirects.</li>
