@@ -157,14 +157,27 @@ descendants() {
 # PID 1.
 main_pid() {
   for d in $(descendants "$1"); do
-    case "$(tr '\0' ' ' < "/proc/$d/cmdline" 2>/dev/null)" in
+    # 2>/dev/null goes first: a process can end between the listing and this
+    # read, and the shell reports a failed < before it reaches a later 2>.
+    case "$(tr '\0' ' ' 2>/dev/null < "/proc/$d/cmdline")" in
       buildah-chroot-exec*) proc_table | awk -v p="$d" '$2 == p { print $1; exit }'; return 0 ;;
     esac
   done
   return 1
 }
 
-alive() { [ -n "$1" ] && [ -r "/proc/$1/status" ] && ! grep -q '^State:[[:space:]]*Z' "/proc/$1/status" 2>/dev/null; }
+# alive PID: 0 while PID runs (any state but zombie or dead). It reads the
+# status file once: testing the file and then reading it is two looks, and a
+# zombie reaped between them read as alive (the file was there, then grep
+# failed, and the ! turned that failure into "alive").
+alive() {
+  [ -n "$1" ] || return 1
+  st=$(awk '/^State:/ { print $2; exit }' "/proc/$1/status" 2>/dev/null)
+  case "$st" in
+    ''|Z|X) return 1 ;;
+  esac
+  return 0
+}
 
 cleanup() {
   for r in a b; do
@@ -439,18 +452,28 @@ if [ "$BOOTED" = yes ] && wanted sigterm; then
   if ! alive "$mp"; then
     flag sigterm "could not find replica A's main process"
   else
-    cmd=$(tr '\0' ' ' < "/proc/$mp/cmdline" | cut -c1-80)
+    cmd=$(tr '\0' ' ' 2>/dev/null < "/proc/$mp/cmdline" | cut -c1-80)
     cmd=${cmd% }
-    sigcgt=$(awk '/^SigCgt:/ { print $2 }' "/proc/$mp/status")
+    sigcgt=$(awk '/^SigCgt:/ { print $2 }' "/proc/$mp/status" 2>/dev/null)
     low=${sigcgt#"${sigcgt%????}"}
-    low=${low:-0000}
-    if [ $((0x$low & 0x4000)) -eq 0 ]; then
+    if [ -z "$low" ]; then
+      flag sigterm "the main process ($cmd) exited by itself before SIGTERM was sent (see replica A's output)"
+    elif [ $((0x$low & 0x4000)) -eq 0 ]; then
       flag sigterm "the main process ($cmd) has no SIGTERM handler: as PID 1 it never sees SIGTERM and is SIGKILLed when the grace period ends (exec a server or an init that handles SIGTERM, such as php-fpm, tini or s6)"
     else
       kill -TERM "$mp"
+      # One verdict, from the look that ended the wait. Once a pid is seen
+      # gone it stays gone, so no second look can call it back to life (one
+      # did on pipeline 4409, when a fast exit was reaped between looks).
       t=0
-      while alive "$mp" && [ "$t" -lt "$STOP_TIMEOUT" ]; do sleep 1; t=$((t + 1)); done
-      if alive "$mp"; then
+      stopped=no
+      while :; do
+        if ! alive "$mp"; then stopped=yes; break; fi
+        [ "$t" -ge "$STOP_TIMEOUT" ] && break
+        sleep 1
+        t=$((t + 1))
+      done
+      if [ "$stopped" = no ]; then
         flag sigterm "the main process ($cmd) was still running ${STOP_TIMEOUT}s after SIGTERM"
       else
         # buildah run reports how its process ended: "exited on <signal>"
