@@ -123,6 +123,24 @@
         { "name": "boot_timeout", "type": "number", "default": 60 }
       ],
       "jobs": ["portability-build", "portability-run"]
+    },
+    "a11y": {
+      "inputs": [
+        { "name": "stage", "type": "string", "default": "test" },
+        { "name": "job_name", "type": "string", "default": "a11y", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
+        { "name": "image", "type": "string", "default": "mcr.microsoft.com/playwright:v1.65.0-noble@sha256:6e3fb709361521eb27161606e6da6d2674e5e89fa16516cb37d6fdd91372273d" },
+        { "name": "allow_failure", "type": "boolean", "default": false },
+        { "name": "site_dir", "type": "string", "default": "site", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" },
+        { "name": "pages", "type": "array", "default": ["**/*.html"] },
+        { "name": "base_url", "type": "string", "default": "", "regex": "^(|https?://\\S+|\\$\\{?[A-Za-z_][A-Za-z0-9_]*\\}?\\S*)$" },
+        { "name": "wcag_tags", "type": "array", "default": ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"] },
+        { "name": "color_schemes", "type": "array", "default": ["light", "dark"] },
+        { "name": "widths", "type": "array", "default": [320, 1280] },
+        { "name": "playwright_version", "type": "string", "default": "", "regex": "^([0-9]+\\.[0-9]+\\.[0-9]+)?$" },
+        { "name": "axe_core_version", "type": "string", "default": "4.14.0", "regex": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        { "name": "axe_playwright_version", "type": "string", "default": "4.14.0", "regex": "^[0-9]+\\.[0-9]+\\.[0-9]+$" }
+      ],
+      "jobs": ["a11y"]
     }
   }
 }

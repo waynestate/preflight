@@ -38,6 +38,12 @@
       "versioning": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<compatibility>-immutable)$"
     },
     {
+      "matchDatasources": ["npm"],
+      "matchPackageNames": ["axe-core", "@axe-core/playwright"],
+      "matchFileNames": ["templates/a11y/template.yml", "contract/inputs.json"],
+      "groupName": "axe-core for the a11y component"
+    },
+    {
       "matchPackageNames": ["waynestate/*", "@waynestate/*"],
       "minimumReleaseAge": "0"
     },
@@ -99,6 +105,26 @@
         "\"default\"\\s*:\\s*\"(?<depName>[a-z0-9][a-z0-9._/-]*):(?<currentValue>[^:@{}\\n]+)@(?<currentDigest>sha256:[a-f0-9]{64})\""
       ],
       "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["templates/a11y/template.yml", "contract/inputs.json"],
+      "matchStrings": [
+        "axe_core_version:\\s*\\n\\s*type: string\\s*\\n\\s*default: \"(?<currentValue>[0-9][^\"]*)\"",
+        "\"name\": \"axe_core_version\", \"type\": \"string\", \"default\": \"(?<currentValue>[0-9][^\"]*)\""
+      ],
+      "depNameTemplate": "axe-core",
+      "datasourceTemplate": "npm"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["templates/a11y/template.yml", "contract/inputs.json"],
+      "matchStrings": [
+        "axe_playwright_version:\\s*\\n\\s*type: string\\s*\\n\\s*default: \"(?<currentValue>[0-9][^\"]*)\"",
+        "\"name\": \"axe_playwright_version\", \"type\": \"string\", \"default\": \"(?<currentValue>[0-9][^\"]*)\""
+      ],
+      "depNameTemplate": "@axe-core/playwright",
+      "datasourceTemplate": "npm"
     },
     {
       "customType": "regex",

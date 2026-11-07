@@ -32,6 +32,14 @@ include:
     inputs:
       working_dir: tests/fixture-app
       image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc
+  # Preflight's own front page and docs, checked by the a11y component at
+  # this commit with the stack's floor, WCAG 2.2 AA. The Playwright image is
+  # on Microsoft's registry, not Docker Hub, so it skips the Dependency Proxy.
+  - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/a11y@$CI_COMMIT_SHA
+    inputs:
+      site_dir: site
+      pages: ["**/*.html"]
+      wcag_tags: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]
   - template: Jobs/Secret-Detection.gitlab-ci.yml
 
 stages:
@@ -64,6 +72,7 @@ contract:
     - sh tests/check-renovate-buildah.sh
     - sh tests/check-sha-pins.sh
     - sh tests/check-release-job.sh
+    - sh tests/check-a11y-inline.sh
 
 # Advisory for now: secret detection is new here. Dated 2026-11-02: make this
 # job blocking (remove allow_failure) after one week of green pipelines.
