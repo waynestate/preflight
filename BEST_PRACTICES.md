@@ -7,8 +7,9 @@ Status: draft, checked against sources on 2026-10-27, with a second research pas
 ## What this covers
 
 Preflight is a set of GitLab CI/CD components that every stack project and WSU app includes with
-`include: component:`. Today it has nine: `php-test` (PHP versions through `parallel:matrix`), `composer-audit`,
-`proctor`, `sbom`, `pint`, `phpstan`, `eslint`, `package-publish` and `renovate`. Accessibility and contract suites come later.
+`include: component:`. Today it has ten: `php-test` (PHP versions through `parallel:matrix`), `composer-audit`,
+`proctor`, `sbom`, `pint`, `phpstan`, `eslint`, `secret-detection`, `package-publish` and `renovate`.
+Accessibility and contract suites come later.
 
 This guide is for two groups:
 
@@ -187,7 +188,7 @@ the run.
 Sources: [GitLab: CI/CD inputs](https://docs.gitlab.com/ci/inputs/);
 [GitLab: component examples](https://docs.gitlab.com/ci/components/examples/).
 
-**How the stack holds it: Enforced.** All nine templates use `spec:inputs` with types, descriptions and defaults.
+**How the stack holds it: Enforced.** All ten templates use `spec:inputs` with types, descriptions and defaults.
 GitLab rejects a wrong type or an unknown input at pipeline creation. The first pipeline, back when Preflight had
 three components, passed all six jobs with the array input.
 
@@ -231,7 +232,7 @@ Why: global keys leak into the consuming pipeline.
 
 Sources: [GitLab: component examples](https://docs.gitlab.com/ci/components/examples/).
 
-**How the stack holds it: Enforced.** All nine templates follow it. `tests/check-contract.sh` fails on any top-level
+**How the stack holds it: Enforced.** All ten templates follow it. `tests/check-contract.sh` fails on any top-level
 key that is not a job named in `contract/inputs.json`, so a template cannot add a global key. The README's "Which jobs
 may be allowed to fail" explains why only `proctor` takes `allow_failure`.
 
@@ -305,9 +306,9 @@ A job timeout cannot exceed the runner's timeout.
 
 Sources: [GitLab: CI/CD YAML, `timeout` and `interruptible`](https://docs.gitlab.com/ci/yaml/).
 
-**How the stack holds it: Documented.** All nine templates set `interruptible: true` and a `timeout` of their own:
-`10m` for pint and phpstan, `15m` for eslint, `30 minutes` for composer-audit, package-publish, php-test, proctor and
-sbom, and `1 hour` for renovate. What stays open is the cancellation half: whether a superseded pipeline is actually
+**How the stack holds it: Documented.** All ten templates set `interruptible: true` and a `timeout` of their own:
+`10m` for pint and phpstan, `15m` for eslint, `30 minutes` for composer-audit, package-publish, php-test, proctor,
+sbom and secret-detection, and `1 hour` for renovate. What stays open is the cancellation half: whether a superseded pipeline is actually
 canceled still needs `workflow:auto_cancel` in the app's own file, which a component cannot force (see 3.1).
 
 ### 2.10 Make every job image an input
@@ -430,7 +431,7 @@ by a hostile `composer.json`, which is exactly what a contributed branch can car
 Sources: [GitLab: merge request pipelines](https://docs.gitlab.com/ci/pipelines/merge_request_pipelines/);
 [GitLab: CI/CD variables](https://docs.gitlab.com/ci/variables/).
 
-**How the stack holds it: Documented.** All nine templates use no secrets, which limits the harm, and the README
+**How the stack holds it: Documented.** All ten templates use no secrets, which limits the harm, and the README
 documents the rule: review a fork's `.gitlab-ci.yml` before running its pipeline, and never give it protected variables.
 
 ---
@@ -754,7 +755,7 @@ Sources: [GitLab: CI/CD variables](https://docs.gitlab.com/ci/variables/);
 [GitLab: pipeline security, secrets](https://docs.gitlab.com/ci/pipeline_security/);
 [OWASP CICD-SEC-6 Insufficient Credential Hygiene](https://owasp.org/www-project-top-10-ci-cd-security-risks/).
 
-**How the stack holds it: Documented.** The nine templates use no secrets, which is good. Nothing fails if a later
+**How the stack holds it: Documented.** The ten templates use no secrets, which is good. Nothing fails if a later
 template adds one. The repository's own pipeline now runs GitLab's pipeline secret detection as an advisory job
 (`secret_detection` with `allow_failure: true`, kept in place by `tests/check-secret-detection.sh` and its `.ps1`
 twin); the plan is to make it blocking after a week of green pipelines. Whether it runs on the git.wayne.edu

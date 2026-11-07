@@ -15,7 +15,7 @@ spec:
       type: string
       default: zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
     config_path:
-      description: Path to a .gitleaks.toml config file, relative to the project root. Empty uses Gitleaks' built-in rules.
+      description: Path to a .gitleaks.toml config file, relative to the project root. Empty uses the built-in rules plus a path allowlist for vendor/ and node_modules/. When set, your file replaces the default, so add the same vendor and node_modules path allowlist to it.
       type: string
       default: ""
       regex: '^([A-Za-z0-9_-][A-Za-z0-9._/-]*)?$'
@@ -45,7 +45,26 @@ spec:
     # project root even when the tree is clean, so the artifact path is the
     # same for every checkout. In dir mode Gitleaks reads a .gitleaksignore
     # at the project root without an extra flag.
-    - if [ -n "$[[ inputs.config_path ]]" ]; then gitleaks dir --redact --no-banner --config="$[[ inputs.config_path ]]" --report-format=json --report-path="$CI_PROJECT_DIR/gitleaks.json" .; else gitleaks dir --redact --no-banner --report-format=json --report-path="$CI_PROJECT_DIR/gitleaks.json" .; fi
+    - |
+      set -eu
+
+      # Gitleaks scans whatever is checked out, and a CI cache can restore
+      # vendor/ and node_modules/, so the dependency trees would raise
+      # findings that are not our code. When no config_path is set, the job
+      # writes this default config to /tmp, outside the scanned tree: the
+      # built-in rules plus a path allowlist for the two trees. When a
+      # config_path is set, the user's file is used as is, unchanged.
+      cat > /tmp/gitleaks-preflight.toml <<'TOML'
+      [extend]
+      useDefault = true
+
+      [allowlist]
+      description = "skip dependency trees: vendor and node_modules are not our code"
+      paths = ['''(^|/)vendor/''', '''(^|/)node_modules/''']
+      TOML
+
+      if [ -n "$[[ inputs.config_path ]]" ]; then CONFIG="$[[ inputs.config_path ]]"; else CONFIG=/tmp/gitleaks-preflight.toml; fi
+      gitleaks dir --redact --no-banner --config="$CONFIG" --report-format=json --report-path="$CI_PROJECT_DIR/gitleaks.json" .
   artifacts:
     when: always
     paths:

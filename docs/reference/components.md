@@ -213,6 +213,27 @@ include:
 
 From `templates/eslint/template.yml`: the component does not install ESLint or Prettier itself; it runs `npm ci --ignore-scripts --cache .npm-cache` (the cache is keyed on `package-lock.json` and stores `.npm-cache/`), then `npx --no-install eslint` with the `eslint_args` value, and, while `prettier` is true, `npx --no-install prettier --check .`. The job is `interruptible: true` with a timeout of 15m.
 
+## secret-detection
+
+Version 1 · Category: Security/Secrets · Tags: security,secrets,gitleaks
+
+Runs [Gitleaks](https://github.com/gitleaks/gitleaks) over the checked-out tree and fails the pipeline when a rule matches, with every match redacted in the job log and the `gitleaks.json` report artifact. By default it runs the built-in rules plus a path allowlist for `vendor/` and `node_modules/`, which a CI cache can restore into the checkout; point `config_path` at your own `.gitleaks.toml` to replace the default, and add the same `vendor` and `node_modules` path allowlist to your file.
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/secret-detection@<full commit SHA> # 0.2.0
+```
+
+| Input | Type | Default | What it does |
+|-------|------|---------|--------------|
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `secret-detection` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f` | Docker image for the job. |
+| `config_path` | string | (empty) | Path to a `.gitleaks.toml` config file, relative to the project root. Empty uses the built-in rules plus a path allowlist for `vendor/` and `node_modules/`. When set, your file replaces the default, so add the same `vendor` and `node_modules` path allowlist to it. |
+| `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline. |
+
+From `templates/secret-detection/template.yml`: the single job (named by `job_name`) runs in the `test` stage by default, is `interruptible: true`, and has a timeout of 30 minutes. The gitleaks image's entrypoint is the gitleaks binary itself, so the script calls its subcommands directly. The job writes the default config to `/tmp` (outside the scanned tree) unless `config_path` is set, then runs `gitleaks dir --redact --no-banner` with `--config` pointing at that file or the user's, writing a JSON report to `gitleaks.json` at the project root. The report is published as an artifact with `when: always` and `expire_in: 30 days`, so a red pipeline still shows what was found, redacted. In `dir` mode Gitleaks reads a `.gitleaksignore` at the project root without an extra flag.
+
 ## package-publish
 
 Version 1 · Category: Release/Publishing · Tags: composer,publish,release
@@ -303,6 +324,7 @@ From `templates/portability/template.yml`: the component defines two jobs with f
 - [The pint component](../guides/component-pint.md)
 - [The phpstan component](../guides/component-phpstan.md)
 - [The eslint component](../guides/component-eslint.md)
+- [The secret-detection component](../guides/component-secret-detection.md)
 - [The package-publish component](../guides/component-package-publish.md)
 - [The renovate component](../guides/component-renovate.md)
 - [The portability component](../guides/component-portability.md)

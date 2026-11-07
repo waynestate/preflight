@@ -237,7 +237,7 @@ include:
 
 Version 1 · Category: Security/Secrets · Tags: security,secrets,gitleaks
 
-Runs [Gitleaks](https://github.com/gitleaks/gitleaks) over the checked-out tree and fails the pipeline when a rule matches, with every match redacted in the job log and the `gitleaks.json` report artifact. Built-in rules by default; point `config_path` at your own `.gitleaks.toml` to extend them, and allowlist a false positive in a `.gitleaksignore` at the project root.
+Runs [Gitleaks](https://github.com/gitleaks/gitleaks) over the checked-out tree and fails the pipeline when a rule matches, with every match redacted in the job log and the `gitleaks.json` report artifact. By default it runs the built-in rules plus a path allowlist for `vendor/` and `node_modules/`, which a CI cache can restore into the checkout; point `config_path` at your own `.gitleaks.toml` to replace the default, and add the same `vendor` and `node_modules` path allowlist to your file. Allowlist a false positive in a `.gitleaksignore` at the project root.
 
 ```yaml
 include:
@@ -249,7 +249,7 @@ include:
 | `stage` | string | `test` | Pipeline stage for the job. |
 | `job_name` | string | `secret-detection` | Name of the job. Set it when you include this component more than once. |
 | `image` | string | `zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f` | Docker image for the job. |
-| `config_path` | string | (empty) | Path to a `.gitleaks.toml` config file, relative to the project root. Empty uses Gitleaks' built-in rules. |
+| `config_path` | string | (empty) | Path to a `.gitleaks.toml` config file, relative to the project root. Empty uses the built-in rules plus a path allowlist for `vendor/` and `node_modules/`. When set, your file replaces the default, so add the same `vendor` and `node_modules` path allowlist to it. |
 | `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline. |
 
 ### package-publish

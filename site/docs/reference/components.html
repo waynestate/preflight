@@ -508,6 +508,55 @@ php-test-next:
 </tbody>
 </table></div>
 <p>From <code>templates/eslint/template.yml</code>: the component does not install ESLint or Prettier itself; it runs <code>npm ci --ignore-scripts --cache .npm-cache</code> (the cache is keyed on <code>package-lock.json</code> and stores <code>.npm-cache/</code>), then <code>npx --no-install eslint</code> with the <code>eslint_args</code> value, and, while <code>prettier</code> is true, <code>npx --no-install prettier --check .</code>. The job is <code>interruptible: true</code> with a timeout of 15m.</p>
+<h2 id="secret-detection">secret-detection<a class="docs-heading-link" aria-label="Link to this section" href="#secret-detection">#</a></h2>
+<p>Version 1 · Category: Security/Secrets · Tags: security,secrets,gitleaks</p>
+<p>Runs <a rel="noopener" href="https://github.com/gitleaks/gitleaks">Gitleaks</a> over the checked-out tree and fails the pipeline when a rule matches, with every match redacted in the job log and the <code>gitleaks.json</code> report artifact. By default it runs the built-in rules plus a path allowlist for <code>vendor/</code> and <code>node_modules/</code>, which a CI cache can restore into the checkout; point <code>config_path</code> at your own <code>.gitleaks.toml</code> to replace the default, and add the same <code>vendor</code> and <code>node_modules</code> path allowlist to your file.</p>
+<pre tabindex="0"><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/secret-detection@&lt;full commit SHA&gt; # 0.2.0
+</code></pre>
+<div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Type</th>
+<th>Default</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stage</code></td>
+<td>string</td>
+<td><code>test</code></td>
+<td>Pipeline stage for the job.</td>
+</tr>
+<tr>
+<td><code>job_name</code></td>
+<td>string</td>
+<td><code>secret-detection</code></td>
+<td>Name of the job. Set it when you include this component more than once.</td>
+</tr>
+<tr>
+<td><code>image</code></td>
+<td>string</td>
+<td><code>zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f</code></td>
+<td>Docker image for the job.</td>
+</tr>
+<tr>
+<td><code>config_path</code></td>
+<td>string</td>
+<td>(empty)</td>
+<td>Path to a <code>.gitleaks.toml</code> config file, relative to the project root. Empty uses the built-in rules plus a path allowlist for <code>vendor/</code> and <code>node_modules/</code>. When set, your file replaces the default, so add the same <code>vendor</code> and <code>node_modules</code> path allowlist to it.</td>
+</tr>
+<tr>
+<td><code>allow_failure</code></td>
+<td>boolean</td>
+<td><code>false</code></td>
+<td>Whether the job can fail without failing the pipeline.</td>
+</tr>
+</tbody>
+</table></div>
+<p>From <code>templates/secret-detection/template.yml</code>: the single job (named by <code>job_name</code>) runs in the <code>test</code> stage by default, is <code>interruptible: true</code>, and has a timeout of 30 minutes. The gitleaks image's entrypoint is the gitleaks binary itself, so the script calls its subcommands directly. The job writes the default config to <code>/tmp</code> (outside the scanned tree) unless <code>config_path</code> is set, then runs <code>gitleaks dir --redact --no-banner</code> with <code>--config</code> pointing at that file or the user's, writing a JSON report to <code>gitleaks.json</code> at the project root. The report is published as an artifact with <code>when: always</code> and <code>expire_in: 30 days</code>, so a red pipeline still shows what was found, redacted. In <code>dir</code> mode Gitleaks reads a <code>.gitleaksignore</code> at the project root without an extra flag.</p>
 <h2 id="package-publish">package-publish<a class="docs-heading-link" aria-label="Link to this section" href="#package-publish">#</a></h2>
 <p>Version 1 · Category: Release/Publishing · Tags: composer,publish,release</p>
 <p>Publishes a semantic version tag to the GitLab group's built-in Composer registry. The job runs only on tags, reads the registry first, and refuses a moved version: a version already published from this commit passes quietly, and a version published from a different commit fails the pipeline, because GitLab would otherwise overwrite it without a word. The default image ships curl and PHP, which the job uses for the registry round trip.</p>
@@ -715,6 +764,7 @@ php-test-next:
 <li><a href="../guides/component-pint.html">The pint component</a></li>
 <li><a href="../guides/component-phpstan.html">The phpstan component</a></li>
 <li><a href="../guides/component-eslint.html">The eslint component</a></li>
+<li><a href="../guides/component-secret-detection.html">The secret-detection component</a></li>
 <li><a href="../guides/component-package-publish.html">The package-publish component</a></li>
 <li><a href="../guides/component-renovate.html">The renovate component</a></li>
 <li><a href="../guides/component-portability.html">The portability component</a></li>
@@ -726,7 +776,7 @@ php-test-next:
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../../docs/guides/template-lint.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">Template lint</span></a><a class="docs-pager__link docs-pager__link--next" href="../../docs/reference/conventions.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">Shared conventions</span></a></nav>
   </div>
-  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#proctor">proctor</a></li><li class="docs-toc__item"><a href="#php-test">php-test</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#caching">Caching</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#try-the-next-php-release-without-breaking-the-pipeline">Try the next PHP release without breaking the pipeline</a></li><li class="docs-toc__item"><a href="#composer-audit">composer-audit</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#run-it-on-a-schedule">Run it on a schedule</a></li><li class="docs-toc__item"><a href="#sbom">sbom</a></li><li class="docs-toc__item"><a href="#pint">pint</a></li><li class="docs-toc__item"><a href="#phpstan">phpstan</a></li><li class="docs-toc__item"><a href="#eslint">eslint</a></li><li class="docs-toc__item"><a href="#package-publish">package-publish</a></li><li class="docs-toc__item"><a href="#renovate">renovate</a></li><li class="docs-toc__item"><a href="#portability">portability</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#proctor">proctor</a></li><li class="docs-toc__item"><a href="#php-test">php-test</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#caching">Caching</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#try-the-next-php-release-without-breaking-the-pipeline">Try the next PHP release without breaking the pipeline</a></li><li class="docs-toc__item"><a href="#composer-audit">composer-audit</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#run-it-on-a-schedule">Run it on a schedule</a></li><li class="docs-toc__item"><a href="#sbom">sbom</a></li><li class="docs-toc__item"><a href="#pint">pint</a></li><li class="docs-toc__item"><a href="#phpstan">phpstan</a></li><li class="docs-toc__item"><a href="#eslint">eslint</a></li><li class="docs-toc__item"><a href="#secret-detection">secret-detection</a></li><li class="docs-toc__item"><a href="#package-publish">package-publish</a></li><li class="docs-toc__item"><a href="#renovate">renovate</a></li><li class="docs-toc__item"><a href="#portability">portability</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
   <span>Documents Preflight <span data-docs-version>0.1.4</span></span>
