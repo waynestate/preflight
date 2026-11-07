@@ -1,0 +1,6 @@
+#!/bin/sh
+# Fake proctor: prints an empty Code Quality report and exits 0.
+# This stands in for the real PROCTOR (waynestate/proctor) until it is
+# published. It checks nothing. Remove once PROCTOR is installed via Composer.
+echo '[]'
+exit 0

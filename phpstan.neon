@@ -8,6 +8,9 @@ parameters:
         - tests
     excludePaths:
         - tests/fixture-app
+        - tests/php-test-fails
+        - tests/phpstan-fails
+        - tests/pint-fails
         - bin/docs-site.php
     phpVersion:
         min: 80300

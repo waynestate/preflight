@@ -2,6 +2,9 @@
     "preset": "per",
     "exclude": [
         "tests/fixture-app",
+        "tests/php-test-fails",
+        "tests/phpstan-fails",
+        "tests/pint-fails",
         "tests/portability",
         "bin/docs-site.php"
     ],
