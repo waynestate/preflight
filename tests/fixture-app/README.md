@@ -14,3 +14,10 @@ works. The fake must be removed once PROCTOR is installed via Composer.
 The must-fail case lives in `tests/proctor-fails`: its fake prints one
 blocker finding and exits 1, and `tests/check-proctor-fails` runs both
 cases.
+
+The must-fail cases for the `php-test`, `phpstan` and `pint` components
+live in `tests/php-test-fails`, `tests/phpstan-fails` and `tests/pint-fails`,
+each a copy of this app with one fault (a failing test, a type error,
+unformatted code); `tests/check-php-test-fails`, `tests/check-phpstan-fails`
+and `tests/check-pint-fails` run this clean app and the faulty copy against
+each component.

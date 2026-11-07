@@ -729,6 +729,20 @@ pwsh -File tests/check-portability.ps1
 
 The site's pages have an accessibility gate: the `a11y` component's own checker, run in Docker with the image and versions pinned in its template, so no host browser is needed and a local run checks the same way as the pipeline. `sh scripts/a11y.sh` on Linux and macOS, `scripts/a11y.ps1` in PowerShell on Windows. It checks the front page and every docs page at WCAG 2.2 AA in light and dark mode at 320 px and 1280 px, with the reflow check, and fails on any violation. `tests/check-a11y.sh` (and `.ps1`) prove the checker passes a clean fixture site and fails a known-bad one.
 
+Run the must-fail fixtures with Docker; each proves its component (`php-test`, `phpstan`, `pint`) still fails a bad app and passes a clean one, running the component's own commands from its template in the component's own image:
+
+```sh
+docker run --rm -v "$(pwd):/app" -w /app php:8.3-cli-trixie sh tests/check-php-test-fails.sh
+docker run --rm -v "$(pwd):/app" -w /app composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc sh tests/check-phpstan-fails.sh
+docker run --rm -v "$(pwd):/app" -w /app composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc sh tests/check-pint-fails.sh
+```
+
+```powershell
+pwsh -File tests/check-php-test-fails.ps1
+pwsh -File tests/check-phpstan-fails.ps1
+pwsh -File tests/check-pint-fails.ps1
+```
+
 ### The cast
 
 ---
@@ -1246,6 +1260,7 @@ All notable changes to PREFLIGHT are recorded here. Entries follow [Keep a Chang
 
 ### Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Added: must-fail fixtures for the php-test, phpstan and pint components: `tests/php-test-fails` carries a failing test, `tests/phpstan-fails` carries a type error, and `tests/pint-fails` is not formatted to the standard, while the clean case in `tests/fixture-app` passes all three; new checks `tests/check-php-test-fails`, `tests/check-phpstan-fails` and `tests/check-pint-fails` (sh and ps1) assert each template keeps the job line that lets the tool's exit code be the job result, then run the component's own commands from its template, in the component's own image, against both cases, and pass only when the clean case passes and the bad case fails with the expected finding. They need Docker, so they are local checks; the contract job does not run them.
 - Added: a must-fail fixture for the proctor component: `tests/proctor-fails` is a fake proctor that prints one blocker finding and exits 1, while the clean case in `tests/fixture-app` prints `[]` and exits 0; new check `tests/check-proctor-fails` (sh and ps1) runs both cases and keeps the template's plain redirect, so the tool's exit code stays the job result, and the contract job runs it.
 - Added: the `a11y` component (`templates/a11y/template.yml`), accessibility as a gate with one include. It opens a site's pages in Chromium with Playwright and runs axe-core through `@axe-core/playwright` in light and dark mode at 320 px and 1280 px, and fails on any violation; at 320 px or less it also checks WCAG 1.4.10 Reflow, which axe-core cannot. The default tags are WCAG 2.1 AA (the ADA Title II level); `wcag22aa` adds 2.2 AA. It serves `site_dir` on a local port or checks a running site at `base_url`, takes paths or globs in `pages` (a glob that matches nothing is a configuration error, a missing page fails with HTTP 404), and writes `gl-a11y-junit.xml` (the merge request's test summary) and `gl-a11y-report.json` (every finding, plus the count axe-core left for a person to review). The image is the multi-arch Playwright image pinned by index digest; the playwright npm version comes from its tag, axe-core and @axe-core/playwright are pinned inputs, and the job fails if a different axe-core ran. `allow_failure` (default `false`) lets a site adopt it while fixing its first findings. The checker is `templates/a11y/check.mjs`, inlined in the template; new contract test `tests/check-a11y-inline` (sh and ps1) keeps the two byte for byte, and `tests/check-a11y` (sh and ps1, Docker) proves it passes a clean fixture site and fails a known-bad one with each flaw named (`tests/a11y-fixtures`). Preflight's own pipeline includes it at WCAG 2.2 AA. `renovate/default.json` bumps the two axe-core packages as one group, waiting for review. New docs page: The a11y component.
 - Added: a site accessibility gate: `scripts/a11y.sh` on Linux and macOS and `scripts/a11y.ps1` on Windows run the `a11y` component's checker in Docker (same image and versions as the template, so no host browser is needed) on the front page and every docs page at WCAG 2.2 AA, in light and dark mode at 320 px and 1280 px with the reflow check, and fail on any violation; all pages pass clean. Options pick the folder, pages, tags and a report folder. The earlier copy under `tools/a11y/` is gone.
@@ -3371,6 +3386,26 @@ pwsh -File tests/check-a11y.ps1
 ```
 
 `tests/check-a11y-inline.sh` (and `.ps1`) checks that the heredoc in the template is a byte-for-byte copy of `templates/a11y/check.mjs`; the contract job runs it. After editing `check.mjs`, run `sh tests/check-a11y-inline.sh --write` (PowerShell: `tests\check-a11y-inline.ps1 -Write`) to copy it into the template.
+
+### The must-fail fixtures[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#the-must-fail-fixtures)
+
+`tests/check-php-test-fails.sh`, `tests/check-phpstan-fails.sh` and `tests/check-pint-fails.sh` (each with a `.ps1` twin) prove the `php-test`, `phpstan` and `pint` components still fail a bad app and pass a clean one. Each asserts its template keeps the job line it promises, then runs the component's own commands from its template, in the component's own image, against the clean case in `tests/fixture-app` and the must-fail case in its fixture (`tests/php-test-fails`, `tests/phpstan-fails`, `tests/pint-fails`), in a copy in a temp dir. They exit 0 only when the clean case passes and the bad case fails with the expected finding. The `.sh` is the payload of a container; the `.ps1` runs it with Docker. They need Docker; the contract job does not run them.
+
+linux
+
+```sh
+docker run --rm -v "$(pwd):/app" -w /app php:8.3-cli-trixie sh tests/check-php-test-fails.sh
+docker run --rm -v "$(pwd):/app" -w /app composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc sh tests/check-phpstan-fails.sh
+docker run --rm -v "$(pwd):/app" -w /app composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc sh tests/check-pint-fails.sh
+```
+
+windows
+
+```powershell
+pwsh -File tests/check-php-test-fails.ps1
+pwsh -File tests/check-phpstan-fails.ps1
+pwsh -File tests/check-pint-fails.ps1
+```
 
 ### Proof[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#proof)
 

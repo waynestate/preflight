@@ -958,15 +958,20 @@ Why: a component that never fails looks the same as one that works.
 
 Sources: [GitLab: components, testing](https://docs.gitlab.com/ci/components/).
 
-**How the stack holds it: Partly.** Four components carry a fixture that must fail them, each kept in place by a
+**How the stack holds it: Partly.** Seven components carry a fixture that must fail them, each kept in place by a
 check: `proctor` runs `tests/proctor-fails`, a fake proctor that prints one blocker finding and exits 1, against the
 clean stub in `tests/fixture-app` (`tests/check-proctor-fails`); `composer-audit` runs `composer audit` on
 `tests/audit-fixtures/advisory`, which fails in every mode, and `tests/audit-fixtures/abandoned`, which fails only in
 `fail` mode (`tests/check-abandoned-input`); `a11y` checks the bad site in `tests/a11y-fixtures/bad`, which fails with
-each flaw named (`tests/check-a11y`); and `portability` passes only when `tests/portability/bad-writes-root` and
-`tests/portability/bad-needs-root` both fail (`tests/check-portability`). Still missing: a malware-flagged version
-fixture for `composer-audit` (see 4.6 and 4.11), and a must-fail fixture for `eslint`, `package-publish`, `php-test`,
-`phpstan`, `pint`, `sbom` and `secret-detection`; `renovate` is a config, not a job, so it has nothing to fail.
+each flaw named (`tests/check-a11y`); `portability` passes only when `tests/portability/bad-writes-root` and
+`tests/portability/bad-needs-root` both fail (`tests/check-portability`); `php-test` runs PHPUnit on
+`tests/php-test-fails`, which carries a failing test, against the clean case in `tests/fixture-app`
+(`tests/check-php-test-fails`); `phpstan` runs PHPStan on `tests/phpstan-fails`, which carries a type error, against
+the clean case in `tests/fixture-app` (`tests/check-phpstan-fails`); and `pint` runs Pint in test mode on
+`tests/pint-fails`, which is not formatted to the standard, against the clean case in `tests/fixture-app`
+(`tests/check-pint-fails`). Still missing: a malware-flagged version fixture for `composer-audit` (see 4.6 and 4.11),
+and a must-fail fixture for `eslint`, `package-publish`, `sbom` and `secret-detection`; `renovate` is a config, not a
+job, so it has nothing to fail.
 
 ### 7.3 Use the stack's own projects as the first users
 Each stack repo includes Preflight, pinned.
