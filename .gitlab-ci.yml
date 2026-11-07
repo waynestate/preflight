@@ -112,7 +112,7 @@ secret_detection:
   allow_failure: true
 
 # Creates the GitLab Release for a pushed tag. It posts to the Releases API
-# with curl because the nougat runner is arm64 and the official GitLab image
+# with curl because the runner is arm64 and the official GitLab image
 # for creating releases has no arm64 build. The project's job token must be
 # allowed to create releases (job token allowlist), and the job sits in its
 # own stage after test and audit: stages run in order, so a failed test or

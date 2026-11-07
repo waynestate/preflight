@@ -3,7 +3,7 @@
 # GitLab Release from a tag?
 #
 # Preflight's own .gitlab-ci.yml carries a release job that runs only on a
-# tag and posts to the Releases API with curl, because the nougat runner is
+# tag and posts to the Releases API with curl, because the runner is
 # arm64 and the official image for creating releases has no arm64 build.
 # The release notes must carry the tag's commit SHA so consumers can pin
 # it (BEST_PRACTICES 1.6). This check fails if any part of that contract

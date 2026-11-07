@@ -5,11 +5,11 @@ description: Ask for a non-privileged Docker executor, a fresh ephemeral environ
 
 # Strongly recommended: a git.wayne.edu instance runner
 
-This page explains why a git.wayne.edu instance runner is strongly recommended and exactly what to ask for when you request one. Read it before you file the request, and carry the three asks below into the request itself.
+This page explains why a git.wayne.edu instance runner is still strongly recommended and exactly what to ask for when you request one. Read it before you file the request, and carry the three asks below into the request itself.
 
 ## Why the recommendation exists
 
-Until git.wayne.edu has a runner, CI runs on the GitLab instance that has one, and Preflight and each app must live on or be mirrored to it. A git.wayne.edu instance runner is strongly recommended.
+git.wayne.edu now has an instance runner, and the stack's CI runs on it. Every product in the stack still strongly recommends a git.wayne.edu instance runner, so that capacity stays there.
 
 ## What to ask for
 

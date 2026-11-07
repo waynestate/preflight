@@ -24,9 +24,14 @@ Documentation: the full manual lives at [preflight.apps.wayne.edu/docs/](https:/
 
 ## Where the code lives
 
-The canonical repository is on nougat: [enterprise-apps/preflight](https://nougat.snu.gs/enterprise-apps/preflight). git.wayne.edu and GitHub ([waynestate/preflight](https://github.com/waynestate/preflight)) are read-only mirrors of it.
-Open issues and merge requests on nougat, not on the mirrors.
-This moves to git.wayne.edu once it has CI runners. Cleared for takeoff from nougat; the mirrors are just other gates.
+The canonical repository is [enterprise-apps/preflight](https://git.wayne.edu/enterprise-apps/preflight) on
+git.wayne.edu. Clone it over SSH (`git@git.wayne.edu:enterprise-apps/preflight.git`) or HTTPS
+(`https://git.wayne.edu/enterprise-apps/preflight.git`), and open issues and merge requests there. Tags are made
+there, by the maintainer, with an approver.
+GitHub ([waynestate/preflight](https://github.com/waynestate/preflight)) is a read-only push mirror of
+git.wayne.edu. Nobody pushes to it; Packagist and npm read from it.
+CI runs on git.wayne.edu, on its instance runner. Cleared for takeoff from git.wayne.edu; the mirror is just
+another gate.
 
 <details>
 <summary><b>Walk round the aircraft</b>: the placards, the flight plan and the flight manual from the front page</summary>
@@ -670,9 +675,9 @@ left out on purpose: it would trade a token for a warning, and the checklist cos
 
 ## Strongly recommended: a git.wayne.edu instance runner.
 
-Until git.wayne.edu has a runner, CI runs on the GitLab instance that has one, and Preflight and each
-app must live on or be mirrored to it. A git.wayne.edu instance runner is strongly recommended. Ask
-for a non-privileged Docker executor (no privileged mode, no Docker socket mount), a fresh ephemeral
+git.wayne.edu now has an instance runner, and the stack's CI runs on it. Every product in the stack still
+strongly recommends a git.wayne.edu instance runner, so that capacity stays there. Ask for a
+non-privileged Docker executor (no privileged mode, no Docker socket mount), a fresh ephemeral
 environment for every job, and no shell executor shared between projects; capacity and maintenance
 stay with ops. A job that needs the host's Docker socket to take off has skipped its own preflight.
 
@@ -835,7 +840,7 @@ pwsh -File tests/check-pint-fails.ps1
   <a href="https://github.com/waynestate/pinstripe" title="Pinstripe"><img src="docs/readme/cast/pinstripe.png" width="48" alt="Pinstripe"></a>
   <a href="https://github.com/waynestate/booster" title="Booster"><img src="docs/readme/cast/booster.png" width="48" alt="Booster"></a>
   <a href="https://github.com/waynestate/rollcall" title="Rollcall"><img src="docs/readme/cast/rollcall.png" width="48" alt="Rollcall"></a>
-  <a href="https://nougat.snu.gs/enterprise-apps/drawbridge" title="Drawbridge"><img src="docs/readme/cast/drawbridge.png" width="48" alt="Drawbridge"></a>
+  <a href="https://git.wayne.edu/enterprise-apps/drawbridge" title="Drawbridge"><img src="docs/readme/cast/drawbridge.png" width="48" alt="Drawbridge"></a>
   <a href="https://github.com/waynestate/advisor" title="ADVISOR"><img src="docs/readme/cast/advisor.png" width="48" alt="ADVISOR"></a>
   <a href="https://github.com/waynestate/weld" title="WELD"><img src="docs/readme/cast/weld.png" width="48" alt="WELD"></a>
 </div>

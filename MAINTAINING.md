@@ -15,9 +15,9 @@ lands on every runway at once. Walk around the plane before you push.
 
 ## Where it lives
 
-Development happens on nougat, the canonical repository ([enterprise-apps/preflight](https://nougat.snu.gs/enterprise-apps/preflight)). This GitHub repository and git.wayne.edu are read-only mirrors: `main` and tags are
-copied automatically, and changes, issues and merge requests go to nougat. Nobody pushes to the mirrors. GitLab
-components can only be included from the same GitLab instance, so other instances need their own
+Development happens on git.wayne.edu, the canonical repository ([enterprise-apps/preflight](https://git.wayne.edu/enterprise-apps/preflight)). GitHub ([waynestate/preflight](https://github.com/waynestate/preflight)) is a read-only push mirror of it: `main` and
+tags are copied automatically, nobody pushes to it, and changes, issues and merge requests go to git.wayne.edu.
+GitLab components can only be included from the same GitLab instance, so other instances need their own
 copy (see "Same instance only" in the README).
 
 ## Build and test
@@ -87,7 +87,7 @@ and run PHPUnit inside it the same way.
    versions are git tags; 0.1.0 predates the heading convention.)
 2. `composer ci` and the contract tests green, then both pipelines green for that commit.
 3. Run a secrets scan of the history and check that nothing internal is in the tree.
-4. Tag `X.Y.Z` (no `v`) on nougat, and protect the tag pattern so a release tag cannot move. Pushing the protected tag
+4. Tag `X.Y.Z` (no `v`) on git.wayne.edu, and protect the tag pattern so a release tag cannot move. Pushing the protected tag
    runs the `release` job, which creates the GitLab Release with the tag's commit SHA in its notes, so consumers can pin
    the SHA. The project's job token must be allowed to create releases, or the job fails. The mirror carries the tag to
    GitHub. Record the tag's commit SHA in the CHANGELOG, because GitHub consumers pin the reusable workflow by SHA.

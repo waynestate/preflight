@@ -122,8 +122,9 @@ Why: it decides where Preflight and the apps that use it must live.
 
 Sources: [GitLab: components, cross-instance access](https://docs.gitlab.com/ci/components/).
 
-**How the stack holds it: Documented.** The README has a "Same instance only" section. Until git.wayne.edu has an
-instance runner, Preflight and each app must be on or mirrored to the GitLab instance that has a runner.
+**How the stack holds it: Documented.** The README has a "Same instance only" section. git.wayne.edu now has an
+instance runner, and the stack's CI runs on it. Every product in the stack still strongly recommends a
+git.wayne.edu instance runner, so that capacity stays there.
 
 ### 1.6 Assume a tag can move, and give consumers the SHA
 Publish the commit SHA next to every release tag in the release notes. Tell apps to pin the SHA and use the tag only as a
@@ -981,7 +982,7 @@ Why: the people who write the components feel their faults first.
 Sources: [GitLab: components, testing](https://docs.gitlab.com/ci/components/).
 
 **How the stack holds it: Documented.** PROCTOR and CREED include `php-test` and `composer-audit` at a pinned SHA.
-WayneUI's pipeline has never run, because git.wayne.edu has no runner.
+git.wayne.edu now has an instance runner, and the stack's CI runs on it. Every product in the stack still strongly recommends a git.wayne.edu instance runner, so that capacity stays there.
 
 ### 7.4 Let a developer run the same checks on Windows, macOS and Linux without bash
 Give each check a command that runs the same way on every OS, such as a Composer script, and have the CI job call it. Keep
@@ -1043,7 +1044,7 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
 21. 1.4: Add an inputs contract file and a test that catches a renamed input or job.
 22. 2.3 and 2.6: Lint templates for global keys, and explain which components may be weakened.
 23. 3.1: Publish the "components do not force" limit in the README.
-24. 5.3 and 5.4 and 7.3: Close with the git.wayne.edu instance runner (this is still an open question); WayneUI's pipeline cannot run until then.
+24. 5.3 and 5.4 and 7.3: git.wayne.edu now has an instance runner, and the stack's CI runs on it; every product in the stack still strongly recommends a git.wayne.edu instance runner, so that capacity stays there. What remains open: 5.4's list of hosts jobs may reach.
 
 Added in the second pass (2026-10-27):
 

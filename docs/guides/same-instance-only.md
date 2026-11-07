@@ -19,7 +19,7 @@ Every include in this manual takes the form `component: $CI_SERVER_FQDN/enterpri
 ## What that means for your app
 
 - Your app must live on the same GitLab instance that hosts this project; if it does not, the components cannot run here.
-- Until git.wayne.edu has a runner, CI runs on the GitLab instance that has one, and Preflight and each app must live on or be mirrored to it. See [Strongly recommended: a git.wayne.edu instance runner](instance-runner.md).
+- git.wayne.edu now has an instance runner, and the stack's CI runs on it. Every product in the stack still strongly recommends a git.wayne.edu instance runner, so that capacity stays there. See [Strongly recommended: a git.wayne.edu instance runner](instance-runner.md).
 - A package that is also mirrored to `github.com/waynestate` cannot include the components there, because GitHub is not a GitLab instance at all. For those mirrors, Preflight ships a reusable GitHub Actions workflow that runs the same checks: the package's `composer ci` script on each supported PHP version, plus a Composer audit. See [GitHub mirrors](github-mirrors.md).
 
 ## Mirroring is the only exception
@@ -29,5 +29,5 @@ The one way to use the components on another GitLab instance is mirroring: mirro
 ## Related
 
 - [GitHub mirrors](github-mirrors.md): the reusable GitHub Actions workflow for packages mirrored to `github.com/waynestate`.
-- [Strongly recommended: a git.wayne.edu instance runner](instance-runner.md): where CI runs until git.wayne.edu has a runner.
+- [Strongly recommended: a git.wayne.edu instance runner](instance-runner.md): where the stack's CI runs, and why the recommendation stays.
 - [When the components run](when-components-run.md): the `workflow:rules` block that belongs in the app's own file.
