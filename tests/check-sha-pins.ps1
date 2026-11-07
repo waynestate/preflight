@@ -38,7 +38,7 @@ foreach ($f in $files) {
   $lines = @(Get-Content -LiteralPath $f)
   for ($i = 0; $i -lt $lines.Count; $i++) {
     if (($lines[$i] -match $bare) -and ($lines[$i] -notmatch $sha)) {
-      Fail "$rel:$($i + 1): $($lines[$i])"
+      Fail "${rel}:$($i + 1): $($lines[$i])"
     }
   }
 }
