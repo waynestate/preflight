@@ -47,6 +47,17 @@ include:
     inputs:
       working_dir: tests/squire-kit-fixture
       image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc
+  # The portability component at this commit, on the clean fixture: it must
+  # pass. must-fail-portability below proves each flaw still fails. The
+  # fixture's base image comes through the Dependency Proxy; the probe
+  # replaces ${NAME} in build_args and env from the job's variables.
+  - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/portability@$CI_COMMIT_SHA
+    inputs:
+      context: tests/portability/app
+      build_args: ["BASE_REGISTRY=${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}", "FLAW=none"]
+      env: ["APP_URL=http://portability.invalid", "APP_KEY=portability-fixture-key-not-a-secret"]
+      session_login_path: /login
+      session_check_path: /me
   - template: Jobs/Secret-Detection.gitlab-ci.yml
 
 stages:
@@ -82,6 +93,7 @@ contract:
     - sh tests/check-sha-pins.sh
     - sh tests/check-release-job.sh
     - sh tests/check-a11y-inline.sh
+    - sh tests/check-portability-inline.sh
     - sh tests/check-renovate-squire-kit.sh
     - sh tests/check-squire-kit.sh
 
@@ -105,6 +117,24 @@ must-fail-phpstan-pint:
   script:
     - sh tests/check-phpstan-fails.sh
     - sh tests/check-pint-fails.sh
+
+# The must-fail fixtures for the portability component: the check runs the
+# component's own probe (templates/portability/probe.sh, which the template
+# carries byte for byte) on the clean fixture and on nine flawed builds of
+# it, and passes only when the clean one passes and each flaw fails the
+# check it targets. Runs in the component's own Buildah image, pinned by
+# digest; it needs user namespaces, not a privileged runner. quay.io, not
+# Docker Hub, so it skips the Dependency Proxy.
+must-fail-portability:
+  stage: test
+  image: quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb
+  interruptible: true
+  timeout: 30 minutes
+  variables:
+    STORAGE_DRIVER: vfs
+    BUILDAH_ISOLATION: chroot
+  script:
+    - sh tests/check-portability.sh
 
 # Advisory for now: secret detection is new here. Dated 2026-11-02: make this
 # job blocking (remove allow_failure) after one week of green pipelines.

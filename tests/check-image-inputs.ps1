@@ -54,11 +54,8 @@ Get-ChildItem -Path (Join-Path $Root "templates") -Directory | ForEach-Object {
   # the most recent top-level key before it in the jobs document. An image
   # may be written inline (`image: $[[ inputs.image ]]`) or as a block
   # (`image:` then `name:`, as secret-detection does to also override the
-  # entrypoint); either way the reference must be the input. One exemption
-  # only: the portability component runs two images, Buildah in
-  # portability-build and the app image in portability-run (whose image
-  # input defaults to what the build job pushes), so portability-build alone
-  # may take inputs.buildah_image. Every other job and value fails.
+  # entrypoint); either way the reference must be the input. No exemptions:
+  # every job and value that is not the image input fails.
   $jobName = $null
   $imageCount = 0
   $pendingJob = $null
@@ -77,7 +74,6 @@ Get-ChildItem -Path (Join-Path $Root "templates") -Directory | ForEach-Object {
       if ($line -match '^    name:[ \t]*(.*)$') {
         $value = $Matches[1]
         if ($value -eq '$[[ inputs.image ]]') { $pendingJob = $null; continue }
-        if ($jobName -eq 'portability-build' -and $value -eq '$[[ inputs.buildah_image ]]') { $pendingJob = $null; continue }
         Fail "${name}: job image is not the image input ($jobName): $value"
       } else {
         Fail "${name}: job image block must start with name: ($jobName): $line"
@@ -89,7 +85,6 @@ Get-ChildItem -Path (Join-Path $Root "templates") -Directory | ForEach-Object {
       $imageCount++
       $value = ($line -replace '^  image:[ \t]*', '')
       if ($value -eq '$[[ inputs.image ]]') { continue }
-      if ($jobName -eq 'portability-build' -and $value -eq '$[[ inputs.buildah_image ]]') { continue }
       Fail "${name}: job image is not the image input ($jobName): $value"
     }
   }

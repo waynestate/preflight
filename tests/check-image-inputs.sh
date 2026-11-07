@@ -50,11 +50,8 @@ for tpl in "$ROOT"/templates/*/template.yml; do
   # the most recent top-level key before it in the jobs document. An image
   # may be written inline (`image: $[[ inputs.image ]]`) or as a block
   # (`image:` then `name:`, as secret-detection does to also override the
-  # entrypoint); either way the reference must be the input. One exemption
-  # only: the portability component runs two images, Buildah in
-  # portability-build and the app image in portability-run (whose image
-  # input defaults to what the build job pushes), so portability-build alone
-  # may take inputs.buildah_image. Every other job and value fails.
+  # entrypoint); either way the reference must be the input. No exemptions:
+  # every job and value that is not the image input fails.
   image_report=$(printf '%s\n' "$jobs" | awk '
     /^[A-Za-z0-9_-]+:/ {
       if (pending != "") print "job image block has no name: (" pending ")"
@@ -72,7 +69,6 @@ for tpl in "$ROOT"/templates/*/template.yml; do
         value = $0
         sub(/^    name:[ \t]*/, "", value)
         if (value == "$[[ inputs.image ]]") { pending = ""; next }
-        if (job == "portability-build" && value == "$[[ inputs.buildah_image ]]") { pending = ""; next }
         print "job image is not the image input (" job "): " value
       } else {
         print "job image block must start with name: (" job "): " $0
@@ -85,7 +81,6 @@ for tpl in "$ROOT"/templates/*/template.yml; do
       value = $0
       sub(/^  image:[ \t]*/, "", value)
       if (value == "$[[ inputs.image ]]") next
-      if (job == "portability-build" && value == "$[[ inputs.buildah_image ]]") next
       print "job image is not the image input (" job "): " value
     }
     END {
