@@ -3,28 +3,6 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://preflight.apps.wayne.edu/</loc></url>
   <url><loc>https://preflight.apps.wayne.edu/docs/changelog.html</loc></url>
-  <url><loc>https://preflight.apps.wayne.edu/docs/guides/component-a11y.html</loc></url>
-  <url><loc>https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html</loc></url>
-  <url><loc>https://preflight.apps.wayne.edu/docs/guides/component-eslint.html</loc></url>
-  <url><loc>https://preflight.apps.wayne.edu/docs/guides/component-package-publish.html</loc></url>
-  <url><loc>https://preflight.apps.wayne.edu/docs/guides/component-php-test.html</loc></url>
-  <url><loc>https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html</loc></url>
-  <url><loc>https://preflight.apps.wayne.edu/docs/guides/component-pint.html</loc></url>
-  <url><loc>https://preflight.apps.wayne.edu/docs/guides/component-portability.html</loc></url>
-  <url><loc>https://preflight.apps.wayne.edu/docs/guides/component-proctor.html</loc></url>
-  <url><loc>https://preflight.apps.wayne.edu/docs/guides/component-renovate.html</loc></url>
-  <url><loc>https://preflight.apps.wayne.edu/docs/guides/component-sbom.html</loc></url>
-  <url><loc>https://preflight.apps.wayne.edu/docs/guides/component-secret-detection.html</loc></url>
-  <url><loc>https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html</loc></url>
-  <url><loc>https://preflight.apps.wayne.edu/docs/guides/github-mirrors.html</loc></url>
-  <url><loc>https://preflight.apps.wayne.edu/docs/guides/image-pins.html</loc></url>
-  <url><loc>https://preflight.apps.wayne.edu/docs/guides/include-twice.html</loc></url>
-  <url><loc>https://preflight.apps.wayne.edu/docs/guides/instance-runner.html</loc></url>
-  <url><loc>https://preflight.apps.wayne.edu/docs/guides/job-token-allowlist.html</loc></url>
-  <url><loc>https://preflight.apps.wayne.edu/docs/guides/quick-start.html</loc></url>
-  <url><loc>https://preflight.apps.wayne.edu/docs/guides/renovate.html</loc></url>
-  <url><loc>https://preflight.apps.wayne.edu/docs/guides/same-instance-only.html</loc></url>
-  <url><loc>https://preflight.apps.wayne.edu/docs/guides/template-lint.html</loc></url>
   <url><loc>https://preflight.apps.wayne.edu/docs/guides/what-components-cannot-force.html</loc></url>
   <url><loc>https://preflight.apps.wayne.edu/docs/guides/when-components-run.html</loc></url>
   <url><loc>https://preflight.apps.wayne.edu/docs/</loc></url>
