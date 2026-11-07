@@ -1,0 +1,36 @@
+#!/bin/sh
+# serve: the runtime half of the portability fixture, the image's CMD.
+#
+# It warms its writable path (so a path the app cannot write stops the boot),
+# then runs PHP's built-in server in the background and waits for it. The
+# trap is the point: as PID 1 in a container, a process with no SIGTERM
+# handler never sees the platform's SIGTERM, and is SIGKILLed when the grace
+# period runs out. `exec php -S` alone has no handler, so this shell keeps
+# one and passes the signal on. Like a good co-pilot, it hands over cleanly.
+set -eu
+
+flaw=${FIXTURE_FLAW:-none}
+port=${PORT:-8080}
+
+if [ "$flaw" = fixed-port ]; then
+  port=8080
+fi
+
+echo warm > /app/storage/warm.txt
+
+if [ "$flaw" = writes-root ]; then
+  # /var/www/html is world-writable in the official php images, so this write
+  # succeeds here; under a read-only root filesystem it would fail.
+  echo boot > /var/www/html/boot.txt
+fi
+
+echo "fixture: serving on 0.0.0.0:$port (flaw: $flaw)" >&2
+
+if [ "$flaw" = no-term-handler ]; then
+  exec php -S "0.0.0.0:$port" -t /app/public
+fi
+
+php -S "0.0.0.0:$port" -t /app/public &
+pid=$!
+trap 'kill -TERM "$pid" 2>/dev/null; wait "$pid" || true; echo "fixture: stopped cleanly" >&2; exit 0' TERM INT
+wait "$pid"

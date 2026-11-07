@@ -312,44 +312,67 @@ include:
 
 ### portability
 
-Proves the app image meets the twelve-factor boot contract. It builds the
-image with Buildah (no Docker daemon, no elevated runner), boots it the
-strict way, and validates it with goss: the health path answers 200 for a
-foreign Host, the root filesystem and the app root are not writable, the app
-runs as the declared uid, and each declared writable path is writable. No
-takeoff without a clean pre-flight.
+Proves the app image runs the way OpenShift, Coolify and plain Docker run it,
+not only on Citadel (ADR-0010). One job builds the image with Buildah (no
+Docker daemon, no privileged runner, no registry push), boots it twice side
+by side as an arbitrary uid in group 0 with no capabilities, and probes it
+with curl. The strict boot must hold (no passwd entry for the uid, app root
+not writable, writable paths writable by group 0, the port variable honored,
+no writes outside the allowed paths), and six checks must pass:
+
+| Check | Passes when |
+|-------|-------------|
+| `health` | The health path answers 200 to `Host: 10.1.2.3:<port>` with no forwarded headers. |
+| `env-only` | No `.env` or config cache is baked in, and the app boots on the environment alone. |
+| `forwarded-headers` | Forged `X-Forwarded-*` and identity headers from an untrusted peer change nothing. |
+| `logs` | Logs reach stdout or stderr, and nothing is written under `logs_path`. |
+| `session-hop` | A sign-in on one replica is still signed in on the other. |
+| `sigterm` | The main process handles SIGTERM and exits by itself within `stop_timeout`. |
+
+No takeoff without a clean pre-flight.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@<full-commit-sha> # <tag, once one ships>
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@<full-commit-sha> # 0.2.0
     inputs:
-      dockerfile: Dockerfile
-      context: .
-      start_command: php -S 0.0.0.0:8080 -t public
+      env: ["APP_KEY=${PORTABILITY_APP_KEY}", "APP_URL=https://myapp.example.edu"]
+      session_login_path: /_portability/login
+      session_check_path: /_portability/me
 ```
 
-Portability ships in 0.1.4 and later (0.1.3 does not include it), so pin the
-`0.1.4` tag, or the full commit SHA of a commit at or after it. The build job needs a runner that permits
-user namespaces (Buildah uses unshare for its storage); the run job needs only
-the project's container registry and an app image that carries curl, sha256sum
-and tar.
+The one-job form ships in 0.2.0 (0.1.4 carries the
+earlier two-job form, `portability-build` and `portability-run`). The runner
+must allow user namespaces, which ordinary unprivileged Docker-executor
+runners do. The guide (`docs/guides/component-portability.md`) has a test
+sign-in route for `session-hop` and what each failure usually means.
 
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
-| `stage` | string | `test` | Pipeline stage for the portability jobs. |
-| `image` | string | `$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA` | App image the portability-run job starts and validates. The default is what portability-build pushes; GitLab expands the CI variables at job time. |
-| `buildah_image` | string | `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb` | Buildah image for the portability-build job; it builds and pushes the app image. |
+| `stage` | string | `test` | Pipeline stage for the portability job. |
+| `job_name` | string | `portability` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb` | Buildah image the job runs in. It builds the app image and runs the probe. |
 | `dockerfile` | string | `Dockerfile` | Dockerfile to build, relative to the context. |
 | `context` | string | `.` | Build context, relative to the project root. |
+| `build_args` | array | `[]` | Build arguments as `NAME=value`; `$NAME` and `${NAME}` are replaced from the job's variables. |
 | `app_root` | string | `/app` | Directory inside the image where the app lives. |
-| `writable_paths` | array | `["storage", "bootstrap/cache"]` | Paths the app may write to, relative to app_root. Each must be writable by the app user. |
-| `port` | number | `8080` | Port the app listens on inside the container. |
-| `health_path` | string | `/up` | Path the app must answer 200 on for any Host. |
-| `uid` | number | `100123` | Numeric uid the app runs as. The gid is always 0. |
-| `start_command` | string | none | Command that starts the app inside the image. It is app-specific, so it is required and has no default. |
-| `boot_timeout` | number | `60` | Seconds goss retries the health check while the app boots. |
+| `writable_paths` | array | `["storage", "bootstrap/cache"]` | Paths the app may write to, relative to `app_root`. Each must be writable by the uid in group 0. |
+| `runtime_paths` | array | `["/tmp", "/var/tmp", "/run", "/var/run"]` | Absolute paths the platform mounts as tmpfs. Writes there are allowed. |
+| `port` | number | `8080` | Port the app listens on by default. The second replica gets `port + 1` through `port_env`. |
+| `port_env` | string | `PORT` | Environment variable that sets the app's listen port. |
+| `health_path` | string | `/up` | Path that must answer 200 for any Host, before trusted hosts, HTTPS redirects, sessions and auth. |
+| `uid` | number | `100123` | Numeric uid the app runs as, with no `/etc/passwd` entry. The gid is always 0. |
+| `start_command` | string | `""` | Command that starts the app, run with `sh -c`. Empty runs the image's own `ENTRYPOINT` and `CMD`. |
+| `env` | array | `[]` | Environment for both replicas, as `NAME=value` (or `NAME` to pass the job's variable through). Keep secrets in CI/CD variables. |
+| `boot_timeout` | number | `60` | Seconds each replica has to answer the health path. |
+| `stop_timeout` | number | `10` | Seconds the main process has to exit after SIGTERM. |
+| `probe_path` | string | `/` | Page probed with and without forged forwarded headers. |
+| `identity_header` | string | `X-Forwarded-User` | Identity header a gateway would set (forged in `forwarded-headers`). |
+| `session_login_path` | string | `""` | GET path that signs in a test user and sets the session cookie. Needed by `session-hop`. |
+| `session_check_path` | string | `""` | Path that answers 200 only for a signed-in user. Needed by `session-hop`. |
+| `logs_path` | string | `storage/logs` | Directory, relative to `app_root`, where nothing may be written. |
+| `checks` | array | `["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm"]` | The checks to run. Leave one out only on purpose; the strict boot always runs. |
 
-The default is an immutable tag (`-immutable`) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.
+The `image` default is an immutable tag (`-immutable`) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.
 
 ### a11y
 
@@ -683,7 +706,7 @@ stay with ops. A job that needs the host's Docker socket to take off has skipped
 
 ## Include a component twice
 
-Every component except `portability` takes a `job_name` input, whose default is the job's usual name. Set it when one
+Every component takes a `job_name` input, whose default is the job's usual name. Set it when one
 project includes the same component more than once, for example in a monorepo with two apps; without it the two jobs
 would share a name and merge into one.
 
@@ -699,8 +722,8 @@ include:
       job_name: pint-admin
 ```
 
-`job_name` ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release. `portability` keeps its two fixed
-job names, because `portability-run` waits on `portability-build`.
+`job_name` ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release. `portability` gained it with its
+one-job form, in 0.2.0.
 
 ## Shared conventions
 
@@ -792,12 +815,16 @@ docker run --rm -v "$(pwd)/tests/fixture-app:/app" -w /app composer:2 composer i
 docker run --rm -v "$(pwd)/tests/fixture-app:/app" -w /app php:8.4-cli vendor/bin/phpunit
 ```
 
-Run the portability fixtures with Docker; they build and boot the three
-fixtures under `tests/portability` the strict way and exit 0 only when `good`
-passes and both `bad-*` fixtures fail:
+Run the portability fixtures with Docker. The check runs the component's own
+probe in its own Buildah image against `tests/portability/app`, once clean
+and once per flaw, and exits 0 only when the clean build passes and each flaw
+fails the check it targets. `seccomp=unconfined` lets Buildah open a user
+namespace; it is not `--privileged`:
 
 ```sh
-sh tests/check-portability.sh
+docker run --rm --security-opt seccomp=unconfined -v "$(pwd):/src:ro" -w /src \
+  quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb \
+  sh tests/check-portability.sh
 ```
 
 ```powershell

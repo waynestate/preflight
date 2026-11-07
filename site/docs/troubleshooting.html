@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Troubleshooting | Preflight docs</title>
 <meta name="description" content="What to do when a Preflight job fails or a gate behaves unexpectedly.">
-<meta name="docs-version" content="0.1.4">
+<meta name="docs-version" content="0.2.0">
 <link rel="stylesheet" href="../assets/wayne-ui/wayne-ui.css">
 <link rel="stylesheet" href="../assets/docs.css">
 <link rel="stylesheet" href="../docs/theme/preflight.css">
@@ -20,7 +20,7 @@
     <a class="brand" href="../index.html">
       <img src="../brand/preflight-avatar-256.png" width="36" height="36" alt="">
       <span class="brand__name">PREFLIGHT</span>
-      <span class="brand__tail">0.1.4</span>
+      <span class="brand__tail">0.2.0</span>
     </a>
     <nav class="topnav" aria-label="Site">
       <a class="topnav__section" href="../index.html#checklist">Checklist</a>
@@ -73,7 +73,7 @@
 <li><strong>Check:</strong> Rollcall is where skipped or weakened gates show up.</li>
 </ul>
 <h3 id="two-includes-of-the-same-component-became-one-job">Two includes of the same component became one job<a class="docs-heading-link" aria-label="Link to this section" href="#two-includes-of-the-same-component-became-one-job">#</a></h3>
-<p>Every component except <code>portability</code> takes a <code>job_name</code> input, whose default is the job's usual name. Without it, two includes of the same component share a job name and merge into one.</p>
+<p>Every component takes a <code>job_name</code> input, whose default is the job's usual name. Without it, two includes of the same component share a job name and merge into one.</p>
 <ul>
 <li><strong>Cause:</strong> one project includes the same component more than once (for example in a monorepo with two apps) without setting <code>job_name</code>.</li>
 <li><strong>Fix:</strong> set <code>job_name</code> on each include, for example <code>pint-app</code> and <code>pint-admin</code>. <code>job_name</code> ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release.</li>
@@ -157,26 +157,40 @@
 <li><strong>Fix:</strong> publish a new version tag instead of moving the old one. Protect the release tags so only maintainers can create or move a tag.</li>
 <li><strong>Check:</strong> the job log shows the version already on the manifest and the commit it was published from.</li>
 </ul>
-<h3 id="portability-is-not-in-the-pinned-ref">portability is not in the pinned ref<a class="docs-heading-link" aria-label="Link to this section" href="#portability-is-not-in-the-pinned-ref">#</a></h3>
-<p>Portability ships in 0.1.4 and later. 0.1.3 does not include it.</p>
+<h3 id="portability-says-an-input-is-unknown">portability says an input is unknown<a class="docs-heading-link" aria-label="Link to this section" href="#portability-says-an-input-is-unknown">#</a></h3>
+<p>The one-job <code>portability</code> component has new inputs, and <code>buildah_image</code> is now <code>image</code> (the old app-image input is gone).</p>
 <ul>
-<li><strong>Cause:</strong> the include is pinned to a tag or SHA at or before 0.1.3.</li>
-<li><strong>Fix:</strong> pin the <code>0.1.4</code> tag, or the full commit SHA of a commit at or after it.</li>
-<li><strong>Check:</strong> the pipeline lists <code>portability-build</code> and <code>portability-run</code>.</li>
+<li><strong>Cause:</strong> the include is pinned to 0.1.4, which carries the two-job form (<code>portability-build</code>, <code>portability-run</code>, goss), or the include still sets <code>buildah_image</code>.</li>
+<li><strong>Fix:</strong> pin a SHA at or after the one-job form and follow <a href="upgrading.html">Upgrading</a>: <code>buildah_image</code> becomes <code>image</code>, and the old app <code>image</code> input is gone because nothing is pushed.</li>
+<li><strong>Check:</strong> the pipeline lists one job, <code>portability</code>.</li>
 </ul>
-<h3 id="portability-build-fails-on-the-runner">portability-build fails on the runner<a class="docs-heading-link" aria-label="Link to this section" href="#portability-build-fails-on-the-runner">#</a></h3>
-<p>The build job runs Buildah, which uses unshare for its storage.</p>
+<h3 id="portability-fails-before-the-build-on-the-runner">portability fails before the build on the runner<a class="docs-heading-link" aria-label="Link to this section" href="#portability-fails-before-the-build-on-the-runner">#</a></h3>
+<p>Buildah's chroot isolation opens a user namespace.</p>
 <ul>
-<li><strong>Cause:</strong> the runner does not permit user namespaces.</li>
-<li><strong>Fix:</strong> run the build job on a runner that permits user namespaces. The job sets <code>STORAGE_DRIVER: vfs</code>, so it needs no special kernel support beyond that.</li>
-<li><strong>Check:</strong> the job log shows an unshare failure before the fix, and a successful <code>buildah bud</code> after it.</li>
+<li><strong>Cause:</strong> the runner (or Docker's seccomp profile on a laptop) refuses user namespaces; the log shows <code>unshare(CLONE_NEWUSER): Operation not permitted</code>.</li>
+<li><strong>Fix:</strong> run the job on a runner that permits user namespaces, which ordinary unprivileged Docker-executor runners do. Do not make the runner privileged for it. Locally, add <code>--security-opt seccomp=unconfined</code> to <code>docker run</code>.</li>
+<li><strong>Check:</strong> the log reaches <code>buildah bud</code> and prints the build steps.</li>
 </ul>
-<h3 id="portability-run-s-health-check-ends-in-eof">portability-run's health check ends in EOF<a class="docs-heading-link" aria-label="Link to this section" href="#portability-run-s-health-check-ends-in-eof">#</a></h3>
-<p>goss sends the HTTP method as written, and a lower-case one makes the server close the connection, so the health check failed with EOF. The check now uses <code>method: GET</code>, fixed in 0.1.4.</p>
+<h3 id="portability-health-fail-on-a-laravel-app">portability: health: FAIL on a Laravel app<a class="docs-heading-link" aria-label="Link to this section" href="#portability-health-fail-on-a-laravel-app">#</a></h3>
+<p>The probe asks for the health path with <code>Host: 10.1.2.3:&lt;port&gt;</code>, the way a platform's probe does.</p>
 <ul>
-<li><strong>Cause:</strong> the include is pinned to a ref before 0.1.4, where the goss health check used a lower-case method.</li>
-<li><strong>Fix:</strong> pin 0.1.4 or a SHA at or after it.</li>
-<li><strong>Check:</strong> <code>goss validate</code> passes the health check instead of ending in EOF.</li>
+<li><strong>Cause:</strong> the trusted-hosts middleware, an HTTPS redirect, a session or an auth check runs before the health route.</li>
+<li><strong>Fix:</strong> answer the health route before those, for example Laravel's <code>health: '/up'</code> route in <code>bootstrap/app.php</code>, and exempt it from trusted hosts and HTTPS redirects.</li>
+<li><strong>Check:</strong> <code>portability: health: pass</code>.</li>
+</ul>
+<h3 id="portability-sigterm-fail">portability: sigterm: FAIL<a class="docs-heading-link" aria-label="Link to this section" href="#portability-sigterm-fail">#</a></h3>
+<p>The main process must handle SIGTERM and exit by itself within <code>stop_timeout</code>, because PID 1 ignores a signal it has no handler for.</p>
+<ul>
+<li><strong>Cause:</strong> the image <code>exec</code>s a server that has no SIGTERM handler (for example <code>php -S</code>), or a shell script starts the server without passing the signal on.</li>
+<li><strong>Fix:</strong> start the app under an init that forwards signals (<code>tini</code>, <code>dumb-init</code>) or a server that handles SIGTERM itself (php-fpm, FrankenPHP); in a shell entrypoint, trap TERM and stop the child.</li>
+<li><strong>Check:</strong> <code>portability: sigterm: pass</code> with <code>handled SIGTERM and exited by itself</code>.</li>
+</ul>
+<h3 id="portability-session-hop-fail-with-set-session-login-path">portability: session-hop: FAIL with &quot;set session_login_path&quot;<a class="docs-heading-link" aria-label="Link to this section" href="#portability-session-hop-fail-with-set-session-login-path">#</a></h3>
+<p><code>session-hop</code> needs a route that signs in a test user and one that answers 200 only for a signed-in user.</p>
+<ul>
+<li><strong>Cause:</strong> <code>session_login_path</code> and <code>session_check_path</code> are empty, but <code>session-hop</code> is in <code>checks</code>.</li>
+<li><strong>Fix:</strong> add the two routes behind an environment variable only the job sets (see <a href="guides/component-portability.html#a-sign-in-route-for-session-hop">The portability component</a>), or, for an app with no sign-in, leave <code>session-hop</code> out of <code>checks</code>.</li>
+<li><strong>Check:</strong> <code>portability: session-hop: pass</code>, or <code>skipped</code> when left out on purpose.</li>
 </ul>
 <h3 id="a11y-fails-on-a-page-that-looked-fine">a11y fails on a page that looked fine<a class="docs-heading-link" aria-label="Link to this section" href="#a11y-fails-on-a-page-that-looked-fine">#</a></h3>
 <p>The job checks each page in light and dark mode at 320 px and 1280 px, with reduced motion, so it sees layouts and palettes a quick look in one browser misses.</p>
@@ -250,12 +264,12 @@
 <li><strong>Check:</strong> the <code>squire-kit</code> job on the merge request is green.</li>
 </ul>
 <h2 id="local-checks">Local checks<a class="docs-heading-link" aria-label="Link to this section" href="#local-checks">#</a></h2>
-<h3 id="the-portability-fixtures-fail-on-permissions">The portability fixtures fail on permissions<a class="docs-heading-link" aria-label="Link to this section" href="#the-portability-fixtures-fail-on-permissions">#</a></h3>
-<p>The app user is not the host user that owns the fixtures' temp dir, and goss is downloaded into it. As of 0.1.4 the fixtures make their temp dir mode 0777 and the goss files in it mode 0644.</p>
+<h3 id="the-portability-fixtures-fail-with-buildah-is-required">The portability fixtures fail with &quot;buildah is required&quot;<a class="docs-heading-link" aria-label="Link to this section" href="#the-portability-fixtures-fail-with-buildah-is-required">#</a></h3>
+<p><code>tests/check-portability.sh</code> runs inside the component's Buildah image, not on the host.</p>
 <ul>
-<li><strong>Cause:</strong> the checkout is from a ref before 0.1.4.</li>
-<li><strong>Fix:</strong> update to 0.1.4 or later, then rerun <code>sh tests/check-portability.sh</code> (or the <code>.ps1</code> twin).</li>
-<li><strong>Check:</strong> the script exits 0: <code>good</code> passes and both <code>bad-*</code> fixtures fail.</li>
+<li><strong>Cause:</strong> the script was run with <code>sh</code> on the host.</li>
+<li><strong>Fix:</strong> run it through <code>docker run</code> in the Buildah image as <a href="reference/local-checks.html">Local checks</a> shows, or run <code>pwsh -File tests/check-portability.ps1</code> on Windows.</li>
+<li><strong>Check:</strong> one result line per case, and the script exits 0.</li>
 </ul>
 <h3 id="composer-ci-fails-on-a-stale-docs-site">composer ci fails on a stale docs site<a class="docs-heading-link" aria-label="Link to this section" href="#composer-ci-fails-on-a-stale-docs-site">#</a></h3>
 <p><code>composer ci</code> runs <code>docs:check</code>, which fails when the built docs site is stale or the generated command or environment reference has drifted from the CLI or source.</p>
@@ -281,10 +295,10 @@
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../docs/reference/proof.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">Proof</span></a><a class="docs-pager__link docs-pager__link--next" href="../docs/upgrading.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">Upgrading</span></a></nav>
   </div>
-  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#the-pipeline">The pipeline</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#the-include-fails-on-another-gitlab-instance">The include fails on another GitLab instance</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#the-components-do-not-run-on-merge-requests">The components do not run on merge requests</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#a-gate-was-skipped-or-weakened">A gate was skipped or weakened</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#two-includes-of-the-same-component-became-one-job">Two includes of the same component became one job</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#pipeline-creation-fails-on-the-unknown-spec-component-key">Pipeline creation fails on the unknown spec: component: key</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#a-fork-merge-request-ran-with-protected-variables">A fork merge request ran with protected variables</a></li><li class="docs-toc__item"><a href="#job-failures">Job failures</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#a-job-misbehaves-which-preflight-release-ran">A job misbehaves: which Preflight release ran?</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#proctor-s-preflight-pinned-check-warns">PROCTOR&#039;s preflight-pinned check warns</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#composer-audit-is-green-then-an-advisory-lands">composer-audit is green, then an advisory lands</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#composer-audit-fails-on-an-abandoned-package">composer-audit fails on an abandoned package</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#composer-install-stops-the-lock-needs-another-php-or-an-extension">composer install stops: the lock needs another PHP or an extension</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#composer-install-cannot-clone-a-private-package">composer install cannot clone a private package</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#eslint-stops-at-npm-ci">eslint stops at npm ci</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#php-test-next-is-red">php-test-next is red</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#package-publish-refuses-the-tag">package-publish refuses the tag</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#portability-is-not-in-the-pinned-ref">portability is not in the pinned ref</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#portability-build-fails-on-the-runner">portability-build fails on the runner</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#portability-run-s-health-check-ends-in-eof">portability-run&#039;s health check ends in EOF</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#a11y-fails-on-a-page-that-looked-fine">a11y fails on a page that looked fine</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#a11y-stops-with-a-configuration-error-exit-2">a11y stops with a configuration error (exit 2)</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#squire-kit-fails-the-kit-drifted-exit-1">squire-kit fails: the kit drifted (exit 1)</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#squire-kit-stops-before-checking-exit-2">squire-kit stops before checking (exit 2)</a></li><li class="docs-toc__item"><a href="#renovate">Renovate</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#renovate-sees-literal-text-instead-of-a-token">Renovate sees literal text instead of a token</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#renovate-auto-merged-a-component-pin-bump">Renovate auto-merged a component pin bump</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#a-squire-kit-merge-request-shows-an-artifact-error">A Squire kit merge request shows an artifact error</a></li><li class="docs-toc__item"><a href="#local-checks">Local checks</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#the-portability-fixtures-fail-on-permissions">The portability fixtures fail on permissions</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#composer-ci-fails-on-a-stale-docs-site">composer ci fails on a stale docs site</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#the-pipeline">The pipeline</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#the-include-fails-on-another-gitlab-instance">The include fails on another GitLab instance</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#the-components-do-not-run-on-merge-requests">The components do not run on merge requests</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#a-gate-was-skipped-or-weakened">A gate was skipped or weakened</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#two-includes-of-the-same-component-became-one-job">Two includes of the same component became one job</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#pipeline-creation-fails-on-the-unknown-spec-component-key">Pipeline creation fails on the unknown spec: component: key</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#a-fork-merge-request-ran-with-protected-variables">A fork merge request ran with protected variables</a></li><li class="docs-toc__item"><a href="#job-failures">Job failures</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#a-job-misbehaves-which-preflight-release-ran">A job misbehaves: which Preflight release ran?</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#proctor-s-preflight-pinned-check-warns">PROCTOR&#039;s preflight-pinned check warns</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#composer-audit-is-green-then-an-advisory-lands">composer-audit is green, then an advisory lands</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#composer-audit-fails-on-an-abandoned-package">composer-audit fails on an abandoned package</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#composer-install-stops-the-lock-needs-another-php-or-an-extension">composer install stops: the lock needs another PHP or an extension</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#composer-install-cannot-clone-a-private-package">composer install cannot clone a private package</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#eslint-stops-at-npm-ci">eslint stops at npm ci</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#php-test-next-is-red">php-test-next is red</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#package-publish-refuses-the-tag">package-publish refuses the tag</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#portability-says-an-input-is-unknown">portability says an input is unknown</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#portability-fails-before-the-build-on-the-runner">portability fails before the build on the runner</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#portability-health-fail-on-a-laravel-app">portability: health: FAIL on a Laravel app</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#portability-sigterm-fail">portability: sigterm: FAIL</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#portability-session-hop-fail-with-set-session-login-path">portability: session-hop: FAIL with &quot;set session_login_path&quot;</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#a11y-fails-on-a-page-that-looked-fine">a11y fails on a page that looked fine</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#a11y-stops-with-a-configuration-error-exit-2">a11y stops with a configuration error (exit 2)</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#squire-kit-fails-the-kit-drifted-exit-1">squire-kit fails: the kit drifted (exit 1)</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#squire-kit-stops-before-checking-exit-2">squire-kit stops before checking (exit 2)</a></li><li class="docs-toc__item"><a href="#renovate">Renovate</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#renovate-sees-literal-text-instead-of-a-token">Renovate sees literal text instead of a token</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#renovate-auto-merged-a-component-pin-bump">Renovate auto-merged a component pin bump</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#a-squire-kit-merge-request-shows-an-artifact-error">A Squire kit merge request shows an artifact error</a></li><li class="docs-toc__item"><a href="#local-checks">Local checks</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#the-portability-fixtures-fail-with-buildah-is-required">The portability fixtures fail with &quot;buildah is required&quot;</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#composer-ci-fails-on-a-stale-docs-site">composer ci fails on a stale docs site</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
-  <span>Documents Preflight <span data-docs-version>0.1.4</span></span>
+  <span>Documents Preflight <span data-docs-version>0.2.0</span></span>
   <span><a rel="noopener" href="https://github.com/waynestate/preflight">Source</a> <a href="troubleshooting.md">Markdown</a></span>
 </footer>
 </body>

@@ -1,0 +1,30 @@
+#!/bin/sh
+# prepare: the build-time half of the portability fixture. Runs once, as root,
+# in the Dockerfile's RUN step. $1 is the flaw (none for the clean app).
+set -eu
+
+flaw=${1:-none}
+
+rm -f /app/Dockerfile
+
+# Start from root-owned files that nobody else can write, whatever modes the
+# build context carried (a Windows checkout copies everything as 777).
+chown -R 0:0 /app
+chmod -R go-w /app
+
+# The writable paths belong to group 0 with group write, so any uid in group
+# 0 (OpenShift's arbitrary uid) can write them. No chown to a named user.
+mkdir -p /app/storage/logs /app/bootstrap/cache
+chgrp -R 0 /app/storage /app/bootstrap/cache
+chmod -R g=u /app/storage /app/bootstrap/cache
+
+case "$flaw" in
+  needs-root)
+    # Root-owned 755: the app's group has no write bit, so its boot fails.
+    chmod -R 755 /app/storage /app/bootstrap/cache
+    ;;
+  dotenv)
+    # Config baked into the image instead of read from the environment.
+    printf 'APP_URL=http://baked-into-the-image.invalid\n' > /app/.env
+    ;;
+esac

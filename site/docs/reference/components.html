@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Components | Preflight docs</title>
 <meta name="description" content="Every component, with its include example, inputs and defaults.">
-<meta name="docs-version" content="0.1.4">
+<meta name="docs-version" content="0.2.0">
 <link rel="stylesheet" href="../../assets/wayne-ui/wayne-ui.css">
 <link rel="stylesheet" href="../../assets/docs.css">
 <link rel="stylesheet" href="../../docs/theme/preflight.css">
@@ -20,7 +20,7 @@
     <a class="brand" href="../../index.html">
       <img src="../../brand/preflight-avatar-256.png" width="36" height="36" alt="">
       <span class="brand__name">PREFLIGHT</span>
-      <span class="brand__tail">0.1.4</span>
+      <span class="brand__tail">0.2.0</span>
     </a>
     <nav class="topnav" aria-label="Site">
       <a class="topnav__section" href="../../index.html#checklist">Checklist</a>
@@ -99,7 +99,7 @@
 </tr>
 </tbody>
 </table></div>
-<p>The <code>a11y</code> and <code>squire-kit</code> components are the next items on the card. They ship in 0.2.0, so the picture above, drawn before them, does not show them yet:</p>
+<p>The <code>a11y</code>, <code>squire-kit</code> and <code>portability</code> components are the next items on the card. They ship in 0.2.0 (<code>portability</code> in its one-job form), so the picture above, drawn before them, does not show them yet:</p>
 <div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
 <thead>
 <tr>
@@ -122,9 +122,15 @@
 <td><code>squire-kit</code></td>
 <td>10 minutes</td>
 </tr>
+<tr>
+<td>10</td>
+<td>Runs off Citadel: strict boot and six portability checks</td>
+<td><code>portability</code></td>
+<td>30 minutes</td>
+</tr>
 </tbody>
 </table></div>
-<p>Every job the templates define is <code>interruptible: true</code>. Every component except <code>portability</code> takes a <code>job_name</code> input whose default is the job's usual name; set it when one project includes the same component more than once. <code>portability</code> keeps its two fixed job names, because <code>portability-run</code> waits on <code>portability-build</code>.</p>
+<p>Every job the templates define is <code>interruptible: true</code>. Every component takes a <code>job_name</code> input whose default is the job's usual name; set it when one project includes the same component more than once.</p>
 <h2 id="proctor">proctor<a class="docs-heading-link" aria-label="Link to this section" href="#proctor">#</a></h2>
 <p>Runs <code>vendor/bin/proctor check --format=codequality</code> and publishes the result as a GitLab Code Quality report. The job installs the app's dependencies with <code>composer install --no-plugins --no-scripts --ignore-platform-reqs</code>, so the app's plugins and scripts never run inside the job, and an app locked to an older PHP or needing an extension the image lacks still gets its report.</p>
 <pre tabindex="0"><code class="language-yaml">include:
@@ -691,15 +697,15 @@ php-test-next:
 </table></div>
 <p>From <code>templates/renovate/template.yml</code>: the job has no <code>stage</code> input and sets no stage. It runs only on scheduled and manual pipelines (<code>$CI_PIPELINE_SOURCE == &quot;schedule&quot;</code> or <code>&quot;web&quot;</code>). It writes its <code>config.js</code> at job time, so the <code>registryAliases</code> entry for the GitLab instance comes from the predefined <code>CI_SERVER_FQDN</code> variable; no hostname is stored in the repository, so the public mirror stays clean. It does not set <code>RENOVATE_TOKEN</code> or <code>GITHUB_COM_TOKEN</code> in the job <code>variables:</code> on purpose: a self-reference such as <code>X: $X</code> arrives as literal text on GitLab 19.5 and would shadow the masked project CI/CD variables, so the job reads both tokens straight from the project. With <code>squire_kit_tasks</code> set to <code>true</code>, <code>config.js</code> also carries an <code>allowedCommands</code> list of two anchored patterns, the exact <code>composer create-project</code> and <code>squire update</code> commands of the preset's Squire rule, with the version and paths limited to safe characters; otherwise the list is empty. The job is <code>interruptible: true</code> with a timeout of 1 hour.</p>
 <h2 id="portability">portability<a class="docs-heading-link" aria-label="Link to this section" href="#portability">#</a></h2>
-<p>Proves the app image meets the twelve-factor boot contract. It builds the image with Buildah (no Docker daemon, no elevated runner), boots it the strict way, and validates it with goss: the health path answers 200 for a foreign Host, the root filesystem and the app root are not writable, the app runs as the declared uid, and each declared writable path is writable. No takeoff without a clean pre-flight.</p>
+<p>Proves the app image runs the way OpenShift, Coolify and plain Docker run it, not only on Citadel (ADR-0010). One job builds the image with Buildah (vfs storage, chroot isolation: no Docker daemon, no privileged runner, no registry), boots it twice side by side as an arbitrary uid in group 0 with no capabilities, and probes it with curl. It fails unless the strict boot holds (no passwd entry for the uid, app root not writable, writable paths writable by group 0, the port variable honored, no writes outside the allowed paths) and six checks pass: <code>health</code>, <code>env-only</code>, <code>forwarded-headers</code>, <code>logs</code>, <code>session-hop</code> and <code>sigterm</code>. See <a href="../guides/component-portability.html">The portability component</a>. No takeoff without a clean pre-flight.</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@&lt;full-commit-sha&gt; # &lt;tag, once one ships&gt;
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@&lt;full-commit-sha&gt; # 0.2.0
     inputs:
-      dockerfile: Dockerfile
-      context: .
-      start_command: php -S 0.0.0.0:8080 -t public
+      env: [&quot;APP_KEY=${PORTABILITY_APP_KEY}&quot;, &quot;APP_URL=https://myapp.example.edu&quot;]
+      session_login_path: /_portability/login
+      session_check_path: /_portability/me
 </code></pre>
-<p>Portability ships in 0.1.4 and later (0.1.3 does not include it), so pin the <code>0.1.4</code> tag, or the full commit SHA of a commit at or after it. The build job needs a runner that permits user namespaces (Buildah uses unshare for its storage); the run job needs only the project's container registry and an app image that carries curl, sha256sum and tar.</p>
+<p>The one-job form ships in 0.2.0; 0.1.4 carries the earlier two-job form (<code>portability-build</code>, <code>portability-run</code>). The runner must allow user namespaces, which ordinary unprivileged Docker-executor runners do.</p>
 <div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
 <thead>
 <tr>
@@ -714,19 +720,19 @@ php-test-next:
 <td><code>stage</code></td>
 <td>string</td>
 <td><code>test</code></td>
-<td>Pipeline stage for the portability jobs.</td>
+<td>Pipeline stage for the portability job.</td>
+</tr>
+<tr>
+<td><code>job_name</code></td>
+<td>string</td>
+<td><code>portability</code></td>
+<td>Name of the job. Set it when you include this component more than once.</td>
 </tr>
 <tr>
 <td><code>image</code></td>
 <td>string</td>
-<td><code>$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA</code></td>
-<td>App image the portability-run job starts and validates. The default is what portability-build pushes; GitLab expands the CI variables at job time.</td>
-</tr>
-<tr>
-<td><code>buildah_image</code></td>
-<td>string</td>
 <td><code>quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb</code></td>
-<td>Buildah image for the portability-build job; it builds and pushes the app image.</td>
+<td>Buildah image the job runs in. It builds the app image and runs the probe, so it needs buildah, curl, awk and find.</td>
 </tr>
 <tr>
 <td><code>dockerfile</code></td>
@@ -741,6 +747,12 @@ php-test-next:
 <td>Build context, relative to the project root.</td>
 </tr>
 <tr>
+<td><code>build_args</code></td>
+<td>array</td>
+<td><code>[]</code></td>
+<td>Build arguments as <code>NAME=value</code>. <code>$NAME</code> and <code>${NAME}</code> in a value are replaced from the job's variables.</td>
+</tr>
+<tr>
 <td><code>app_root</code></td>
 <td>string</td>
 <td><code>/app</code></td>
@@ -750,42 +762,102 @@ php-test-next:
 <td><code>writable_paths</code></td>
 <td>array</td>
 <td><code>[&quot;storage&quot;, &quot;bootstrap/cache&quot;]</code></td>
-<td>Paths the app may write to, relative to app_root. Each must be writable by the app user.</td>
+<td>Paths the app may write to, relative to <code>app_root</code>. Each must be writable by the uid in group 0.</td>
+</tr>
+<tr>
+<td><code>runtime_paths</code></td>
+<td>array</td>
+<td><code>[&quot;/tmp&quot;, &quot;/var/tmp&quot;, &quot;/run&quot;, &quot;/var/run&quot;]</code></td>
+<td>Absolute paths the platform mounts as tmpfs. Writes there are allowed.</td>
 </tr>
 <tr>
 <td><code>port</code></td>
 <td>number</td>
 <td><code>8080</code></td>
-<td>Port the app listens on inside the container.</td>
+<td>Port the app listens on by default. The second replica gets <code>port + 1</code> through <code>port_env</code>.</td>
+</tr>
+<tr>
+<td><code>port_env</code></td>
+<td>string</td>
+<td><code>PORT</code></td>
+<td>Environment variable that sets the app's listen port.</td>
 </tr>
 <tr>
 <td><code>health_path</code></td>
 <td>string</td>
 <td><code>/up</code></td>
-<td>Path the app must answer 200 on for any Host.</td>
+<td>Path that must answer 200 for any Host, before trusted hosts, HTTPS redirects, sessions and auth.</td>
 </tr>
 <tr>
 <td><code>uid</code></td>
 <td>number</td>
 <td><code>100123</code></td>
-<td>Numeric uid the app runs as. The gid is always 0.</td>
+<td>Numeric uid the app runs as, with no <code>/etc/passwd</code> entry. The gid is always 0.</td>
 </tr>
 <tr>
 <td><code>start_command</code></td>
 <td>string</td>
-<td>none</td>
-<td>Command that starts the app inside the image. It is app-specific, so it is required and has no default.</td>
+<td><code>&quot;&quot;</code></td>
+<td>Command that starts the app, run with <code>sh -c</code>. Empty runs the image's own <code>ENTRYPOINT</code> and <code>CMD</code>.</td>
+</tr>
+<tr>
+<td><code>env</code></td>
+<td>array</td>
+<td><code>[]</code></td>
+<td>Environment for both replicas, as <code>NAME=value</code> (or <code>NAME</code> to pass the job's variable through). Keep secrets in CI/CD variables.</td>
 </tr>
 <tr>
 <td><code>boot_timeout</code></td>
 <td>number</td>
 <td><code>60</code></td>
-<td>Seconds goss retries the health check while the app boots.</td>
+<td>Seconds each replica has to answer the health path.</td>
+</tr>
+<tr>
+<td><code>stop_timeout</code></td>
+<td>number</td>
+<td><code>10</code></td>
+<td>Seconds the main process has to exit after SIGTERM.</td>
+</tr>
+<tr>
+<td><code>probe_path</code></td>
+<td>string</td>
+<td><code>/</code></td>
+<td>Page probed with and without forged forwarded headers.</td>
+</tr>
+<tr>
+<td><code>identity_header</code></td>
+<td>string</td>
+<td><code>X-Forwarded-User</code></td>
+<td>Identity header a gateway would set (forged in <code>forwarded-headers</code>).</td>
+</tr>
+<tr>
+<td><code>session_login_path</code></td>
+<td>string</td>
+<td><code>&quot;&quot;</code></td>
+<td>GET path that signs in a test user and sets the session cookie. Needed by <code>session-hop</code>.</td>
+</tr>
+<tr>
+<td><code>session_check_path</code></td>
+<td>string</td>
+<td><code>&quot;&quot;</code></td>
+<td>Path that answers 200 only for a signed-in user. Needed by <code>session-hop</code>.</td>
+</tr>
+<tr>
+<td><code>logs_path</code></td>
+<td>string</td>
+<td><code>storage/logs</code></td>
+<td>Directory, relative to <code>app_root</code>, where nothing may be written.</td>
+</tr>
+<tr>
+<td><code>checks</code></td>
+<td>array</td>
+<td><code>[&quot;health&quot;, &quot;env-only&quot;, &quot;forwarded-headers&quot;, &quot;logs&quot;, &quot;session-hop&quot;, &quot;sigterm&quot;]</code></td>
+<td>The checks to run. Leave one out only on purpose; the strict boot always runs.</td>
 </tr>
 </tbody>
 </table></div>
-<p>The default is an immutable tag (<code>-immutable</code>) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.</p>
-<p>From <code>templates/portability/template.yml</code>: the component defines two jobs with fixed names. <code>portability-build</code> runs in the <code>buildah_image</code>, sets <code>STORAGE_DRIVER: vfs</code> (the vfs driver needs no special kernel support and runs in an ordinary container), builds the image with <code>buildah bud</code>, logs in to the project's container registry, and pushes <code>$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA</code>. <code>portability-run</code> needs <code>portability-build</code>, generates a goss file from the inputs (the goss template is inlined in the job, because a component only ships its <code>template.yml</code> to the including project), downloads goss pinned by version and checksum, starts the app with <code>start_command</code>, and runs <code>goss validate</code> with <code>--retry-timeout</code> set to <code>boot_timeout</code> seconds. goss runs as the app user (the declared uid, gid 0), so its command checks see the same permissions the app has. Both jobs are <code>interruptible: true</code> with a timeout of 30 minutes.</p>
+<p>The <code>image</code> default is an immutable tag (<code>-immutable</code>) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.</p>
+<p>From <code>templates/portability/template.yml</code>: one job, keyed by <code>job_name</code>, with <code>STORAGE_DRIVER: vfs</code> and <code>BUILDAH_ISOLATION: chroot</code>. It writes the inputs to a file through a quoted heredoc, writes the probe (<code>templates/portability/probe.sh</code>, inlined byte for byte because a component only ships its <code>template.yml</code>), and runs it. The probe prints one <code>portability: &lt;check&gt;: pass</code>, <code>FAIL</code> or <code>skipped</code> line per check and exits 1 on any failure, 2 on an input error. The job is <code>interruptible: true</code> with a timeout of 30 minutes.</p>
 <h2 id="a11y">a11y<a class="docs-heading-link" aria-label="Link to this section" href="#a11y">#</a></h2>
 <p>Version 1 · Category: Testing/Validation · Tags: accessibility,a11y,wcag,axe-core,playwright</p>
 <p>Opens the app's pages in a real Chromium browser with Playwright and runs axe-core through @axe-core/playwright, in light and dark mode at 320 px and 1280 px, and fails the pipeline on any violation. The default tags are WCAG 2.1 Level AA (the ADA Title II level); add <code>wcag22aa</code> for WCAG 2.2 AA, the stack's floor. At 320 px it also checks WCAG 1.4.10 Reflow, which axe-core cannot. It writes a JUnit report and a JSON report. See <a href="../guides/component-a11y.html">The a11y component</a>.</p>
@@ -969,7 +1041,7 @@ php-test-next:
   <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#proctor">proctor</a></li><li class="docs-toc__item"><a href="#php-test">php-test</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#caching">Caching</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#try-the-next-php-release-without-breaking-the-pipeline">Try the next PHP release without breaking the pipeline</a></li><li class="docs-toc__item"><a href="#composer-audit">composer-audit</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#run-it-on-a-schedule">Run it on a schedule</a></li><li class="docs-toc__item"><a href="#sbom">sbom</a></li><li class="docs-toc__item"><a href="#pint">pint</a></li><li class="docs-toc__item"><a href="#phpstan">phpstan</a></li><li class="docs-toc__item"><a href="#eslint">eslint</a></li><li class="docs-toc__item"><a href="#secret-detection">secret-detection</a></li><li class="docs-toc__item"><a href="#package-publish">package-publish</a></li><li class="docs-toc__item"><a href="#renovate">renovate</a></li><li class="docs-toc__item"><a href="#portability">portability</a></li><li class="docs-toc__item"><a href="#a11y">a11y</a></li><li class="docs-toc__item"><a href="#squire-kit">squire-kit</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
-  <span>Documents Preflight <span data-docs-version>0.1.4</span></span>
+  <span>Documents Preflight <span data-docs-version>0.2.0</span></span>
   <span><a rel="noopener" href="https://github.com/waynestate/preflight">Source</a> <a href="components.md">Markdown</a></span>
 </footer>
 </body>

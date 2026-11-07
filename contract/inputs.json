@@ -111,19 +111,30 @@
     "portability": {
       "inputs": [
         { "name": "stage", "type": "string", "default": "test" },
-        { "name": "image", "type": "string", "default": "$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA" },
-        { "name": "buildah_image", "type": "string", "default": "quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb" },
+        { "name": "job_name", "type": "string", "default": "portability", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
+        { "name": "image", "type": "string", "default": "quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb" },
         { "name": "dockerfile", "type": "string", "default": "Dockerfile" },
         { "name": "context", "type": "string", "default": "." },
+        { "name": "build_args", "type": "array", "default": [] },
         { "name": "app_root", "type": "string", "default": "/app" },
         { "name": "writable_paths", "type": "array", "default": ["storage", "bootstrap/cache"] },
+        { "name": "runtime_paths", "type": "array", "default": ["/tmp", "/var/tmp", "/run", "/var/run"] },
         { "name": "port", "type": "number", "default": 8080 },
+        { "name": "port_env", "type": "string", "default": "PORT" },
         { "name": "health_path", "type": "string", "default": "/up" },
         { "name": "uid", "type": "number", "default": 100123 },
-        { "name": "start_command", "type": "string" },
-        { "name": "boot_timeout", "type": "number", "default": 60 }
+        { "name": "start_command", "type": "string", "default": "" },
+        { "name": "env", "type": "array", "default": [] },
+        { "name": "boot_timeout", "type": "number", "default": 60 },
+        { "name": "stop_timeout", "type": "number", "default": 10 },
+        { "name": "probe_path", "type": "string", "default": "/" },
+        { "name": "identity_header", "type": "string", "default": "X-Forwarded-User" },
+        { "name": "session_login_path", "type": "string", "default": "" },
+        { "name": "session_check_path", "type": "string", "default": "" },
+        { "name": "logs_path", "type": "string", "default": "storage/logs" },
+        { "name": "checks", "type": "array", "default": ["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm"] }
       ],
-      "jobs": ["portability-build", "portability-run"]
+      "jobs": ["portability"]
     },
     "a11y": {
       "inputs": [

@@ -10,17 +10,29 @@ generator: Squire agent-ready
 
 This page is the checklist for moving an app from one Preflight pin to the next, one released version at a time, newest first; every section follows `CHANGELOG.md`. Read the section for the version you are moving to, apply its steps, and verify on the next pipeline. Like a real preflight, the walk takes a few minutes and earns its keep: move the pin only after you have read the version notes.
 
-## Unreleased[#](https://preflight.apps.wayne.edu/docs/upgrading.html#unreleased)
+## 0.2.0[#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-2-0)
+
+### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking)
+
+The `portability` component is now one job, `portability` (named by a new `job_name` input), instead of `portability-build` and `portability-run`, and it checks what ADR-0010 asks for instead of the goss list. It builds the image with Buildah and runs it in the same job, so nothing is pushed to the container registry and no app image is pulled. Only an app that already includes `portability` from 0.1.4 needs to act:
+
+- `buildah_image` is renamed `image` (same default, the Buildah image pinned by digest); the old `image` input (the app image) is gone.
+- `start_command` is optional: empty runs the image's own `ENTRYPOINT` and `CMD`, the way the platforms do. Keep it only if your image needs a different start.
+- New inputs with defaults: `job_name`, `build_args`, `runtime_paths`, `port_env`, `env`, `stop_timeout`, `probe_path`, `identity_header`, `session_login_path`, `session_check_path`, `logs_path` and `checks`. Set `env` to what the app needs to boot (secrets from CI/CD variables), and either add a test sign-in route for `session-hop` or leave it out of `checks`.
+- Anything that waited on `portability-run` with `needs:` now names `portability`.
+- The app image needs no curl, sha256sum or tar any more; the probe runs outside it.
+
+See [The portability component](https://preflight.apps.wayne.edu/docs/guides/component-portability.html) for the six checks and how to fix each failure.
 
 ### Changed[#](https://preflight.apps.wayne.edu/docs/upgrading.html#changed)
 
-The `portability` component's `buildah_image` default moved from the plain version tag to the immutable tag `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb`: Red Hat re-pushed the plain version tag and garbage-collected the old digest, so a pipeline pinned to it broke. If your app overrides `buildah_image`, point it at an `-immutable` tag pinned by digest too. The `composer-audit` component gains an `abandoned` input (`fail`, `report` or `ignore`) for how `composer audit` treats abandoned packages. No action needed: the default is `fail`, which is what the component already did, so existing pipelines behave exactly as before. A new `a11y` component checks a site's pages with axe-core in Playwright (WCAG 2.1 AA by default; add `wcag22aa` for 2.2 AA). It is opt-in: add its include to start the gate, with `allow_failure: true` while the site fixes its first findings. See [The a11y component](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html). Preflight's own local gate (`scripts/a11y.sh`, `scripts/a11y.ps1`) now runs the component's checker, at 320 px instead of 360 px, with the reflow check; `tools/a11y/` is gone. A new `squire-kit` component fails the pipeline when a Squire deploy kit drifts from the Squire release its `.squire.json` records (`squire init --check`). It is opt-in: run `vendor/bin/squire init --check --path=deploy` first, clean up what it reports, then add the include with `working_dir: deploy`. See [The squire-kit component](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html). The Renovate preset no longer updates files inside a Squire kit (`docker-compose.squire.yml` and `.squire/**`, outside Squire's own `templates/`): those bumps made every kit drift. Its Squire rule now runs `squire update` on the kit in the merge request it opens for a new Squire. The runner must allow those commands: set `squire_kit_tasks: true` on the runner project's `renovate` include. Until it does, each Squire merge request shows an artifact error and needs `vendor/bin/squire update --path=deploy` run by hand, as before. See [Squire kits](https://preflight.apps.wayne.edu/docs/guides/renovate.html#squire-kits). This release needs GitLab 18.7 or later: every component now declares `spec: component:` and prints a `Preflight component` line as its first command, and GitLab accepts that spec key only from 18.7 on. On an older instance, pipeline creation fails on the unknown key, so upgrade GitLab or pin an older Preflight tag.
+The Buildah image default (now the `portability` component's `image` input) moved from the plain version tag to the immutable tag `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb`: Red Hat re-pushed the plain version tag and garbage-collected the old digest, so a pipeline pinned to it broke. If your app overrides it, point it at an `-immutable` tag pinned by digest too. The `composer-audit` component gains an `abandoned` input (`fail`, `report` or `ignore`) for how `composer audit` treats abandoned packages. No action needed: the default is `fail`, which is what the component already did, so existing pipelines behave exactly as before. A new `a11y` component checks a site's pages with axe-core in Playwright (WCAG 2.1 AA by default; add `wcag22aa` for 2.2 AA). It is opt-in: add its include to start the gate, with `allow_failure: true` while the site fixes its first findings. See [The a11y component](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html). Preflight's own local gate (`scripts/a11y.sh`, `scripts/a11y.ps1`) now runs the component's checker, at 320 px instead of 360 px, with the reflow check; `tools/a11y/` is gone. A new `squire-kit` component fails the pipeline when a Squire deploy kit drifts from the Squire release its `.squire.json` records (`squire init --check`). It is opt-in: run `vendor/bin/squire init --check --path=deploy` first, clean up what it reports, then add the include with `working_dir: deploy`. See [The squire-kit component](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html). The Renovate preset no longer updates files inside a Squire kit (`docker-compose.squire.yml` and `.squire/**`, outside Squire's own `templates/`): those bumps made every kit drift. Its Squire rule now runs `squire update` on the kit in the merge request it opens for a new Squire. The runner must allow those commands: set `squire_kit_tasks: true` on the runner project's `renovate` include. Until it does, each Squire merge request shows an artifact error and needs `vendor/bin/squire update --path=deploy` run by hand, as before. See [Squire kits](https://preflight.apps.wayne.edu/docs/guides/renovate.html#squire-kits). This release needs GitLab 18.7 or later: every component now declares `spec: component:` and prints a `Preflight component` line as its first command, and GitLab accepts that spec key only from 18.7 on. On an older instance, pipeline creation fails on the unknown key, so upgrade GitLab or pin an older Preflight tag.
 
 ## 0.1.4[#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-1-4)
 
 Released 2026-11-03. The new pieces are opt-in: the `portability` component, a `job_name` input on every component except `portability`, and a stricter Renovate preset.
 
-### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking)
+### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-1)
 
 0.1.4 has no breaking changes: the version adds a component, an input and preset rules, and removes nothing.
 
@@ -63,7 +75,7 @@ Push the change and run the app's pipeline. The components are ordinary jobs, so
 
 Released 2026-11-03. Two consumer-facing changes: the `proctor` component installs the app with `--no-plugins --no-scripts`, and the shared Renovate preset stopped auto-merging the pins that every pipeline runs.
 
-### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-1)
+### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-2)
 
 0.1.3 has no breaking changes, but the `proctor` job now installs the app's dependencies with `composer install --no-plugins --no-scripts`, so the app's plugins and scripts never run inside the job.
 
@@ -97,7 +109,7 @@ Run the pipeline and confirm the jobs run on the new pin. In the runner project,
 
 Released 2026-10-29. The site gained the agent-ready kit (prompt blocks, Markdown twins, llms.txt) from Squire, and the proof page moved to a private site that needs a Wayne State sign-in.
 
-### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-2)
+### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-3)
 
 0.1.2 has no breaking changes: the version touches the site, the README and the proof page, not the components.
 
@@ -122,7 +134,7 @@ Run the pipeline and confirm the component jobs run on the new pin. PROCTOR's `p
 
 Released 2026-10-29. Two new components: `package-publish`, which publishes a semantic version tag to the GitLab group's built-in Composer registry, and `renovate`, with the shared preset `renovate/default.json`. The reusable GitHub Actions workflow for mirrors ships in this tag too.
 
-### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-3)
+### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-4)
 
 0.1.1 has no breaking changes: the version adds components and changes only the repository's own PHPStan config.
 
@@ -170,7 +182,7 @@ Run the pipeline. For `package-publish`, the job runs only on tags and reads the
 
 Released 2026-10-27. First tagged release.
 
-### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-4)
+### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-5)
 
 0.1.0 is the first tagged release, so there is nothing to break: it is the baseline every later pin moves from.
 

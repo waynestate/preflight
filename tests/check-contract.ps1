@@ -119,17 +119,6 @@ foreach ($d in $tplDirs) {
   }
 }
 
-# goss sends the HTTP method as written, so the portability template must use
-# the upper-case method: a lower-case one makes the server close the
-# connection, and the good fixture fails with EOF.
-$portabilityFiles = Get-ChildItem -LiteralPath (Join-Path $Root "templates/portability") -Recurse -File
-foreach ($f in $portabilityFiles) {
-  if (Select-String -LiteralPath $f.FullName -SimpleMatch -CaseSensitive -Pattern "method: get" -Quiet) {
-    Write-Output "templates/portability/$($f.Name): lower-case 'method: get' found; goss needs 'method: GET'"
-    $status = 1
-  }
-}
-
 if ($status -eq 0) {
   Write-Output "contract: all components match contract/inputs.json"
 }

@@ -46,7 +46,7 @@ An included component is a set of ordinary jobs. The app's own `.gitlab-ci.yml` 
 
 ### Two includes of the same component became one job
 
-Every component except `portability` takes a `job_name` input, whose default is the job's usual name. Without it, two includes of the same component share a job name and merge into one.
+Every component takes a `job_name` input, whose default is the job's usual name. Without it, two includes of the same component share a job name and merge into one.
 
 - **Cause:** one project includes the same component more than once (for example in a monorepo with two apps) without setting `job_name`.
 - **Fix:** set `job_name` on each include, for example `pint-app` and `pint-admin`. `job_name` ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release.
@@ -142,29 +142,45 @@ The job reads the registry before publishing. Republishing a version from the sa
 - **Fix:** publish a new version tag instead of moving the old one. Protect the release tags so only maintainers can create or move a tag.
 - **Check:** the job log shows the version already on the manifest and the commit it was published from.
 
-### portability is not in the pinned ref
+### portability says an input is unknown
 
-Portability ships in 0.1.4 and later. 0.1.3 does not include it.
+The one-job `portability` component has new inputs, and `buildah_image` is now `image` (the old app-image input is gone).
 
-- **Cause:** the include is pinned to a tag or SHA at or before 0.1.3.
-- **Fix:** pin the `0.1.4` tag, or the full commit SHA of a commit at or after it.
-- **Check:** the pipeline lists `portability-build` and `portability-run`.
+- **Cause:** the include is pinned to 0.1.4, which carries the two-job form (`portability-build`, `portability-run`, goss), or the include still sets `buildah_image`.
+- **Fix:** pin a SHA at or after the one-job form and follow [Upgrading](upgrading.md): `buildah_image` becomes `image`, and the old app `image` input is gone because nothing is pushed.
+- **Check:** the pipeline lists one job, `portability`.
 
-### portability-build fails on the runner
+### portability fails before the build on the runner
 
-The build job runs Buildah, which uses unshare for its storage.
+Buildah's chroot isolation opens a user namespace.
 
-- **Cause:** the runner does not permit user namespaces.
-- **Fix:** run the build job on a runner that permits user namespaces. The job sets `STORAGE_DRIVER: vfs`, so it needs no special kernel support beyond that.
-- **Check:** the job log shows an unshare failure before the fix, and a successful `buildah bud` after it.
+- **Cause:** the runner (or Docker's seccomp profile on a laptop) refuses user namespaces; the log shows `unshare(CLONE_NEWUSER): Operation not permitted`.
+- **Fix:** run the job on a runner that permits user namespaces, which ordinary unprivileged Docker-executor runners do. Do not make the runner privileged for it. Locally, add `--security-opt seccomp=unconfined` to `docker run`.
+- **Check:** the log reaches `buildah bud` and prints the build steps.
 
-### portability-run's health check ends in EOF
+### portability: health: FAIL on a Laravel app
 
-goss sends the HTTP method as written, and a lower-case one makes the server close the connection, so the health check failed with EOF. The check now uses `method: GET`, fixed in 0.1.4.
+The probe asks for the health path with `Host: 10.1.2.3:<port>`, the way a platform's probe does.
 
-- **Cause:** the include is pinned to a ref before 0.1.4, where the goss health check used a lower-case method.
-- **Fix:** pin 0.1.4 or a SHA at or after it.
-- **Check:** `goss validate` passes the health check instead of ending in EOF.
+- **Cause:** the trusted-hosts middleware, an HTTPS redirect, a session or an auth check runs before the health route.
+- **Fix:** answer the health route before those, for example Laravel's `health: '/up'` route in `bootstrap/app.php`, and exempt it from trusted hosts and HTTPS redirects.
+- **Check:** `portability: health: pass`.
+
+### portability: sigterm: FAIL
+
+The main process must handle SIGTERM and exit by itself within `stop_timeout`, because PID 1 ignores a signal it has no handler for.
+
+- **Cause:** the image `exec`s a server that has no SIGTERM handler (for example `php -S`), or a shell script starts the server without passing the signal on.
+- **Fix:** start the app under an init that forwards signals (`tini`, `dumb-init`) or a server that handles SIGTERM itself (php-fpm, FrankenPHP); in a shell entrypoint, trap TERM and stop the child.
+- **Check:** `portability: sigterm: pass` with `handled SIGTERM and exited by itself`.
+
+### portability: session-hop: FAIL with "set session_login_path"
+
+`session-hop` needs a route that signs in a test user and one that answers 200 only for a signed-in user.
+
+- **Cause:** `session_login_path` and `session_check_path` are empty, but `session-hop` is in `checks`.
+- **Fix:** add the two routes behind an environment variable only the job sets (see [The portability component](guides/component-portability.md#a-sign-in-route-for-session-hop)), or, for an app with no sign-in, leave `session-hop` out of `checks`.
+- **Check:** `portability: session-hop: pass`, or `skipped` when left out on purpose.
 
 ### a11y fails on a page that looked fine
 
@@ -238,13 +254,13 @@ The preset's Squire rule runs two commands after it bumps `.squire.json`: it ins
 
 ## Local checks
 
-### The portability fixtures fail on permissions
+### The portability fixtures fail with "buildah is required"
 
-The app user is not the host user that owns the fixtures' temp dir, and goss is downloaded into it. As of 0.1.4 the fixtures make their temp dir mode 0777 and the goss files in it mode 0644.
+`tests/check-portability.sh` runs inside the component's Buildah image, not on the host.
 
-- **Cause:** the checkout is from a ref before 0.1.4.
-- **Fix:** update to 0.1.4 or later, then rerun `sh tests/check-portability.sh` (or the `.ps1` twin).
-- **Check:** the script exits 0: `good` passes and both `bad-*` fixtures fail.
+- **Cause:** the script was run with `sh` on the host.
+- **Fix:** run it through `docker run` in the Buildah image as [Local checks](reference/local-checks.md) shows, or run `pwsh -File tests/check-portability.ps1` on Windows.
+- **Check:** one result line per case, and the script exits 0.
 
 ### composer ci fails on a stale docs site
 

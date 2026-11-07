@@ -1,0 +1,547 @@
+#!/bin/sh
+# probe.sh: PREFLIGHT's portability check (ADR-0010, decision 5).
+#
+# Builds the app image with Buildah and boots it twice, side by side, the way
+# OpenShift would: an arbitrary uid with no /etc/passwd entry in group 0, no
+# capabilities, config from the environment only. Then it checks the six
+# things ADR-0010 asks for, plus the strict boot they all stand on:
+#
+#   strict-boot        the uid has no passwd entry; the writable paths are
+#                      writable by uid:0 and the app root is not; the app
+#                      honors its port variable (replica B); during the run
+#                      nothing is written outside the writable and runtime
+#                      paths (what a read-only root filesystem would refuse)
+#   health             the health path answers 200 to Host: 10.1.2.3:<port>,
+#                      with no forwarded headers, sent to the pod address
+#   env-only           no .env file and no build-time config cache in the
+#                      image, and the app boots on the environment alone
+#   forwarded-headers  X-Forwarded-Host, -Proto, -Port and the identity
+#                      header, sent from an untrusted peer, change nothing
+#   logs               the app writes to stdout or stderr, and nothing lands
+#                      under the logs path
+#   session-hop        a sign-in on replica A is still signed in on replica B
+#   sigterm            the main process handles SIGTERM and exits by itself
+#                      within the stop timeout, as PID 1 must
+#
+# No Docker daemon, no privileged runner: Buildah builds with the vfs driver
+# and chroot isolation, and `buildah run` starts each replica in the job's own
+# network namespace, so curl reaches it on the pod address. Buildah needs the
+# runner to allow user namespaces, which ordinary unprivileged jobs do.
+#
+# Usage: sh probe.sh <inputs file>. The inputs file holds one KEY=VALUE per
+# line (the component writes it from its inputs; tests/check-portability.sh
+# writes its own). Array values are JSON-style lists: ["a", "b"]. $NAME and
+# ${NAME} in build_args and env values are replaced from the job environment,
+# the way GitLab expands variables; nothing is ever passed to eval.
+#
+# Output: one "portability: <check>: problem: ..." line as each problem is
+# found, then a summary with one "portability: <check>: pass", "FAIL" or
+# "skipped" line per check. Exit 0 only when every check that ran passed.
+# Pre-flight rule: if one light is red, nobody taxis.
+
+set -u
+
+CONFIG=${1:?usage: probe.sh <inputs file>}
+WORK=$(mktemp -d)
+ALL_CHECKS="strict-boot health env-only forwarded-headers logs session-hop sigterm"
+TEST_HOST=10.1.2.3
+FORGED_HOST=forged-host.invalid
+FORGED_USER=forged-user-preflight
+
+say() { printf 'portability: %s\n' "$*"; }
+
+# ---------------------------------------------------------------- inputs
+
+# cfg KEY: the raw value of KEY in the inputs file (first match).
+cfg() { awk -v k="$1" 'index($0, k "=") == 1 { print substr($0, length(k) + 2); exit }' "$CONFIG"; }
+
+# items TEXT: a JSON-style list, one item per line.
+items() {
+  printf '%s\n' "$1" | awk '{
+    s = $0
+    sub(/^[ \t]*\[/, "", s); sub(/\][ \t]*$/, "", s)
+    n = split(s, parts, /"[ \t]*,[ \t]*"/)
+    for (i = 1; i <= n; i++) {
+      v = parts[i]
+      gsub(/^[ \t]*"|"[ \t]*$/, "", v)
+      gsub(/\\"/, "\"", v); gsub(/\\\\/, "\\", v)
+      if (v != "") print v
+    }
+  }'
+}
+
+# expand TEXT: replace $NAME and ${NAME} from the environment, no eval.
+expand() {
+  printf '%s\n' "$1" | awk '{
+    s = $0; out = ""
+    while (match(s, /\$\{[A-Za-z_][A-Za-z0-9_]*\}|\$[A-Za-z_][A-Za-z0-9_]*/)) {
+      name = substr(s, RSTART + 1, RLENGTH - 1); gsub(/[{}]/, "", name)
+      out = out substr(s, 1, RSTART - 1) ENVIRON[name]
+      s = substr(s, RSTART + RLENGTH)
+    }
+    print out s
+  }'
+}
+
+CONTEXT=$(cfg context); CONTEXT=${CONTEXT:-.}
+DOCKERFILE=$(cfg dockerfile); DOCKERFILE=${DOCKERFILE:-Dockerfile}
+APP_ROOT=$(cfg app_root); APP_ROOT=${APP_ROOT:-/app}; APP_ROOT=${APP_ROOT%/}
+PORT=$(cfg port); PORT=${PORT:-8080}
+PORT_ENV=$(cfg port_env); PORT_ENV=${PORT_ENV:-PORT}
+HEALTH_PATH=$(cfg health_path); HEALTH_PATH=${HEALTH_PATH:-/up}
+UID_NUM=$(cfg uid); UID_NUM=${UID_NUM:-100123}
+START_COMMAND=$(cfg start_command)
+BOOT_TIMEOUT=$(cfg boot_timeout); BOOT_TIMEOUT=${BOOT_TIMEOUT:-60}
+STOP_TIMEOUT=$(cfg stop_timeout); STOP_TIMEOUT=${STOP_TIMEOUT:-10}
+PROBE_PATH=$(cfg probe_path); PROBE_PATH=${PROBE_PATH:-/}
+IDENTITY_HEADER=$(cfg identity_header); IDENTITY_HEADER=${IDENTITY_HEADER:-X-Forwarded-User}
+LOGIN_PATH=$(cfg session_login_path)
+CHECK_PATH=$(cfg session_check_path)
+LOGS_PATH=$(cfg logs_path); LOGS_PATH=${LOGS_PATH:-storage/logs}; LOGS_PATH=${LOGS_PATH%/}
+PORT_B=$((PORT + 1))
+
+items "$(cfg writable_paths)" > "$WORK/writable.list"
+items "$(cfg runtime_paths)" > "$WORK/runtime.list"
+items "$(cfg checks)" > "$WORK/checks.list"
+: > "$WORK/build-args.list"
+items "$(cfg build_args)" | while IFS= read -r a; do expand "$a"; done > "$WORK/build-args.list"
+: > "$WORK/env.list"
+items "$(cfg env)" | while IFS= read -r e; do
+  case "$e" in
+    *=*) expand "$e" ;;
+    *) printf '%s=%s\n' "$e" "$(printenv "$e" || true)" ;;
+  esac
+done > "$WORK/env.list"
+
+if [ ! -s "$WORK/checks.list" ]; then
+  printf '%s\n' health env-only forwarded-headers logs session-hop sigterm > "$WORK/checks.list"
+fi
+while IFS= read -r c; do
+  case " $ALL_CHECKS " in
+    *" $c "*) ;;
+    *) say "input error: unknown check '$c' (known: $ALL_CHECKS)"; exit 2 ;;
+  esac
+done < "$WORK/checks.list"
+
+wanted() { [ "$1" = strict-boot ] || grep -qxF "$1" "$WORK/checks.list"; }
+
+# The Host the app's own pages expect: APP_URL's host, when env sets one.
+APP_HOST=$(awk -F= '$1 == "APP_URL" { sub(/^[^=]*=/, ""); sub(/^[A-Za-z]+:\/\//, ""); sub(/\/.*$/, ""); print; exit }' "$WORK/env.list")
+
+# A problem found: print it now, keep it for the summary.
+flag() { printf '%s\n' "$2" >> "$WORK/fail.$1"; say "$1: problem: $2"; }
+ok() { printf '%s\n' "$2" >> "$WORK/ok.$1"; }
+
+# ---------------------------------------------------------------- processes
+
+# pid ppid for every process the job can see.
+proc_table() { awk '/^PPid:/ { n = split(FILENAME, a, "/"); print a[3], $2 }' /proc/[0-9]*/status 2>/dev/null; }
+
+# descendants ROOT: every process below ROOT, one pid per line.
+descendants() {
+  table=$(proc_table)
+  queue=$1
+  while [ -n "$queue" ]; do
+    cur=${queue%% *}
+    if [ "$cur" = "$queue" ]; then queue=""; else queue=${queue#* }; fi
+    for kid in $(printf '%s\n' "$table" | awk -v p="$cur" '$2 == p { print $1 }'); do
+      echo "$kid"
+      queue="$queue $kid"
+      queue=${queue# }
+    done
+  done
+}
+
+# main_pid ROOT: the app's main process under a `buildah run` (ROOT), that is
+# the child of buildah-chroot-exec: what a container runtime would run as
+# PID 1.
+main_pid() {
+  for d in $(descendants "$1"); do
+    # 2>/dev/null goes first: a process can end between the listing and this
+    # read, and the shell reports a failed < before it reaches a later 2>.
+    case "$(tr '\0' ' ' 2>/dev/null < "/proc/$d/cmdline")" in
+      buildah-chroot-exec*) proc_table | awk -v p="$d" '$2 == p { print $1; exit }'; return 0 ;;
+    esac
+  done
+  return 1
+}
+
+# alive PID: 0 while PID runs (any state but zombie or dead). It reads the
+# status file once: testing the file and then reading it is two looks, and a
+# zombie reaped between them read as alive (the file was there, then grep
+# failed, and the ! turned that failure into "alive").
+alive() {
+  [ -n "$1" ] || return 1
+  st=$(awk '/^State:/ { print $2; exit }' "/proc/$1/status" 2>/dev/null)
+  case "$st" in
+    ''|Z|X) return 1 ;;
+  esac
+  return 0
+}
+
+cleanup() {
+  for r in a b; do
+    [ -f "$WORK/$r.bpid" ] || continue
+    bpid=$(cat "$WORK/$r.bpid")
+    for d in $(descendants "$bpid"); do kill -KILL "$d" 2>/dev/null; done
+    kill -KILL "$bpid" 2>/dev/null
+    wait "$bpid" 2>/dev/null
+  done
+  for r in a b; do
+    [ -f "$WORK/$r.ctr" ] && buildah rm "$(cat "$WORK/$r.ctr")" >/dev/null 2>&1
+  done
+  rm -rf "$WORK"
+}
+trap cleanup EXIT
+
+# ---------------------------------------------------------------- build
+
+if [ -n "${CI_DEPENDENCY_PROXY_SERVER:-}" ] && [ -n "${CI_DEPENDENCY_PROXY_USER:-}" ]; then
+  printf '%s' "${CI_DEPENDENCY_PROXY_PASSWORD:-}" | buildah login -u "$CI_DEPENDENCY_PROXY_USER" --password-stdin "$CI_DEPENDENCY_PROXY_SERVER" >/dev/null 2>&1 \
+    || say "note: the Dependency Proxy login failed; base images pull without it"
+fi
+
+set -- --isolation chroot -f "$CONTEXT/$DOCKERFILE" -t localhost/portability-app
+while IFS= read -r a; do set -- "$@" --build-arg "$a"; done < "$WORK/build-args.list"
+say "building $CONTEXT/$DOCKERFILE with Buildah (vfs, chroot isolation)"
+if ! buildah bud "$@" "$CONTEXT"; then
+  say "build: FAIL: buildah bud failed (see above)"
+  exit 1
+fi
+
+# The image's own ENTRYPOINT and CMD, one argument per line, unless the
+# start_command input replaces them.
+buildah inspect --type image --format '{{range .OCIv1.Config.Entrypoint}}{{println .}}{{end}}{{range .OCIv1.Config.Cmd}}{{println .}}{{end}}' localhost/portability-app > "$WORK/argv.list"
+if [ -z "$START_COMMAND" ] && [ ! -s "$WORK/argv.list" ]; then
+  say "input error: the image has no ENTRYPOINT or CMD; set start_command"
+  exit 2
+fi
+
+# ---------------------------------------------------------------- replicas
+
+for r in a b; do
+  buildah from --pull=never --name "portability-$r" localhost/portability-app > "$WORK/$r.ctr" || { say "build: FAIL: buildah from failed"; exit 1; }
+  buildah mount "$(cat "$WORK/$r.ctr")" > "$WORK/$r.mnt" || { say "build: FAIL: buildah mount failed"; exit 1; }
+done
+MNT_A=$(cat "$WORK/a.mnt")
+MNT_B=$(cat "$WORK/b.mnt")
+
+# The pod address: the job's first non-loopback IPv4 address. Probes go there,
+# not to 127.0.0.1, so the app sees a peer it has no reason to trust.
+POD_IP=$(awk '/32 host LOCAL/ { print prev } { prev = $2 }' /proc/net/fib_trie 2>/dev/null | grep -v '^127\.' | head -n 1)
+POD_IP=${POD_IP:-127.0.0.1}
+
+# writable_by_app PATH: can uid UID_NUM, gid 0, write PATH (by mode bits)?
+writable_by_app() {
+  # shellcheck disable=SC2046
+  set -- $(stat -c '%u %g %A' "$1" 2>/dev/null)
+  [ $# -eq 3 ] || return 1
+  perms=$3
+  [ "$1" = "$UID_NUM" ] && [ "$(printf '%s' "$perms" | cut -c3)" = w ] && return 0
+  [ "$2" = 0 ] && [ "$(printf '%s' "$perms" | cut -c6)" = w ] && return 0
+  [ "$(printf '%s' "$perms" | cut -c9)" = w ]
+}
+
+# Strict boot, before the app starts.
+if awk -F: -v u="$UID_NUM" '$3 == u { found = 1 } END { exit !found }' "$MNT_A/etc/passwd" 2>/dev/null; then
+  flag strict-boot "uid $UID_NUM has an /etc/passwd entry in the image; pick a uid the image does not know, as OpenShift does"
+fi
+if writable_by_app "$MNT_A$APP_ROOT"; then
+  flag strict-boot "the app root $APP_ROOT is writable by uid $UID_NUM gid 0; only the writable paths may be"
+fi
+while IFS= read -r p; do
+  if [ ! -e "$MNT_A$APP_ROOT/$p" ]; then
+    flag strict-boot "writable path $APP_ROOT/$p is missing from the image"
+  elif ! writable_by_app "$MNT_A$APP_ROOT/$p"; then
+    flag strict-boot "writable path $APP_ROOT/$p is not writable by uid $UID_NUM gid 0 (make it group 0 with group write: chgrp -R 0, chmod -R g=u)"
+  fi
+done < "$WORK/writable.list"
+
+# env-only, before the app starts.
+if wanted env-only; then
+  for f in .env bootstrap/cache/config.php; do
+    if [ -e "$MNT_A$APP_ROOT/$f" ]; then
+      flag env-only "the image ships $APP_ROOT/$f; config must come from the environment at start, not from the image"
+    fi
+  done
+fi
+
+: > "$WORK/marker"
+sleep 1
+
+# start_replica NAME PORT: buildah run in the background, as uid:0, with no
+# capabilities, the env input and the port variable.
+start_replica() {
+  name=$1
+  rport=$2
+  set -- --user "$UID_NUM:0" --cap-drop=ALL --env "$PORT_ENV=$rport"
+  while IFS= read -r e; do set -- "$@" --env "$e"; done < "$WORK/env.list"
+  set -- "$@" "$(cat "$WORK/$name.ctr")" --
+  if [ -n "$START_COMMAND" ]; then
+    set -- "$@" sh -c "$START_COMMAND"
+  else
+    while IFS= read -r a; do set -- "$@" "$a"; done < "$WORK/argv.list"
+  fi
+  buildah run "$@" > "$WORK/$name.out" 2>&1 &
+  echo $! > "$WORK/$name.bpid"
+}
+
+# wait_health NAME PORT: 0 when the health path answers 200 within the boot
+# timeout. Stops early when the replica exits, or after ten straight non-200
+# answers (the app is up and saying no).
+wait_health() {
+  t=0
+  no=0
+  LAST_CODE=000
+  while [ "$t" -lt "$BOOT_TIMEOUT" ]; do
+    LAST_CODE=$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 -H "Host: $TEST_HOST:$2" "http://$POD_IP:$2$HEALTH_PATH" 2>/dev/null)
+    LAST_CODE=${LAST_CODE:-000}
+    [ "$LAST_CODE" = 200 ] && return 0
+    if [ "$LAST_CODE" != 000 ]; then no=$((no + 1)); else no=0; fi
+    [ "$no" -ge 10 ] && return 1
+    kill -0 "$(cat "$WORK/$1.bpid")" 2>/dev/null || return 1
+    sleep 1
+    t=$((t + 1))
+  done
+  return 1
+}
+
+say "starting replica A on $PORT_ENV=$PORT and replica B on $PORT_ENV=$PORT_B as uid $UID_NUM gid 0, probing $POD_IP"
+start_replica a "$PORT"
+start_replica b "$PORT_B"
+
+BOOTED=no
+if wait_health a "$PORT"; then
+  BOOTED=yes
+  ok health "$HEALTH_PATH answered 200 to Host: $TEST_HOST:$PORT with no forwarded headers"
+else
+  flag health "$HEALTH_PATH did not answer 200 to Host: $TEST_HOST:$PORT within ${BOOT_TIMEOUT}s (last answer: $LAST_CODE)"
+  say "replica A output (last 40 lines):"
+  tail -n 40 "$WORK/a.out" | sed 's/^/  | /'
+fi
+
+B_UP=no
+if [ "$BOOTED" = yes ]; then
+  if wait_health b "$PORT_B"; then
+    B_UP=yes
+    ok strict-boot "replica B answered on $PORT_ENV=$PORT_B"
+  else
+    flag strict-boot "replica B did not answer on $PORT_ENV=$PORT_B (last answer: $LAST_CODE); the app must listen on the port in \$$PORT_ENV"
+    say "replica B output (last 20 lines):"
+    tail -n 20 "$WORK/b.out" | sed 's/^/  | /'
+  fi
+fi
+
+if [ "$BOOTED" = yes ] && wanted env-only && [ ! -s "$WORK/fail.env-only" ]; then
+  ok env-only "no .env or build-time config cache, and the app booted on the environment alone"
+fi
+
+# ---------------------------------------------------------------- requests
+
+# fetch PREFIX PATH PORT [curl args]: status code; headers in PREFIX.h, body
+# in PREFIX.b. Sends APP_URL's host as Host when env sets one.
+fetch() {
+  pfx=$1
+  fpath=$2
+  fport=$3
+  shift 3
+  if [ -n "$APP_HOST" ]; then set -- -H "Host: $APP_HOST" "$@"; fi
+  code=$(curl -s --max-time 10 -D "$pfx.h" -o "$pfx.b" -w '%{http_code}' "$@" "http://$POD_IP:$fport$fpath" 2>/dev/null)
+  printf '%s' "${code:-000}"
+}
+
+location() { awk 'tolower($1) == "location:" { sub(/^[^:]*:[ \t]*/, ""); sub(/\r$/, ""); print; exit }' "$1" 2>/dev/null; }
+
+if [ "$BOOTED" = yes ] && wanted forwarded-headers; then
+  for fpath in "$PROBE_PATH" "$CHECK_PATH"; do
+    [ -n "$fpath" ] || continue
+    base=$(fetch "$WORK/fwd-base" "$fpath" "$PORT")
+    forged=$(fetch "$WORK/fwd-forged" "$fpath" "$PORT" \
+      -H "X-Forwarded-Host: $FORGED_HOST" -H "X-Forwarded-Proto: https" -H "X-Forwarded-Port: 444" \
+      -H "$IDENTITY_HEADER: $FORGED_USER")
+    if [ "$base" = 000 ]; then
+      flag forwarded-headers "$fpath did not answer, so the forwarded headers could not be tested"
+      continue
+    fi
+    found=no
+    if [ "$base" != "$forged" ]; then
+      flag forwarded-headers "$fpath answered $base, but $forged with forged forwarded headers from an untrusted peer"
+      found=yes
+    fi
+    lb=$(location "$WORK/fwd-base.h")
+    lf=$(location "$WORK/fwd-forged.h")
+    if [ "$lb" != "$lf" ]; then
+      flag forwarded-headers "$fpath redirected to '$lb', but to '$lf' with forged X-Forwarded-Host, -Proto and -Port"
+      found=yes
+    fi
+    if grep -qiF -e "$FORGED_HOST" -e "$FORGED_USER" "$WORK/fwd-forged.h" "$WORK/fwd-forged.b" 2>/dev/null; then
+      flag forwarded-headers "$fpath repeated a forged value ($FORGED_HOST or $IDENTITY_HEADER: $FORGED_USER) in its answer"
+      found=yes
+    fi
+    [ "$found" = no ] && ok forwarded-headers "$fpath answered $base either way; forged X-Forwarded-Host, -Proto, -Port and $IDENTITY_HEADER changed nothing"
+  done
+fi
+
+if [ "$BOOTED" = yes ] && wanted session-hop; then
+  if [ -z "$LOGIN_PATH" ] || [ -z "$CHECK_PATH" ]; then
+    flag session-hop "set session_login_path and session_check_path, or leave session-hop out of checks"
+  elif [ "$B_UP" != yes ]; then
+    flag session-hop "replica B is not running, so there is nowhere to hop to"
+  else
+    lcode=$(fetch "$WORK/login" "$LOGIN_PATH" "$PORT")
+    cookies=$(awk 'tolower($1) == "set-cookie:" { sub(/^[^:]*:[ \t]*/, ""); sub(/;.*$/, ""); sub(/\r$/, ""); printf "%s%s", sep, $0; sep = "; " }' "$WORK/login.h" 2>/dev/null)
+    case "$lcode" in
+      2??|3??) ;;
+      *) flag session-hop "$LOGIN_PATH on replica A answered $lcode, not 2xx or 3xx" ;;
+    esac
+    if [ ! -s "$WORK/fail.session-hop" ]; then
+      if [ -z "$cookies" ]; then
+        flag session-hop "$LOGIN_PATH on replica A set no cookie"
+      else
+        anon=$(fetch "$WORK/anon" "$CHECK_PATH" "$PORT_B")
+        same=$(fetch "$WORK/same" "$CHECK_PATH" "$PORT" -H "Cookie: $cookies")
+        hop=$(fetch "$WORK/hop" "$CHECK_PATH" "$PORT_B" -H "Cookie: $cookies")
+        if [ "$anon" = 200 ]; then
+          flag session-hop "$CHECK_PATH answers 200 with no session, so it cannot tell a signed-in user from a guest"
+        elif [ "$same" != 200 ]; then
+          flag session-hop "$CHECK_PATH on replica A answered $same after the sign-in, not 200"
+        elif [ "$hop" != 200 ]; then
+          flag session-hop "signed in on replica A, but $CHECK_PATH on replica B answered $hop: the session lives on one replica's disk, not in a shared store"
+        else
+          ok session-hop "signed in on replica A; $CHECK_PATH on replica B answered 200 (and $anon without the session)"
+        fi
+      fi
+    fi
+  fi
+fi
+
+# ---------------------------------------------------------------- logs
+
+# newer_files MNT [PREFIX]: files written during the run, relative to the
+# image root; under PREFIX only, when given.
+newer_files() {
+  find "$1${2:-}" -newer "$WORK/marker" ! -type d 2>/dev/null | sed "s|^$1||"
+}
+
+if [ "$BOOTED" = yes ] && wanted logs; then
+  if [ -s "$WORK/a.out" ] || [ -s "$WORK/b.out" ]; then
+    ok logs "the app wrote to stdout or stderr"
+  else
+    flag logs "nothing reached stdout or stderr; the platform collects logs only from there"
+  fi
+  written=$( { newer_files "$MNT_A" "$APP_ROOT/$LOGS_PATH"; newer_files "$MNT_B" "$APP_ROOT/$LOGS_PATH"; } | sort -u)
+  if [ -n "$written" ]; then
+    flag logs "the app wrote under $APP_ROOT/$LOGS_PATH: $(printf '%s' "$written" | tr '\n' ' ')(log to stderr instead)"
+  else
+    ok logs "nothing was written under $APP_ROOT/$LOGS_PATH"
+  fi
+fi
+
+# ---------------------------------------------------------------- sigterm
+
+# The replicas are not PID 1 (Buildah's chroot isolation has no PID
+# namespace), so the check stands in for PID 1's rule: the kernel delivers
+# SIGTERM to PID 1 only through a handler, and ignores SIGTERM's default
+# action there. So the main process must have a SIGTERM handler, and must
+# then exit by itself. Dying of the signal's default action (no handler, or a
+# handler that re-raises it, as PHP's Zend signal layer does) works here but
+# hangs as PID 1 until the platform's SIGKILL.
+if [ "$BOOTED" = yes ] && wanted sigterm; then
+  abpid=$(cat "$WORK/a.bpid")
+  mp=$(main_pid "$abpid")
+  if ! alive "$mp"; then
+    flag sigterm "could not find replica A's main process"
+  else
+    cmd=$(tr '\0' ' ' 2>/dev/null < "/proc/$mp/cmdline" | cut -c1-80)
+    cmd=${cmd% }
+    sigcgt=$(awk '/^SigCgt:/ { print $2 }' "/proc/$mp/status" 2>/dev/null)
+    low=${sigcgt#"${sigcgt%????}"}
+    if [ -z "$low" ]; then
+      flag sigterm "the main process ($cmd) exited by itself before SIGTERM was sent (see replica A's output)"
+    elif [ $((0x$low & 0x4000)) -eq 0 ]; then
+      flag sigterm "the main process ($cmd) has no SIGTERM handler: as PID 1 it never sees SIGTERM and is SIGKILLed when the grace period ends (exec a server or an init that handles SIGTERM, such as php-fpm, tini or s6)"
+    else
+      kill -TERM "$mp"
+      # One verdict, from the look that ended the wait. Once a pid is seen
+      # gone it stays gone, so no second look can call it back to life (one
+      # did on pipeline 4409, when a fast exit was reaped between looks).
+      t=0
+      stopped=no
+      while :; do
+        if ! alive "$mp"; then stopped=yes; break; fi
+        [ "$t" -ge "$STOP_TIMEOUT" ] && break
+        sleep 1
+        t=$((t + 1))
+      done
+      if [ "$stopped" = no ]; then
+        flag sigterm "the main process ($cmd) was still running ${STOP_TIMEOUT}s after SIGTERM"
+      else
+        # buildah run reports how its process ended: "exited on <signal>"
+        # for a death by signal, "exited with status N" otherwise.
+        w=0
+        while kill -0 "$abpid" 2>/dev/null && [ "$w" -lt 5 ]; do sleep 1; w=$((w + 1)); done
+        if grep -q 'subprocess exited on ' "$WORK/a.out"; then
+          flag sigterm "the main process ($cmd) died of SIGTERM's default action instead of handling it and exiting: as PID 1 the kernel ignores that, so the platform SIGKILLs it after the grace period (exec a server or an init that handles SIGTERM, such as php-fpm, tini or s6)"
+        else
+          ok sigterm "the main process ($cmd) handled SIGTERM and exited by itself within ${t}s"
+        fi
+      fi
+    fi
+  fi
+fi
+
+# ---------------------------------------------------------------- writes
+
+# Stop both replicas, then look for files written outside the writable and
+# runtime paths: the writes a read-only root filesystem would have refused.
+for r in a b; do
+  bpid=$(cat "$WORK/$r.bpid")
+  mp=$(main_pid "$bpid")
+  if alive "$mp"; then kill -TERM "$mp" 2>/dev/null; fi
+  t=0
+  while kill -0 "$bpid" 2>/dev/null && [ "$t" -lt 5 ]; do sleep 1; t=$((t + 1)); done
+  for d in $(descendants "$bpid"); do kill -KILL "$d" 2>/dev/null; done
+  kill -KILL "$bpid" 2>/dev/null
+  wait "$bpid" 2>/dev/null
+  rm -f "$WORK/$r.bpid"
+done
+
+{
+  while IFS= read -r p; do printf '%s\n' "$APP_ROOT/${p%/}"; done < "$WORK/writable.list"
+  while IFS= read -r p; do printf '%s\n' "${p%/}"; done < "$WORK/runtime.list"
+  printf '%s\n' /proc /sys /dev
+} > "$WORK/allowed.list"
+outside=$( { newer_files "$MNT_A"; newer_files "$MNT_B"; } | sort -u | awk -v list="$WORK/allowed.list" '
+  BEGIN { while ((getline line < list) > 0) if (line != "") allowed[line] = 1 }
+  { for (a in allowed) if ($0 == a || index($0, a "/") == 1) next; print }')
+if [ -n "$outside" ]; then
+  flag strict-boot "the app wrote outside its writable and runtime paths (a read-only root filesystem refuses these): $(printf '%s' "$outside" | head -n 10 | tr '\n' ' ')"
+elif [ "$BOOTED" = yes ]; then
+  ok strict-boot "nothing was written outside the writable and runtime paths"
+fi
+
+# ---------------------------------------------------------------- summary
+
+status=0
+echo
+say "summary"
+for c in $ALL_CHECKS; do
+  if ! wanted "$c"; then
+    say "$c: skipped (not in checks)"
+  elif [ -s "$WORK/fail.$c" ]; then
+    say "$c: FAIL"
+    sed 's/^/  - /' "$WORK/fail.$c"
+    status=1
+  elif [ -s "$WORK/ok.$c" ]; then
+    say "$c: pass"
+    sed 's/^/  - /' "$WORK/ok.$c"
+  else
+    say "$c: FAIL"
+    echo "  - not run: the app did not boot"
+    status=1
+  fi
+done
+if [ "$status" -eq 0 ]; then
+  say "cleared for takeoff: the image runs off Citadel the way OpenShift, Coolify and plain Docker run it"
+fi
+exit "$status"

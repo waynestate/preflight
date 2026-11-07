@@ -28,14 +28,15 @@ The checklist, item by item, with each item's job and timeout read from `templat
 | 6 | PHPStan | `phpstan` | 10m |
 | 7 | ESLint and Prettier | `eslint` | 15m |
 
-The `a11y` and `squire-kit` components are the next items on the card. They ship in 0.2.0, so the picture above, drawn before them, does not show them yet:
+The `a11y`, `squire-kit` and `portability` components are the next items on the card. They ship in 0.2.0 (`portability` in its one-job form), so the picture above, drawn before them, does not show them yet:
 
 | # | Item | Job | Timeout |
 | --- | --- | --- | --- |
 | 8 | Accessibility, WCAG 2.1 AA by default | `a11y` | 30 minutes |
 | 9 | Squire deploy kit matches its release | `squire-kit` | 10 minutes |
+| 10 | Runs off Citadel: strict boot and six portability checks | `portability` | 30 minutes |
 
-Every job the templates define is `interruptible: true`. Every component except `portability` takes a `job_name` input whose default is the job's usual name; set it when one project includes the same component more than once. `portability` keeps its two fixed job names, because `portability-run` waits on `portability-build`.
+Every job the templates define is `interruptible: true`. Every component takes a `job_name` input whose default is the job's usual name; set it when one project includes the same component more than once.
 
 ## proctor[#](https://preflight.apps.wayne.edu/docs/reference/components.html#proctor)
 
@@ -296,37 +297,48 @@ From `templates/renovate/template.yml`: the job has no `stage` input and sets no
 
 ## portability[#](https://preflight.apps.wayne.edu/docs/reference/components.html#portability)
 
-Proves the app image meets the twelve-factor boot contract. It builds the image with Buildah (no Docker daemon, no elevated runner), boots it the strict way, and validates it with goss: the health path answers 200 for a foreign Host, the root filesystem and the app root are not writable, the app runs as the declared uid, and each declared writable path is writable. No takeoff without a clean pre-flight.
+Proves the app image runs the way OpenShift, Coolify and plain Docker run it, not only on Citadel (ADR-0010). One job builds the image with Buildah (vfs storage, chroot isolation: no Docker daemon, no privileged runner, no registry), boots it twice side by side as an arbitrary uid in group 0 with no capabilities, and probes it with curl. It fails unless the strict boot holds (no passwd entry for the uid, app root not writable, writable paths writable by group 0, the port variable honored, no writes outside the allowed paths) and six checks pass: `health`, `env-only`, `forwarded-headers`, `logs`, `session-hop` and `sigterm`. See [The portability component](https://preflight.apps.wayne.edu/docs/guides/component-portability.html). No takeoff without a clean pre-flight.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@<full-commit-sha> # <tag, once one ships>
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@<full-commit-sha> # 0.2.0
     inputs:
-      dockerfile: Dockerfile
-      context: .
-      start_command: php -S 0.0.0.0:8080 -t public
+      env: ["APP_KEY=${PORTABILITY_APP_KEY}", "APP_URL=https://myapp.example.edu"]
+      session_login_path: /_portability/login
+      session_check_path: /_portability/me
 ```
 
-Portability ships in 0.1.4 and later (0.1.3 does not include it), so pin the `0.1.4` tag, or the full commit SHA of a commit at or after it. The build job needs a runner that permits user namespaces (Buildah uses unshare for its storage); the run job needs only the project's container registry and an app image that carries curl, sha256sum and tar.
+The one-job form ships in 0.2.0; 0.1.4 carries the earlier two-job form (`portability-build`, `portability-run`). The runner must allow user namespaces, which ordinary unprivileged Docker-executor runners do.
 
 | Input | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `stage` | string | `test` | Pipeline stage for the portability jobs. |
-| `image` | string | `$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA` | App image the portability-run job starts and validates. The default is what portability-build pushes; GitLab expands the CI variables at job time. |
-| `buildah_image` | string | `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb` | Buildah image for the portability-build job; it builds and pushes the app image. |
+| `stage` | string | `test` | Pipeline stage for the portability job. |
+| `job_name` | string | `portability` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb` | Buildah image the job runs in. It builds the app image and runs the probe, so it needs buildah, curl, awk and find. |
 | `dockerfile` | string | `Dockerfile` | Dockerfile to build, relative to the context. |
 | `context` | string | `.` | Build context, relative to the project root. |
+| `build_args` | array | `[]` | Build arguments as `NAME=value`. `$NAME` and `${NAME}` in a value are replaced from the job's variables. |
 | `app_root` | string | `/app` | Directory inside the image where the app lives. |
-| `writable_paths` | array | `["storage", "bootstrap/cache"]` | Paths the app may write to, relative to app_root. Each must be writable by the app user. |
-| `port` | number | `8080` | Port the app listens on inside the container. |
-| `health_path` | string | `/up` | Path the app must answer 200 on for any Host. |
-| `uid` | number | `100123` | Numeric uid the app runs as. The gid is always 0. |
-| `start_command` | string | none | Command that starts the app inside the image. It is app-specific, so it is required and has no default. |
-| `boot_timeout` | number | `60` | Seconds goss retries the health check while the app boots. |
+| `writable_paths` | array | `["storage", "bootstrap/cache"]` | Paths the app may write to, relative to `app_root`. Each must be writable by the uid in group 0. |
+| `runtime_paths` | array | `["/tmp", "/var/tmp", "/run", "/var/run"]` | Absolute paths the platform mounts as tmpfs. Writes there are allowed. |
+| `port` | number | `8080` | Port the app listens on by default. The second replica gets `port + 1` through `port_env`. |
+| `port_env` | string | `PORT` | Environment variable that sets the app's listen port. |
+| `health_path` | string | `/up` | Path that must answer 200 for any Host, before trusted hosts, HTTPS redirects, sessions and auth. |
+| `uid` | number | `100123` | Numeric uid the app runs as, with no `/etc/passwd` entry. The gid is always 0. |
+| `start_command` | string | `""` | Command that starts the app, run with `sh -c`. Empty runs the image's own `ENTRYPOINT` and `CMD`. |
+| `env` | array | `[]` | Environment for both replicas, as `NAME=value` (or `NAME` to pass the job's variable through). Keep secrets in CI/CD variables. |
+| `boot_timeout` | number | `60` | Seconds each replica has to answer the health path. |
+| `stop_timeout` | number | `10` | Seconds the main process has to exit after SIGTERM. |
+| `probe_path` | string | `/` | Page probed with and without forged forwarded headers. |
+| `identity_header` | string | `X-Forwarded-User` | Identity header a gateway would set (forged in `forwarded-headers`). |
+| `session_login_path` | string | `""` | GET path that signs in a test user and sets the session cookie. Needed by `session-hop`. |
+| `session_check_path` | string | `""` | Path that answers 200 only for a signed-in user. Needed by `session-hop`. |
+| `logs_path` | string | `storage/logs` | Directory, relative to `app_root`, where nothing may be written. |
+| `checks` | array | `["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm"]` | The checks to run. Leave one out only on purpose; the strict boot always runs. |
 
-The default is an immutable tag (`-immutable`) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.
+The `image` default is an immutable tag (`-immutable`) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.
 
-From `templates/portability/template.yml`: the component defines two jobs with fixed names. `portability-build` runs in the `buildah_image`, sets `STORAGE_DRIVER: vfs` (the vfs driver needs no special kernel support and runs in an ordinary container), builds the image with `buildah bud`, logs in to the project's container registry, and pushes `$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA`. `portability-run` needs `portability-build`, generates a goss file from the inputs (the goss template is inlined in the job, because a component only ships its `template.yml` to the including project), downloads goss pinned by version and checksum, starts the app with `start_command`, and runs `goss validate` with `--retry-timeout` set to `boot_timeout` seconds. goss runs as the app user (the declared uid, gid 0), so its command checks see the same permissions the app has. Both jobs are `interruptible: true` with a timeout of 30 minutes.
+From `templates/portability/template.yml`: one job, keyed by `job_name`, with `STORAGE_DRIVER: vfs` and `BUILDAH_ISOLATION: chroot`. It writes the inputs to a file through a quoted heredoc, writes the probe (`templates/portability/probe.sh`, inlined byte for byte because a component only ships its `template.yml`), and runs it. The probe prints one `portability: <check>: pass`, `FAIL` or `skipped` line per check and exits 1 on any failure, 2 on an input error. The job is `interruptible: true` with a timeout of 30 minutes.
 
 ## a11y[#](https://preflight.apps.wayne.edu/docs/reference/components.html#a11y)
 

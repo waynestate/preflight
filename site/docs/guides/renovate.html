@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Renovate | Preflight docs</title>
 <meta name="description" content="Preflight owns the stack&#039;s version automation: the shared preset and the component that runs it.">
-<meta name="docs-version" content="0.1.4">
+<meta name="docs-version" content="0.2.0">
 <link rel="stylesheet" href="../../assets/wayne-ui/wayne-ui.css">
 <link rel="stylesheet" href="../../assets/docs.css">
 <link rel="stylesheet" href="../../docs/theme/preflight.css">
@@ -20,7 +20,7 @@
     <a class="brand" href="../../index.html">
       <img src="../../brand/preflight-avatar-256.png" width="36" height="36" alt="">
       <span class="brand__name">PREFLIGHT</span>
-      <span class="brand__tail">0.1.4</span>
+      <span class="brand__tail">0.2.0</span>
     </a>
     <nav class="topnav" aria-label="Site">
       <a class="topnav__section" href="../../index.html#checklist">Checklist</a>
@@ -116,7 +116,7 @@ away from production, so only digest updates are enabled for them: the same
 tag, the exact image. <code>citadel/php-apache</code> is disabled entirely, because
 Squire's own data owns that image.</p>
 <h2 id="pinned-to-immutable-tags">Pinned to immutable tags<a class="docs-heading-link" aria-label="Link to this section" href="#pinned-to-immutable-tags">#</a></h2>
-<p>The <code>quay.io/buildah/stable</code> image (the <code>buildah_image</code> default of the
+<p>The <code>quay.io/buildah/stable</code> image (the <code>image</code> default of the
 portability component) is matched to <code>-immutable</code> tags only. Red Hat re-pushed
 v1.43.5 under the mutable tag and garbage-collected the old digest, which broke
 an image job, so DRAWBRIDGE and SQUIRE now pin the immutable form,
@@ -186,7 +186,7 @@ variable. No hostname is stored in this repository.</p>
   <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#how-it-works">How it works</a></li><li class="docs-toc__item"><a href="#what-auto-merges">What auto-merges</a></li><li class="docs-toc__item"><a href="#what-waits">What waits</a></li><li class="docs-toc__item"><a href="#what-waits-for-review">What waits for review</a></li><li class="docs-toc__item"><a href="#squire-kits">Squire kits</a></li><li class="docs-toc__item"><a href="#why-mysql-and-ha-proxy-get-digests-only">Why MySQL and HA-Proxy get digests only</a></li><li class="docs-toc__item"><a href="#pinned-to-immutable-tags">Pinned to immutable tags</a></li><li class="docs-toc__item"><a href="#set-up-the-user-does-this">Set up (the user does this)</a></li><li class="docs-toc__item"><a href="#the-runner-project">The runner project</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
-  <span>Documents Preflight <span data-docs-version>0.1.4</span></span>
+  <span>Documents Preflight <span data-docs-version>0.2.0</span></span>
   <span><a rel="noopener" href="https://github.com/waynestate/preflight">Source</a> <a href="renovate.md">Markdown</a></span>
 </footer>
 </body>

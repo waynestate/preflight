@@ -9,7 +9,7 @@ Goal: run the same component more than once in one project, for example in a mon
 
 ## Set `job_name`
 
-Every component except `portability` takes a `job_name` input, whose default is the job's usual name. Set it when one project includes the same component more than once, for example in a monorepo with two apps; without it the two jobs would share a name and merge into one.
+Every component takes a `job_name` input, whose default is the job's usual name. Set it when one project includes the same component more than once, for example in a monorepo with two apps; without it the two jobs would share a name and merge into one.
 
 ```yaml
 include:
@@ -26,7 +26,7 @@ include:
 Expected: the pipeline runs two separately named jobs, `pint-app` and `pint-admin`, instead of two jobs that merge into one.
 
 > [!NOTE]
-> `job_name` ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release. `portability` keeps its two fixed job names, because `portability-run` waits on `portability-build`.
+> `job_name` ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release. `portability` gained it with its one-job form, in 0.2.0.
 
 ## Another use: the next PHP release
 
@@ -50,6 +50,6 @@ A red `php-test-next` job is an early warning, not a stop. Drop the `allow_failu
 ## Related
 
 - [The php-test component](component-php-test.md): inputs, caching, and the full next-release example.
-- [The portability component](component-portability.md): the one component without a `job_name` input.
+- [The portability component](component-portability.md): include it once per app image, each with its own `job_name`.
 - [When the components run](when-components-run.md): the `workflow:rules` block that belongs in the app's own file.
 - [Reference](../reference/components.md): every component, with its inputs and defaults.

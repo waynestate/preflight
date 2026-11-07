@@ -302,44 +302,67 @@ include:
 
 #### portability
 
-Proves the app image meets the twelve-factor boot contract. It builds the
-image with Buildah (no Docker daemon, no elevated runner), boots it the
-strict way, and validates it with goss: the health path answers 200 for a
-foreign Host, the root filesystem and the app root are not writable, the app
-runs as the declared uid, and each declared writable path is writable. No
-takeoff without a clean pre-flight.
+Proves the app image runs the way OpenShift, Coolify and plain Docker run it,
+not only on Citadel (ADR-0010). One job builds the image with Buildah (no
+Docker daemon, no privileged runner, no registry push), boots it twice side
+by side as an arbitrary uid in group 0 with no capabilities, and probes it
+with curl. The strict boot must hold (no passwd entry for the uid, app root
+not writable, writable paths writable by group 0, the port variable honored,
+no writes outside the allowed paths), and six checks must pass:
+
+| Check | Passes when |
+|-------|-------------|
+| `health` | The health path answers 200 to `Host: 10.1.2.3:` with no forwarded headers. |
+| `env-only` | No `.env` or config cache is baked in, and the app boots on the environment alone. |
+| `forwarded-headers` | Forged `X-Forwarded-*` and identity headers from an untrusted peer change nothing. |
+| `logs` | Logs reach stdout or stderr, and nothing is written under `logs_path`. |
+| `session-hop` | A sign-in on one replica is still signed in on the other. |
+| `sigterm` | The main process handles SIGTERM and exits by itself within `stop_timeout`. |
+
+No takeoff without a clean pre-flight.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@<full-commit-sha> # <tag, once one ships>
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@<full-commit-sha> # 0.2.0
     inputs:
-      dockerfile: Dockerfile
-      context: .
-      start_command: php -S 0.0.0.0:8080 -t public
+      env: ["APP_KEY=${PORTABILITY_APP_KEY}", "APP_URL=https://myapp.example.edu"]
+      session_login_path: /_portability/login
+      session_check_path: /_portability/me
 ```
 
-Portability ships in 0.1.4 and later (0.1.3 does not include it), so pin the
-`0.1.4` tag, or the full commit SHA of a commit at or after it. The build job needs a runner that permits
-user namespaces (Buildah uses unshare for its storage); the run job needs only
-the project's container registry and an app image that carries curl, sha256sum
-and tar.
+The one-job form ships in 0.2.0 (0.1.4 carries the
+earlier two-job form, `portability-build` and `portability-run`). The runner
+must allow user namespaces, which ordinary unprivileged Docker-executor
+runners do. The guide (`docs/guides/component-portability.md`) has a test
+sign-in route for `session-hop` and what each failure usually means.
 
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
-| `stage` | string | `test` | Pipeline stage for the portability jobs. |
-| `image` | string | `$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA` | App image the portability-run job starts and validates. The default is what portability-build pushes; GitLab expands the CI variables at job time. |
-| `buildah_image` | string | `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb` | Buildah image for the portability-build job; it builds and pushes the app image. |
+| `stage` | string | `test` | Pipeline stage for the portability job. |
+| `job_name` | string | `portability` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb` | Buildah image the job runs in. It builds the app image and runs the probe. |
 | `dockerfile` | string | `Dockerfile` | Dockerfile to build, relative to the context. |
 | `context` | string | `.` | Build context, relative to the project root. |
+| `build_args` | array | `[]` | Build arguments as `NAME=value`; `$NAME` and `${NAME}` are replaced from the job's variables. |
 | `app_root` | string | `/app` | Directory inside the image where the app lives. |
-| `writable_paths` | array | `["storage", "bootstrap/cache"]` | Paths the app may write to, relative to app_root. Each must be writable by the app user. |
-| `port` | number | `8080` | Port the app listens on inside the container. |
-| `health_path` | string | `/up` | Path the app must answer 200 on for any Host. |
-| `uid` | number | `100123` | Numeric uid the app runs as. The gid is always 0. |
-| `start_command` | string | none | Command that starts the app inside the image. It is app-specific, so it is required and has no default. |
-| `boot_timeout` | number | `60` | Seconds goss retries the health check while the app boots. |
+| `writable_paths` | array | `["storage", "bootstrap/cache"]` | Paths the app may write to, relative to `app_root`. Each must be writable by the uid in group 0. |
+| `runtime_paths` | array | `["/tmp", "/var/tmp", "/run", "/var/run"]` | Absolute paths the platform mounts as tmpfs. Writes there are allowed. |
+| `port` | number | `8080` | Port the app listens on by default. The second replica gets `port + 1` through `port_env`. |
+| `port_env` | string | `PORT` | Environment variable that sets the app's listen port. |
+| `health_path` | string | `/up` | Path that must answer 200 for any Host, before trusted hosts, HTTPS redirects, sessions and auth. |
+| `uid` | number | `100123` | Numeric uid the app runs as, with no `/etc/passwd` entry. The gid is always 0. |
+| `start_command` | string | `""` | Command that starts the app, run with `sh -c`. Empty runs the image's own `ENTRYPOINT` and `CMD`. |
+| `env` | array | `[]` | Environment for both replicas, as `NAME=value` (or `NAME` to pass the job's variable through). Keep secrets in CI/CD variables. |
+| `boot_timeout` | number | `60` | Seconds each replica has to answer the health path. |
+| `stop_timeout` | number | `10` | Seconds the main process has to exit after SIGTERM. |
+| `probe_path` | string | `/` | Page probed with and without forged forwarded headers. |
+| `identity_header` | string | `X-Forwarded-User` | Identity header a gateway would set (forged in `forwarded-headers`). |
+| `session_login_path` | string | `""` | GET path that signs in a test user and sets the session cookie. Needed by `session-hop`. |
+| `session_check_path` | string | `""` | Path that answers 200 only for a signed-in user. Needed by `session-hop`. |
+| `logs_path` | string | `storage/logs` | Directory, relative to `app_root`, where nothing may be written. |
+| `checks` | array | `["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm"]` | The checks to run. Leave one out only on purpose; the strict boot always runs. |
 
-The default is an immutable tag (`-immutable`) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.
+The `image` default is an immutable tag (`-immutable`) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.
 
 #### a11y
 
@@ -672,7 +695,7 @@ stay with ops. A job that needs the host's Docker socket to take off has skipped
 
 ### Include a component twice
 
-Every component except `portability` takes a `job_name` input, whose default is the job's usual name. Set it when one
+Every component takes a `job_name` input, whose default is the job's usual name. Set it when one
 project includes the same component more than once, for example in a monorepo with two apps; without it the two jobs
 would share a name and merge into one.
 
@@ -688,8 +711,8 @@ include:
       job_name: pint-admin
 ```
 
-`job_name` ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release. `portability` keeps its two fixed
-job names, because `portability-run` waits on `portability-build`.
+`job_name` ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release. `portability` gained it with its
+one-job form, in 0.2.0.
 
 ### Shared conventions
 
@@ -781,12 +804,16 @@ docker run --rm -v "$(pwd)/tests/fixture-app:/app" -w /app composer:2 composer i
 docker run --rm -v "$(pwd)/tests/fixture-app:/app" -w /app php:8.4-cli vendor/bin/phpunit
 ```
 
-Run the portability fixtures with Docker; they build and boot the three
-fixtures under `tests/portability` the strict way and exit 0 only when `good`
-passes and both `bad-*` fixtures fail:
+Run the portability fixtures with Docker. The check runs the component's own
+probe in its own Buildah image against `tests/portability/app`, once clean
+and once per flaw, and exits 0 only when the clean build passes and each flaw
+fails the check it targets. `seccomp=unconfined` lets Buildah open a user
+namespace; it is not `--privileged`:
 
 ```sh
-sh tests/check-portability.sh
+docker run --rm --security-opt seccomp=unconfined -v "$(pwd):/src:ro" -w /src \
+  quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb \
+  sh tests/check-portability.sh
 ```
 
 ```powershell
@@ -1327,7 +1354,12 @@ All notable changes to PREFLIGHT are recorded here. Entries follow [Keep a Chang
 
 ### Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
-- Added: `scripts/a11y.sh --base-url` and `scripts/a11y.ps1 -BaseUrl` (or `A11Y_BASE_URL`) check a running site locally, as the component's `base_url` input does in CI.
+### 0.2.0 (2026-11-07)[#](https://preflight.apps.wayne.edu/docs/changelog.html#0-2-0-2026-11-07)
+
+- Changed (breaking for 0.1.4 includes of `portability`): the `portability` component is one job that runs the six checks of ADR-0010 decision 5 instead of goss. It builds the image with Buildah (vfs storage, chroot isolation: no Docker daemon, no privileged runner, no registry push), boots it twice side by side as an arbitrary uid in group 0 with no capabilities and no passwd entry, and probes it with curl: the strict boot (app root not writable, writable paths writable by group 0, the port variable honored, no writes outside `writable_paths` and `runtime_paths`), then `health` (200 to `Host: 10.1.2.3:<port>`), `env-only` (no `.env` or config cache in the image), `forwarded-headers` (forged `X-Forwarded-*` and identity headers change nothing), `logs` (stdout or stderr, nothing under `logs_path`), `session-hop` (a sign-in survives a hop to the second replica) and `sigterm` (the main process handles SIGTERM and exits within `stop_timeout`). One `portability: <check>: pass|FAIL|skipped` line per check. The probe is `templates/portability/probe.sh`, inlined in the template byte for byte; new contract test `tests/check-portability-inline` (sh and ps1, with a write mode) keeps the two in step.
+- Changed: `portability` inputs. `buildah_image` is renamed `image` (same default); the app-image `image` input is gone; `start_command` is optional (empty runs the image's `ENTRYPOINT` and `CMD`); new `job_name` (default `portability`), `build_args`, `runtime_paths`, `port_env`, `env`, `stop_timeout`, `probe_path`, `identity_header`, `session_login_path`, `session_check_path`, `logs_path` and `checks`. `contract/inputs.json` lists the new set and the one job; `tests/check-job-names` now covers `portability`, and `tests/check-image-inputs` has no exemptions left.
+- Added: a must-fail proof for `portability`: one fixture app, `tests/portability/app`, built clean and once per flaw (`ARG FLAW`: needs-root, writes-root, fixed-port, host-bound, dotenv, trusts-proxy, file-logs, file-sessions, no-term-handler). `tests/check-portability` (sh, run inside the Buildah image, and a ps1 wrapper that runs it with Docker and `seccomp=unconfined`, never `--privileged`) passes only when the clean build passes and each flaw fails the check it targets. Preflight's pipeline includes the component on the clean fixture and runs the check as `must-fail-portability`.
+- Removed: `templates/portability/goss.yaml`, the goss download, the registry push and the `tests/portability/good`, `bad-needs-root` and `bad-writes-root` fixtures.
 - Changed: The canonical repository is git.wayne.edu (ADR-0021); docs, links and package metadata no longer point at the archived nougat copy.
 - Added: must-fail fixtures for the php-test, phpstan and pint components: `tests/php-test-fails` carries a failing test, `tests/phpstan-fails` carries a type error, and `tests/pint-fails` is not formatted to the standard, while the clean case in `tests/fixture-app` passes all three; new checks `tests/check-php-test-fails`, `tests/check-phpstan-fails` and `tests/check-pint-fails` (sh and ps1) assert each template keeps the job line that lets the tool's exit code be the job result, then run the component's own commands from its template, in the component's own image, against both cases, and pass only when the clean case passes and the bad case fails with the expected finding. The `must-fail-php-test` and `must-fail-phpstan-pint` jobs run them in CI, in the templates' own images, and they still run locally with Docker.
 - Added: the `squire-kit` component (`templates/squire-kit/template.yml`), which fails the pipeline when a Squire deploy kit drifts from the Squire release its `.squire.json` records. It installs that release from Packagist into a temporary folder (`--no-dev --no-scripts`) and runs `squire init --check` on `working_dir`; exit 0 the kit matches, 1 it drifted, 2 the check could not run. Inputs: `stage`, `job_name`, `image`, `working_dir`, `squire_version` (empty or `x.y.z`) and `allow_failure` (default `false`). It checks the recorded version, so a new Squire never turns main red by itself. Preflight's own pipeline runs it on `tests/squire-kit-fixture`, a kit written by `squire init --target=raw`. New contract test `tests/check-squire-kit` (sh and ps1). New docs page: The squire-kit component.
@@ -1358,6 +1390,7 @@ All notable changes to PREFLIGHT are recorded here. Entries follow [Keep a Chang
 - Added: a packageRule in `renovate/default.json` that restricts `quay.io/buildah/stable` to `-immutable` tags (regex versioning), so Renovate never moves a pin back to a mutable tag after Red Hat re-pushed one and garbage-collected the old digest; new test tests/check-renovate-buildah.
 - Changed: the portability component's `buildah_image` default moves to the immutable tag `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb`; Red Hat re-pushed the plain version tag and garbage-collected the old digest, so pipelines pinned to the mutable tag broke. New test tests/check-buildah-pin.
 - Added: an `abandoned` input on the composer-audit component (`fail`, `report` or `ignore`, default `fail`) so an app can relax how `composer audit` treats abandoned packages on purpose; the job now runs `composer audit --locked --abandoned=$[[ inputs.abandoned ]]`. New test tests/check-abandoned-input (and its `.ps1` twin) with the fixtures in tests/audit-fixtures.
+- Fixed: the `portability` probe's `sigterm` check no longer fails, now and then, an app that stops at once. It checked whether the main process was still running in two steps (is its status file there, then is it a zombie), and a process reaped between the two read as running, so a clean exit could be reported as "still running 10s after SIGTERM" without any wait. It now reads the status once, takes its verdict from the same check that ended the wait, and no longer prints a stray `/proc/<pid>/cmdline` error when a process ends while the probe looks at it.
 
 ### 0.1.4 (2026-11-03)[#](https://preflight.apps.wayne.edu/docs/changelog.html#0-1-4-2026-11-03)
 
@@ -2018,89 +2051,126 @@ Source: https://preflight.apps.wayne.edu/docs/guides/component-portability.html
 
 ## The portability component[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#the-portability-component)
 
-The portability component proves your app image meets the twelve-factor boot contract: it builds the image, boots it the strict way, and validates it before anything else gets to run it. Like the real pre-flight, it is a list of checks you finish on the ground before you are cleared for takeoff. Add the include below to your app's `.gitlab-ci.yml`, then read what the two jobs check.
+The portability component proves your app image runs anywhere a container platform runs it: OpenShift, Coolify, plain Docker, and Citadel too. It builds the image, boots it twice side by side as a stranger (an arbitrary uid with no name, in group 0, with no capabilities), and runs the six checks from ADR-0010. Like the real pre-flight, it is a list you finish on the ground: if one light is red, nobody taxis.
 
 ### What it checks[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#what-it-checks)
 
-Proves the app image meets the twelve-factor boot contract. It builds the image with Buildah (no Docker daemon, no elevated runner), boots it the strict way, and validates it with goss: the health path answers 200 for a foreign Host, the root filesystem and the app root are not writable, the app runs as the declared uid, and each declared writable path is writable. No takeoff without a clean pre-flight.
+The strict boot comes first, because every other check stands on it. Then the six checks, each reported on its own line.
 
-This is the twelve-factor boot check from ADR-0010: the app must start as a non-root user, write only to its declared paths, and answer its health path for any Host, not just its own.
+| Check | What it does | What a failure usually means |
+| --- | --- | --- |
+| `strict-boot` | Starts the image as `uid:0` (default `100123:0`) with no `/etc/passwd` entry and every capability dropped. Fails if the app root is writable by that user, if a writable path is missing or not writable by group 0, if the second replica does not listen on the port its `port_env` variable names, or if the app wrote anywhere outside `writable_paths` and `runtime_paths` while it ran (what a read-only root filesystem would refuse). | The image expects root, a named user, a fixed port, or writes caches next to the code. |
+| `health` | Asks for `health_path` with `Host: 10.1.2.3:<port>`, no forwarded headers, at the job's own address, and expects 200. That is what a platform's probe sends. | Trusted-host lists, HTTPS redirects, sessions or auth run before the health route. |
+| `env-only` | Fails on a `.env` file or a Laravel config cache (`bootstrap/cache/config.php`) baked into the image; the app must boot on the `env` input alone. | Config was copied or cached at build time. |
+| `forwarded-headers` | Requests `probe_path` twice: plain, then with forged `X-Forwarded-Host`, `-Proto`, `-Port` and the `identity_header`, sent from an untrusted peer. Fails if the status or `Location` changes or a forged value shows up in the answer. | The app trusts every proxy, so anyone can set its host, scheme or user. |
+| `logs` | Fails if nothing reached stdout or stderr during the run, or if anything was written under `logs_path` (default `storage/logs`). | Logs go to files that vanish with the container. |
+| `session-hop` | Signs in on replica A with `session_login_path`, then sends that cookie to replica B's `session_check_path` and expects 200. The replicas have separate disks. | Sessions live in local files instead of a shared store or a signed cookie. |
+| `sigterm` | Sends SIGTERM to the main process and expects it to exit by itself within `stop_timeout` seconds, as PID 1 must. | The process has no SIGTERM handler (PID 1 ignores the signal by default), or the handler hangs. |
+
+The job prints one `portability: <check>: problem: ...` line per problem as it finds it, then a summary with `pass`, `FAIL` or `skipped` for every check, and passes only when every check that ran passed.
 
 ### Add the include[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#add-the-include)
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@<full-commit-sha> # <tag, once one ships>
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@<full-commit-sha> # 0.2.0
     inputs:
-      dockerfile: Dockerfile
-      context: .
-      start_command: php -S 0.0.0.0:8080 -t public
+      env: ["APP_KEY=${PORTABILITY_APP_KEY}", "APP_URL=https://myapp.example.edu", "SESSION_DRIVER=cookie", "LOG_CHANNEL=stderr"]
+      session_login_path: /_portability/login
+      session_check_path: /_portability/me
 ```
 
 Note
 
-Portability ships in 0.1.4 and later (0.1.3 does not include it), so pin the `0.1.4` tag, or the full commit SHA of a commit at or after it.
+The one-job component on this page ships in 0.2.0. 0.1.4 carries an earlier two-job version (`portability-build` and `portability-run`, checked with goss); see [Upgrading](https://preflight.apps.wayne.edu/docs/upgrading.html). Until the release, pin the full commit SHA.
+
+With no `start_command`, the job runs the image's own `ENTRYPOINT` and `CMD`, exactly as the platforms do. Put secrets such as `APP_KEY` in CI/CD variables and name them in `env`: `$NAME` and `${NAME}` in `env` and `build_args` values are replaced from the job's variables.
 
 Warning
 
-The build job needs a runner that permits user namespaces (Buildah uses unshare for its storage); the run job needs only the project's container registry and an app image that carries curl, sha256sum and tar.
+The runner must allow user namespaces, which Buildah's chroot isolation uses. Ordinary unprivileged Docker-executor runners do; no privileged mode, Docker-in-Docker or registry is needed.
 
-`start_command` is the one input with no default: it is app-specific, so you must set it.
+#### A sign-in route for session-hop[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#a-sign-in-route-for-session-hop)
 
-### How the jobs work[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#how-the-jobs-work)
+`session-hop` needs a GET route that signs in a test user and one that answers 200 only when signed in. Enable them with an environment variable that only this job sets, so they never exist in production. In Laravel (and a Sourdough or WELD app):
 
-The component is two jobs.
+```php
+if (env('PORTABILITY_PROBE') === 'yes') {
+    Route::middleware('web')->group(function () {
+        Route::get('/_portability/login', function () {
+            Auth::login(User::firstOrCreate(['email' => 'portability@example.invalid'], ['name' => 'Portability', 'password' => Str::random(40)]));
 
-`portability-build` builds the image with Buildah, which needs no Docker daemon, and pushes it to the project's container registry. Buildah stores its layers with the vfs driver, which needs no special kernel support and runs in an ordinary container. Both jobs are interruptible and carry `timeout: 30 minutes`.
+            return 'signed in';
+        });
+        Route::get('/_portability/me', fn () => Auth::check() ? 'ok' : abort(401));
+    });
+}
+```
 
-`portability-run` pulls that image, starts the app as an arbitrary uid, and validates it with goss. In order, the job:
+Add `"PORTABILITY_PROBE=yes"` to `env`. An app with no sign-in leaves `session-hop` out of `checks` on purpose; the other checks still run.
 
-1. Generates the goss file from the template and the inputs. The template is the same file the local checks use (`templates/portability/goss.yaml`); it is inlined in the component because a component only ships its `template.yml` to the including project. The `PORT`, `HEALTH_PATH`, `APP_ROOT` and `UID` placeholders are replaced with the inputs, and one command check per writable path is appended.
-2. Downloads goss, pinned by version and checksum (v0.4.10, verified with `sha256sum -c`).
-3. Starts the app in the background with `start_command`, then runs `goss validate` against the generated file, retrying the health check until the app answers or `boot_timeout` seconds expire.
+### How the job works[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#how-the-job-works)
 
-goss runs as the app user (uid, gid 0), so the command checks see the same permissions the app has.
+The component is one job, named by `job_name` (default `portability`). It runs in the Buildah image, pinned by digest, with `STORAGE_DRIVER=vfs` and `BUILDAH_ISOLATION=chroot`, `interruptible: true` and `timeout: 30 minutes`. In order, it:
 
-#### The goss checks[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#the-goss-checks)
+1. Builds the image with `buildah bud`, from `dockerfile` in `context`, with `build_args`. Nothing is pushed: the image stays in the job's own storage.
+2. Reads the image's `ENTRYPOINT` and `CMD`, makes two copies of its filesystem (replicas A and B) and runs the static parts of `strict-boot` and `env-only` on them.
+3. Starts both replicas with `buildah run --user <uid>:0 --cap-drop=ALL` and the `env` input; B gets `port + 1` through `port_env`.
+4. Waits up to `boot_timeout` seconds for each replica's health path, then runs `health`, `env-only`, `forwarded-headers`, `session-hop`, `logs` and `sigterm` with curl.
+5. Stops both replicas and compares what changed on disk against `writable_paths` and `runtime_paths`.
 
-| Check | Command or request | What it asserts |
-| --- | --- | --- |
-| Health path | `http://127.0.0.1:{{PORT}}{{HEALTH_PATH}}`, `method: GET`, request header `Host: portability-check.invalid` | The app answers 200 for a foreign Host, not just its own. |
-| `root-not-writable` | `test ! -w /` | The app cannot write to the root of the filesystem. |
-| `app-root-not-writable` | `test ! -w {{APP_ROOT}}` | The app cannot write to its own root directory. |
-| `runs-as-uid` | `test "$(id -u)" = "{{UID}}"` | The app runs as the declared uid, not root. |
-| One `writable-...` check per entry of `writable_paths` | `test -w <app_root>/<path>` | Each declared writable path is writable by the app user. |
+The probe is `templates/portability/probe.sh`, inlined in the template byte for byte, because a component ships only its `template.yml`. The inputs reach it through a quoted heredoc as data; nothing in them is run except `start_command`.
 
-Note
+#### Why Buildah[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#why-buildah)
 
-goss sends the method as written, so the health check uses upper case `GET`.
+The old runner allowed no Docker-in-Docker, and a privileged runner is a key to the building. Buildah is maintained by Red Hat, builds from a Dockerfile with no daemon, and can also run the image it built, as any uid, with no capabilities, inside an ordinary job. kaniko builds but cannot run a container, and Google archived it in 2025. A GitLab `services:` entry runs an image but cannot set its uid or drop its capabilities, and needs the image pushed to a registry first. Buildah needs neither a push nor a second job.
+
+#### What the job emulates[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#what-the-job-emulates)
+
+The checks run in an unprivileged job, so a few things are emulated rather than enforced by a kernel. Each one fails the same apps the real thing would.
+
+- **Read-only root.** The image is not mounted read-only; the job looks for files written outside the allowed paths after the run. A write is caught, not refused.
+- **PID 1.** `buildah run` starts no PID namespace, so the main process is not PID 1. The job checks that it handles SIGTERM, and fails it when it dies of the signal's default action, which PID 1 would ignore.
+- **No new privileges.** Every capability is dropped, but `buildah run` has no `no-new-privileges` flag. The uid has no passwd entry, so set-uid tools have little to grab.
+- **Networking.** Both replicas share the job's network namespace; the second one listens on `port + 1`.
 
 ### Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#inputs)
 
 | Input | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `stage` | string | `test` | Pipeline stage for the portability jobs. |
-| `image` | string | `$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA` | App image the portability-run job starts and validates. The default is what portability-build pushes; GitLab expands the CI variables at job time. |
-| `buildah_image` | string | `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb` | Buildah image for the portability-build job; it builds and pushes the app image. |
+| `stage` | string | `test` | Pipeline stage for the portability job. |
+| `job_name` | string | `portability` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb` | Buildah image the job runs in. It builds the app image and runs the probe, so it needs buildah, curl, awk and find. |
 | `dockerfile` | string | `Dockerfile` | Dockerfile to build, relative to the context. |
 | `context` | string | `.` | Build context, relative to the project root. |
+| `build_args` | array | `[]` | Build arguments as `NAME=value`. `$NAME` and `${NAME}` in a value are replaced from the job's variables. |
 | `app_root` | string | `/app` | Directory inside the image where the app lives. |
-| `writable_paths` | array | `["storage", "bootstrap/cache"]` | Paths the app may write to, relative to app_root. Each must be writable by the app user. |
-| `port` | number | `8080` | Port the app listens on inside the container. |
-| `health_path` | string | `/up` | Path the app must answer 200 on for any Host. |
-| `uid` | number | `100123` | Numeric uid the app runs as. The gid is always 0. |
-| `start_command` | string | none | Command that starts the app inside the image. It is app-specific, so it is required and has no default. |
-| `boot_timeout` | number | `60` | Seconds goss retries the health check while the app boots. |
+| `writable_paths` | array | `["storage", "bootstrap/cache"]` | Paths the app may write to, relative to `app_root`. Each must be writable by the uid in group 0. |
+| `runtime_paths` | array | `["/tmp", "/var/tmp", "/run", "/var/run"]` | Absolute paths the platform mounts as tmpfs. Writes there are allowed. |
+| `port` | number | `8080` | Port the app listens on by default. The second replica gets `port + 1` through `port_env`. |
+| `port_env` | string | `PORT` | Environment variable that sets the app's listen port. |
+| `health_path` | string | `/up` | Path that must answer 200 for any Host, before trusted hosts, HTTPS redirects, sessions and auth. |
+| `uid` | number | `100123` | Numeric uid the app runs as, with no `/etc/passwd` entry. The gid is always 0. |
+| `start_command` | string | `""` | Command that starts the app, run with `sh -c`. Empty runs the image's own `ENTRYPOINT` and `CMD`. |
+| `env` | array | `[]` | Environment for both replicas, as `NAME=value` (or `NAME` to pass the job's variable through). Keep secrets in CI/CD variables. |
+| `boot_timeout` | number | `60` | Seconds each replica has to answer the health path. |
+| `stop_timeout` | number | `10` | Seconds the main process has to exit after SIGTERM. |
+| `probe_path` | string | `/` | Page probed with and without forged forwarded headers; one that redirects or builds absolute URLs shows the most. |
+| `identity_header` | string | `X-Forwarded-User` | Identity header a gateway would set (forged in `forwarded-headers`). |
+| `session_login_path` | string | `""` | GET path that signs in a test user and sets the session cookie. Needed by `session-hop`. |
+| `session_check_path` | string | `""` | Path that answers 200 only for a signed-in user. Needed by `session-hop`. |
+| `logs_path` | string | `storage/logs` | Directory, relative to `app_root`, where nothing may be written. |
+| `checks` | array | `["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm"]` | The checks to run. Leave one out only on purpose; the strict boot always runs. |
 
-The default is an immutable tag (`-immutable`) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.
+The `image` default is an immutable tag (`-immutable`) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.
 
 ### Verify locally[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#verify-locally)
 
-The goss template is the same file the local checks use. `tests/check-portability.sh` (and its `.ps1` twin) do the placeholder replacement for the fixtures and build and boot the three fixtures under `tests/portability` the strict way; they exit 0 only when `good` passes and both `bad-*` fixtures fail. See [Local checks](https://preflight.apps.wayne.edu/docs/reference/local-checks.html) for the commands.
+`tests/check-portability.sh` (and its `.ps1` twin) run the same probe in the same Buildah image against `tests/portability/app`: once clean, where every check must pass, and once per flaw (needs root, writes outside its paths, fixed port, host-bound health, a baked `.env`, trusts any proxy, file logs, file sessions, no SIGTERM handler), where the targeted check must fail. Preflight's own pipeline runs the component on the clean fixture and this check as `must-fail-portability`. See [Local checks](https://preflight.apps.wayne.edu/docs/reference/local-checks.html) for the commands.
 
 ### Related[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#related)
 
-- [Include a component twice](https://preflight.apps.wayne.edu/docs/guides/include-twice.html): the `job_name` input, and why `portability` keeps its two fixed job names instead.
+- [Include a component twice](https://preflight.apps.wayne.edu/docs/guides/include-twice.html): the `job_name` input.
 - [Same instance only](https://preflight.apps.wayne.edu/docs/guides/same-instance-only.html): components run only inside the GitLab instance that hosts this project.
 - [When the components run](https://preflight.apps.wayne.edu/docs/guides/when-components-run.html): the `workflow:rules` block that belongs in the app's own file.
 - [Reference](https://preflight.apps.wayne.edu/docs/reference/components.html): every component, with its inputs and defaults.
@@ -2585,7 +2655,7 @@ Goal: run the same component more than once in one project, for example in a mon
 
 ### Set `job_name` [#](https://preflight.apps.wayne.edu/docs/guides/include-twice.html#set-job-name)
 
-Every component except `portability` takes a `job_name` input, whose default is the job's usual name. Set it when one project includes the same component more than once, for example in a monorepo with two apps; without it the two jobs would share a name and merge into one.
+Every component takes a `job_name` input, whose default is the job's usual name. Set it when one project includes the same component more than once, for example in a monorepo with two apps; without it the two jobs would share a name and merge into one.
 
 ```yaml
 include:
@@ -2603,7 +2673,7 @@ Expected: the pipeline runs two separately named jobs, `pint-app` and `pint-admi
 
 Note
 
-`job_name` ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release. `portability` keeps its two fixed job names, because `portability-run` waits on `portability-build`.
+`job_name` ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release. `portability` gained it with its one-job form, in 0.2.0.
 
 ### Another use: the next PHP release[#](https://preflight.apps.wayne.edu/docs/guides/include-twice.html#another-use-the-next-php-release)
 
@@ -2627,7 +2697,7 @@ A red `php-test-next` job is an early warning, not a stop. Drop the `allow_failu
 ### Related[#](https://preflight.apps.wayne.edu/docs/guides/include-twice.html#related)
 
 - [The php-test component](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html): inputs, caching, and the full next-release example.
-- [The portability component](https://preflight.apps.wayne.edu/docs/guides/component-portability.html): the one component without a `job_name` input.
+- [The portability component](https://preflight.apps.wayne.edu/docs/guides/component-portability.html): include it once per app image, each with its own `job_name`.
 - [When the components run](https://preflight.apps.wayne.edu/docs/guides/when-components-run.html): the `workflow:rules` block that belongs in the app's own file.
 - [Reference](https://preflight.apps.wayne.edu/docs/reference/components.html): every component, with its inputs and defaults.
 
@@ -2778,7 +2848,7 @@ The `mysql` and `haproxy` images mirror the versions Citadel actually runs, not 
 
 ### Pinned to immutable tags[#](https://preflight.apps.wayne.edu/docs/guides/renovate.html#pinned-to-immutable-tags)
 
-The `quay.io/buildah/stable` image (the `buildah_image` default of the portability component) is matched to `-immutable` tags only. Red Hat re-pushed v1.43.5 under the mutable tag and garbage-collected the old digest, which broke an image job, so DRAWBRIDGE and SQUIRE now pin the immutable form, `v1.43.5-immutable@sha256:...`. The preset carries a packageRule for `quay.io/buildah/stable` with a regex versioning that only matches `vX.Y.Z-immutable` tags, so Renovate proposes updates within the immutable tags and never moves a pin back to a mutable one. Digests stay pinned as before (`docker:pinDigests`).
+The `quay.io/buildah/stable` image (the `image` default of the portability component) is matched to `-immutable` tags only. Red Hat re-pushed v1.43.5 under the mutable tag and garbage-collected the old digest, which broke an image job, so DRAWBRIDGE and SQUIRE now pin the immutable form, `v1.43.5-immutable@sha256:...`. The preset carries a packageRule for `quay.io/buildah/stable` with a regex versioning that only matches `vX.Y.Z-immutable` tags, so Renovate proposes updates within the immutable tags and never moves a pin back to a mutable one. Digests stay pinned as before (`docker:pinDigests`).
 
 ### Set up (the user does this)[#](https://preflight.apps.wayne.edu/docs/guides/renovate.html#set-up-the-user-does-this)
 
@@ -3068,14 +3138,15 @@ The checklist, item by item, with each item's job and timeout read from `templat
 | 6 | PHPStan | `phpstan` | 10m |
 | 7 | ESLint and Prettier | `eslint` | 15m |
 
-The `a11y` and `squire-kit` components are the next items on the card. They ship in 0.2.0, so the picture above, drawn before them, does not show them yet:
+The `a11y`, `squire-kit` and `portability` components are the next items on the card. They ship in 0.2.0 (`portability` in its one-job form), so the picture above, drawn before them, does not show them yet:
 
 | # | Item | Job | Timeout |
 | --- | --- | --- | --- |
 | 8 | Accessibility, WCAG 2.1 AA by default | `a11y` | 30 minutes |
 | 9 | Squire deploy kit matches its release | `squire-kit` | 10 minutes |
+| 10 | Runs off Citadel: strict boot and six portability checks | `portability` | 30 minutes |
 
-Every job the templates define is `interruptible: true`. Every component except `portability` takes a `job_name` input whose default is the job's usual name; set it when one project includes the same component more than once. `portability` keeps its two fixed job names, because `portability-run` waits on `portability-build`.
+Every job the templates define is `interruptible: true`. Every component takes a `job_name` input whose default is the job's usual name; set it when one project includes the same component more than once.
 
 ### proctor[#](https://preflight.apps.wayne.edu/docs/reference/components.html#proctor)
 
@@ -3336,37 +3407,48 @@ From `templates/renovate/template.yml`: the job has no `stage` input and sets no
 
 ### portability[#](https://preflight.apps.wayne.edu/docs/reference/components.html#portability)
 
-Proves the app image meets the twelve-factor boot contract. It builds the image with Buildah (no Docker daemon, no elevated runner), boots it the strict way, and validates it with goss: the health path answers 200 for a foreign Host, the root filesystem and the app root are not writable, the app runs as the declared uid, and each declared writable path is writable. No takeoff without a clean pre-flight.
+Proves the app image runs the way OpenShift, Coolify and plain Docker run it, not only on Citadel (ADR-0010). One job builds the image with Buildah (vfs storage, chroot isolation: no Docker daemon, no privileged runner, no registry), boots it twice side by side as an arbitrary uid in group 0 with no capabilities, and probes it with curl. It fails unless the strict boot holds (no passwd entry for the uid, app root not writable, writable paths writable by group 0, the port variable honored, no writes outside the allowed paths) and six checks pass: `health`, `env-only`, `forwarded-headers`, `logs`, `session-hop` and `sigterm`. See [The portability component](https://preflight.apps.wayne.edu/docs/guides/component-portability.html). No takeoff without a clean pre-flight.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@<full-commit-sha> # <tag, once one ships>
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@<full-commit-sha> # 0.2.0
     inputs:
-      dockerfile: Dockerfile
-      context: .
-      start_command: php -S 0.0.0.0:8080 -t public
+      env: ["APP_KEY=${PORTABILITY_APP_KEY}", "APP_URL=https://myapp.example.edu"]
+      session_login_path: /_portability/login
+      session_check_path: /_portability/me
 ```
 
-Portability ships in 0.1.4 and later (0.1.3 does not include it), so pin the `0.1.4` tag, or the full commit SHA of a commit at or after it. The build job needs a runner that permits user namespaces (Buildah uses unshare for its storage); the run job needs only the project's container registry and an app image that carries curl, sha256sum and tar.
+The one-job form ships in 0.2.0; 0.1.4 carries the earlier two-job form (`portability-build`, `portability-run`). The runner must allow user namespaces, which ordinary unprivileged Docker-executor runners do.
 
 | Input | Type | Default | What it does |
 | --- | --- | --- | --- |
-| `stage` | string | `test` | Pipeline stage for the portability jobs. |
-| `image` | string | `$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA` | App image the portability-run job starts and validates. The default is what portability-build pushes; GitLab expands the CI variables at job time. |
-| `buildah_image` | string | `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb` | Buildah image for the portability-build job; it builds and pushes the app image. |
+| `stage` | string | `test` | Pipeline stage for the portability job. |
+| `job_name` | string | `portability` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb` | Buildah image the job runs in. It builds the app image and runs the probe, so it needs buildah, curl, awk and find. |
 | `dockerfile` | string | `Dockerfile` | Dockerfile to build, relative to the context. |
 | `context` | string | `.` | Build context, relative to the project root. |
+| `build_args` | array | `[]` | Build arguments as `NAME=value`. `$NAME` and `${NAME}` in a value are replaced from the job's variables. |
 | `app_root` | string | `/app` | Directory inside the image where the app lives. |
-| `writable_paths` | array | `["storage", "bootstrap/cache"]` | Paths the app may write to, relative to app_root. Each must be writable by the app user. |
-| `port` | number | `8080` | Port the app listens on inside the container. |
-| `health_path` | string | `/up` | Path the app must answer 200 on for any Host. |
-| `uid` | number | `100123` | Numeric uid the app runs as. The gid is always 0. |
-| `start_command` | string | none | Command that starts the app inside the image. It is app-specific, so it is required and has no default. |
-| `boot_timeout` | number | `60` | Seconds goss retries the health check while the app boots. |
+| `writable_paths` | array | `["storage", "bootstrap/cache"]` | Paths the app may write to, relative to `app_root`. Each must be writable by the uid in group 0. |
+| `runtime_paths` | array | `["/tmp", "/var/tmp", "/run", "/var/run"]` | Absolute paths the platform mounts as tmpfs. Writes there are allowed. |
+| `port` | number | `8080` | Port the app listens on by default. The second replica gets `port + 1` through `port_env`. |
+| `port_env` | string | `PORT` | Environment variable that sets the app's listen port. |
+| `health_path` | string | `/up` | Path that must answer 200 for any Host, before trusted hosts, HTTPS redirects, sessions and auth. |
+| `uid` | number | `100123` | Numeric uid the app runs as, with no `/etc/passwd` entry. The gid is always 0. |
+| `start_command` | string | `""` | Command that starts the app, run with `sh -c`. Empty runs the image's own `ENTRYPOINT` and `CMD`. |
+| `env` | array | `[]` | Environment for both replicas, as `NAME=value` (or `NAME` to pass the job's variable through). Keep secrets in CI/CD variables. |
+| `boot_timeout` | number | `60` | Seconds each replica has to answer the health path. |
+| `stop_timeout` | number | `10` | Seconds the main process has to exit after SIGTERM. |
+| `probe_path` | string | `/` | Page probed with and without forged forwarded headers. |
+| `identity_header` | string | `X-Forwarded-User` | Identity header a gateway would set (forged in `forwarded-headers`). |
+| `session_login_path` | string | `""` | GET path that signs in a test user and sets the session cookie. Needed by `session-hop`. |
+| `session_check_path` | string | `""` | Path that answers 200 only for a signed-in user. Needed by `session-hop`. |
+| `logs_path` | string | `storage/logs` | Directory, relative to `app_root`, where nothing may be written. |
+| `checks` | array | `["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm"]` | The checks to run. Leave one out only on purpose; the strict boot always runs. |
 
-The default is an immutable tag (`-immutable`) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.
+The `image` default is an immutable tag (`-immutable`) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.
 
-From `templates/portability/template.yml`: the component defines two jobs with fixed names. `portability-build` runs in the `buildah_image`, sets `STORAGE_DRIVER: vfs` (the vfs driver needs no special kernel support and runs in an ordinary container), builds the image with `buildah bud`, logs in to the project's container registry, and pushes `$CI_REGISTRY_IMAGE/portability:$CI_COMMIT_SHORT_SHA`. `portability-run` needs `portability-build`, generates a goss file from the inputs (the goss template is inlined in the job, because a component only ships its `template.yml` to the including project), downloads goss pinned by version and checksum, starts the app with `start_command`, and runs `goss validate` with `--retry-timeout` set to `boot_timeout` seconds. goss runs as the app user (the declared uid, gid 0), so its command checks see the same permissions the app has. Both jobs are `interruptible: true` with a timeout of 30 minutes.
+From `templates/portability/template.yml`: one job, keyed by `job_name`, with `STORAGE_DRIVER: vfs` and `BUILDAH_ISOLATION: chroot`. It writes the inputs to a file through a quoted heredoc, writes the probe (`templates/portability/probe.sh`, inlined byte for byte because a component only ships its `template.yml`), and runs it. The probe prints one `portability: <check>: pass`, `FAIL` or `skipped` line per check and exits 1 on any failure, 2 on an input error. The job is `interruptible: true` with a timeout of 30 minutes.
 
 ### a11y[#](https://preflight.apps.wayne.edu/docs/reference/components.html#a11y)
 
@@ -3552,12 +3634,14 @@ docker run --rm -v "$(pwd)/tests/fixture-app:/app" -w /app php:8.4-cli vendor/bi
 
 ### The portability fixtures[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#the-portability-fixtures)
 
-Run the portability fixtures with Docker; they build and boot the three fixtures under `tests/portability` the strict way and exit 0 only when `good` passes and both `bad-*` fixtures fail:
+Run the portability fixtures with Docker. The check runs the component's own probe in the component's own Buildah image against `tests/portability/app`, once clean and once per flaw, and exits 0 only when the clean build passes every check and each flaw fails the check it targets. It takes about two minutes. `--security-opt seccomp=unconfined` lets Buildah open the user namespace that Docker's default seccomp profile refuses; it grants no capabilities and is not `--privileged`.
 
 linux
 
 ```sh
-sh tests/check-portability.sh
+docker run --rm --security-opt seccomp=unconfined -v "$(pwd):/src:ro" -w /src \
+  quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb \
+  sh tests/check-portability.sh
 ```
 
 windows
@@ -3565,6 +3649,8 @@ windows
 ```powershell
 pwsh -File tests/check-portability.ps1
 ```
+
+To run some cases only, set `PORTABILITY_CASES` (for example `-e PORTABILITY_CASES="none sigterm"` on the `docker run`), or pass `-Cases none,sigterm` to the `.ps1`.
 
 ### The accessibility gate[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#the-accessibility-gate)
 
@@ -3582,7 +3668,7 @@ windows
 scripts\a11y.ps1
 ```
 
-Options pick another folder, pages, tags, a running site or a folder for the reports: `--site=DIR --pages='["index.html"]' --tags='["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]' --base-url=URL --report=DIR` (PowerShell: `-Site`, `-Pages`, `-Tags`, `-BaseUrl`, `-Report`). With `--base-url=URL` (or the `A11Y_BASE_URL` environment variable) the gate checks a running site at URL instead of a folder of HTML, as the component's `base_url` input does in CI; `localhost` inside the container is the container itself, so a site on the host is reached as `host.docker.internal`.
+Options pick another folder, pages, tags or a folder for the reports: `--site=DIR --pages='["index.html"]' --tags='["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]' --report=DIR` (PowerShell: `-Site`, `-Pages`, `-Tags`, `-Report`).
 
 ### The accessibility fixtures[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#the-accessibility-fixtures)
 
@@ -3796,7 +3882,7 @@ An included component is a set of ordinary jobs. The app's own `.gitlab-ci.yml` 
 
 #### Two includes of the same component became one job[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#two-includes-of-the-same-component-became-one-job)
 
-Every component except `portability` takes a `job_name` input, whose default is the job's usual name. Without it, two includes of the same component share a job name and merge into one.
+Every component takes a `job_name` input, whose default is the job's usual name. Without it, two includes of the same component share a job name and merge into one.
 
 - **Cause:** one project includes the same component more than once (for example in a monorepo with two apps) without setting `job_name`.
 - **Fix:** set `job_name` on each include, for example `pint-app` and `pint-admin`. `job_name` ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release.
@@ -3892,29 +3978,45 @@ The job reads the registry before publishing. Republishing a version from the sa
 - **Fix:** publish a new version tag instead of moving the old one. Protect the release tags so only maintainers can create or move a tag.
 - **Check:** the job log shows the version already on the manifest and the commit it was published from.
 
-#### portability is not in the pinned ref[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#portability-is-not-in-the-pinned-ref)
+#### portability says an input is unknown[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#portability-says-an-input-is-unknown)
 
-Portability ships in 0.1.4 and later. 0.1.3 does not include it.
+The one-job `portability` component has new inputs, and `buildah_image` is now `image` (the old app-image input is gone).
 
-- **Cause:** the include is pinned to a tag or SHA at or before 0.1.3.
-- **Fix:** pin the `0.1.4` tag, or the full commit SHA of a commit at or after it.
-- **Check:** the pipeline lists `portability-build` and `portability-run`.
+- **Cause:** the include is pinned to 0.1.4, which carries the two-job form (`portability-build`, `portability-run`, goss), or the include still sets `buildah_image`.
+- **Fix:** pin a SHA at or after the one-job form and follow [Upgrading](https://preflight.apps.wayne.edu/docs/upgrading.html): `buildah_image` becomes `image`, and the old app `image` input is gone because nothing is pushed.
+- **Check:** the pipeline lists one job, `portability`.
 
-#### portability-build fails on the runner[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#portability-build-fails-on-the-runner)
+#### portability fails before the build on the runner[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#portability-fails-before-the-build-on-the-runner)
 
-The build job runs Buildah, which uses unshare for its storage.
+Buildah's chroot isolation opens a user namespace.
 
-- **Cause:** the runner does not permit user namespaces.
-- **Fix:** run the build job on a runner that permits user namespaces. The job sets `STORAGE_DRIVER: vfs`, so it needs no special kernel support beyond that.
-- **Check:** the job log shows an unshare failure before the fix, and a successful `buildah bud` after it.
+- **Cause:** the runner (or Docker's seccomp profile on a laptop) refuses user namespaces; the log shows `unshare(CLONE_NEWUSER): Operation not permitted`.
+- **Fix:** run the job on a runner that permits user namespaces, which ordinary unprivileged Docker-executor runners do. Do not make the runner privileged for it. Locally, add `--security-opt seccomp=unconfined` to `docker run`.
+- **Check:** the log reaches `buildah bud` and prints the build steps.
 
-#### portability-run's health check ends in EOF[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#portability-run-s-health-check-ends-in-eof)
+#### portability: health: FAIL on a Laravel app[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#portability-health-fail-on-a-laravel-app)
 
-goss sends the HTTP method as written, and a lower-case one makes the server close the connection, so the health check failed with EOF. The check now uses `method: GET`, fixed in 0.1.4.
+The probe asks for the health path with `Host: 10.1.2.3:<port>`, the way a platform's probe does.
 
-- **Cause:** the include is pinned to a ref before 0.1.4, where the goss health check used a lower-case method.
-- **Fix:** pin 0.1.4 or a SHA at or after it.
-- **Check:** `goss validate` passes the health check instead of ending in EOF.
+- **Cause:** the trusted-hosts middleware, an HTTPS redirect, a session or an auth check runs before the health route.
+- **Fix:** answer the health route before those, for example Laravel's `health: '/up'` route in `bootstrap/app.php`, and exempt it from trusted hosts and HTTPS redirects.
+- **Check:** `portability: health: pass`.
+
+#### portability: sigterm: FAIL[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#portability-sigterm-fail)
+
+The main process must handle SIGTERM and exit by itself within `stop_timeout`, because PID 1 ignores a signal it has no handler for.
+
+- **Cause:** the image `exec`s a server that has no SIGTERM handler (for example `php -S`), or a shell script starts the server without passing the signal on.
+- **Fix:** start the app under an init that forwards signals (`tini`, `dumb-init`) or a server that handles SIGTERM itself (php-fpm, FrankenPHP); in a shell entrypoint, trap TERM and stop the child.
+- **Check:** `portability: sigterm: pass` with `handled SIGTERM and exited by itself`.
+
+#### portability: session-hop: FAIL with "set session_login_path"[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#portability-session-hop-fail-with-set-session-login-path)
+
+`session-hop` needs a route that signs in a test user and one that answers 200 only for a signed-in user.
+
+- **Cause:** `session_login_path` and `session_check_path` are empty, but `session-hop` is in `checks`.
+- **Fix:** add the two routes behind an environment variable only the job sets (see [The portability component](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#a-sign-in-route-for-session-hop)), or, for an app with no sign-in, leave `session-hop` out of `checks`.
+- **Check:** `portability: session-hop: pass`, or `skipped` when left out on purpose.
 
 #### a11y fails on a page that looked fine[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#a11y-fails-on-a-page-that-looked-fine)
 
@@ -3988,13 +4090,13 @@ The preset's Squire rule runs two commands after it bumps `.squire.json`: it ins
 
 ### Local checks[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#local-checks)
 
-#### The portability fixtures fail on permissions[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#the-portability-fixtures-fail-on-permissions)
+#### The portability fixtures fail with "buildah is required"[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#the-portability-fixtures-fail-with-buildah-is-required)
 
-The app user is not the host user that owns the fixtures' temp dir, and goss is downloaded into it. As of 0.1.4 the fixtures make their temp dir mode 0777 and the goss files in it mode 0644.
+`tests/check-portability.sh` runs inside the component's Buildah image, not on the host.
 
-- **Cause:** the checkout is from a ref before 0.1.4.
-- **Fix:** update to 0.1.4 or later, then rerun `sh tests/check-portability.sh` (or the `.ps1` twin).
-- **Check:** the script exits 0: `good` passes and both `bad-*` fixtures fail.
+- **Cause:** the script was run with `sh` on the host.
+- **Fix:** run it through `docker run` in the Buildah image as [Local checks](https://preflight.apps.wayne.edu/docs/reference/local-checks.html) shows, or run `pwsh -File tests/check-portability.ps1` on Windows.
+- **Check:** one result line per case, and the script exits 0.
 
 #### composer ci fails on a stale docs site[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#composer-ci-fails-on-a-stale-docs-site)
 
@@ -4025,17 +4127,29 @@ Source: https://preflight.apps.wayne.edu/docs/upgrading.html
 
 This page is the checklist for moving an app from one Preflight pin to the next, one released version at a time, newest first; every section follows `CHANGELOG.md`. Read the section for the version you are moving to, apply its steps, and verify on the next pipeline. Like a real preflight, the walk takes a few minutes and earns its keep: move the pin only after you have read the version notes.
 
-### Unreleased[#](https://preflight.apps.wayne.edu/docs/upgrading.html#unreleased)
+### 0.2.0[#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-2-0)
+
+#### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking)
+
+The `portability` component is now one job, `portability` (named by a new `job_name` input), instead of `portability-build` and `portability-run`, and it checks what ADR-0010 asks for instead of the goss list. It builds the image with Buildah and runs it in the same job, so nothing is pushed to the container registry and no app image is pulled. Only an app that already includes `portability` from 0.1.4 needs to act:
+
+- `buildah_image` is renamed `image` (same default, the Buildah image pinned by digest); the old `image` input (the app image) is gone.
+- `start_command` is optional: empty runs the image's own `ENTRYPOINT` and `CMD`, the way the platforms do. Keep it only if your image needs a different start.
+- New inputs with defaults: `job_name`, `build_args`, `runtime_paths`, `port_env`, `env`, `stop_timeout`, `probe_path`, `identity_header`, `session_login_path`, `session_check_path`, `logs_path` and `checks`. Set `env` to what the app needs to boot (secrets from CI/CD variables), and either add a test sign-in route for `session-hop` or leave it out of `checks`.
+- Anything that waited on `portability-run` with `needs:` now names `portability`.
+- The app image needs no curl, sha256sum or tar any more; the probe runs outside it.
+
+See [The portability component](https://preflight.apps.wayne.edu/docs/guides/component-portability.html) for the six checks and how to fix each failure.
 
 #### Changed[#](https://preflight.apps.wayne.edu/docs/upgrading.html#changed)
 
-The `portability` component's `buildah_image` default moved from the plain version tag to the immutable tag `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb`: Red Hat re-pushed the plain version tag and garbage-collected the old digest, so a pipeline pinned to it broke. If your app overrides `buildah_image`, point it at an `-immutable` tag pinned by digest too. The `composer-audit` component gains an `abandoned` input (`fail`, `report` or `ignore`) for how `composer audit` treats abandoned packages. No action needed: the default is `fail`, which is what the component already did, so existing pipelines behave exactly as before. A new `a11y` component checks a site's pages with axe-core in Playwright (WCAG 2.1 AA by default; add `wcag22aa` for 2.2 AA). It is opt-in: add its include to start the gate, with `allow_failure: true` while the site fixes its first findings. See [The a11y component](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html). Preflight's own local gate (`scripts/a11y.sh`, `scripts/a11y.ps1`) now runs the component's checker, at 320 px instead of 360 px, with the reflow check; `tools/a11y/` is gone. A new `squire-kit` component fails the pipeline when a Squire deploy kit drifts from the Squire release its `.squire.json` records (`squire init --check`). It is opt-in: run `vendor/bin/squire init --check --path=deploy` first, clean up what it reports, then add the include with `working_dir: deploy`. See [The squire-kit component](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html). The Renovate preset no longer updates files inside a Squire kit (`docker-compose.squire.yml` and `.squire/**`, outside Squire's own `templates/`): those bumps made every kit drift. Its Squire rule now runs `squire update` on the kit in the merge request it opens for a new Squire. The runner must allow those commands: set `squire_kit_tasks: true` on the runner project's `renovate` include. Until it does, each Squire merge request shows an artifact error and needs `vendor/bin/squire update --path=deploy` run by hand, as before. See [Squire kits](https://preflight.apps.wayne.edu/docs/guides/renovate.html#squire-kits). This release needs GitLab 18.7 or later: every component now declares `spec: component:` and prints a `Preflight component` line as its first command, and GitLab accepts that spec key only from 18.7 on. On an older instance, pipeline creation fails on the unknown key, so upgrade GitLab or pin an older Preflight tag.
+The Buildah image default (now the `portability` component's `image` input) moved from the plain version tag to the immutable tag `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb`: Red Hat re-pushed the plain version tag and garbage-collected the old digest, so a pipeline pinned to it broke. If your app overrides it, point it at an `-immutable` tag pinned by digest too. The `composer-audit` component gains an `abandoned` input (`fail`, `report` or `ignore`) for how `composer audit` treats abandoned packages. No action needed: the default is `fail`, which is what the component already did, so existing pipelines behave exactly as before. A new `a11y` component checks a site's pages with axe-core in Playwright (WCAG 2.1 AA by default; add `wcag22aa` for 2.2 AA). It is opt-in: add its include to start the gate, with `allow_failure: true` while the site fixes its first findings. See [The a11y component](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html). Preflight's own local gate (`scripts/a11y.sh`, `scripts/a11y.ps1`) now runs the component's checker, at 320 px instead of 360 px, with the reflow check; `tools/a11y/` is gone. A new `squire-kit` component fails the pipeline when a Squire deploy kit drifts from the Squire release its `.squire.json` records (`squire init --check`). It is opt-in: run `vendor/bin/squire init --check --path=deploy` first, clean up what it reports, then add the include with `working_dir: deploy`. See [The squire-kit component](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html). The Renovate preset no longer updates files inside a Squire kit (`docker-compose.squire.yml` and `.squire/**`, outside Squire's own `templates/`): those bumps made every kit drift. Its Squire rule now runs `squire update` on the kit in the merge request it opens for a new Squire. The runner must allow those commands: set `squire_kit_tasks: true` on the runner project's `renovate` include. Until it does, each Squire merge request shows an artifact error and needs `vendor/bin/squire update --path=deploy` run by hand, as before. See [Squire kits](https://preflight.apps.wayne.edu/docs/guides/renovate.html#squire-kits). This release needs GitLab 18.7 or later: every component now declares `spec: component:` and prints a `Preflight component` line as its first command, and GitLab accepts that spec key only from 18.7 on. On an older instance, pipeline creation fails on the unknown key, so upgrade GitLab or pin an older Preflight tag.
 
 ### 0.1.4[#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-1-4)
 
 Released 2026-11-03. The new pieces are opt-in: the `portability` component, a `job_name` input on every component except `portability`, and a stricter Renovate preset.
 
-#### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking)
+#### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-1)
 
 0.1.4 has no breaking changes: the version adds a component, an input and preset rules, and removes nothing.
 
@@ -4078,7 +4192,7 @@ Push the change and run the app's pipeline. The components are ordinary jobs, so
 
 Released 2026-11-03. Two consumer-facing changes: the `proctor` component installs the app with `--no-plugins --no-scripts`, and the shared Renovate preset stopped auto-merging the pins that every pipeline runs.
 
-#### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-1)
+#### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-2)
 
 0.1.3 has no breaking changes, but the `proctor` job now installs the app's dependencies with `composer install --no-plugins --no-scripts`, so the app's plugins and scripts never run inside the job.
 
@@ -4112,7 +4226,7 @@ Run the pipeline and confirm the jobs run on the new pin. In the runner project,
 
 Released 2026-10-29. The site gained the agent-ready kit (prompt blocks, Markdown twins, llms.txt) from Squire, and the proof page moved to a private site that needs a Wayne State sign-in.
 
-#### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-2)
+#### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-3)
 
 0.1.2 has no breaking changes: the version touches the site, the README and the proof page, not the components.
 
@@ -4137,7 +4251,7 @@ Run the pipeline and confirm the component jobs run on the new pin. PROCTOR's `p
 
 Released 2026-10-29. Two new components: `package-publish`, which publishes a semantic version tag to the GitLab group's built-in Composer registry, and `renovate`, with the shared preset `renovate/default.json`. The reusable GitHub Actions workflow for mirrors ships in this tag too.
 
-#### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-3)
+#### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-4)
 
 0.1.1 has no breaking changes: the version adds components and changes only the repository's own PHPStan config.
 
@@ -4185,7 +4299,7 @@ Run the pipeline. For `package-publish`, the job runs only on tags and reads the
 
 Released 2026-10-27. First tagged release.
 
-#### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-4)
+#### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-5)
 
 0.1.0 is the first tagged release, so there is nothing to break: it is the baseline every later pin moves from.
 

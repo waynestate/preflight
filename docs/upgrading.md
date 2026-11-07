@@ -7,11 +7,23 @@ description: How to move an app from one Preflight pin to the next.
 
 This page is the checklist for moving an app from one Preflight pin to the next, one released version at a time, newest first; every section follows `CHANGELOG.md`. Read the section for the version you are moving to, apply its steps, and verify on the next pipeline. Like a real preflight, the walk takes a few minutes and earns its keep: move the pin only after you have read the version notes.
 
-## Unreleased
+## 0.2.0
+
+### Breaking
+
+The `portability` component is now one job, `portability` (named by a new `job_name` input), instead of `portability-build` and `portability-run`, and it checks what ADR-0010 asks for instead of the goss list. It builds the image with Buildah and runs it in the same job, so nothing is pushed to the container registry and no app image is pulled. Only an app that already includes `portability` from 0.1.4 needs to act:
+
+- `buildah_image` is renamed `image` (same default, the Buildah image pinned by digest); the old `image` input (the app image) is gone.
+- `start_command` is optional: empty runs the image's own `ENTRYPOINT` and `CMD`, the way the platforms do. Keep it only if your image needs a different start.
+- New inputs with defaults: `job_name`, `build_args`, `runtime_paths`, `port_env`, `env`, `stop_timeout`, `probe_path`, `identity_header`, `session_login_path`, `session_check_path`, `logs_path` and `checks`. Set `env` to what the app needs to boot (secrets from CI/CD variables), and either add a test sign-in route for `session-hop` or leave it out of `checks`.
+- Anything that waited on `portability-run` with `needs:` now names `portability`.
+- The app image needs no curl, sha256sum or tar any more; the probe runs outside it.
+
+See [The portability component](guides/component-portability.md) for the six checks and how to fix each failure.
 
 ### Changed
 
-The `portability` component's `buildah_image` default moved from the plain version tag to the immutable tag `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb`: Red Hat re-pushed the plain version tag and garbage-collected the old digest, so a pipeline pinned to it broke. If your app overrides `buildah_image`, point it at an `-immutable` tag pinned by digest too.
+The Buildah image default (now the `portability` component's `image` input) moved from the plain version tag to the immutable tag `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb`: Red Hat re-pushed the plain version tag and garbage-collected the old digest, so a pipeline pinned to it broke. If your app overrides it, point it at an `-immutable` tag pinned by digest too.
 The `composer-audit` component gains an `abandoned` input (`fail`, `report` or `ignore`) for how `composer audit` treats abandoned packages. No action needed: the default is `fail`, which is what the component already did, so existing pipelines behave exactly as before.
 A new `a11y` component checks a site's pages with axe-core in Playwright (WCAG 2.1 AA by default; add `wcag22aa` for 2.2 AA). It is opt-in: add its include to start the gate, with `allow_failure: true` while the site fixes its first findings. See [The a11y component](guides/component-a11y.md). Preflight's own local gate (`scripts/a11y.sh`, `scripts/a11y.ps1`) now runs the component's checker, at 320 px instead of 360 px, with the reflow check; `tools/a11y/` is gone.
 A new `squire-kit` component fails the pipeline when a Squire deploy kit drifts from the Squire release its `.squire.json` records (`squire init --check`). It is opt-in: run `vendor/bin/squire init --check --path=deploy` first, clean up what it reports, then add the include with `working_dir: deploy`. See [The squire-kit component](guides/component-squire-kit.md).

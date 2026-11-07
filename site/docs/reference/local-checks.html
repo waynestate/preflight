@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Local checks | Preflight docs</title>
 <meta name="description" content="How maintainers build, test and release this project with Docker.">
-<meta name="docs-version" content="0.1.4">
+<meta name="docs-version" content="0.2.0">
 <link rel="stylesheet" href="../../assets/wayne-ui/wayne-ui.css">
 <link rel="stylesheet" href="../../assets/docs.css">
 <link rel="stylesheet" href="../../docs/theme/preflight.css">
@@ -20,7 +20,7 @@
     <a class="brand" href="../../index.html">
       <img src="../../brand/preflight-avatar-256.png" width="36" height="36" alt="">
       <span class="brand__name">PREFLIGHT</span>
-      <span class="brand__tail">0.1.4</span>
+      <span class="brand__tail">0.2.0</span>
     </a>
     <nav class="topnav" aria-label="Site">
       <a class="topnav__section" href="../../index.html#checklist">Checklist</a>
@@ -129,11 +129,14 @@ docker run --rm -v &quot;${PWD}:/app&quot; -w /app composer:2 composer ci
 docker run --rm -v &quot;$(pwd)/tests/fixture-app:/app&quot; -w /app php:8.4-cli vendor/bin/phpunit
 </code></pre>
 <h2 id="the-portability-fixtures">The portability fixtures<a class="docs-heading-link" aria-label="Link to this section" href="#the-portability-fixtures">#</a></h2>
-<p>Run the portability fixtures with Docker; they build and boot the three fixtures under <code>tests/portability</code> the strict way and exit 0 only when <code>good</code> passes and both <code>bad-*</code> fixtures fail:</p>
-<div class="docs-tabs" data-tabs="linux|windows"><div class="docs-tabs__panel" data-tab-label="linux"><p class="docs-tabs__label">linux</p><pre tabindex="0"><code class="language-sh">sh tests/check-portability.sh
+<p>Run the portability fixtures with Docker. The check runs the component's own probe in the component's own Buildah image against <code>tests/portability/app</code>, once clean and once per flaw, and exits 0 only when the clean build passes every check and each flaw fails the check it targets. It takes about two minutes. <code>--security-opt seccomp=unconfined</code> lets Buildah open the user namespace that Docker's default seccomp profile refuses; it grants no capabilities and is not <code>--privileged</code>.</p>
+<div class="docs-tabs" data-tabs="linux|windows"><div class="docs-tabs__panel" data-tab-label="linux"><p class="docs-tabs__label">linux</p><pre tabindex="0"><code class="language-sh">docker run --rm --security-opt seccomp=unconfined -v &quot;$(pwd):/src:ro&quot; -w /src \
+  quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb \
+  sh tests/check-portability.sh
 </code></pre></div>
 <div class="docs-tabs__panel" data-tab-label="windows"><p class="docs-tabs__label">windows</p><pre tabindex="0"><code class="language-powershell">pwsh -File tests/check-portability.ps1
 </code></pre></div></div>
+<p>To run some cases only, set <code>PORTABILITY_CASES</code> (for example <code>-e PORTABILITY_CASES=&quot;none sigterm&quot;</code> on the <code>docker run</code>), or pass <code>-Cases none,sigterm</code> to the <code>.ps1</code>.</p>
 <h2 id="the-accessibility-gate">The accessibility gate<a class="docs-heading-link" aria-label="Link to this section" href="#the-accessibility-gate">#</a></h2>
 <p>The site's pages have an accessibility gate: the <code>a11y</code> component's own checker (<code>templates/a11y/check.mjs</code>, axe-core in Playwright), run in Docker with the image and versions pinned in <code>templates/a11y/template.yml</code>, so no host browser is needed and a local run checks the same way as the pipeline. With no options it checks the front page and every docs page at WCAG 2.2 AA, in light and dark mode at 320 px and 1280 px, with the reflow check, and fails on any violation:</p>
 <div class="docs-tabs" data-tabs="linux|windows"><div class="docs-tabs__panel" data-tab-label="linux"><p class="docs-tabs__label">linux</p><pre tabindex="0"><code class="language-sh">sh scripts/a11y.sh
@@ -188,7 +191,7 @@ pwsh -File tests/check-pint-fails.ps1
   <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#the-full-gate">The full gate</a></li><li class="docs-toc__item"><a href="#composer-scripts">Composer scripts</a></li><li class="docs-toc__item"><a href="#the-php-fixture-app">The PHP fixture app</a></li><li class="docs-toc__item"><a href="#the-portability-fixtures">The portability fixtures</a></li><li class="docs-toc__item"><a href="#the-accessibility-gate">The accessibility gate</a></li><li class="docs-toc__item"><a href="#the-accessibility-fixtures">The accessibility fixtures</a></li><li class="docs-toc__item"><a href="#the-must-fail-fixtures">The must-fail fixtures</a></li><li class="docs-toc__item"><a href="#the-squire-kit-checks">The Squire kit checks</a></li><li class="docs-toc__item"><a href="#proof">Proof</a></li><li class="docs-toc__item"><a href="#docs">Docs</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
-  <span>Documents Preflight <span data-docs-version>0.1.4</span></span>
+  <span>Documents Preflight <span data-docs-version>0.2.0</span></span>
   <span><a rel="noopener" href="https://github.com/waynestate/preflight">Source</a> <a href="local-checks.md">Markdown</a></span>
 </footer>
 </body>
