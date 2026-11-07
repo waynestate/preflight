@@ -10,7 +10,7 @@ generator: Squire agent-ready
 
 This page is the checklist for moving an app from one Preflight pin to the next, one released version at a time, newest first; every section follows `CHANGELOG.md`. Read the section for the version you are moving to, apply its steps, and verify on the next pipeline. Like a real preflight, the walk takes a few minutes and earns its keep: move the pin only after you have read the version notes.
 
-## Unreleased[#](https://preflight.apps.wayne.edu/docs/upgrading.html#unreleased)
+## 0.2.0[#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-2-0)
 
 ### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking)
 

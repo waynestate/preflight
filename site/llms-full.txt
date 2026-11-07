@@ -323,14 +323,14 @@ No takeoff without a clean pre-flight.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@<full-commit-sha> # <tag, once one ships>
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@<full-commit-sha> # 0.2.0
     inputs:
       env: ["APP_KEY=${PORTABILITY_APP_KEY}", "APP_URL=https://myapp.example.edu"]
       session_login_path: /_portability/login
       session_check_path: /_portability/me
 ```
 
-The one-job form ships in the first release after 0.1.4 (0.1.4 carries the
+The one-job form ships in 0.2.0 (0.1.4 carries the
 earlier two-job form, `portability-build` and `portability-run`). The runner
 must allow user namespaces, which ordinary unprivileged Docker-executor
 runners do. The guide (`docs/guides/component-portability.md`) has a test
@@ -712,7 +712,7 @@ include:
 ```
 
 `job_name` ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release. `portability` gained it with its
-one-job form, in the first release after 0.1.4.
+one-job form, in 0.2.0.
 
 ### Shared conventions
 
@@ -1353,6 +1353,8 @@ Source: https://preflight.apps.wayne.edu/docs/changelog.html
 All notable changes to PREFLIGHT are recorded here. Entries follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); released versions are Git tags.
 
 ### Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
+
+### 0.2.0 (2026-11-07)[#](https://preflight.apps.wayne.edu/docs/changelog.html#0-2-0-2026-11-07)
 
 - Changed (breaking for 0.1.4 includes of `portability`): the `portability` component is one job that runs the six checks of ADR-0010 decision 5 instead of goss. It builds the image with Buildah (vfs storage, chroot isolation: no Docker daemon, no privileged runner, no registry push), boots it twice side by side as an arbitrary uid in group 0 with no capabilities and no passwd entry, and probes it with curl: the strict boot (app root not writable, writable paths writable by group 0, the port variable honored, no writes outside `writable_paths` and `runtime_paths`), then `health` (200 to `Host: 10.1.2.3:<port>`), `env-only` (no `.env` or config cache in the image), `forwarded-headers` (forged `X-Forwarded-*` and identity headers change nothing), `logs` (stdout or stderr, nothing under `logs_path`), `session-hop` (a sign-in survives a hop to the second replica) and `sigterm` (the main process handles SIGTERM and exits within `stop_timeout`). One `portability: <check>: pass|FAIL|skipped` line per check. The probe is `templates/portability/probe.sh`, inlined in the template byte for byte; new contract test `tests/check-portability-inline` (sh and ps1, with a write mode) keeps the two in step.
 - Changed: `portability` inputs. `buildah_image` is renamed `image` (same default); the app-image `image` input is gone; `start_command` is optional (empty runs the image's `ENTRYPOINT` and `CMD`); new `job_name` (default `portability`), `build_args`, `runtime_paths`, `port_env`, `env`, `stop_timeout`, `probe_path`, `identity_header`, `session_login_path`, `session_check_path`, `logs_path` and `checks`. `contract/inputs.json` lists the new set and the one job; `tests/check-job-names` now covers `portability`, and `tests/check-image-inputs` has no exemptions left.
@@ -2070,7 +2072,7 @@ The job prints one `portability: <check>: problem: ...` line per problem as it f
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@<full-commit-sha> # <tag, once one ships>
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@<full-commit-sha> # 0.2.0
     inputs:
       env: ["APP_KEY=${PORTABILITY_APP_KEY}", "APP_URL=https://myapp.example.edu", "SESSION_DRIVER=cookie", "LOG_CHANNEL=stderr"]
       session_login_path: /_portability/login
@@ -2079,7 +2081,7 @@ include:
 
 Note
 
-The one-job component on this page ships in the first release after 0.1.4. 0.1.4 carries an earlier two-job version (`portability-build` and `portability-run`, checked with goss); see [Upgrading](https://preflight.apps.wayne.edu/docs/upgrading.html). Until the release, pin the full commit SHA.
+The one-job component on this page ships in 0.2.0. 0.1.4 carries an earlier two-job version (`portability-build` and `portability-run`, checked with goss); see [Upgrading](https://preflight.apps.wayne.edu/docs/upgrading.html). Until the release, pin the full commit SHA.
 
 With no `start_command`, the job runs the image's own `ENTRYPOINT` and `CMD`, exactly as the platforms do. Put secrets such as `APP_KEY` in CI/CD variables and name them in `env`: `$NAME` and `${NAME}` in `env` and `build_args` values are replaced from the job's variables.
 
@@ -2670,7 +2672,7 @@ Expected: the pipeline runs two separately named jobs, `pint-app` and `pint-admi
 
 Note
 
-`job_name` ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release. `portability` gained it with its one-job form, in the first release after 0.1.4.
+`job_name` ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release. `portability` gained it with its one-job form, in 0.2.0.
 
 ### Another use: the next PHP release[#](https://preflight.apps.wayne.edu/docs/guides/include-twice.html#another-use-the-next-php-release)
 
@@ -3408,14 +3410,14 @@ Proves the app image runs the way OpenShift, Coolify and plain Docker run it, no
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@<full-commit-sha> # <tag, once one ships>
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@<full-commit-sha> # 0.2.0
     inputs:
       env: ["APP_KEY=${PORTABILITY_APP_KEY}", "APP_URL=https://myapp.example.edu"]
       session_login_path: /_portability/login
       session_check_path: /_portability/me
 ```
 
-The one-job form ships in the first release after 0.1.4; 0.1.4 carries the earlier two-job form (`portability-build`, `portability-run`). The runner must allow user namespaces, which ordinary unprivileged Docker-executor runners do.
+The one-job form ships in 0.2.0; 0.1.4 carries the earlier two-job form (`portability-build`, `portability-run`). The runner must allow user namespaces, which ordinary unprivileged Docker-executor runners do.
 
 | Input | Type | Default | What it does |
 | --- | --- | --- | --- |
@@ -4124,7 +4126,7 @@ Source: https://preflight.apps.wayne.edu/docs/upgrading.html
 
 This page is the checklist for moving an app from one Preflight pin to the next, one released version at a time, newest first; every section follows `CHANGELOG.md`. Read the section for the version you are moving to, apply its steps, and verify on the next pipeline. Like a real preflight, the walk takes a few minutes and earns its keep: move the pin only after you have read the version notes.
 
-### Unreleased[#](https://preflight.apps.wayne.edu/docs/upgrading.html#unreleased)
+### 0.2.0[#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-2-0)
 
 #### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking)
 

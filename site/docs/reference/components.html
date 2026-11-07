@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Components | Preflight docs</title>
 <meta name="description" content="Every component, with its include example, inputs and defaults.">
-<meta name="docs-version" content="0.1.4">
+<meta name="docs-version" content="0.2.0">
 <link rel="stylesheet" href="../../assets/wayne-ui/wayne-ui.css">
 <link rel="stylesheet" href="../../assets/docs.css">
 <link rel="stylesheet" href="../../docs/theme/preflight.css">
@@ -20,7 +20,7 @@
     <a class="brand" href="../../index.html">
       <img src="../../brand/preflight-avatar-256.png" width="36" height="36" alt="">
       <span class="brand__name">PREFLIGHT</span>
-      <span class="brand__tail">0.1.4</span>
+      <span class="brand__tail">0.2.0</span>
     </a>
     <nav class="topnav" aria-label="Site">
       <a class="topnav__section" href="../../index.html#checklist">Checklist</a>
@@ -699,13 +699,13 @@ php-test-next:
 <h2 id="portability">portability<a class="docs-heading-link" aria-label="Link to this section" href="#portability">#</a></h2>
 <p>Proves the app image runs the way OpenShift, Coolify and plain Docker run it, not only on Citadel (ADR-0010). One job builds the image with Buildah (vfs storage, chroot isolation: no Docker daemon, no privileged runner, no registry), boots it twice side by side as an arbitrary uid in group 0 with no capabilities, and probes it with curl. It fails unless the strict boot holds (no passwd entry for the uid, app root not writable, writable paths writable by group 0, the port variable honored, no writes outside the allowed paths) and six checks pass: <code>health</code>, <code>env-only</code>, <code>forwarded-headers</code>, <code>logs</code>, <code>session-hop</code> and <code>sigterm</code>. See <a href="../guides/component-portability.html">The portability component</a>. No takeoff without a clean pre-flight.</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@&lt;full-commit-sha&gt; # &lt;tag, once one ships&gt;
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@&lt;full-commit-sha&gt; # 0.2.0
     inputs:
       env: [&quot;APP_KEY=${PORTABILITY_APP_KEY}&quot;, &quot;APP_URL=https://myapp.example.edu&quot;]
       session_login_path: /_portability/login
       session_check_path: /_portability/me
 </code></pre>
-<p>The one-job form ships in the first release after 0.1.4; 0.1.4 carries the earlier two-job form (<code>portability-build</code>, <code>portability-run</code>). The runner must allow user namespaces, which ordinary unprivileged Docker-executor runners do.</p>
+<p>The one-job form ships in 0.2.0; 0.1.4 carries the earlier two-job form (<code>portability-build</code>, <code>portability-run</code>). The runner must allow user namespaces, which ordinary unprivileged Docker-executor runners do.</p>
 <div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
 <thead>
 <tr>
@@ -1041,7 +1041,7 @@ php-test-next:
   <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#proctor">proctor</a></li><li class="docs-toc__item"><a href="#php-test">php-test</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#caching">Caching</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#try-the-next-php-release-without-breaking-the-pipeline">Try the next PHP release without breaking the pipeline</a></li><li class="docs-toc__item"><a href="#composer-audit">composer-audit</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#run-it-on-a-schedule">Run it on a schedule</a></li><li class="docs-toc__item"><a href="#sbom">sbom</a></li><li class="docs-toc__item"><a href="#pint">pint</a></li><li class="docs-toc__item"><a href="#phpstan">phpstan</a></li><li class="docs-toc__item"><a href="#eslint">eslint</a></li><li class="docs-toc__item"><a href="#secret-detection">secret-detection</a></li><li class="docs-toc__item"><a href="#package-publish">package-publish</a></li><li class="docs-toc__item"><a href="#renovate">renovate</a></li><li class="docs-toc__item"><a href="#portability">portability</a></li><li class="docs-toc__item"><a href="#a11y">a11y</a></li><li class="docs-toc__item"><a href="#squire-kit">squire-kit</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
-  <span>Documents Preflight <span data-docs-version>0.1.4</span></span>
+  <span>Documents Preflight <span data-docs-version>0.2.0</span></span>
   <span><a rel="noopener" href="https://github.com/waynestate/preflight">Source</a> <a href="components.md">Markdown</a></span>
 </footer>
 </body>
