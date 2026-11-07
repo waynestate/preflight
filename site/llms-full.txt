@@ -790,6 +790,20 @@ pwsh -File tests/check-portability.ps1
 
 The site's pages have an accessibility gate: the `a11y` component's own checker, run in Docker with the image and versions pinned in its template, so no host browser is needed and a local run checks the same way as the pipeline. `sh scripts/a11y.sh` on Linux and macOS, `scripts/a11y.ps1` in PowerShell on Windows. It checks the front page and every docs page at WCAG 2.2 AA in light and dark mode at 320 px and 1280 px, with the reflow check, and fails on any violation. `tests/check-a11y.sh` (and `.ps1`) prove the checker passes a clean fixture site and fails a known-bad one.
 
+Run the must-fail fixtures with Docker; each proves its component (`php-test`, `phpstan`, `pint`) still fails a bad app and passes a clean one, running the component's own commands from its template in the component's own image. The `must-fail-php-test` and `must-fail-phpstan-pint` jobs run the same checks in CI, in the components' own images, so they need no Docker there. Locally, run them with Docker:
+
+```sh
+docker run --rm -v "$(pwd):/app" -w /app php:8.3-cli-trixie sh tests/check-php-test-fails.sh
+docker run --rm -v "$(pwd):/app" -w /app composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc sh tests/check-phpstan-fails.sh
+docker run --rm -v "$(pwd):/app" -w /app composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc sh tests/check-pint-fails.sh
+```
+
+```powershell
+pwsh -File tests/check-php-test-fails.ps1
+pwsh -File tests/check-phpstan-fails.ps1
+pwsh -File tests/check-pint-fails.ps1
+```
+
 ### The cast
 
 ---
@@ -1308,6 +1322,7 @@ All notable changes to PREFLIGHT are recorded here. Entries follow [Keep a Chang
 
 ### Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Added: must-fail fixtures for the php-test, phpstan and pint components: `tests/php-test-fails` carries a failing test, `tests/phpstan-fails` carries a type error, and `tests/pint-fails` is not formatted to the standard, while the clean case in `tests/fixture-app` passes all three; new checks `tests/check-php-test-fails`, `tests/check-phpstan-fails` and `tests/check-pint-fails` (sh and ps1) assert each template keeps the job line that lets the tool's exit code be the job result, then run the component's own commands from its template, in the component's own image, against both cases, and pass only when the clean case passes and the bad case fails with the expected finding. The `must-fail-php-test` and `must-fail-phpstan-pint` jobs run them in CI, in the templates' own images, and they still run locally with Docker.
 - Added: the `squire-kit` component (`templates/squire-kit/template.yml`), which fails the pipeline when a Squire deploy kit drifts from the Squire release its `.squire.json` records. It installs that release from Packagist into a temporary folder (`--no-dev --no-scripts`) and runs `squire init --check` on `working_dir`; exit 0 the kit matches, 1 it drifted, 2 the check could not run. Inputs: `stage`, `job_name`, `image`, `working_dir`, `squire_version` (empty or `x.y.z`) and `allow_failure` (default `false`). It checks the recorded version, so a new Squire never turns main red by itself. Preflight's own pipeline runs it on `tests/squire-kit-fixture`, a kit written by `squire init --target=raw`. New contract test `tests/check-squire-kit` (sh and ps1). New docs page: The squire-kit component.
 - Added: the preset's `waynestate/squire` rule runs `postUpgradeTasks`: it installs the new Squire into a folder under `/tmp` and runs `squire update` on the kit folder, so the merge request for a new Squire carries the refreshed kit. The renovate component gains a `squire_kit_tasks` input (boolean, default `false`) that writes the two allowed command patterns into the runner's `config.js` (`allowedCommands`); with it off the merge request bumps the version only and shows an artifact error. No shell executor is turned on. New contract test `tests/check-renovate-squire-kit` (sh and ps1) pins the commands, the patterns and 22 hostile variants they must refuse; `tests/check-renovate-review` no longer forbids `postUpgradeTasks`.
 - Fixed: Renovate no longer updates files inside a Squire kit (`docker-compose.squire.yml` and `.squire/**`, outside Squire's own `templates/`). Its digest and tag bumps edited files Squire owns, which left every stack kit drifted from its recorded release and made `squire update` refuse to refresh them. Change those images in Squire's templates instead.
@@ -3579,6 +3594,26 @@ pwsh -File tests/check-a11y.ps1
 ```
 
 `tests/check-a11y-inline.sh` (and `.ps1`) checks that the heredoc in the template is a byte-for-byte copy of `templates/a11y/check.mjs`; the contract job runs it. After editing `check.mjs`, run `sh tests/check-a11y-inline.sh --write` (PowerShell: `tests\check-a11y-inline.ps1 -Write`) to copy it into the template.
+
+### The must-fail fixtures[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#the-must-fail-fixtures)
+
+`tests/check-php-test-fails.sh`, `tests/check-phpstan-fails.sh` and `tests/check-pint-fails.sh` (each with a `.ps1` twin) prove the `php-test`, `phpstan` and `pint` components still fail a bad app and pass a clean one. Each asserts its template keeps the job line it promises, then runs the component's own commands from its template, in the component's own image, against the clean case in `tests/fixture-app` and the must-fail case in its fixture (`tests/php-test-fails`, `tests/phpstan-fails`, `tests/pint-fails`), in a copy in a temp dir. They exit 0 only when the clean case passes and the bad case fails with the expected finding. The `.sh` is the payload of a container; the `.ps1` runs it with Docker. They need Docker; the contract job does not run them.
+
+linux
+
+```sh
+docker run --rm -v "$(pwd):/app" -w /app php:8.3-cli-trixie sh tests/check-php-test-fails.sh
+docker run --rm -v "$(pwd):/app" -w /app composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc sh tests/check-phpstan-fails.sh
+docker run --rm -v "$(pwd):/app" -w /app composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc sh tests/check-pint-fails.sh
+```
+
+windows
+
+```powershell
+pwsh -File tests/check-php-test-fails.ps1
+pwsh -File tests/check-phpstan-fails.ps1
+pwsh -File tests/check-pint-fails.ps1
+```
 
 ### The Squire kit checks[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#the-squire-kit-checks)
 

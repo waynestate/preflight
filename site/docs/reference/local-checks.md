@@ -130,6 +130,26 @@ pwsh -File tests/check-a11y.ps1
 
 `tests/check-a11y-inline.sh` (and `.ps1`) checks that the heredoc in the template is a byte-for-byte copy of `templates/a11y/check.mjs`; the contract job runs it. After editing `check.mjs`, run `sh tests/check-a11y-inline.sh --write` (PowerShell: `tests\check-a11y-inline.ps1 -Write`) to copy it into the template.
 
+## The must-fail fixtures[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#the-must-fail-fixtures)
+
+`tests/check-php-test-fails.sh`, `tests/check-phpstan-fails.sh` and `tests/check-pint-fails.sh` (each with a `.ps1` twin) prove the `php-test`, `phpstan` and `pint` components still fail a bad app and pass a clean one. Each asserts its template keeps the job line it promises, then runs the component's own commands from its template, in the component's own image, against the clean case in `tests/fixture-app` and the must-fail case in its fixture (`tests/php-test-fails`, `tests/phpstan-fails`, `tests/pint-fails`), in a copy in a temp dir. They exit 0 only when the clean case passes and the bad case fails with the expected finding. The `.sh` is the payload of a container; the `.ps1` runs it with Docker. They need Docker; the contract job does not run them.
+
+linux
+
+```sh
+docker run --rm -v "$(pwd):/app" -w /app php:8.3-cli-trixie sh tests/check-php-test-fails.sh
+docker run --rm -v "$(pwd):/app" -w /app composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc sh tests/check-phpstan-fails.sh
+docker run --rm -v "$(pwd):/app" -w /app composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc sh tests/check-pint-fails.sh
+```
+
+windows
+
+```powershell
+pwsh -File tests/check-php-test-fails.ps1
+pwsh -File tests/check-phpstan-fails.ps1
+pwsh -File tests/check-pint-fails.ps1
+```
+
 ## The Squire kit checks[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#the-squire-kit-checks)
 
 `tests/check-renovate-squire-kit.sh` (and `.ps1`) checks the preset's Squire rule: the exact two post-upgrade commands, the kit-files rule, and the `squire_kit_tasks` allow-list the renovate component writes. It compiles the commands for sample upgrades and checks that each one matches an allowed pattern, and that 22 hostile variants (shell operators, `..` paths, another package or tool, an extra flag) match none. `tests/check-squire-kit.sh` (and `.ps1`) checks the `squire-kit` template: the version it reads, the install flags, `squire init --check` and its exit codes. The contract job runs both `.sh` files; the job itself runs on `tests/squire-kit-fixture` in Preflight's own pipeline.
