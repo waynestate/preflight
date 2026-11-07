@@ -34,5 +34,6 @@ Pins change only through a reviewed merge request.
 
 ## Related[#](https://preflight.apps.wayne.edu/docs/guides/image-pins.html#related)
 
+- [Dependency caching](https://preflight.apps.wayne.edu/docs/guides/dependency-caching.html): the `image_prefix` input in front of each pin, and the package caches.
 - [Template lint](https://preflight.apps.wayne.edu/docs/guides/template-lint.html): the unsafe CI patterns `composer ci` scans for before the fixture tests.
 - [Shared conventions](https://preflight.apps.wayne.edu/docs/reference/conventions.html): Composer vendor, license, PHP floor and JavaScript installs.

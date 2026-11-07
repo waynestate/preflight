@@ -7,6 +7,19 @@ description: How to move an app from one Preflight pin to the next.
 
 This page is the checklist for moving an app from one Preflight pin to the next, one released version at a time, newest first; every section follows `CHANGELOG.md`. Read the section for the version you are moving to, apply its steps, and verify on the next pipeline. Like a real preflight, the walk takes a few minutes and earns its keep: move the pin only after you have read the version notes.
 
+## Unreleased
+
+### Breaking
+
+Every component whose image comes from Docker Hub now pulls `image_prefix/image`, and `image_prefix` defaults to your group's Dependency Proxy (`${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}`). `image` keeps its default and is the path after the prefix. Only an app that overrides `image` needs to act:
+
+1. If the override was `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/<image>` only to reach the proxy, delete the `image:` input; the default does the same.
+2. If it names a different Docker Hub image, drop the `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/` part and keep the rest.
+3. If it names another registry, move the host and path into `image_prefix` and keep the rest in `image`.
+4. On a GitLab or group without the proxy, set `image_prefix: docker.io`.
+
+Verify: the job log's `Pulling docker image` line shows the prefix once. See [Dependency caching](guides/dependency-caching.md).
+
 ## 0.2.0
 
 ### Breaking

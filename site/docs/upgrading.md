@@ -10,9 +10,22 @@ generator: Squire agent-ready
 
 This page is the checklist for moving an app from one Preflight pin to the next, one released version at a time, newest first; every section follows `CHANGELOG.md`. Read the section for the version you are moving to, apply its steps, and verify on the next pipeline. Like a real preflight, the walk takes a few minutes and earns its keep: move the pin only after you have read the version notes.
 
-## 0.2.0[#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-2-0)
+## Unreleased[#](https://preflight.apps.wayne.edu/docs/upgrading.html#unreleased)
 
 ### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking)
+
+Every component whose image comes from Docker Hub now pulls `image_prefix/image`, and `image_prefix` defaults to your group's Dependency Proxy (`${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}`). `image` keeps its default and is the path after the prefix. Only an app that overrides `image` needs to act:
+
+1. If the override was `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/<image>` only to reach the proxy, delete the `image:` input; the default does the same.
+2. If it names a different Docker Hub image, drop the `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/` part and keep the rest.
+3. If it names another registry, move the host and path into `image_prefix` and keep the rest in `image`.
+4. On a GitLab or group without the proxy, set `image_prefix: docker.io`.
+
+Verify: the job log's `Pulling docker image` line shows the prefix once. See [Dependency caching](https://preflight.apps.wayne.edu/docs/guides/dependency-caching.html).
+
+## 0.2.0[#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-2-0)
+
+### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-1)
 
 The `portability` component is now one job, `portability` (named by a new `job_name` input), instead of `portability-build` and `portability-run`, and it checks what ADR-0010 asks for instead of the goss list. It builds the image with Buildah and runs it in the same job, so nothing is pushed to the container registry and no app image is pulled. Only an app that already includes `portability` from 0.1.4 needs to act:
 
@@ -32,7 +45,7 @@ The Buildah image default (now the `portability` component's `image` input) move
 
 Released 2026-11-03. The new pieces are opt-in: the `portability` component, a `job_name` input on every component except `portability`, and a stricter Renovate preset.
 
-### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-1)
+### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-2)
 
 0.1.4 has no breaking changes: the version adds a component, an input and preset rules, and removes nothing.
 
@@ -75,7 +88,7 @@ Push the change and run the app's pipeline. The components are ordinary jobs, so
 
 Released 2026-11-03. Two consumer-facing changes: the `proctor` component installs the app with `--no-plugins --no-scripts`, and the shared Renovate preset stopped auto-merging the pins that every pipeline runs.
 
-### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-2)
+### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-3)
 
 0.1.3 has no breaking changes, but the `proctor` job now installs the app's dependencies with `composer install --no-plugins --no-scripts`, so the app's plugins and scripts never run inside the job.
 
@@ -109,7 +122,7 @@ Run the pipeline and confirm the jobs run on the new pin. In the runner project,
 
 Released 2026-10-29. The site gained the agent-ready kit (prompt blocks, Markdown twins, llms.txt) from Squire, and the proof page moved to a private site that needs a Wayne State sign-in.
 
-### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-3)
+### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-4)
 
 0.1.2 has no breaking changes: the version touches the site, the README and the proof page, not the components.
 
@@ -134,7 +147,7 @@ Run the pipeline and confirm the component jobs run on the new pin. PROCTOR's `p
 
 Released 2026-10-29. Two new components: `package-publish`, which publishes a semantic version tag to the GitLab group's built-in Composer registry, and `renovate`, with the shared preset `renovate/default.json`. The reusable GitHub Actions workflow for mirrors ships in this tag too.
 
-### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-4)
+### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-5)
 
 0.1.1 has no breaking changes: the version adds components and changes only the repository's own PHPStan config.
 
@@ -182,7 +195,7 @@ Run the pipeline. For `package-publish`, the job runs only on tags and reads the
 
 Released 2026-10-27. First tagged release.
 
-### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-5)
+### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-6)
 
 0.1.0 is the first tagged release, so there is nothing to break: it is the baseline every later pin moves from.
 

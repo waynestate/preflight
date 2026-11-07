@@ -28,6 +28,7 @@ include:
 | `stage` | string | `test` | Pipeline stage for the jobs. |
 | `job_name` | string | `php-test` | Name of the job. Set it when you include this component more than once. |
 | `image` | string | `php:${PHP_VERSION}-cli-trixie` | Docker image for the jobs. The default carries the literal `${PHP_VERSION}`, which GitLab expands in the image at job time. |
+| `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `php_versions` | array | `["8.3", "8.4", "8.5"]` | PHP versions to test against. |
 | `composer_version` | string | `2.10.3` | Composer version to install. |
 | `test_command` | string | `vendor/bin/phpunit` | The test command to run. |
