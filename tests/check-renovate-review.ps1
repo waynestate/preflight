@@ -97,7 +97,8 @@ if ($managerIndex -lt 0) {
 
 # The Squire kit rule: a custom.regex rule for waynestate/squire must turn
 # automerge off and carry the squire-kit label, so a kit version bump waits
-# for a person to run squire update.
+# for a person to review the refreshed kit. Its postUpgradeTasks and the
+# runner's allow-list are checked by tests/check-renovate-squire-kit.ps1.
 $squireIndex = -1
 for ($i = 0; $i -lt $lines.Count; $i++) {
   if ($lines[$i] -match '"matchDepNames".*"waynestate/squire"') {
@@ -120,10 +121,6 @@ if ($squireIndex -lt 0) {
   if (-not $squireKitLabel) {
     Fail "the waynestate/squire rule does not carry the squire-kit label"
   }
-}
-
-if ($lines | Where-Object { $_ -match 'postUpgradeTasks' }) {
-  Fail "renovate/default.json must not carry postUpgradeTasks"
 }
 
 if ($status -eq 0) {

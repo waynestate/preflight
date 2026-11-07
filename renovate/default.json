@@ -66,13 +66,32 @@
       "labels": ["auto-deps", "needs-review"]
     },
     {
+      "matchFileNames": [
+        "**/docker-compose.squire.yml",
+        "**/.squire/**",
+        "!/^templates\\/(common|vue|raw|laravel|static)\\//"
+      ],
+      "enabled": false
+    },
+    {
       "matchDepNames": ["waynestate/squire"],
       "matchManagers": ["custom.regex"],
       "automerge": false,
       "platformAutomerge": false,
       "labels": ["auto-deps", "squire-kit", "needs-review"],
+      "postUpgradeTasks": {
+        "commands": [
+          "composer create-project --no-dev --no-interaction --no-progress --no-scripts waynestate/squire /tmp/renovate-squire/{{{replace '[^A-Za-z0-9_-]' '-' repository}}}-{{{replace '[^A-Za-z0-9_-]' '-' packageFile}}} {{{newVersion}}}",
+          "php /tmp/renovate-squire/{{{replace '[^A-Za-z0-9_-]' '-' repository}}}-{{{replace '[^A-Za-z0-9_-]' '-' packageFile}}}/bin/squire update --path={{{packageFileDir}}}"
+        ],
+        "installTools": {
+          "php": {},
+          "composer": {}
+        },
+        "executionMode": "update"
+      },
       "prBodyNotes": [
-        "This changes the recorded Squire kit version only. Run `vendor/bin/squire update --path=deploy` (use the right path for this repo), review the diff, commit it to this branch, then merge. `squire init --check` in CI fails until the kit files match. A person refreshes the Squire kit MR by running `squire update`; the runner runs no commands, so the preset carries no post-bump tasks."
+        "A new Squire is out. On a runner that allows the Squire kit commands (the renovate component's `squire_kit_tasks` input), Renovate already ran `squire update` on this kit, so this branch carries the refreshed files. If the merge request shows an artifact error instead, run `vendor/bin/squire update --path=<kit folder>` yourself, review the diff and commit it to this branch; a release that adds a kit file also needs `vendor/bin/squire init --path=<kit folder>`. The `squire-kit` CI job fails until the kit matches the recorded version."
       ]
     }
   ],

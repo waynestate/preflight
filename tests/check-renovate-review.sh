@@ -79,7 +79,8 @@ fi
 
 # The Squire kit rule: a custom.regex rule for waynestate/squire must turn
 # automerge off and carry the squire-kit label, so a kit version bump waits
-# for a person to run squire update.
+# for a person to review the refreshed kit. Its postUpgradeTasks and the
+# runner's allow-list are checked by tests/check-renovate-squire-kit.sh.
 if ! awk '
   /"matchDepNames".*"waynestate\/squire"/ { key = NR }
   key > 0 && NR >= key && NR - key <= 6 {
@@ -89,10 +90,6 @@ if ! awk '
   END { exit (a && l) ? 0 : 1 }
 ' "$RENOVATE"; then
   fail "the waynestate/squire rule does not turn automerge off and carry the squire-kit label"
-fi
-
-if grep -q 'postUpgradeTasks' "$RENOVATE"; then
-  fail "renovate/default.json must not carry postUpgradeTasks"
 fi
 
 if [ "$status" -eq 0 ]; then

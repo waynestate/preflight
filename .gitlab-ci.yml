@@ -74,6 +74,7 @@ contract:
     - sh tests/check-sha-pins.sh
     - sh tests/check-release-job.sh
     - sh tests/check-a11y-inline.sh
+    - sh tests/check-renovate-squire-kit.sh
 
 # Advisory for now: secret detection is new here. Dated 2026-11-02: make this
 # job blocking (remove allow_failure) after one week of green pipelines.
