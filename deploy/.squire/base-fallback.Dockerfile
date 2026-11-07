@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e
+# syntax=docker/dockerfile:1
 #
 # FALLBACK base image: an approximation of Citadel's PHP 8.4 image
 # for developers who cannot build or pull the real one. Same official php:8.4.x-apache base, same users, Apache
@@ -7,8 +7,8 @@
 # scripts/parity.sh and parity.ps1 build it for you with `--fallback`:
 #   docker build -f .squire/base-fallback.Dockerfile -t squire/php-parity-base:8.4 .squire
 
-ARG PHP_IMAGE=php:8.4.27-apache@sha256:4af38a0245996e700e20ec211b9f1c44fb789ad8cc7d24c7ea81ff382b641052
-ARG NODE_IMAGE=node:22-trixie-slim@sha256:2117f713a417f3aff682ac8f5bc2ebbdf1beed51f36e67ab1e0fd3866b6d2d8f
+ARG PHP_IMAGE=php:8.4.27-apache
+ARG NODE_IMAGE=node:22-trixie-slim
 FROM ${NODE_IMAGE} AS node
 
 FROM ${PHP_IMAGE}
@@ -25,11 +25,15 @@ ENV APACHE_RUN_USER=prisoner \
 WORKDIR /
 
 # The host-matching "citadel" user owns the source; "prisoner" is the user Apache runs as.
-RUN groupadd --gid "$CITADEL_SOURCE_GID" citadel \
-    && useradd --uid "$CITADEL_SOURCE_UID" --gid "$CITADEL_SOURCE_GID" -m --home-dir /citadel --shell /bin/bash citadel \
-    && chmod 755 /citadel \
-    && groupadd --gid "$CITADEL_CONTAINER_GID" prisoner \
-    && useradd --uid "$CITADEL_CONTAINER_UID" --gid "$CITADEL_CONTAINER_GID" -s /usr/sbin/nologin prisoner
+# The numbers come from the host, so they may already belong to another account in the base image, or to each
+# other (a host with gid 1001, like the GitHub runners, collides with prisoner's default 1001). --non-unique lets
+# both names resolve to the requested numbers anyway; the container only ever refers to them by name.
+RUN set -eux; \
+    groupadd --non-unique --gid "$CITADEL_SOURCE_GID" citadel; \
+    useradd --non-unique --uid "$CITADEL_SOURCE_UID" --gid "$CITADEL_SOURCE_GID" -m --home-dir /citadel --shell /bin/bash citadel; \
+    chmod 755 /citadel; \
+    groupadd --non-unique --gid "$CITADEL_CONTAINER_GID" prisoner; \
+    useradd --non-unique --uid "$CITADEL_CONTAINER_UID" --gid "$CITADEL_CONTAINER_GID" -s /usr/sbin/nologin prisoner
 
 # Apache logs are real files, because the vhost pipes them through rotatelogs.
 RUN a2enmod rewrite headers \
@@ -80,7 +84,7 @@ RUN set -eux; \
 # pinned Composer image so the container does not need the network to start).
 RUN apt-get update && apt-get install -y --no-install-recommends git openssh-client wget zip unzip curl \
     && rm -rf /var/lib/apt/lists/*
-COPY --from=composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48 /usr/bin/composer /usr/local/bin/composer
+COPY --from=composer:2.10.3 /usr/bin/composer /usr/local/bin/composer
 
 # Node 22 and corepack, copied from the official Node image instead of piping a setup script into a shell (S4).
 COPY --from=node /usr/local/bin/node /usr/local/bin/node
