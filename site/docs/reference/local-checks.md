@@ -12,7 +12,7 @@ How maintainers build, test and release this project with Docker, and the Compos
 
 Note
 
-Maintainers: how to build, test and release this project, and where its data comes from, is in [MAINTAINING.md](https://nougat.snu.gs/enterprise-apps/preflight/-/blob/main/MAINTAINING.md) on the canonical repository.
+Maintainers: how to build, test and release this project, and where its data comes from, is in [MAINTAINING.md](https://git.wayne.edu/enterprise-apps/preflight/-/blob/main/MAINTAINING.md) on the canonical repository.
 
 ## The full gate[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#the-full-gate)
 
