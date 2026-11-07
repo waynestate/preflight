@@ -32,7 +32,7 @@ copy (see "Same instance only" in the README).
 Each contract test comes as a `.sh` and `.ps1` pair that check the same thing (`check-contract`, `check-spec-keys`,
 `check-image-inputs`, `check-php-test-cache`, `check-working-dir-regex`, `check-path-input-regex`, `check-github-workflow`,
 `check-proctor-install-flags`, `check-secret-detection`, `check-renovate-review`, `check-renovate-buildah`, `check-sha-pins`, `check-release-job`,
-`check-abandoned-input`, `check-component-version`, `check-input-interpolation`, `check-a11y-inline`). CI runs the `.sh` ones, except `check-abandoned-input`: the contract job's yq image has no Docker, and the test runs composer in the composer:2.10.3 image, so it stays out of the contract job's script list in `.gitlab-ci.yml`.
+`check-abandoned-input`, `check-component-version`, `check-input-interpolation`, `check-a11y-inline`, `check-renovate-squire-kit`, `check-squire-kit`). CI runs the `.sh` ones, except `check-abandoned-input`: the contract job's yq image has no Docker, and the test runs composer in the composer:2.10.3 image, so it stays out of the contract job's script list in `.gitlab-ci.yml`.
 Keep both in step when you change one.
 
 `tests/check-portability.sh` (and `tests/check-portability.ps1`) is a local check that needs Docker and runs the
@@ -44,6 +44,11 @@ one fails with each known flaw named. Run it after any change to `templates/a11y
 `sh tests/check-a11y-inline.sh --write` (PowerShell: `tests\check-a11y-inline.ps1 -Write`) to copy the checker into
 the template; the contract job fails while the two differ. The site's own gate is `sh scripts/a11y.sh` (PowerShell:
 `scripts\a11y.ps1`).
+
+`tests/squire-kit-fixture` is a deploy kit written by `squire init --target=raw`; Preflight's own pipeline runs the
+`squire-kit` component on it. Renovate moves it with each Squire release, like any kit. Never edit its files by hand:
+rewrite it with Squire (`squire update`, then `squire init`, on the folder) so it stays a kit that passes
+`squire init --check`. Pint and PHPStan skip it.
 
 With only Docker:
 

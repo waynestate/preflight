@@ -191,6 +191,29 @@ Exit 2 means the job never judged a page: an input or a tool is wrong.
 - **Fix:** correct the input the message names: fix the glob or `site_dir`, set `playwright_version` to the Playwright release in the image, or move `axe_core_version` and `axe_playwright_version` together (Renovate bumps them as one group).
 - **Check:** the job log's second line names the site or URL and the Playwright version, and the summary line names the axe-core version that ran.
 
+### squire-kit fails: the kit drifted (exit 1)[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#squire-kit-fails-the-kit-drifted-exit-1)
+
+The job installs the Squire release the kit records and runs `squire init --check`; the log lists every kit file with its state.
+
+- **Cause:** one of the states below.
+  - `modified`: someone, or a bot, edited a file Squire owns. Renovate's digest and tag bumps to `.squire/` files and `docker-compose.squire.yml` were the usual culprit before the preset turned them off.
+  - `outdated`: the file is untouched but is not the template of the recorded release, usually because `.squire.json` was bumped without `squire update`.
+  - `missing`: a kit file is gone, or the release added one that `squire update` does not write.
+  - `untracked`: a file sits in one of the kit's groups but is not recorded in `.squire.json`.
+- **Fix:** for `outdated` and `missing`, run `vendor/bin/squire update --path=deploy`, then `vendor/bin/squire init --path=deploy`, review the diff and commit it. For `modified`, put Squire's file back with `vendor/bin/squire init --force --path=deploy` and send the change to Squire instead, so every kit gets it. While a repository works through its first findings, set `allow_failure: true` on the include and remove it once the job is green.
+- **Check:** `vendor/bin/squire init --check --path=deploy` prints `RESULT: pass`, and so does the job's last line.
+
+### squire-kit stops before checking (exit 2)[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#squire-kit-stops-before-checking-exit-2)
+
+Exit 2 means the job never compared a file.
+
+- **Cause:** one of the messages below.
+  - `no .squire.json in ...`: `working_dir` is not the kit folder. The stack's repos keep the kit in `deploy`.
+  - `.squire.json records no released Squire version`: the manifest is damaged or records a branch.
+  - `could not install waynestate/squire X from Packagist`: no such release, or the job cannot reach Packagist.
+- **Fix:** set `working_dir` to the folder holding `.squire.json`, set `squire_version` to the release the kit was written with, or let the job reach Packagist.
+- **Check:** the job log prints `Checking the kit in ... against Squire X` before the file list.
+
 ## Renovate[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#renovate)
 
 ### Renovate sees literal text instead of a token[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#renovate-sees-literal-text-instead-of-a-token)
@@ -208,6 +231,14 @@ In refs before 0.1.4 the component-rule manager name in `renovate/default.json` 
 - **Cause:** the shared preset comes from a ref before the 0.1.4 fix.
 - **Fix:** point the repositories' `renovate.json` at the shared preset from 0.1.4 or later. Component version bumps now carry the `needs-review` label and never auto-merge.
 - **Check:** the merge request carries the `needs-review` label.
+
+### A Squire kit merge request shows an artifact error[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#a-squire-kit-merge-request-shows-an-artifact-error)
+
+The preset's Squire rule runs two commands after it bumps `.squire.json`: it installs the new Squire into `/tmp` and runs `squire update` on the kit folder. The merge request reports an artifact error when it could not.
+
+- **Cause:** the runner does not allow the commands (the message says the command `has not been added to the allowed list in allowedCommands`; the renovate component's `squire_kit_tasks` input is off), or `squire update` refused a kit file someone edited (the message names the file), or the release needs PHP or a network the runner lacks.
+- **Fix:** check out the branch, run `vendor/bin/squire update --path=deploy` (and `vendor/bin/squire init --path=deploy` for a release that adds a file), review the diff and commit it to the branch. For an edited file, restore it first with `vendor/bin/squire init --force --path=deploy`. To let the runner do this itself, set `squire_kit_tasks: true` on its renovate include.
+- **Check:** the `squire-kit` job on the merge request is green.
 
 ## Local checks[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#local-checks)
 

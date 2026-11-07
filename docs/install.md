@@ -52,4 +52,5 @@ default. A green job means the check passed.
 - [When the components run](guides/when-components-run.md): the `workflow:rules` block that belongs in the app's own file.
 - [The php-test component](guides/component-php-test.md): inputs, caching, and trying the next PHP release.
 - [The a11y component](guides/component-a11y.md): the accessibility gate for a site's pages, in 0.2.0.
+- [The squire-kit component](guides/component-squire-kit.md): the check that a deploy kit still matches its Squire release, in 0.2.0.
 - [Reference](reference/components.md): every component, with its inputs and defaults.

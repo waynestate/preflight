@@ -20,6 +20,7 @@ Under the hood, the job:
 - Points Renovate at the instance: `RENOVATE_PLATFORM` is `gitlab` and `RENOVATE_ENDPOINT` is `$CI_API_V4_URL`.
 - Turns on autodiscovery (`RENOVATE_AUTODISCOVER: "true"`), limited to the `autodiscover_filter` glob, default `$CI_PROJECT_NAMESPACE/*`, relative to the runner project's namespace.
 - Writes its `config.js` at job time. The `registryAliases` entry for the GitLab instance comes from the predefined `CI_SERVER_FQDN` variable: GitLab expands the key before the shell runs, and Node resolves the value when Renovate loads `config.js`. No hostname is stored in the template, so the public mirror stays clean.
+- Adds the Squire kit commands to the `config.js` `allowedCommands` list when `squire_kit_tasks` is `true`, so the preset's Squire rule can refresh a kit in its merge request (see [Squire kits](https://preflight.apps.wayne.edu/docs/guides/renovate.html#squire-kits)). The list is empty otherwise.
 - Passes `git_author` through as `RENOVATE_GIT_AUTHOR` and `dry_run` through as `RENOVATE_DRY_RUN`.
 - Is interruptible and times out after 1 hour.
 
@@ -47,6 +48,7 @@ include:
 | `autodiscover_filter` | string | `$CI_PROJECT_NAMESPACE/*` | Glob limiting which projects Renovate discovers, relative to the runner project's namespace. |
 | `dry_run` | string | `"null"` | Dry run mode: `null` (disabled), `lookup` or `full`. |
 | `git_author` | string | none | Author of the commits and merge requests Renovate creates, in the form `Name <email>`. Required. |
+| `squire_kit_tasks` | boolean | `false` | Allow the Squire kit commands of Preflight's preset (install the new `waynestate/squire` from Packagist, then `squire update` on the kit folder), so a Squire kit merge request arrives with its files refreshed. Off, the merge request bumps the version only and shows an artifact error. |
 
 ## Verify[#](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html#verify)
 
@@ -55,6 +57,7 @@ Start the job manually from the web, or wait for the schedule. Expected: the job
 ## Related[#](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html#related)
 
 - [Renovate](https://preflight.apps.wayne.edu/docs/guides/renovate.html): the shared preset, and what auto-merges, what waits and what waits for review.
+- [The squire-kit component](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html): the pipeline check that a kit matches the Squire release it records.
 - [Include a component twice](https://preflight.apps.wayne.edu/docs/guides/include-twice.html): the `job_name` input in action.
 - [Quick start](https://preflight.apps.wayne.edu/docs/guides/quick-start.html): wire one component into an app and watch the pipeline run it.
 - [Reference](https://preflight.apps.wayne.edu/docs/reference/components.html): every component, with its inputs and defaults.

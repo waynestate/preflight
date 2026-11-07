@@ -16,7 +16,7 @@ $ErrorActionPreference = "Stop"
 
 $Root = Split-Path -Parent $PSScriptRoot
 
-$Templates = @("pint", "phpstan", "eslint", "sbom", "renovate", "proctor", "php-test", "composer-audit", "package-publish", "secret-detection", "a11y")
+$Templates = @("pint", "phpstan", "eslint", "sbom", "renovate", "proctor", "php-test", "composer-audit", "package-publish", "secret-detection", "a11y", "squire-kit")
 
 $status = 0
 

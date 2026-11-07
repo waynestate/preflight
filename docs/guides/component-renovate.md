@@ -34,6 +34,10 @@ Under the hood, the job:
   GitLab expands the key before the shell runs, and Node resolves the value
   when Renovate loads `config.js`. No hostname is stored in the template, so
   the public mirror stays clean.
+- Adds the Squire kit commands to the `config.js` `allowedCommands` list when
+  `squire_kit_tasks` is `true`, so the preset's Squire rule can refresh a kit in
+  its merge request (see [Squire kits](renovate.md#squire-kits)). The list is
+  empty otherwise.
 - Passes `git_author` through as `RENOVATE_GIT_AUTHOR` and `dry_run` through
   as `RENOVATE_DRY_RUN`.
 - Is interruptible and times out after 1 hour.
@@ -66,6 +70,7 @@ include:
 | `autodiscover_filter` | string | `$CI_PROJECT_NAMESPACE/*` | Glob limiting which projects Renovate discovers, relative to the runner project's namespace. |
 | `dry_run` | string | `"null"` | Dry run mode: `null` (disabled), `lookup` or `full`. |
 | `git_author` | string | none | Author of the commits and merge requests Renovate creates, in the form `Name <email>`. Required. |
+| `squire_kit_tasks` | boolean | `false` | Allow the Squire kit commands of Preflight's preset (install the new `waynestate/squire` from Packagist, then `squire update` on the kit folder), so a Squire kit merge request arrives with its files refreshed. Off, the merge request bumps the version only and shows an artifact error. |
 
 ## Verify
 
@@ -77,6 +82,7 @@ To try it without changes, set `dry_run` to `lookup` or `full`; `null`
 ## Related
 
 - [Renovate](renovate.md): the shared preset, and what auto-merges, what waits and what waits for review.
+- [The squire-kit component](component-squire-kit.md): the pipeline check that a kit matches the Squire release it records.
 - [Include a component twice](include-twice.md): the `job_name` input in action.
 - [Quick start](quick-start.md): wire one component into an app and watch the pipeline run it.
 - [Reference](../reference/components.md): every component, with its inputs and defaults.
