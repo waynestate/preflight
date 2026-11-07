@@ -740,7 +740,7 @@ pwsh -File tests/check-portability.ps1
 
 The site's pages have an accessibility gate: the `a11y` component's own checker, run in Docker with the image and versions pinned in its template, so no host browser is needed and a local run checks the same way as the pipeline. `sh scripts/a11y.sh` on Linux and macOS, `scripts/a11y.ps1` in PowerShell on Windows. It checks the front page and every docs page at WCAG 2.2 AA in light and dark mode at 320 px and 1280 px, with the reflow check, and fails on any violation. `tests/check-a11y.sh` (and `.ps1`) prove the checker passes a clean fixture site and fails a known-bad one.
 
-Run the must-fail fixtures with Docker; each proves its component (`php-test`, `phpstan`, `pint`) still fails a bad app and passes a clean one, running the component's own commands from its template in the component's own image:
+Run the must-fail fixtures with Docker; each proves its component (`php-test`, `phpstan`, `pint`) still fails a bad app and passes a clean one, running the component's own commands from its template in the component's own image. The `must-fail-php-test` and `must-fail-phpstan-pint` jobs run the same checks in CI, in the components' own images, so they need no Docker there. Locally, run them with Docker:
 
 ```sh
 docker run --rm -v "$(pwd):/app" -w /app php:8.3-cli-trixie sh tests/check-php-test-fails.sh

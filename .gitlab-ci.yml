@@ -76,6 +76,27 @@ contract:
     - sh tests/check-release-job.sh
     - sh tests/check-a11y-inline.sh
 
+# The must-fail fixture for the php-test component: the check proves the
+# template keeps the job line that lets the tool's exit code be the job
+# result. Runs in the template's own image, pinned by digest, so it needs
+# no Docker.
+must-fail-php-test:
+  stage: test
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/php:8.3-cli-trixie@sha256:628102249d93494233b54490b785f12db9cd60f4dc89416dfca15973f2125f10
+  script:
+    - sh tests/check-php-test-fails.sh
+
+# The must-fail fixtures for the phpstan and pint components: the checks
+# prove the templates keep the job lines that let the tools' exit codes be
+# the job results. Run in the templates' own image, pinned by digest, so
+# they need no Docker.
+must-fail-phpstan-pint:
+  stage: test
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc
+  script:
+    - sh tests/check-phpstan-fails.sh
+    - sh tests/check-pint-fails.sh
+
 # Advisory for now: secret detection is new here. Dated 2026-11-02: make this
 # job blocking (remove allow_failure) after one week of green pipelines.
 secret_detection:

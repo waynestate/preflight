@@ -46,10 +46,11 @@ the template; the contract job fails while the two differ. The site's own gate i
 `scripts\a11y.ps1`).
 
 `tests/check-php-test-fails.sh`, `tests/check-phpstan-fails.sh` and `tests/check-pint-fails.sh` (each with a `.ps1`
-twin) are local checks that need Docker: they run the `php-test`, `phpstan` and `pint` components' own commands, in the
-components' own images, against the clean case in `tests/fixture-app` and the must-fail case in `tests/php-test-fails`,
-`tests/phpstan-fails` and `tests/pint-fails`, and pass only when the clean case passes and the bad case fails. The
-contract job does not run them: its yq image has no Docker.
+twin) run the `php-test`, `phpstan` and `pint` components' own commands, in the components' own images, against the
+clean case in `tests/fixture-app` and the must-fail case in `tests/php-test-fails`, `tests/phpstan-fails` and
+`tests/pint-fails`, and pass only when the clean case passes and the bad case fails. The `must-fail-php-test` and
+`must-fail-phpstan-pint` jobs run them in CI, in the templates' own images, and they still run locally with Docker, as
+the script headers show.
 
 With only Docker:
 

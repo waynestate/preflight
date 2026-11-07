@@ -9,4 +9,7 @@ component that runs the app's own Pint fails on it.
 
 The clean case is `tests/fixture-app`: Pint exits 0 and reports PASS.
 `tests/check-pint-fails.sh` (and `tests/check-pint-fails.ps1`) run both
-cases in the template's image.
+cases in the template's image. `composer.lock` is a byte-for-byte copy of
+`tests/fixture-app/composer.lock`, so the clean and bad cases install the
+same versions; the must-fail checks never run PROCTOR, so this fixture
+carries no `bin/proctor`.
