@@ -39,6 +39,11 @@ spec:
       type: string
       default: "."
       regex: '^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$'
+    git_depth:
+      description: "How many commits the job clones (GitLab's GIT_DEPTH). The default 0 clones the full history, so PROCTOR's override-approver check can see who wrote each override. Set a number, such as 50, on a very large repository; older override lines then report could-not-run."
+      type: string
+      default: "0"
+      regex: '^[0-9]+$'
 ---
 "$[[ inputs.job_name ]]":
   stage: $[[ inputs.stage ]]
@@ -60,6 +65,8 @@ spec:
     when: always  # a failed job still keeps every package that finished downloading (D-072)
   variables:
     COMPOSER_CACHE_DIR: "$CI_PROJECT_DIR/.composer-cache"
+    # Full history by default: override-approver reads git blame (0 means no depth limit).
+    GIT_DEPTH: "$[[ inputs.git_depth ]]"
   script:
     - echo "Preflight component $[[ component.name ]] $[[ component.version ]] (ref $[[ component.reference ]], sha $[[ component.sha ]])"
     # php:8.4-cli-trixie does not ship Composer, unzip or git. The image is
