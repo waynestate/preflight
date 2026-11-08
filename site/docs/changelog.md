@@ -13,6 +13,7 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 ## Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
 - Added: php-test's php_advisory_version input runs one more PHP version (a release candidate) in a separate job that may fail, so an app hears about the next PHP before it is supported (BEST_PRACTICES 6.4).
+- Fixed: the contract check resolves job names that contain the job_name input (php-test-advisory) and skips hidden template jobs, so main is green again.
 - Docs: a deprecation and removal policy for components (docs/guides/deprecation.md): tags never move, one release of notice, six months before removal, and the Catalog toggle stays on while any version is pinned.
 - Changed: the deploy layer runs Squire's kit 0.7.1 (was 0.6.0): `.squire/php.ini` no longer sets the deprecated `session.sid_*` lines, web requests get a `disable_functions` list and Apache hardening (`.squire/php-web.ini`, `.squire/apache-hardening.conf`), and opcache gets production settings with `SQUIRE_OPCACHE_VALIDATE` as the one switch.
 - Docs: the docs home footer names 0.3.1 (it still said 0.3.0).
