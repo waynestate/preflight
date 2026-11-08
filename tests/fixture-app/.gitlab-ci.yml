@@ -1,0 +1,20 @@
+# The fixture app's own pipeline, in the shape of a small stack app: install
+# from the lock, then run the checks kept in the `ci` script of composer.json.
+# Preflight's proctor job runs the real PROCTOR on this app, and PROCTOR's
+# ci-pipelines check reads this file and .github/workflows/ci.yml.
+image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc
+
+variables:
+  COMPOSER_CACHE_DIR: "$CI_PROJECT_DIR/.composer-cache"
+
+cache:
+  key: preflight-fixture
+  paths:
+    - .composer-cache/
+  policy: pull-push
+  when: always
+
+ci:
+  script:
+    - composer install --no-interaction --no-progress
+    - composer ci

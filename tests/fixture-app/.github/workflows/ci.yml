@@ -1,0 +1,19 @@
+# The fixture app's checks on the GitHub mirror, in the shape of a mirrored
+# package: it calls Preflight's reusable workflow, pinned at the release
+# tag's commit SHA. `ci-command` is set explicitly, so PROCTOR's
+# ci-pipelines check sees composer ci without opening the callee.
+name: CI
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v*', '*.*.*']
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    uses: waynestate/preflight/.github/workflows/php-package.yml@b90323b5823287a7840095d0d5f0682aaeedf327 # 0.3.1
+    with:
+      ci-command: composer ci

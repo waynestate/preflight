@@ -7,10 +7,10 @@
 # the includes below pass no image; tests/check-dependency-cache.sh fails
 # if one does, or if a job here pulls from Docker Hub directly.
 include:
+  # The real PROCTOR (fixture-app require-dev), on the component's default command.
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/proctor@$CI_COMMIT_SHA
     inputs:
       working_dir: tests/fixture-app
-      proctor_command: bin/proctor check --format=codequality
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/php-test@$CI_COMMIT_SHA
     inputs:
       working_dir: tests/fixture-app

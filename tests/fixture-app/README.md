@@ -4,12 +4,11 @@ This is a minimal fixture app used to test the Preflight CI/CD components.
 
 ## Fake proctor
 
-`bin/proctor` is a **fake**. It stands in for the real PROCTOR
-(`waynestate/proctor`) until PROCTOR is published. It prints `[]` (an empty
-Code Quality report) and checks nothing.
-
-The proctor component is tested against this fake so the pipeline wiring
-works. The fake must be removed once PROCTOR is installed via Composer.
+`bin/proctor` is a **fake**: it prints `[]` (an empty Code Quality report)
+and checks nothing. The pipeline's proctor job no longer uses it: PROCTOR
+(`waynestate/proctor`) is published, and the job runs the real tool from the
+fixture app's `require-dev`. The fake stays only as the offline stand-in for
+`tests/check-proctor-fails`, which needs no Docker and no Composer.
 
 The must-fail case lives in `tests/proctor-fails`: its fake prints one
 blocker finding and exits 1, and `tests/check-proctor-fails` runs both
