@@ -12,6 +12,7 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ## Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Changed: the front page deploy layer requires HELMET ^1.0 (lock at 1.0.1, was 0.4.0), like the rest of the stack; its shared front controller already runs on HELMET 1.0 in Squire, Sourdough and Pinstripe.
 - Docs: README, the guides, the docs pages and the examples pin the 0.3.1 tag commit, and the upgrading page has a 0.3.1 section.
 
 ## 0.3.1 (2026-11-08)[#](https://preflight.apps.wayne.edu/docs/changelog.html#0-3-1-2026-11-08)
