@@ -13,6 +13,7 @@ are Git tags.
 
 ## Unreleased
 
+- Docs: the docs home footer names 0.3.1 (it still said 0.3.0).
 - Changed: the front page deploy layer requires HELMET ^1.0 (lock at 1.0.1, was 0.4.0), like the rest of the stack; its shared front controller already runs on HELMET 1.0 in Squire, Sourdough and Pinstripe.
 - Docs: README, the guides, the docs pages and the examples pin the 0.3.1 tag commit, and the upgrading page has a 0.3.1 section.
 
