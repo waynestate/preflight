@@ -1399,6 +1399,7 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 ### Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
 - Added: php-test's php_advisory_version input runs one more PHP version (a release candidate) in a separate job that may fail, so an app hears about the next PHP before it is supported (BEST_PRACTICES 6.4).
+- Docs: a deprecation and removal policy for components (docs/guides/deprecation.md): tags never move, one release of notice, six months before removal, and the Catalog toggle stays on while any version is pinned.
 - Changed: the deploy layer runs Squire's kit 0.7.1 (was 0.6.0): `.squire/php.ini` no longer sets the deprecated `session.sid_*` lines, web requests get a `disable_functions` list and Apache hardening (`.squire/php-web.ini`, `.squire/apache-hardening.conf`), and opcache gets production settings with `SQUIRE_OPCACHE_VALIDATE` as the one switch.
 - Docs: the docs home footer names 0.3.1 (it still said 0.3.0).
 - Changed: the front page deploy layer requires HELMET ^1.0 (lock at 1.0.1, was 0.4.0), like the rest of the stack; its shared front controller already runs on HELMET 1.0 in Squire, Sourdough and Pinstripe.
@@ -2755,6 +2756,45 @@ composer-ci:
 - [Updating image pins](https://preflight.apps.wayne.edu/docs/guides/image-pins.html): how the digests behind `image` are chosen and changed.
 - [The php-test component](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html): the matrix and its per-version cache.
 - [GitLab: Dependency Proxy](https://docs.gitlab.com/user/packages/dependency_proxy/) and [GitLab: caching](https://docs.gitlab.com/ci/caching/).
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/guides/deprecation.html
+
+## Deprecating and removing a component[#](https://preflight.apps.wayne.edu/docs/guides/deprecation.html#deprecating-and-removing-a-component)
+
+Apps pin Preflight by tag, so a removal is only fair when it was announced first. This page is the policy: what never changes, what may go and in which release, how the announcement works, and how to find out who still pins a version before anything is removed. A deprecation notice is the preflight checklist for goodbye: read it twice, then take off.
+
+### What never changes[#](https://preflight.apps.wayne.edu/docs/guides/deprecation.html#what-never-changes)
+
+- Published tags are never moved or deleted. An app that pins `component: $CI_SERVER_FQDN/enterprise-apps/preflight/<name>@<version>` keeps resolving that reference, and its pipeline keeps running, for as long as the app wants it.
+- A deprecation is a promise with a date, not a mood. The notice names the replacement and the release that removes it, and both parts of the promise must hold.
+
+### What may go, and in which release[#](https://preflight.apps.wayne.edu/docs/guides/deprecation.html#what-may-go-and-in-which-release)
+
+An input, a job name or a default that an app may rely on is removed only in a minor release while Preflight is below 1.0, or in a major release after 1.0. The CHANGELOG entry for the removal says what replaces it, so an app that reads the changelog knows where to move.
+
+### How the deprecation is announced[#](https://preflight.apps.wayne.edu/docs/guides/deprecation.html#how-the-deprecation-is-announced)
+
+Deprecation comes first, one full release ahead of removal:
+
+- The CHANGELOG gets a `Deprecated:` bullet naming the input, job or component and its replacement.
+- The component's guide gets a note at the top of the page naming the replacement and the release that removes it.
+- Where the component can, its job log prints one line saying it is deprecated, so the app sees the notice in every pipeline run.
+
+A whole component stays in the repo and in the Catalog for at least 6 months after its deprecation release, even if nobody has pinned it since.
+
+### The Catalog toggle stays on[#](https://preflight.apps.wayne.edu/docs/guides/deprecation.html#the-catalog-toggle-stays-on)
+
+The CI/CD Catalog toggle is never turned off while any published version is still pinned somewhere in the group. Turning it off deletes the Catalog metadata for every published version ([GitLab: components, unpublishing](https://docs.gitlab.com/ci/components/)), and republishing needs a new release. Whether `component:` includes pinned by SHA keep working afterwards is unverified, so do not rely on it.
+
+To find who still pins a version, search the group for `preflight/<name>@`. Rollcall lists the apps that carry the pin, so the fleet report agrees with the search before the toggle question is even asked.
+
+### Related[#](https://preflight.apps.wayne.edu/docs/guides/deprecation.html#related)
+
+- [Upgrading](https://preflight.apps.wayne.edu/docs/upgrading.html)
+- [What the components cannot force](https://preflight.apps.wayne.edu/docs/guides/what-components-cannot-force.html)
+- [GitLab: CI/CD components](https://docs.gitlab.com/ci/components/)
 
 ---
 
