@@ -392,7 +392,11 @@ Sources: [OWASP CICD-SEC-1 Insufficient Flow Control Mechanisms](https://owasp.o
 [OpenSSF Scorecard: SAST](https://github.com/ossf/scorecard/blob/main/docs/checks.md) (a check for whether analysis
 runs at all).
 
-**How the stack holds it: Not yet.** PROCTOR does not read `.gitlab-ci.yml`. Rollcall's "apps with CI" number is a plan.
+**How the stack holds it: Partly.** PROCTOR's `ci-pipelines` check reads `.gitlab-ci.yml` and
+`.github/workflows/ci.yml`: it fails a stack package whose pipeline is missing or runs no `composer ci`, and warns when
+the pipeline switches Composer's audit off or runs `composer update`. Nothing yet flags a missing Preflight include, an
+unpinned include, `allow_failure: true` on a gate or a missing `proctor` job. Rollcall's "apps with CI" number is a
+plan.
 
 ### 3.4 Control when pipelines run, once, in the app
 Set `workflow:rules` so a branch with an open merge request does not run twice, and so merge request pipelines exist.
