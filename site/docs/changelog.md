@@ -12,6 +12,7 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ## Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Changed: php-test's and proctor's `composer_version` refuses a Composer older than 2.9.6 (the floor with the 2026 security fixes); the pattern is held by `tests/check-composer-floor.sh` in the contract job.
 - Added: the proctor component's `git_depth` input (default `"0"`, the full history), so PROCTOR's override-approver check can read git blame on every override line instead of reporting could-not-run past the 20-commit default clone.
 - Added: php-test's php_advisory_version input runs one more PHP version (a release candidate) in a separate job that may fail, so an app hears about the next PHP before it is supported (BEST_PRACTICES 6.4).
 - Fixed: the contract check resolves job names that contain the job_name input (php-test-advisory) and skips hidden template jobs, so main is green again.

@@ -100,7 +100,7 @@
 <td><code>composer_version</code></td>
 <td>string</td>
 <td><code>2.10.3</code></td>
-<td>Composer version to install.</td>
+<td>Composer version to install, 2.9.6 or later.</td>
 </tr>
 <tr>
 <td><code>test_command</code></td>
@@ -116,7 +116,7 @@
 </tr>
 </tbody>
 </table></div>
-<aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>The template adds regexes to three inputs: <code>job_name</code> must match <code>^[A-Za-z0-9_][A-Za-z0-9_.-]*$</code>, <code>composer_version</code> must match <code>^2\.\d+\.\d+$</code>, and <code>working_dir</code> must match <code>^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$</code>.</p></aside>
+<aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>The template adds regexes to three inputs: <code>job_name</code> must match <code>^[A-Za-z0-9_][A-Za-z0-9_.-]*$</code>, <code>composer_version</code> must match <code>^2\.(9\.([6-9]|[1-9][0-9]+)|[1-9][0-9]+\.[0-9]+)$</code>, and <code>working_dir</code> must match <code>^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$</code>.</p></aside>
 <h2 id="what-the-jobs-do">What the jobs do<a class="docs-heading-link" aria-label="Link to this section" href="#what-the-jobs-do">#</a></h2>
 <p>The array input feeds <code>parallel:matrix</code> directly, so one job is created per PHP version. <code>PHP_VERSION</code> becomes a CI/CD variable in each job, which the <code>image</code> input's default expands at job time. The default image is deliberately tag-pinned, so each job runs the newest patch release of its PHP version. Each job is <code>interruptible: true</code> with a <code>timeout: 30 minutes</code>, and its script:</p>
 <ol>

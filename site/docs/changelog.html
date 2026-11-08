@@ -47,6 +47,7 @@
 are Git tags.</p>
 <h2 id="unreleased">Unreleased<a class="docs-heading-link" aria-label="Link to this section" href="#unreleased">#</a></h2>
 <ul>
+<li>Changed: php-test's and proctor's <code>composer_version</code> refuses a Composer older than 2.9.6 (the floor with the 2026 security fixes); the pattern is held by <code>tests/check-composer-floor.sh</code> in the contract job.</li>
 <li>Added: the proctor component's <code>git_depth</code> input (default <code>&quot;0&quot;</code>, the full history), so PROCTOR's override-approver check can read git blame on every override line instead of reporting could-not-run past the 20-commit default clone.</li>
 <li>Added: php-test's php_advisory_version input runs one more PHP version (a release candidate) in a separate job that may fail, so an app hears about the next PHP before it is supported (BEST_PRACTICES 6.4).</li>
 <li>Fixed: the contract check resolves job names that contain the job_name input (php-test-advisory) and skips hidden template jobs, so main is green again.</li>
