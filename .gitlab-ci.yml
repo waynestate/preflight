@@ -115,6 +115,22 @@ must-fail-phpstan-pint:
     - sh tests/check-phpstan-fails.sh
     - sh tests/check-pint-fails.sh
 
+# The must-fail fixture for the eslint component: the check proves the
+# template keeps the job lines that let ESLint's and Prettier's exit codes
+# be the job result. Runs in the template's own image, pinned by digest, so
+# it needs no Docker. npm downloads land in .npm-cache/ under a fixed key,
+# so repeat pipelines skip them.
+must-fail-eslint:
+  stage: test
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/node:22.13-alpine@sha256:e2b39f7b64281324929257d0f8004fb6cb4bf0fdfb9aa8cedb235a766aec31da
+  cache:
+    key: preflight-must-fail-eslint
+    paths:
+      - .npm-cache/
+    when: always  # a failed job still keeps every package that finished downloading (D-072)
+  script:
+    - sh tests/check-eslint-fails.sh
+
 # The must-fail fixtures for the portability component: the check runs the
 # component's own probe (templates/portability/probe.sh, which the template
 # carries byte for byte) on the clean fixture and on nine flawed builds of

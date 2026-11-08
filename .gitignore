@@ -1,3 +1,4 @@
 /tests/fixture-app/vendor/
 /vendor/
+.npm-cache/
 

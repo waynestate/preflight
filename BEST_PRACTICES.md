@@ -965,7 +965,7 @@ Why: a component that never fails looks the same as one that works.
 
 Sources: [GitLab: components, testing](https://docs.gitlab.com/ci/components/).
 
-**How the stack holds it: Partly.** Seven components carry a fixture that must fail them, each kept in place by a
+**How the stack holds it: Partly.** Eight components carry a fixture that must fail them, each kept in place by a
 check: `proctor` runs `tests/proctor-fails`, a fake proctor that prints one blocker finding and exits 1, against the
 clean stub in `tests/fixture-app` (`tests/check-proctor-fails`); `composer-audit` runs `composer audit` on
 `tests/audit-fixtures/advisory`, which fails in every mode, and `tests/audit-fixtures/abandoned`, which fails only in
@@ -976,11 +976,12 @@ passes only when the clean build passes and each flaw fails the check it targets
 CI by `must-fail-portability`); `php-test` runs PHPUnit on
 `tests/php-test-fails`, which carries a failing test, against the clean case in `tests/fixture-app`
 (`tests/check-php-test-fails`); `phpstan` runs PHPStan on `tests/phpstan-fails`, which carries a type error, against
-the clean case in `tests/fixture-app` (`tests/check-phpstan-fails`); and `pint` runs Pint in test mode on
+the clean case in `tests/fixture-app` (`tests/check-phpstan-fails`); `pint` runs Pint in test mode on
 `tests/pint-fails`, which is not formatted to the standard, against the clean case in `tests/fixture-app`
-(`tests/check-pint-fails`). Still missing: a malware-flagged version fixture for `composer-audit` (see 4.6 and 4.11),
-and a must-fail fixture for `eslint`, `package-publish`, `sbom` and `secret-detection`; `renovate` is a config, not a
-job, so it has nothing to fail.
+(`tests/check-pint-fails`); and `eslint` runs the app's own ESLint and Prettier on `tests/eslint-fails`, which
+carries one unused `const`, against the clean case in `tests/eslint-clean` (`tests/check-eslint-fails`).
+Still missing: a malware-flagged version fixture for `composer-audit` (see 4.6 and 4.11), and must-fail fixtures
+for `package-publish`, `sbom` and `secret-detection`; `renovate` is a config, not a job, so it has nothing to fail.
 
 ### 7.3 Use the stack's own projects as the first users
 Each stack repo includes Preflight, pinned.
