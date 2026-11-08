@@ -146,6 +146,23 @@ must-fail-secret-detection:
   script:
     - sh tests/check-secret-detection-fails.sh
 
+# The must-fail fixture for the sbom component: the check proves the
+# template keeps the job lines that let Composer's exit code be the job
+# result, and that the omit_dev=true branch keeps --omit=dev. Runs in the
+# template's own image, pinned by digest, so it needs no Docker. Composer
+# downloads land in .composer-cache/ under a fixed key, so repeat
+# pipelines skip them.
+must-fail-sbom:
+  stage: test
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc
+  cache:
+    key: preflight-must-fail-sbom
+    paths:
+      - .composer-cache/
+    when: always  # a failed job still keeps every package that finished downloading (D-072)
+  script:
+    - sh tests/check-sbom-fails.sh
+
 # The must-fail fixtures for the portability component: the check runs the
 # component's own probe (templates/portability/probe.sh, which the template
 # carries byte for byte) on the clean fixture and on nine flawed builds of

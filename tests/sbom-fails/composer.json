@@ -1,0 +1,21 @@
+{
+    "name": "waynestate/preflight-sbom-clean",
+    "description": "Clean fixture for the sbom component's must-fail check.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Wayne State University, Enterprise Applications"
+        }
+    ],
+    "require": {
+        "psr/log": "^3"
+    },
+    "require-dev": {
+        "psr/container": "^2"
+    },
+    "config": {
+        "platform": {
+            "php": "8.3.0"
+        }
+    }
+}
