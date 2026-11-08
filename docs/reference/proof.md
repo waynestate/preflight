@@ -74,16 +74,18 @@ A run that only finds praise was not looking hard enough. This one found these, 
 Include the components in your app's `.gitlab-ci.yml` as the [Quick start](../guides/quick-start.md) shows, push a branch, and read each job's log. To try the PROCTOR job's steps on your machine first, from the app's root (the first line adds PROCTOR to require-dev, which the proctor component expects):
 
 ```sh tab="Linux / macOS"
-docker run --rm -v "$(pwd):/app" -w /app composer:2 composer require --dev waynestate/proctor --no-scripts --ignore-platform-reqs
-docker run --rm -v "$(pwd):/app" -w /app composer:2 composer install --no-plugins --no-scripts --ignore-platform-reqs
-docker run --rm -v "$(pwd):/app" -w /app composer:2 vendor/bin/proctor check
+docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2 composer require --dev waynestate/proctor --no-scripts --ignore-platform-reqs
+docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2 composer install --no-plugins --no-scripts --ignore-platform-reqs
+docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2 vendor/bin/proctor check
 ```
 
 ```powershell tab="Windows"
-docker run --rm -v "${PWD}:/app" -w /app composer:2 composer require --dev waynestate/proctor --no-scripts --ignore-platform-reqs
-docker run --rm -v "${PWD}:/app" -w /app composer:2 composer install --no-plugins --no-scripts --ignore-platform-reqs
-docker run --rm -v "${PWD}:/app" -w /app composer:2 vendor/bin/proctor check
+docker run --rm -v "${PWD}:/app" -v stack-composer-cache:/tmp/cache -w /app composer:2 composer require --dev waynestate/proctor --no-scripts --ignore-platform-reqs
+docker run --rm -v "${PWD}:/app" -v stack-composer-cache:/tmp/cache -w /app composer:2 composer install --no-plugins --no-scripts --ignore-platform-reqs
+docker run --rm -v "${PWD}:/app" -v stack-composer-cache:/tmp/cache -w /app composer:2 vendor/bin/proctor check
 ```
+
+The `stack-composer-cache` volume keeps Composer's downloads between runs; Docker creates it the first time.
 
 ## Related
 

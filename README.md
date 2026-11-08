@@ -817,21 +817,23 @@ Maintainers: how to build, test and release this project, and where its data com
 Run the template lint and the fixture tests with Docker:
 
 ```sh
-docker run --rm -v "$(pwd):/app" -w /app composer:2 composer install
-docker run --rm -v "$(pwd):/app" -w /app composer:2 composer ci
+docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2 composer install
+docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2 composer ci
 ```
+
+The `stack-composer-cache` volume keeps Composer's downloads between runs; Docker creates it the first time.
 
 In PowerShell, use `${PWD}` instead of `$(pwd)`:
 
 ```powershell
-docker run --rm -v "${PWD}:/app" -w /app composer:2 composer install
-docker run --rm -v "${PWD}:/app" -w /app composer:2 composer ci
+docker run --rm -v "${PWD}:/app" -v stack-composer-cache:/tmp/cache -w /app composer:2 composer install
+docker run --rm -v "${PWD}:/app" -v stack-composer-cache:/tmp/cache -w /app composer:2 composer ci
 ```
 
 Run the PHP fixture app separately:
 
 ```sh
-docker run --rm -v "$(pwd)/tests/fixture-app:/app" -w /app composer:2 composer install
+docker run --rm -v "$(pwd)/tests/fixture-app:/app" -v stack-composer-cache:/tmp/cache -w /app composer:2 composer install
 docker run --rm -v "$(pwd)/tests/fixture-app:/app" -w /app php:8.4-cli vendor/bin/phpunit
 ```
 
@@ -857,8 +859,8 @@ Run the must-fail fixtures with Docker; each proves its component (`php-test`, `
 
 ```sh
 docker run --rm -v "$(pwd):/app" -w /app php:8.3-cli-trixie sh tests/check-php-test-fails.sh
-docker run --rm -v "$(pwd):/app" -w /app composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc sh tests/check-phpstan-fails.sh
-docker run --rm -v "$(pwd):/app" -w /app composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc sh tests/check-pint-fails.sh
+docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc sh tests/check-phpstan-fails.sh
+docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc sh tests/check-pint-fails.sh
 ```
 
 ```powershell
