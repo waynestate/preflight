@@ -7,7 +7,7 @@ description: All notable changes to this project.
 
 # Changelog
 
-All notable changes to PREFLIGHT are recorded here. Entries follow
+All notable changes to Preflight are recorded here. Entries follow
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); released versions
 are Git tags.
 

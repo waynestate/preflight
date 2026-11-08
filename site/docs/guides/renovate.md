@@ -54,7 +54,7 @@ The `mysql` and `haproxy` images mirror the versions Citadel actually runs, not 
 
 ## Pinned to immutable tags[#](https://preflight.apps.wayne.edu/docs/guides/renovate.html#pinned-to-immutable-tags)
 
-The `quay.io/buildah/stable` image (the `image` default of the portability component) is matched to `-immutable` tags only. Red Hat re-pushed v1.43.5 under the mutable tag and garbage-collected the old digest, which broke an image job, so DRAWBRIDGE and SQUIRE now pin the immutable form, `v1.43.5-immutable@sha256:...`. The preset carries a packageRule for `quay.io/buildah/stable` with a regex versioning that only matches `vX.Y.Z-immutable` tags, so Renovate proposes updates within the immutable tags and never moves a pin back to a mutable one. Digests stay pinned as before (`docker:pinDigests`).
+The `quay.io/buildah/stable` image (the `image` default of the portability component) is matched to `-immutable` tags only. Red Hat re-pushed v1.43.5 under the mutable tag and garbage-collected the old digest, which broke an image job, so Drawbridge and Squire now pin the immutable form, `v1.43.5-immutable@sha256:...`. The preset carries a packageRule for `quay.io/buildah/stable` with a regex versioning that only matches `vX.Y.Z-immutable` tags, so Renovate proposes updates within the immutable tags and never moves a pin back to a mutable one. Digests stay pinned as before (`docker:pinDigests`).
 
 ## Set up (the user does this)[#](https://preflight.apps.wayne.edu/docs/guides/renovate.html#set-up-the-user-does-this)
 
