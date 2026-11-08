@@ -6,7 +6,11 @@ are Git tags.
 
 ## Unreleased
 
+- Docs: README, the guides, the docs pages and the examples pin the 0.3.1 tag commit, and the upgrading page has a 0.3.1 section.
+
 ## 0.3.1 (2026-11-08)
+
+Tag commit: `b90323b5823287a7840095d0d5f0682aaeedf327` (pin this SHA, with `# 0.3.1` in a trailing comment).
 
 Fixed CI cache keys (D-072): every component that installs packages caches under a fixed key instead of a lock-file
 hash, and saves its cache even when the job fails, so a lock change or a dropped GitHub download refetches only what

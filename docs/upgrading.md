@@ -7,6 +7,33 @@ description: How to move an app from one Preflight pin to the next.
 
 This page is the checklist for moving an app from one Preflight pin to the next, one released version at a time, newest first; every section follows `CHANGELOG.md`. Read the section for the version you are moving to, apply its steps, and verify on the next pipeline. Like a real preflight, the walk takes a few minutes and earns its keep: move the pin only after you have read the version notes.
 
+## 0.3.1
+
+Released 2026-11-08. Every component that installs packages caches under a fixed key per component (such as `preflight-pint`, or `preflight-php-8.4` for one PHP version of `php-test`) instead of a lock-file hash, and saves its cache even when the job fails (D-072). A lock change, or a retry after a dropped download, fetches only what is missing.
+
+### Breaking
+
+0.3.1 has no breaking changes: inputs, defaults and job names are the same as in 0.3.0.
+
+### Deprecated
+
+Nothing was deprecated in 0.3.1.
+
+### Steps
+
+Point each component include at the `0.3.1` tag, pinned to the tag's full commit SHA with the tag in a trailing comment:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@b90323b5823287a7840095d0d5f0682aaeedf327 # 0.3.1
+```
+
+The first pipeline on the new pin fills the new cache keys, so expect it to download everything once.
+
+### How to verify
+
+The pipeline is green, and a component's job log shows `Creating cache preflight-` followed by the component's key, and, after a failed job, `Saving cache for failed job`.
+
 ## 0.3.0
 
 Released 2026-11-08. Docker Hub images now come through the group's Dependency Proxy by default (a new `image_prefix` input), and more components cache their Composer and npm downloads.
