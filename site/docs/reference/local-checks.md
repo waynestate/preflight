@@ -138,7 +138,7 @@ pwsh -File tests/check-a11y.ps1
 
 ## The must-fail fixtures[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#the-must-fail-fixtures)
 
-`tests/check-php-test-fails.sh`, `tests/check-phpstan-fails.sh` and `tests/check-pint-fails.sh` (each with a `.ps1` twin) prove the `php-test`, `phpstan` and `pint` components still fail a bad app and pass a clean one. Each asserts its template keeps the job line it promises, then runs the component's own commands from its template, in the component's own image, against the clean case in `tests/fixture-app` and the must-fail case in its fixture (`tests/php-test-fails`, `tests/phpstan-fails`, `tests/pint-fails`), in a copy in a temp dir. They exit 0 only when the clean case passes and the bad case fails with the expected finding. The `.sh` is the payload of a container; the `.ps1` runs it with Docker. They need Docker; the contract job does not run them.
+`tests/check-php-test-fails.sh`, `tests/check-phpstan-fails.sh`, `tests/check-pint-fails.sh` and `tests/check-eslint-fails.sh` (each with a `.ps1` twin) prove the `php-test`, `phpstan`, `pint` and `eslint` components still fail a bad app and pass a clean one. Each asserts its template keeps the job lines it promises, then runs the component's own commands from its template, in the component's own image, against the clean case (`tests/fixture-app` for the PHP components, `tests/eslint-clean` for eslint) and the must-fail case in its fixture (`tests/php-test-fails`, `tests/phpstan-fails`, `tests/pint-fails`, `tests/eslint-fails`), in a copy in a temp dir. They exit 0 only when the clean case passes and the bad case fails with the expected finding. The `.sh` is the payload of a container; the `.ps1` runs it with Docker. They need Docker; the contract job does not run them.
 
 linux
 
@@ -146,6 +146,7 @@ linux
 docker run --rm -v "$(pwd):/app" -w /app php:8.3-cli-trixie sh tests/check-php-test-fails.sh
 docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc sh tests/check-phpstan-fails.sh
 docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc sh tests/check-pint-fails.sh
+docker run --rm -v "$(pwd):/app" -w /app node:22.13-alpine@sha256:e2b39f7b64281324929257d0f8004fb6cb4bf0fdfb9aa8cedb235a766aec31da sh tests/check-eslint-fails.sh
 ```
 
 windows
@@ -154,6 +155,7 @@ windows
 pwsh -File tests/check-php-test-fails.ps1
 pwsh -File tests/check-phpstan-fails.ps1
 pwsh -File tests/check-pint-fails.ps1
+pwsh -File tests/check-eslint-fails.ps1
 ```
 
 ## The Squire kit checks[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#the-squire-kit-checks)
