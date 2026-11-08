@@ -13,6 +13,7 @@ are Git tags.
 
 ## Unreleased
 
+- Changed: the front page's deploy layer (`deploy/`) runs Squire's kit 0.6.0 (was 0.5.0): `scripts/release.sh` asks PROCTOR's deploy gate for a go or no-go on each release (a report, not a stop, unless `SQUIRE_PROCTOR=enforce`), and `.env.squire.example` lists the new setting. The layer's pins move to HELMET `^0.4` (locked 0.4.0) and PROCTOR `^0.7` (locked 0.7.0).
 - Docs: the Docker commands in the README and docs mount the shared `stack-composer-cache` volume, so Composer downloads are cached between runs.
 - Fixed: the README and docs describe the `portability` health check's `Host` as a bare IP address and the port (`Host: <ip>:<port>`) instead of printing a literal private address.
 - Fixed: the front page's "Same instance only" caution says git.wayne.edu has an instance runner and the stack's CI runs on it (it said git.wayne.edu had no runner yet), and its cast says Sourdough starts all five app shapes.
