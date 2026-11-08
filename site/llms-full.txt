@@ -65,6 +65,7 @@ include:
 | `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline. |
 | `proctor_command` | string | `vendor/bin/proctor check --format=codequality` | The proctor command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
+| `git_depth` | string | `"0"` | How many commits the job clones (GitLab's `GIT_DEPTH`); the default `0` clones the full history, so PROCTOR's override-approver check can see who wrote each override. |
 
 #### php-test
 
@@ -1398,6 +1399,7 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ### Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Added: the proctor component's `git_depth` input (default `"0"`, the full history), so PROCTOR's override-approver check can read git blame on every override line instead of reporting could-not-run past the 20-commit default clone.
 - Added: php-test's php_advisory_version input runs one more PHP version (a release candidate) in a separate job that may fail, so an app hears about the next PHP before it is supported (BEST_PRACTICES 6.4).
 - Fixed: the contract check resolves job names that contain the job_name input (php-test-advisory) and skips hidden template jobs, so main is green again.
 - Fixed: the component-version check follows `extends:` to a hidden base job, so php-test's jobs pass when their script comes from `.php-test-base`.
@@ -2316,10 +2318,11 @@ The install skips plugins and scripts on purpose: the job only inspects the app,
 | `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline. |
 | `proctor_command` | string | `vendor/bin/proctor check --format=codequality` | The proctor command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
+| `git_depth` | string | `"0"` | How many commits the job clones (GitLab's `GIT_DEPTH`); the default `0` clones the full history, so PROCTOR's override-approver check can see who wrote each override. |
 
 Note
 
-The template adds regexes to three inputs: `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`, `composer_version` must match `^2\.\d+\.\d+$`, and `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$`.
+The template adds regexes to four inputs: `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`, `composer_version` must match `^2\.\d+\.\d+$`, `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$`, and `git_depth` must match `^[0-9]+$`.
 
 ### What the job does[#](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html#what-the-job-does)
 
@@ -3413,6 +3416,7 @@ include:
 | `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline. |
 | `proctor_command` | string | `vendor/bin/proctor check --format=codequality` | The proctor command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
+| `git_depth` | string | `"0"` | How many commits the job clones (GitLab's `GIT_DEPTH`); the default `0` clones the full history, so PROCTOR's override-approver check can see who wrote each override. |
 
 From `templates/proctor/template.yml`: the single job (named by `job_name`) runs in the `test` stage by default, is `interruptible: true`, and has a timeout of 30 minutes. It installs Composer with the official getcomposer.org installer, verifies the installer's SHA-384 against composer.github.io/installer.sig, and pins the installed version to `composer_version`. It then runs `composer install --no-interaction --no-progress --no-plugins --no-scripts --ignore-platform-reqs`, so the app's plugins and scripts never run with the job's access and the app's PHP version and extensions are not required. The command's output goes through a plain redirect (not `tee`) to `gl-code-quality-report.json` at the project root, which keeps PROCTOR's exit code as the job result and gives the artifact the same path for every `working_dir`, including `.`. The report is published as a Code Quality report with `when: always`.
 

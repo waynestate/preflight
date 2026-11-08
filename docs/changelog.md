@@ -13,6 +13,7 @@ are Git tags.
 
 ## Unreleased
 
+- Added: the proctor component's `git_depth` input (default `"0"`, the full history), so PROCTOR's override-approver check can read git blame on every override line instead of reporting could-not-run past the 20-commit default clone.
 - Added: php-test's php_advisory_version input runs one more PHP version (a release candidate) in a separate job that may fail, so an app hears about the next PHP before it is supported (BEST_PRACTICES 6.4).
 - Fixed: the contract check resolves job names that contain the job_name input (php-test-advisory) and skips hidden template jobs, so main is green again.
 - Fixed: the component-version check follows `extends:` to a hidden base job, so php-test's jobs pass when their script comes from `.php-test-base`.

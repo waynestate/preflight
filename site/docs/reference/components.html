@@ -196,6 +196,12 @@
 <td><code>.</code></td>
 <td>Directory to run the command in, relative to the project root.</td>
 </tr>
+<tr>
+<td><code>git_depth</code></td>
+<td>string</td>
+<td><code>&quot;0&quot;</code></td>
+<td>How many commits the job clones (GitLab's <code>GIT_DEPTH</code>); the default <code>0</code> clones the full history, so PROCTOR's override-approver check can see who wrote each override.</td>
+</tr>
 </tbody>
 </table></div>
 <p>From <code>templates/proctor/template.yml</code>: the single job (named by <code>job_name</code>) runs in the <code>test</code> stage by default, is <code>interruptible: true</code>, and has a timeout of 30 minutes. It installs Composer with the official getcomposer.org installer, verifies the installer's SHA-384 against composer.github.io/installer.sig, and pins the installed version to <code>composer_version</code>. It then runs <code>composer install --no-interaction --no-progress --no-plugins --no-scripts --ignore-platform-reqs</code>, so the app's plugins and scripts never run with the job's access and the app's PHP version and extensions are not required. The command's output goes through a plain redirect (not <code>tee</code>) to <code>gl-code-quality-report.json</code> at the project root, which keeps PROCTOR's exit code as the job result and gives the artifact the same path for every <code>working_dir</code>, including <code>.</code>. The report is published as a Code Quality report with <code>when: always</code>.</p>
