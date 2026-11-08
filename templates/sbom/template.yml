@@ -47,6 +47,7 @@ spec:
     paths:
       - .composer-cache/
     policy: pull-push
+    when: always  # a failed job still keeps every package that finished downloading (D-072)
   variables:
     COMPOSER_CACHE_DIR: "$CI_PROJECT_DIR/.composer-cache"
   script:

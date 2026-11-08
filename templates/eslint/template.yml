@@ -54,6 +54,7 @@ spec:
     key: preflight-eslint
     paths:
       - .npm-cache/
+    when: always  # a failed job still keeps every package that finished downloading (D-072)
   script:
     - echo "Preflight component $[[ component.name ]] $[[ component.version ]] (ref $[[ component.reference ]], sha $[[ component.sha ]])"
     - cd "$[[ inputs.working_dir ]]"

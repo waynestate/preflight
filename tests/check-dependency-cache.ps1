@@ -3,7 +3,7 @@
 #
 # The stack's rule (2026-11-07): every dependency download is cached or
 # proxied, so a busy day of pipelines never gets the runner's address rate
-# limited by Docker Hub, Packagist or npm. Three practices, checked in one
+# limited by Docker Hub, Packagist or npm. Four practices, checked in one
 # pass:
 #
 #   * A component whose image default comes from Docker Hub has the
@@ -14,6 +14,8 @@
 #     create-project, or npm ci or install, has a cache: block and points
 #     the tool at it (COMPOSER_CACHE_DIR; NPM_CONFIG_CACHE, npm_config_cache
 #     or --cache).
+#   * Every cache: block in a component template has when: always, so a
+#     failed job still saves the packages that finished downloading (D-072).
 #   * In .gitlab-ci.yml, every Docker Hub job image starts with
 #     ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/, and no component include
 #     passes an image that already carries the proxy (the component adds it,
@@ -127,6 +129,20 @@ Get-ChildItem -Path (Join-Path $Root "templates") -Directory | ForEach-Object {
       ($code | Where-Object { $_ -cmatch ($npmPattern + '.*--cache\s') })
     if (-not $pointed) {
       Fail "${name}: runs npm but points it at no cache (NPM_CONFIG_CACHE, npm_config_cache or --cache)"
+    }
+  }
+
+  # Every cache: block saves even when the job fails.
+  if ($hasCache) {
+    $inCacheBlock = $false
+    $hasWhenAlways = $false
+    foreach ($line in $jobs) {
+      if ($line -match '^  cache:') { $inCacheBlock = $true; continue }
+      if ($inCacheBlock -and $line -match '^  [A-Za-z_]') { $inCacheBlock = $false; continue }
+      if ($inCacheBlock -and $line -match '^    when: always') { $hasWhenAlways = $true }
+    }
+    if (-not $hasWhenAlways) {
+      Fail "${name}: cache: block without when: always (D-072)"
     }
   }
 }

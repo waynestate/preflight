@@ -4,7 +4,7 @@
 #
 # The stack's rule (2026-11-07): every dependency download is cached or
 # proxied, so a busy day of pipelines never gets the runner's address rate
-# limited by Docker Hub, Packagist or npm. Three practices, checked in one
+# limited by Docker Hub, Packagist or npm. Four practices, checked in one
 # pass:
 #
 #   * A component whose image default comes from Docker Hub has the
@@ -15,6 +15,8 @@
 #     create-project, or npm ci or install, has a cache: block and points
 #     the tool at it (COMPOSER_CACHE_DIR; NPM_CONFIG_CACHE, npm_config_cache
 #     or --cache).
+#   * Every cache: block in a component template has when: always, so a
+#     failed job still saves the packages that finished downloading (D-072).
 #   * In .gitlab-ci.yml, every Docker Hub job image starts with
 #     ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/, and no component include
 #     passes an image that already carries the proxy (the component adds it,
@@ -133,6 +135,16 @@ EOF
       && ! printf '%s\n' "$code" | grep -Eq "$npm_pattern"'.*--cache[[:space:]]'; then
       fail "$name: runs npm but points it at no cache (NPM_CONFIG_CACHE, npm_config_cache or --cache)"
     fi
+  fi
+
+  # Every cache: block saves even when the job fails.
+  if printf '%s\n' "$jobs" | grep -Eq '^  cache:'; then
+    printf '%s\n' "$jobs" | awk '
+      /^  cache:/ { inblock = 1; next }
+      inblock && /^  [A-Za-z_]/ { inblock = 0 }
+      inblock && /^    when: always/ { found = 1 }
+      END { exit !found }
+    ' || fail "$name: cache: block without when: always (D-072)"
   fi
 done
 

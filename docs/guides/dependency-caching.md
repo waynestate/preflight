@@ -87,6 +87,8 @@ project so GitLab can save and restore them:
 `COMPOSER_CACHE_DIR` and `NPM_CONFIG_CACHE` point the tools at those paths. The
 keys are fixed (D-072) and installs still resolve from the lock, so a cached
 run never installs a stale package: Composer and npm only skip the download.
+Every component cache also saves with `when: always`, so a retry after a
+dropped download fetches only what is missing.
 
 ## Your own jobs
 
@@ -103,6 +105,7 @@ composer-ci:
   cache:
     key: composer
     paths: [.cache/composer/]
+    when: always
   script:
     - composer install --no-interaction --no-progress --prefer-dist
     - composer ci

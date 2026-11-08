@@ -104,6 +104,7 @@ spec:
     paths:
       - .npm-cache/
     policy: pull-push
+    when: always  # a failed job still keeps every package that finished downloading (D-072)
   variables:
     # A variable, not a script line, so GitLab expands $CI_ENVIRONMENT_URL
     # and the like, and the value never passes through the shell.
