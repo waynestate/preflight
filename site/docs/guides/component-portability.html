@@ -93,7 +93,7 @@
 <p>The job prints one <code>portability: &lt;check&gt;: problem: ...</code> line per problem as it finds it, then a summary with <code>pass</code>, <code>FAIL</code> or <code>skipped</code> for every check, and passes only when every check that ran passed.</p>
 <h2 id="add-the-include">Add the include<a class="docs-heading-link" aria-label="Link to this section" href="#add-the-include">#</a></h2>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@b90323b5823287a7840095d0d5f0682aaeedf327 # 0.3.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@87d9b6fc6b0ed302dd729986525282cd7b567ebd # 0.4.0
     inputs:
       env: [&quot;APP_KEY=${PORTABILITY_APP_KEY}&quot;, &quot;APP_URL=https://myapp.example.edu&quot;, &quot;SESSION_DRIVER=cookie&quot;, &quot;LOG_CHANNEL=stderr&quot;]
       session_login_path: /_portability/login

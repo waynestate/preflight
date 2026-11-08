@@ -10,19 +10,47 @@ generator: Squire agent-ready
 
 This page is the checklist for moving an app from one Preflight pin to the next, one released version at a time, newest first; every section follows `CHANGELOG.md`. Read the section for the version you are moving to, apply its steps, and verify on the next pipeline. Like a real preflight, the walk takes a few minutes and earns its keep: move the pin only after you have read the version notes.
 
+## 0.4.0[#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-4-0)
+
+Released 2026-11-08. Two new inputs and a Composer floor. The proctor component's `git_depth` (default `"0"`) clones the full history, so PROCTOR's override-approver check can read git blame on every override line instead of reporting could-not-run past GitLab's 20-commit default. php-test's `php_advisory_version` runs one more PHP version, such as a release candidate, in a separate job that may fail. php-test and proctor refuse a `composer_version` older than 2.9.6, the floor with the 2026 security fixes.
+
+### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking)
+
+An include that sets `composer_version` on php-test or proctor to a version older than 2.9.6 no longer starts: GitLab rejects the input before the pipeline runs. The default (2.10.3) is unaffected, and no other input, default or job name changed.
+
+### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated)
+
+Nothing was deprecated in 0.4.0.
+
+### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps)
+
+1. If an include sets `composer_version` below 2.9.6, remove the input (the default is 2.10.3) or set 2.9.6 or later.
+2. Point each component include at the `0.4.0` tag, pinned to the tag's full commit SHA with the tag in a trailing comment:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@87d9b6fc6b0ed302dd729986525282cd7b567ebd # 0.4.0
+```
+
+3. Optional: on a very large repository, set the proctor component's `git_depth` to a number such as `50`; override lines older than that then report could-not-run. To hear about the next PHP early, set php-test's `php_advisory_version`, for example `8.6.0RC2`.
+
+### How to verify[#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify)
+
+The pipeline is green, the proctor job log's fetch line no longer says `git depth set to 20` (unless you set `git_depth`), and with `php_advisory_version` set a `php-test-advisory` job runs and may fail without failing the pipeline.
+
 ## 0.3.1[#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-3-1)
 
 Released 2026-11-08. Every component that installs packages caches under a fixed key per component (such as `preflight-pint`, or `preflight-php-8.4` for one PHP version of `php-test`) instead of a lock-file hash, and saves its cache even when the job fails (D-072). A lock change, or a retry after a dropped download, fetches only what is missing.
 
-### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking)
+### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-1)
 
 0.3.1 has no breaking changes: inputs, defaults and job names are the same as in 0.3.0.
 
-### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated)
+### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated-1)
 
 Nothing was deprecated in 0.3.1.
 
-### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps)
+### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-1)
 
 Point each component include at the `0.3.1` tag, pinned to the tag's full commit SHA with the tag in a trailing comment:
 
@@ -33,7 +61,7 @@ include:
 
 The first pipeline on the new pin fills the new cache keys, so expect it to download everything once.
 
-### How to verify[#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify)
+### How to verify[#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-1)
 
 The pipeline is green, and a component's job log shows `Creating cache preflight-` followed by the component's key, and, after a failed job, `Saving cache for failed job`.
 
@@ -41,7 +69,7 @@ The pipeline is green, and a component's job log shows `Creating cache preflight
 
 Released 2026-11-08. Docker Hub images now come through the group's Dependency Proxy by default (a new `image_prefix` input), and more components cache their Composer and npm downloads.
 
-### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-1)
+### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-2)
 
 Every component whose image comes from Docker Hub (`proctor`, `php-test`, `composer-audit`, `sbom`, `pint`, `phpstan`, `eslint`, `secret-detection`, `package-publish`, `renovate`, `squire-kit`) now pulls `image_prefix/image`, and `image_prefix` defaults to your group's Dependency Proxy (`${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}`). `image` keeps its default and is the path after the prefix. Only an app that overrides `image`, or runs where the proxy is off, needs to act:
 
@@ -52,11 +80,11 @@ Every component whose image comes from Docker Hub (`proctor`, `php-test`, `compo
 
 `a11y` (mcr.microsoft.com) and `portability` (quay.io) have no `image_prefix` and are unchanged: the proxy serves Docker Hub only.
 
-### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated-1)
+### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated-2)
 
 Nothing was deprecated in 0.3.0.
 
-### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-1)
+### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-2)
 
 1. Move every Preflight include to the `0.3.0` tag in one change, pinned to the tag's full commit SHA with the tag in a trailing comment, and remove any proxied `image:` input in the same change (step 1 above):
    ```yaml
@@ -82,7 +110,7 @@ Verify: the job log's `Pulling docker image` line shows the prefix once, and eac
 
 ## 0.2.0[#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-2-0)
 
-### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-2)
+### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-3)
 
 The `portability` component is now one job, `portability` (named by a new `job_name` input), instead of `portability-build` and `portability-run`, and it checks what ADR-0010 asks for instead of the goss list. It builds the image with Buildah and runs it in the same job, so nothing is pushed to the container registry and no app image is pulled. Only an app that already includes `portability` from 0.1.4 needs to act:
 
@@ -102,15 +130,15 @@ The Buildah image default (now the `portability` component's `image` input) move
 
 Released 2026-11-03. The new pieces are opt-in: the `portability` component, a `job_name` input on every component except `portability`, and a stricter Renovate preset.
 
-### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-3)
+### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-4)
 
 0.1.4 has no breaking changes: the version adds a component, an input and preset rules, and removes nothing.
 
-### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated-2)
+### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated-3)
 
 Nothing was deprecated in 0.1.4.
 
-### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-2)
+### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-3)
 
 Point each component include at the `0.1.4` tag, pinned to the tag's full commit SHA with the tag in a trailing comment:
 
@@ -137,7 +165,7 @@ Note
 
 Pins change only through a reviewed merge request. A tag or branch can move; a SHA cannot.
 
-### How to verify[#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-1)
+### How to verify[#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-2)
 
 Push the change and run the app's pipeline. The components are ordinary jobs, so they run whenever the app's pipeline runs; expect the same jobs as before, green. PROCTOR's `preflight-pinned` check warns when an include is not pinned to a commit SHA. If you added `portability`, the `portability-run` job passes only when the image boots the strict way and the goss checks hold.
 
@@ -145,15 +173,15 @@ Push the change and run the app's pipeline. The components are ordinary jobs, so
 
 Released 2026-11-03. Two consumer-facing changes: the `proctor` component installs the app with `--no-plugins --no-scripts`, and the shared Renovate preset stopped auto-merging the pins that every pipeline runs.
 
-### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-4)
+### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-5)
 
 0.1.3 has no breaking changes, but the `proctor` job now installs the app's dependencies with `composer install --no-plugins --no-scripts`, so the app's plugins and scripts never run inside the job.
 
-### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated-3)
+### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated-4)
 
 Nothing was deprecated in 0.1.3.
 
-### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-3)
+### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-4)
 
 Bump each component include to the `0.1.3` tag's full commit SHA, with the tag in a trailing comment:
 
@@ -171,7 +199,7 @@ Warning
 
 Do not add `RENOVATE_TOKEN: $RENOVATE_TOKEN` to your own `variables:`; that self-reference arrives as literal text.
 
-### How to verify[#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-2)
+### How to verify[#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-3)
 
 Run the pipeline and confirm the jobs run on the new pin. In the runner project, confirm the job reads `RENOVATE_TOKEN` straight from the project as a masked CI variable, and that a bump touching the templates, the contract or a component include pin opens a merge request labeled `needs-review` instead of auto-merging.
 
@@ -179,15 +207,15 @@ Run the pipeline and confirm the jobs run on the new pin. In the runner project,
 
 Released 2026-10-29. The site gained the agent-ready kit (prompt blocks, Markdown twins, llms.txt) from Squire, and the proof page moved to a private site that needs a Wayne State sign-in.
 
-### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-5)
+### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-6)
 
 0.1.2 has no breaking changes: the version touches the site, the README and the proof page, not the components.
 
-### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated-4)
+### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated-5)
 
 Nothing was deprecated in 0.1.2.
 
-### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-4)
+### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-5)
 
 Bump each component include to the `0.1.2` tag's full commit SHA, with the tag in a trailing comment:
 
@@ -196,7 +224,7 @@ include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@<full commit SHA> # 0.1.2
 ```
 
-### How to verify[#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-3)
+### How to verify[#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-4)
 
 Run the pipeline and confirm the component jobs run on the new pin. PROCTOR's `preflight-pinned` check warns when an include is not pinned to a commit SHA.
 
@@ -204,15 +232,15 @@ Run the pipeline and confirm the component jobs run on the new pin. PROCTOR's `p
 
 Released 2026-10-29. Two new components: `package-publish`, which publishes a semantic version tag to the GitLab group's built-in Composer registry, and `renovate`, with the shared preset `renovate/default.json`. The reusable GitHub Actions workflow for mirrors ships in this tag too.
 
-### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-6)
+### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-7)
 
 0.1.1 has no breaking changes: the version adds components and changes only the repository's own PHPStan config.
 
-### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated-5)
+### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated-6)
 
 Nothing was deprecated in 0.1.1.
 
-### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-5)
+### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-6)
 
 Bump the existing includes to the `0.1.1` tag's full commit SHA, and add the new components where you want them:
 
@@ -244,7 +272,7 @@ jobs:
     uses: waynestate/preflight/.github/workflows/php-package.yml@<full commit SHA> # 0.1.1
 ```
 
-### How to verify[#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-4)
+### How to verify[#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-5)
 
 Run the pipeline. For `package-publish`, the job runs only on tags and reads the registry first: a version already published from this commit passes quietly, and a version published from a different commit fails the pipeline. For a mirrored package, a release tag is not done until it is green on both sides.
 
@@ -252,15 +280,15 @@ Run the pipeline. For `package-publish`, the job runs only on tags and reads the
 
 Released 2026-10-27. First tagged release.
 
-### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-7)
+### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-8)
 
 0.1.0 is the first tagged release, so there is nothing to break: it is the baseline every later pin moves from.
 
-### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated-6)
+### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated-7)
 
 Nothing was deprecated in 0.1.0.
 
-### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-6)
+### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-7)
 
 Include the components pinned to the `0.1.0` tag's full commit SHA:
 
@@ -269,7 +297,7 @@ include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@<full commit SHA> # 0.1.0
 ```
 
-### How to verify[#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-5)
+### How to verify[#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-6)
 
 Run the pipeline and confirm the component jobs run on the pin.
 

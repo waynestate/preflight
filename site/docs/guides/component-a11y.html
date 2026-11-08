@@ -72,14 +72,14 @@ person. The report counts the items axe-core could not decide (&quot;to review b
 <h2 id="include-the-component">Include the component<a class="docs-heading-link" aria-label="Link to this section" href="#include-the-component">#</a></h2>
 <p>Add the include to the app's <code>.gitlab-ci.yml</code>, pinned to a full commit SHA with the tag in a trailing comment:</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@b90323b5823287a7840095d0d5f0682aaeedf327 # 0.3.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@87d9b6fc6b0ed302dd729986525282cd7b567ebd # 0.4.0
 </code></pre>
 <p>With no inputs, the job serves the <code>site/</code> folder on a local port and checks every <code>.html</code> file in it at WCAG 2.1 AA.</p>
 <aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>The a11y component ships in Preflight 0.2.0; 0.1.4 does not include it. Pin that tag's full commit SHA, or the full
 commit SHA of a commit at or after it.</p></aside>
 <p>To hold the stack's floor, WCAG 2.2 AA, and to name the pages:</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@b90323b5823287a7840095d0d5f0682aaeedf327 # 0.3.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@87d9b6fc6b0ed302dd729986525282cd7b567ebd # 0.4.0
     inputs:
       site_dir: site
       pages: [&quot;index.html&quot;, &quot;docs/**/*.html&quot;]
@@ -208,7 +208,7 @@ text.</p>
 <p>A site that has never been checked usually has a few findings. Land the gate first, fix the findings, then make it
 blocking:</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@b90323b5823287a7840095d0d5f0682aaeedf327 # 0.3.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@87d9b6fc6b0ed302dd729986525282cd7b567ebd # 0.4.0
     inputs:
       allow_failure: true
 </code></pre>
@@ -219,7 +219,7 @@ not become wallpaper.</p>
 <p>For pages a static folder cannot hold (a Laravel or raw-PHP app), point the job at a running copy, such as a review app
 or a pre-production deploy, and list the paths:</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@b90323b5823287a7840095d0d5f0682aaeedf327 # 0.3.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@87d9b6fc6b0ed302dd729986525282cd7b567ebd # 0.4.0
     inputs:
       base_url: $CI_ENVIRONMENT_URL
       pages: [&quot;/&quot;, &quot;about&quot;, &quot;apply&quot;]

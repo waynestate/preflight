@@ -12,7 +12,11 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ## Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Docs: README, the guides, the docs pages and the examples pin the 0.4.0 tag commit, and the upgrading page has a 0.4.0 section.
+
 ## 0.4.0 (2026-11-08)[#](https://preflight.apps.wayne.edu/docs/changelog.html#0-4-0-2026-11-08)
+
+Tag commit: `87d9b6fc6b0ed302dd729986525282cd7b567ebd` (pin this SHA, with `# 0.4.0` in a trailing comment).
 
 Two new inputs and a Composer floor: the proctor component's `git_depth` clones the full history so PROCTOR's override-approver check can read git blame, php-test's `php_advisory_version` runs the next PHP in a job that may fail, and php-test and proctor refuse a `composer_version` older than 2.9.6. Preflight's own pipeline now proves ten components fail a bad app (eslint, secret-detection and sbom are new), runs the real PROCTOR, and the deploy layer moves to Squire's kit 0.7.1 and HELMET ^1.0.
 
