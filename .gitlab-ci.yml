@@ -131,6 +131,21 @@ must-fail-eslint:
   script:
     - sh tests/check-eslint-fails.sh
 
+# The must-fail fixture for the secret-detection component: the check proves
+# the template keeps the gitleaks dir line that lets Gitleaks' exit code be
+# the job result, then runs the template's own command, with the template's
+# own config, against the clean fixture and a copy of it carrying a token in
+# src/config.php. The token is built at run time, so no secret-shaped string
+# is ever committed. Runs in the template's own image, pinned by digest, so
+# it needs no Docker; it downloads nothing, so it keeps no cache.
+must-fail-secret-detection:
+  stage: test
+  image:
+    name: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+    entrypoint: [""]
+  script:
+    - sh tests/check-secret-detection-fails.sh
+
 # The must-fail fixtures for the portability component: the check runs the
 # component's own probe (templates/portability/probe.sh, which the template
 # carries byte for byte) on the clean fixture and on nine flawed builds of

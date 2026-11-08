@@ -6,6 +6,7 @@ are Git tags.
 
 ## Unreleased
 
+- Added: a must-fail fixture for the secret-detection component (`tests/secret-detection-clean`, `tests/check-secret-detection-fails.sh` and its Windows twin, the `must-fail-secret-detection` job): Preflight's pipeline proves Gitleaks fails on a token in the app's code, skips vendor/ and node_modules/, and redacts the value.
 - Added: a must-fail fixture for the eslint component (`tests/eslint-fails`, `tests/check-eslint-fails.sh` and its Windows twin, the `must-fail-eslint` job): Preflight's pipeline proves the job fails on an ESLint error and passes a clean app.
 - Changed: php-test's and proctor's `composer_version` refuses a Composer older than 2.9.6 (the floor with the 2026 security fixes); the pattern is held by `tests/check-composer-floor.sh` (and its Windows twin, `tests/check-composer-floor.ps1`) in the contract job.
 - Changed: Preflight's own pipeline runs the real PROCTOR (`waynestate/proctor` ^0.8 in the fixture app) on the proctor component's default command, instead of a fake that printed an empty report; the fake stays only for the offline `check-proctor-fails` wiring check.

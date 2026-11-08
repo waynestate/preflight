@@ -965,7 +965,7 @@ Why: a component that never fails looks the same as one that works.
 
 Sources: [GitLab: components, testing](https://docs.gitlab.com/ci/components/).
 
-**How the stack holds it: Partly.** Eight components carry a fixture that must fail them, each kept in place by a
+**How the stack holds it: Partly.** Nine components carry a fixture that must fail them, each kept in place by a
 check: `proctor` runs `tests/proctor-fails`, a fake proctor that prints one blocker finding and exits 1, against the
 clean stub in `tests/fixture-app` (`tests/check-proctor-fails`); `composer-audit` runs `composer audit` on
 `tests/audit-fixtures/advisory`, which fails in every mode, and `tests/audit-fixtures/abandoned`, which fails only in
@@ -978,10 +978,15 @@ CI by `must-fail-portability`); `php-test` runs PHPUnit on
 (`tests/check-php-test-fails`); `phpstan` runs PHPStan on `tests/phpstan-fails`, which carries a type error, against
 the clean case in `tests/fixture-app` (`tests/check-phpstan-fails`); `pint` runs Pint in test mode on
 `tests/pint-fails`, which is not formatted to the standard, against the clean case in `tests/fixture-app`
-(`tests/check-pint-fails`); and `eslint` runs the app's own ESLint and Prettier on `tests/eslint-fails`, which
-carries one unused `const`, against the clean case in `tests/eslint-clean` (`tests/check-eslint-fails`).
+(`tests/check-pint-fails`); `eslint` runs the app's own ESLint and Prettier on `tests/eslint-fails`, which
+carries one unused `const`, against the clean case in `tests/eslint-clean` (`tests/check-eslint-fails`); and
+`secret-detection` runs the template's own gitleaks command, with the template's own config, on
+`tests/secret-detection-clean` plus a token built at run time in `src/config.php`, which must fail with
+`gitlab-pat` named and the value redacted from the log, while the same token planted in `vendor/` and
+`node_modules/` must stay invisible (`tests/check-secret-detection-fails`, run in CI by
+`must-fail-secret-detection`).
 Still missing: a malware-flagged version fixture for `composer-audit` (see 4.6 and 4.11), and must-fail fixtures
-for `package-publish`, `sbom` and `secret-detection`; `renovate` is a config, not a job, so it has nothing to fail.
+for `package-publish` and `sbom`; `renovate` is a config, not a job, so it has nothing to fail.
 
 ### 7.3 Use the stack's own projects as the first users
 Each stack repo includes Preflight, pinned.
