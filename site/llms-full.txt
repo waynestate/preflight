@@ -918,7 +918,10 @@ Before takeoff · every push
 7. ESLint · Prettier Clean
    The app's own ESLint and `prettier --check`, installed from the lock with scripts off.
    `npx --no-install eslint .`
-8. Clearance Cleared for takeoff
+8. A11y · axe-core No violations
+   axe-core in Playwright on the app's pages, light and dark, at 320 and 1280 px. WCAG 2.1 AA by default; one input adds 2.2 AA.
+   `node check.mjs config.json`
+9. Clearance Cleared for takeoff
    Every gate green. The release is free to leave for Citadel.
 
 Checklist complete. Tray tables up, tests green.
@@ -932,7 +935,7 @@ Checklist complete. Tray tables up, tests green.
 - PINT
 - PHPSTAN
 - ESLINT
-- A11Ynext tag
+- A11Y
 - CONTRACTcoming soon
 - FRESHNESScoming soon
 - CLEARED FOR TAKEOFF
@@ -941,9 +944,9 @@ Makes the Composer audit fail, to show the pipeline holding short.
 
 Cockpit placards
 
-### Seven checks, one include each
+### Eight checks, one include each
 
-Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All seven are in the 0.3.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Two more components, `package-publish` and `renovate`, ship in the same tag; the README documents them.
+Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All eight are in the 0.3.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Five more components ship in the same tag, and the docs cover each one: `secret-detection`, `squire-kit`, `portability`, `package-publish` and `renovate`. New in 0.3.0: every component that pulls from Docker Hub goes through GitLab's Dependency Proxy on its own (the `image_prefix` input), so Docker Hub is asked once.
 
 in 0.3.0
 
@@ -1085,6 +1088,27 @@ The app's own ESLint and Prettier. The app requires `@waynestate/pinstripe`, `es
 
 in 0.3.0
 
+#### a11y
+
+Boarding for every passenger.
+
+Opens the pages in Chromium and fails on any axe-core violation, with the reflow check at 320 px. It serves a static `site_dir`, or checks a running app at `base_url`.
+
+```
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+```
+
+**6 inputs**
+
+- **stage**: `test`
+- **image**: `playwright:v1.65.0-noble@sha256:…`
+- **site_dir**: `site`
+- **pages**: `["**/*.html"]`
+- **base_url**: `""`
+- **wcag_tags**: `wcag21aa` and below
+
+in 0.3.0
+
 #### php-package.yml
 
 Two cockpits, one checklist.
@@ -1103,10 +1127,8 @@ uses: waynestate/preflight/.github/workflows/php-package.yml@23038dfe767f6ef60e3
 
 #### Deferred items
 
-On the list, not yet on board. Nothing to include until they land.
+On the list, not yet on board. Nothing to include until they land, and the next tag has no date yet. The accessibility suite and the Squire kit check left this list in 0.2.0.
 
-- Next tagAccessibility suiteBuilt: the `a11y` component runs axe-core in Playwright, light and dark, at 320 and 1280 px. WCAG 2.1 Level AA by default; one input adds 2.2 AA, the floor WayneUI's own gate uses. A manual review is still owed.
-- Next tagSquire kit checkBuilt: the `squire-kit` component runs `squire init --check` on the deploy kit, so a file that drifted from its Squire release fails the pipeline. Renovate's merge request for each new Squire can carry the refreshed kit.
 - Coming soonContract suiteNamed in the best practices as coming later. Not built yet.
 - Coming soonSite freshnessPlanned. Not in this repo yet.
 
@@ -1377,6 +1399,8 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 ### Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
 - Docs: the README, docs, front page and examples pin the 0.3.0 tag's commit SHA, and the GitHub workflow example moves from 0.1.1 to 0.3.0.
+- Fixed: the front page said a11y and squire-kit were coming in the next tag; both shipped in 0.2.0. The checklist card gains an eighth check, a11y, which lights the A11Y lamp (it was a hatched "next tag" lamp), the placards add an a11y placard and name the five other components in 0.3.0, and "Deferred items" keeps only the contract suite and site freshness, with no date for the next tag. The README's checklist art is rebuilt to match: nine rows, all thirteen components in 0.3.0, and a components badge that reads 13 (it read 9).
+- Fixed: the README art kit (`scripts/readme-art`) reads job names from the `job_name` input every template now uses, puts the stage list on its own line (it ran past the panel), closes up the component list when it grows, and labels the license badge in US spelling.
 
 ### 0.3.0 (2026-11-08)[#](https://preflight.apps.wayne.edu/docs/changelog.html#0-3-0-2026-11-08)
 
@@ -3185,7 +3209,7 @@ Source: https://preflight.apps.wayne.edu/docs/
 
 ## Preflight[#](https://preflight.apps.wayne.edu/docs/#preflight)
 
-![php ^8.3](https://preflight.apps.wayne.edu/docs/readme/badges/php.svg) ![license MIT](https://preflight.apps.wayne.edu/docs/readme/badges/license.svg) ![gitlab ci components: 9](https://preflight.apps.wayne.edu/docs/readme/badges/components.svg)
+![php ^8.3](https://preflight.apps.wayne.edu/docs/readme/badges/php.svg) ![license MIT](https://preflight.apps.wayne.edu/docs/readme/badges/license.svg) ![gitlab ci components: 13](https://preflight.apps.wayne.edu/docs/readme/badges/components.svg)
 
 **Every push is cleared for takeoff.**
 
@@ -3272,7 +3296,7 @@ Note
 
 Components are GA on the Free tier since GitLab 17.0. They work only within the same GitLab instance that hosts this project.
 
-![Preflight's before-takeoff checklist card. 1 PROCTOR, checked; 2 PHP tests, 8.3, 8.4 and 8.5 pass; 3 Composer audit, no advisories; 4 SBOM, validated; 5 Pint, clean; 6 PHPStan, no errors; 7 ESLint and Prettier, clean; 8 clearance, cleared for takeoff. Beside it the annunciator panel lights a green lamp per check, with a11y, contract and freshness marked coming soon, and lists the seven checks, all in the 0.1.4 tag.](https://preflight.apps.wayne.edu/docs/readme/checklist.svg)
+![Preflight's before-takeoff checklist card. 1 PROCTOR, checked; 2 PHP tests, 8.3, 8.4 and 8.5 pass; 3 Composer audit, no advisories; 4 SBOM, validated; 5 Pint, clean; 6 PHPStan, no errors; 7 ESLint and Prettier, clean; 8 a11y with axe-core, no violations; 9 clearance, cleared for takeoff. Beside it the annunciator panel lights a green lamp per check, with contract and freshness marked coming soon, and lists all thirteen components, every one in the 0.3.0 tag.](https://preflight.apps.wayne.edu/docs/readme/checklist.svg)
 
 The checklist, item by item, with each item's job and timeout read from `templates/`:
 

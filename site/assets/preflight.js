@@ -79,10 +79,12 @@
     var runBtn = pf.querySelector("[data-run]");
     var auditResp = items[2].querySelector(".item__resp");
 
-    var TOTAL = items.length;          // 8: seven jobs and the clearance
+    var TOTAL = items.length;          // 9: eight jobs and the clearance
     var AUDIT = 2;                      // index of the Composer audit item
-    // Where the aircraft sits after n items are done (SVG user units).
-    var X = [33, 92, 186, 222, 284, 306, 326, 440];
+    // Where the aircraft sits after n items are done (SVG user units): past
+    // STYLE it waits at the edge of the runway for a11y, then lines up.
+    var X = [33, 92, 186, 222, 284, 306, 326, 384, 440];
+    var LAST = X.length - 1;
     // Which hold-short line each count has rolled past: TEST after 2, AUDIT after 4, STYLE after 7.
     var HOLD_AT = [2, 4, 7];
 
@@ -134,8 +136,8 @@
       });
 
       if (blocked) setPlane(X[3], false);
-      else if (cleared) setPlane(X[7], motion);
-      else setPlane(X[Math.min(c, 7)], false);
+      else if (cleared) setPlane(X[LAST], motion);
+      else setPlane(X[Math.min(c, LAST)], false);
     }
 
     function measure() {

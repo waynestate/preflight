@@ -12,7 +12,7 @@ description: Preflight is a set of GitLab CI/CD components that give every WSU a
 <div align="center">
   <img src="readme/badges/php.svg" alt="php ^8.3">
   <img src="readme/badges/license.svg" alt="license MIT">
-  <img src="readme/badges/components.svg" alt="gitlab ci components: 9">
+  <img src="readme/badges/components.svg" alt="gitlab ci components: 13">
 </div>
 
 **Every push is cleared for takeoff.**

@@ -22,8 +22,9 @@ fonts over `file://`).
   lamp goes red, a stop bar lights across the AUDIT line and the clearance becomes HOLD SHORT.
 - hero: the compass card swings round and settles on the gold heading bug, the title's letters light like panel
   backlighting, and the PAPI lights settle from all red to two white, two red: on the glidepath.
-- coming soon: the accessibility suite, a contract suite and site freshness sit on the panel as dim, hatched lamps
-  and in "Deferred items"; none has a command, because none exists yet.
+- coming soon: a contract suite and site freshness sit on the panel as dim, hatched lamps and in "Deferred items";
+  neither has a command, because neither exists yet. The accessibility suite shipped in 0.2.0, so A11Y is a live
+  lamp now, lit by the card's eighth check: the aircraft waits past STYLE at the runway edge for it.
 - marks: `brand/` is Preflight's (generated with ChatGPT, never redrawn). `assets/marks/` holds the other stack parts'
   marks, copied from the sibling sites; WayneUI uses its own reversed mark on green.
 - reduced motion: the page is the finished flight, every word present at first paint: every box ticked, every lamp

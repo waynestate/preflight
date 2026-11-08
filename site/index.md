@@ -60,7 +60,10 @@ Before takeoff · every push
 7. ESLint · Prettier Clean
    The app's own ESLint and `prettier --check`, installed from the lock with scripts off.
    `npx --no-install eslint .`
-8. Clearance Cleared for takeoff
+8. A11y · axe-core No violations
+   axe-core in Playwright on the app's pages, light and dark, at 320 and 1280 px. WCAG 2.1 AA by default; one input adds 2.2 AA.
+   `node check.mjs config.json`
+9. Clearance Cleared for takeoff
    Every gate green. The release is free to leave for Citadel.
 
 Checklist complete. Tray tables up, tests green.
@@ -74,7 +77,7 @@ Checklist complete. Tray tables up, tests green.
 - PINT
 - PHPSTAN
 - ESLINT
-- A11Ynext tag
+- A11Y
 - CONTRACTcoming soon
 - FRESHNESScoming soon
 - CLEARED FOR TAKEOFF
@@ -83,9 +86,9 @@ Makes the Composer audit fail, to show the pipeline holding short.
 
 Cockpit placards
 
-## Seven checks, one include each
+## Eight checks, one include each
 
-Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All seven are in the 0.3.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Two more components, `package-publish` and `renovate`, ship in the same tag; the README documents them.
+Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All eight are in the 0.3.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Five more components ship in the same tag, and the docs cover each one: `secret-detection`, `squire-kit`, `portability`, `package-publish` and `renovate`. New in 0.3.0: every component that pulls from Docker Hub goes through GitLab's Dependency Proxy on its own (the `image_prefix` input), so Docker Hub is asked once.
 
 in 0.3.0
 
@@ -227,6 +230,27 @@ The app's own ESLint and Prettier. The app requires `@waynestate/pinstripe`, `es
 
 in 0.3.0
 
+### a11y
+
+Boarding for every passenger.
+
+Opens the pages in Chromium and fails on any axe-core violation, with the reflow check at 320 px. It serves a static `site_dir`, or checks a running app at `base_url`.
+
+```
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+```
+
+**6 inputs**
+
+- **stage**: `test`
+- **image**: `playwright:v1.65.0-noble@sha256:…`
+- **site_dir**: `site`
+- **pages**: `["**/*.html"]`
+- **base_url**: `""`
+- **wcag_tags**: `wcag21aa` and below
+
+in 0.3.0
+
 ### php-package.yml
 
 Two cockpits, one checklist.
@@ -245,10 +269,8 @@ uses: waynestate/preflight/.github/workflows/php-package.yml@23038dfe767f6ef60e3
 
 ### Deferred items
 
-On the list, not yet on board. Nothing to include until they land.
+On the list, not yet on board. Nothing to include until they land, and the next tag has no date yet. The accessibility suite and the Squire kit check left this list in 0.2.0.
 
-- Next tagAccessibility suiteBuilt: the `a11y` component runs axe-core in Playwright, light and dark, at 320 and 1280 px. WCAG 2.1 Level AA by default; one input adds 2.2 AA, the floor WayneUI's own gate uses. A manual review is still owed.
-- Next tagSquire kit checkBuilt: the `squire-kit` component runs `squire init --check` on the deploy kit, so a file that drifted from its Squire release fails the pipeline. Renovate's merge request for each new Squire can carry the refreshed kit.
 - Coming soonContract suiteNamed in the best practices as coming later. Not built yet.
 - Coming soonSite freshnessPlanned. Not in this repo yet.
 

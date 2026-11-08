@@ -201,7 +201,12 @@
               <p class="item__why">The app's own ESLint and <code>prettier --check</code>, installed from the lock with scripts off.</p>
               <code class="item__cmd">npx --no-install eslint .</code>
             </li>
-            <li class="item item--final" data-step="7" data-lights="cleared">
+            <li class="item" data-step="7" data-lights="a11y">
+              <p class="item__row"><span class="item__name">A11y · axe-core</span><span class="item__dots" aria-hidden="true"></span><span class="item__resp">No violations</span><span class="item__tick" aria-hidden="true"></span></p>
+              <p class="item__why">axe-core in Playwright on the app's pages, light and dark, at 320 and 1280 px. WCAG 2.1 AA by default; one input adds 2.2 AA.</p>
+              <code class="item__cmd">node check.mjs config.json</code>
+            </li>
+            <li class="item item--final" data-step="8" data-lights="cleared">
               <p class="item__row"><span class="item__name">Clearance</span><span class="item__dots" aria-hidden="true"></span><span class="item__resp">Cleared for takeoff</span><span class="item__tick" aria-hidden="true"></span></p>
               <p class="item__why">Every gate green. The release is free to leave for Citadel.</p>
             </li>
@@ -223,7 +228,7 @@
               <li class="lamp" data-lamp="pint"><span class="lamp__face">PINT</span></li>
               <li class="lamp" data-lamp="phpstan"><span class="lamp__face">PHPSTAN</span></li>
               <li class="lamp" data-lamp="eslint"><span class="lamp__face">ESLINT</span></li>
-              <li class="lamp lamp--soon"><span class="lamp__face">A11Y<small>next tag</small></span></li>
+              <li class="lamp" data-lamp="a11y"><span class="lamp__face">A11Y</span></li>
               <li class="lamp lamp--soon"><span class="lamp__face">CONTRACT<small>coming soon</small></span></li>
               <li class="lamp lamp--soon"><span class="lamp__face">FRESHNESS<small>coming soon</small></span></li>
               <li class="lamp lamp--wide" data-lamp="cleared"><span class="lamp__face" data-clearance>CLEARED FOR TAKEOFF</span></li>
@@ -296,8 +301,8 @@
     <div class="wsu-container">
       <div class="section__head">
         <p class="eyebrow">Cockpit placards</p>
-        <h2 id="components-title">Seven checks, one include each</h2>
-        <p>Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All seven are in the 0.3.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Two more components, <code>package-publish</code> and <code>renovate</code>, ship in the same tag; the README documents them.</p>
+        <h2 id="components-title">Eight checks, one include each</h2>
+        <p>Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All eight are in the 0.3.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Five more components ship in the same tag, and the docs cover each one: <code>secret-detection</code>, <code>squire-kit</code>, <code>portability</code>, <code>package-publish</code> and <code>renovate</code>. New in 0.3.0: every component that pulls from Docker Hub goes through GitLab's Dependency Proxy on its own (the <code>image_prefix</code> input), so Docker Hub is asked once.</p>
       </div>
 
       <div class="placards">
@@ -433,6 +438,26 @@
           </details>
         </article>
 
+        <article class="placard">
+          <span class="placard__screws" aria-hidden="true"></span>
+          <p class="placard__tag">in 0.3.0</p>
+          <h3 class="placard__name">a11y</h3>
+          <p class="placard__aside">Boarding for every passenger.</p>
+          <p class="placard__line">Opens the pages in Chromium and fails on any axe-core violation, with the reflow check at 320 px. It serves a static <code>site_dir</code>, or checks a running app at <code>base_url</code>.</p>
+<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0</code></pre>
+          <details class="placard__inputs">
+            <summary>6 inputs</summary>
+            <dl>
+              <dt>stage</dt><dd><code>test</code></dd>
+              <dt>image</dt><dd><code>playwright:v1.65.0-noble@sha256:…</code></dd>
+              <dt>site_dir</dt><dd><code>site</code></dd>
+              <dt>pages</dt><dd><code>["**/*.html"]</code></dd>
+              <dt>base_url</dt><dd><code>""</code></dd>
+              <dt>wcag_tags</dt><dd><code>wcag21aa</code> and below</dd>
+            </dl>
+          </details>
+        </article>
+
         <!-- Not a component: the reusable workflow for GitHub mirrors. -->
         <article class="placard placard--alt">
           <span class="placard__screws" aria-hidden="true"></span>
@@ -454,10 +479,8 @@
 
       <div class="deferred">
         <h3 class="deferred__title">Deferred items</h3>
-        <p class="deferred__note">On the list, not yet on board. Nothing to include until they land.</p>
+        <p class="deferred__note">On the list, not yet on board. Nothing to include until they land, and the next tag has no date yet. The accessibility suite and the Squire kit check left this list in 0.2.0.</p>
         <ul class="deferred__list">
-          <li class="inop"><span class="inop__sticker">Next tag</span><span class="inop__name">Accessibility suite</span><span class="inop__line">Built: the <code>a11y</code> component runs axe-core in Playwright, light and dark, at 320 and 1280 px. WCAG 2.1 Level AA by default; one input adds 2.2 AA, the floor WayneUI's own gate uses. A manual review is still owed.</span></li>
-          <li class="inop"><span class="inop__sticker">Next tag</span><span class="inop__name">Squire kit check</span><span class="inop__line">Built: the <code>squire-kit</code> component runs <code>squire init --check</code> on the deploy kit, so a file that drifted from its Squire release fails the pipeline. Renovate's merge request for each new Squire can carry the refreshed kit.</span></li>
           <li class="inop"><span class="inop__sticker">Coming soon</span><span class="inop__name">Contract suite</span><span class="inop__line">Named in the best practices as coming later. Not built yet.</span></li>
           <li class="inop"><span class="inop__sticker">Coming soon</span><span class="inop__name">Site freshness</span><span class="inop__line">Planned. Not in this repo yet.</span></li>
         </ul>

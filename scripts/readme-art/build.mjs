@@ -41,7 +41,7 @@ const MAX_BYTES = 300 * 1024; // every file in docs/readme/ stays at or under th
 const FORBIDDEN = /noug[a]t|snu[.]gs|citadel/i; // internal names never ship in art
 
 // The tag every component ships in. The page's placards must agree with it.
-const COMPONENT_TAG = "0.1.1";
+const COMPONENT_TAG = "0.3.0";
 
 // Preflight's own palette, as declared in site/assets/preflight.css.
 const C = {
@@ -167,7 +167,7 @@ function buildBadges(templates) {
   const composer = JSON.parse(readFileSync(path.join(repoRoot, "composer.json"), "utf8"));
   const defs = [
     { key: "php", label: "php", message: composer.require?.php },
-    { key: "license", label: "licence", message: composer.license },
+    { key: "license", label: "license", message: composer.license },
     // The third fact is the repo's own product: how many CI components it ships.
     { key: "components", label: "gitlab ci components", message: String(templates.length) },
   ];
@@ -216,17 +216,25 @@ function readTemplates() {
     const file = path.join(templatesDir, d.name, "template.yml");
     if (!existsSync(file)) fail(`templates/${d.name} has no template.yml`);
     const text = readFileSync(file, "utf8");
-    const keys = [...text.matchAll(/^([A-Za-z][A-Za-z0-9_-]*):\s*$/gm)].map((m) => m[1]).filter((k) => k !== "spec");
+    // A job key is a literal name or "$[[ inputs.job_name ]]", which names the
+    // job after that input's default.
+    const keys = [...text.matchAll(/^("\$\[\[ inputs\.job_name \]\]"|[A-Za-z][A-Za-z0-9_-]*):\s*$/gm)]
+      .map((m) => m[1])
+      .filter((k) => k !== "spec");
     if (keys.length !== 1) fail(`templates/${d.name}: expected one job, found ${keys.join(", ") || "none"}`);
-    const job = keys[0];
-    const body = text.slice(text.indexOf(`\n${job}:`));
+    const key = keys[0];
+    const job = key.startsWith('"')
+      ? text.match(/^ {4}job_name:\s*\r?\n(?: {6}.*\r?\n)*? {6}default:\s*"?([A-Za-z0-9_.-]+)"?/m)?.[1]
+      : key;
+    if (!job) fail(`templates/${d.name}: the job_name input has no default`);
+    const body = text.slice(text.indexOf(`\n${key}:`));
     const timeout = body.match(/^\s+timeout:\s*(.+?)\s*$/m)?.[1];
     if (!timeout) fail(`templates/${d.name}: job ${job} has no timeout`);
     const matrix = /^\s+parallel:\s*$/m.test(body) && /^\s+matrix:\s*$/m.test(body);
     // The stage, in the order a template can set it: the spec's `stage` input
     // default, then a literal `stage:` on the job. A template with neither
     // gets its label from its own rules, which say when the job runs.
-    const stage = templateStage(text, job) ?? ruleStage(body);
+    const stage = templateStage(text, key) ?? ruleStage(body);
     const t = { job, timeout, matrix, stage };
     assertTextClean(JSON.stringify(t), `templates/${d.name}`);
     return t;
@@ -519,6 +527,9 @@ async function buildChecklist(page, templates) {
   // the tag it ships in. Checklist components come first, in the card's own
   // order; the ones without a card row follow.
   const jobsY = lampsBottom + 44;
+  // The include count and the stage list take a line each: on one line the
+  // stages ran past the panel. The list starts below both.
+  const jobsTop = jobsY + 48;
   const paired = items.filter((it) => it.tpl);
   const unpaired = templates.filter((tp) => !paired.some((it) => it.tpl === tp));
   const listed = [
@@ -526,19 +537,23 @@ async function buildChecklist(page, templates) {
     ...unpaired.map((tp) => ({ job: tp.job, stage: tp.stage })),
   ];
   const stages = [...new Set(listed.map((it) => it.stage))].join(" · ");
-  const rowGap = 23;
+  // 23 units a row, closed up (never under 19) when the list grows past the
+  // panel; the overflow check below still catches a list that cannot fit.
+  const rowRoom = (panelY + panelH - 24 - jobsTop) / Math.max(1, listed.length - 1);
+  const rowGap = Math.max(19, Math.min(23, Math.floor(rowRoom)));
   const tagLabel = `IN ${COMPONENT_TAG}`.toUpperCase();
   const jobsSvg = [
-    `<text x="${panelX + lampPadX}" y="${jobsY}" font-family="${MONO}" font-weight="700" font-size="12" letter-spacing="1.2" fill="${C.glassText}">INCLUDE: ${listed.length} COMPONENTS · STAGE ${esc(stages.toUpperCase())}</text>`,
+    `<text x="${panelX + lampPadX}" y="${jobsY}" font-family="${MONO}" font-weight="700" font-size="12" letter-spacing="1.2" fill="${C.glassText}">INCLUDE: ${listed.length} COMPONENTS</text>`,
+    `<text x="${panelX + lampPadX}" y="${jobsY + 18}" font-family="${MONO}" font-weight="700" font-size="12" letter-spacing="1.2" fill="${C.glassText}">STAGE ${esc(stages.toUpperCase())}</text>`,
     ...listed.map((it, i) => {
-      const y = jobsY + 30 + i * rowGap;
+      const y = jobsTop + i * rowGap;
       return (
         `<text x="${panelX + lampPadX}" y="${y}" font-family="${MONO}" font-size="14" fill="${C.cream}"><tspan fill="${C.gold}">- </tspan>${esc(it.job)}</text>` +
         `<text x="${panelX + panelW - lampPadX}" y="${y}" text-anchor="end" font-family="${MONO}" font-size="12" letter-spacing="0.6" fill="${C.lit}">${esc(tagLabel)}</text>`
       );
     }),
   ].join("\n  ");
-  const jobsBottom = jobsY + 30 + (listed.length - 1) * rowGap;
+  const jobsBottom = jobsTop + (listed.length - 1) * rowGap;
 
   // ---- screws (simple geometry: the page's placards and instrument have them)
   const screw = (x, y) =>

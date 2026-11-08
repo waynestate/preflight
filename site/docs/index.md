@@ -10,7 +10,7 @@ generator: Squire agent-ready
 
 # Preflight[#](https://preflight.apps.wayne.edu/docs/#preflight)
 
-![php ^8.3](https://preflight.apps.wayne.edu/docs/readme/badges/php.svg) ![license MIT](https://preflight.apps.wayne.edu/docs/readme/badges/license.svg) ![gitlab ci components: 9](https://preflight.apps.wayne.edu/docs/readme/badges/components.svg)
+![php ^8.3](https://preflight.apps.wayne.edu/docs/readme/badges/php.svg) ![license MIT](https://preflight.apps.wayne.edu/docs/readme/badges/license.svg) ![gitlab ci components: 13](https://preflight.apps.wayne.edu/docs/readme/badges/components.svg)
 
 **Every push is cleared for takeoff.**
 
