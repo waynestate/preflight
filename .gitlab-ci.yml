@@ -92,6 +92,7 @@ contract:
     - sh tests/check-portability-inline.sh
     - sh tests/check-renovate-squire-kit.sh
     - sh tests/check-squire-kit.sh
+    - sh tests/check-composer-floor.sh
 
 # The must-fail fixture for the php-test component: the check proves the
 # template keeps the job line that lets the tool's exit code be the job

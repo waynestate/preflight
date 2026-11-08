@@ -30,11 +30,12 @@ spec:
       default: ""
       regex: '^$|^[0-9]+\.[0-9]+([.][0-9A-Za-z]+)*$'
     composer_version:
-      description: Composer version to install.
+      description: Composer version to install, 2.9.6 or later.
       type: string
       default: 2.10.3
       # GitLab reads this as a raw RE2 pattern: no slashes around it.
-      regex: ^2\.\d+\.\d+$
+      regex: '^2\.(9\.([6-9]|[1-9][0-9]+)|[1-9][0-9]+\.[0-9]+)$'
+      # Floor 2.9.6: older Composer lacks the 2026 security fixes.
     test_command:
       description: The test command to run.
       type: string

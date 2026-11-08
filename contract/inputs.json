@@ -7,7 +7,7 @@
         { "name": "job_name", "type": "string", "default": "proctor", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
         { "name": "image", "type": "string", "default": "php:8.4-cli-trixie@sha256:9cf851bc2c1b37c3e59dfd677a3c3e56d485af5a47c93f629424bb039eafcb69" },
         { "name": "image_prefix", "type": "string", "default": "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}", "regex": "^[^/\\s](\\S*[^/\\s])?$" },
-        { "name": "composer_version", "type": "string", "default": "2.10.3" },
+        { "name": "composer_version", "type": "string", "default": "2.10.3", "regex": "^2\\.(9\\.([6-9]|[1-9][0-9]+)|[1-9][0-9]+\\.[0-9]+)$" },
         { "name": "allow_failure", "type": "boolean", "default": false },
         { "name": "proctor_command", "type": "string", "default": "vendor/bin/proctor check --format=codequality" },
         { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" },
@@ -23,7 +23,7 @@
         { "name": "image_prefix", "type": "string", "default": "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}", "regex": "^[^/\\s](\\S*[^/\\s])?$" },
         { "name": "php_versions", "type": "array", "default": ["8.3", "8.4", "8.5"] },
         { "name": "php_advisory_version", "type": "string", "default": "", "regex": "^$|^[0-9]+\\.[0-9]+([.][0-9A-Za-z]+)*$" },
-        { "name": "composer_version", "type": "string", "default": "2.10.3" },
+        { "name": "composer_version", "type": "string", "default": "2.10.3", "regex": "^2\\.(9\\.([6-9]|[1-9][0-9]+)|[1-9][0-9]+\\.[0-9]+)$" },
         { "name": "test_command", "type": "string", "default": "vendor/bin/phpunit" },
         { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" }
       ],
