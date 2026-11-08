@@ -91,6 +91,12 @@
 <td>PHP versions to test against.</td>
 </tr>
 <tr>
+<td><code>php_advisory_version</code></td>
+<td>string</td>
+<td><code>&quot;&quot;</code></td>
+<td>One more PHP version tested in a separate <code>&lt;job_name&gt;-advisory</code> job that may fail (<code>allow_failure: true</code>), for a release candidate. Empty: no advisory job. Never add a release candidate to <code>php_versions</code>.</td>
+</tr>
+<tr>
 <td><code>composer_version</code></td>
 <td>string</td>
 <td><code>2.10.3</code></td>
@@ -145,6 +151,15 @@ php-test-next:
   allow_failure: true
 </code></pre>
 <p>A red <code>php-test-next</code> job is an early warning, not a stop. Drop the <code>allow_failure</code> and move the version into the main <code>php_versions</code> list once the release is supported (the supported versions follow <code>policy.json</code>).</p>
+<h2 id="testing-the-next-php-release">Testing the next PHP release<a class="docs-heading-link" aria-label="Link to this section" href="#testing-the-next-php-release">#</a></h2>
+<p>Set <code>php_advisory_version</code> to a release candidate tag and the component adds a <code>&lt;job_name&gt;-advisory</code> job that runs your tests on that version:</p>
+<pre tabindex="0"><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@b90323b5823287a7840095d0d5f0682aaeedf327 # 0.3.1
+    inputs:
+      test_command: vendor/bin/phpunit
+      php_advisory_version: &quot;8.6.0RC2&quot;
+</code></pre>
+<p>The job warns, it never blocks; move the version into <code>php_versions</code> only once it is a final, supported release.</p>
 <h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
 <ul>
 <li><a href="component-proctor.html">The proctor component</a></li>
@@ -154,7 +169,7 @@ php-test-next:
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../../docs/guides/component-proctor.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">The proctor component</span></a><a class="docs-pager__link docs-pager__link--next" href="../../docs/guides/component-composer-audit.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">The composer-audit component</span></a></nav>
   </div>
-  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#include-the-component">Include the component</a></li><li class="docs-toc__item"><a href="#inputs">Inputs</a></li><li class="docs-toc__item"><a href="#what-the-jobs-do">What the jobs do</a></li><li class="docs-toc__item"><a href="#caching">Caching</a></li><li class="docs-toc__item"><a href="#try-the-next-php-release-without-breaking-the-pipeline">Try the next PHP release without breaking the pipeline</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#include-the-component">Include the component</a></li><li class="docs-toc__item"><a href="#inputs">Inputs</a></li><li class="docs-toc__item"><a href="#what-the-jobs-do">What the jobs do</a></li><li class="docs-toc__item"><a href="#caching">Caching</a></li><li class="docs-toc__item"><a href="#try-the-next-php-release-without-breaking-the-pipeline">Try the next PHP release without breaking the pipeline</a></li><li class="docs-toc__item"><a href="#testing-the-next-php-release">Testing the next PHP release</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
   <span>Documents Preflight <span data-docs-version>0.3.1</span></span>
