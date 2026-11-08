@@ -45,12 +45,13 @@
 <aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>Maintainers: how to build, test and release this project, and where its data comes from, is in <a rel="noopener" href="https://git.wayne.edu/enterprise-apps/preflight/-/blob/main/MAINTAINING.md">MAINTAINING.md</a> on the canonical repository.</p></aside>
 <h2 id="the-full-gate">The full gate<a class="docs-heading-link" aria-label="Link to this section" href="#the-full-gate">#</a></h2>
 <p>Run the template lint and the fixture tests with Docker:</p>
-<div class="docs-tabs" data-tabs="linux|windows"><div class="docs-tabs__panel" data-tab-label="linux"><p class="docs-tabs__label">linux</p><pre tabindex="0"><code class="language-sh">docker run --rm -v &quot;$(pwd):/app&quot; -w /app composer:2 composer install
-docker run --rm -v &quot;$(pwd):/app&quot; -w /app composer:2 composer ci
+<div class="docs-tabs" data-tabs="linux|windows"><div class="docs-tabs__panel" data-tab-label="linux"><p class="docs-tabs__label">linux</p><pre tabindex="0"><code class="language-sh">docker run --rm -v &quot;$(pwd):/app&quot; -v stack-composer-cache:/tmp/cache -w /app composer:2 composer install
+docker run --rm -v &quot;$(pwd):/app&quot; -v stack-composer-cache:/tmp/cache -w /app composer:2 composer ci
 </code></pre></div>
-<div class="docs-tabs__panel" data-tab-label="windows"><p class="docs-tabs__label">windows</p><pre tabindex="0"><code class="language-powershell">docker run --rm -v &quot;${PWD}:/app&quot; -w /app composer:2 composer install
-docker run --rm -v &quot;${PWD}:/app&quot; -w /app composer:2 composer ci
+<div class="docs-tabs__panel" data-tab-label="windows"><p class="docs-tabs__label">windows</p><pre tabindex="0"><code class="language-powershell">docker run --rm -v &quot;${PWD}:/app&quot; -v stack-composer-cache:/tmp/cache -w /app composer:2 composer install
+docker run --rm -v &quot;${PWD}:/app&quot; -v stack-composer-cache:/tmp/cache -w /app composer:2 composer ci
 </code></pre></div></div>
+<p>The <code>stack-composer-cache</code> volume keeps Composer's downloads between runs; Docker creates it the first time.</p>
 <p>In PowerShell, use <code>${PWD}</code> instead of <code>$(pwd)</code>. <code>composer ci</code> is the whole gate: it runs the template lint, the fixture tests, Pint, PHPStan, the agent-ready file check and the docs site check, in that order.</p>
 <h2 id="composer-scripts">Composer scripts<a class="docs-heading-link" aria-label="Link to this section" href="#composer-scripts">#</a></h2>
 <p>The scripts from <code>composer.json</code>:</p>
@@ -125,7 +126,7 @@ docker run --rm -v &quot;${PWD}:/app&quot; -w /app composer:2 composer ci
 </table></div>
 <h2 id="the-php-fixture-app">The PHP fixture app<a class="docs-heading-link" aria-label="Link to this section" href="#the-php-fixture-app">#</a></h2>
 <p>Run the PHP fixture app separately:</p>
-<pre tabindex="0"><code class="language-sh">docker run --rm -v &quot;$(pwd)/tests/fixture-app:/app&quot; -w /app composer:2 composer install
+<pre tabindex="0"><code class="language-sh">docker run --rm -v &quot;$(pwd)/tests/fixture-app:/app&quot; -v stack-composer-cache:/tmp/cache -w /app composer:2 composer install
 docker run --rm -v &quot;$(pwd)/tests/fixture-app:/app&quot; -w /app php:8.4-cli vendor/bin/phpunit
 </code></pre>
 <h2 id="the-portability-fixtures">The portability fixtures<a class="docs-heading-link" aria-label="Link to this section" href="#the-portability-fixtures">#</a></h2>
@@ -154,8 +155,8 @@ docker run --rm -v &quot;$(pwd)/tests/fixture-app:/app&quot; -w /app php:8.4-cli
 <h2 id="the-must-fail-fixtures">The must-fail fixtures<a class="docs-heading-link" aria-label="Link to this section" href="#the-must-fail-fixtures">#</a></h2>
 <p><code>tests/check-php-test-fails.sh</code>, <code>tests/check-phpstan-fails.sh</code> and <code>tests/check-pint-fails.sh</code> (each with a <code>.ps1</code> twin) prove the <code>php-test</code>, <code>phpstan</code> and <code>pint</code> components still fail a bad app and pass a clean one. Each asserts its template keeps the job line it promises, then runs the component's own commands from its template, in the component's own image, against the clean case in <code>tests/fixture-app</code> and the must-fail case in its fixture (<code>tests/php-test-fails</code>, <code>tests/phpstan-fails</code>, <code>tests/pint-fails</code>), in a copy in a temp dir. They exit 0 only when the clean case passes and the bad case fails with the expected finding. The <code>.sh</code> is the payload of a container; the <code>.ps1</code> runs it with Docker. They need Docker; the contract job does not run them.</p>
 <div class="docs-tabs" data-tabs="linux|windows"><div class="docs-tabs__panel" data-tab-label="linux"><p class="docs-tabs__label">linux</p><pre tabindex="0"><code class="language-sh">docker run --rm -v &quot;$(pwd):/app&quot; -w /app php:8.3-cli-trixie sh tests/check-php-test-fails.sh
-docker run --rm -v &quot;$(pwd):/app&quot; -w /app composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc sh tests/check-phpstan-fails.sh
-docker run --rm -v &quot;$(pwd):/app&quot; -w /app composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc sh tests/check-pint-fails.sh
+docker run --rm -v &quot;$(pwd):/app&quot; -v stack-composer-cache:/tmp/cache -w /app composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc sh tests/check-phpstan-fails.sh
+docker run --rm -v &quot;$(pwd):/app&quot; -v stack-composer-cache:/tmp/cache -w /app composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc sh tests/check-pint-fails.sh
 </code></pre></div>
 <div class="docs-tabs__panel" data-tab-label="windows"><p class="docs-tabs__label">windows</p><pre tabindex="0"><code class="language-powershell">pwsh -File tests/check-php-test-fails.ps1
 pwsh -File tests/check-phpstan-fails.ps1

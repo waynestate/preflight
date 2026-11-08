@@ -208,14 +208,15 @@
 </ul>
 <h2 id="run-it-on-your-app">Run it on your app<a class="docs-heading-link" aria-label="Link to this section" href="#run-it-on-your-app">#</a></h2>
 <p>Include the components in your app's <code>.gitlab-ci.yml</code> as the <a href="../guides/quick-start.html">Quick start</a> shows, push a branch, and read each job's log. To try the PROCTOR job's steps on your machine first, from the app's root (the first line adds PROCTOR to require-dev, which the proctor component expects):</p>
-<div class="docs-tabs" data-tabs="linux / macos|windows"><div class="docs-tabs__panel" data-tab-label="Linux / macOS"><p class="docs-tabs__label">Linux / macOS</p><pre tabindex="0"><code class="language-sh">docker run --rm -v &quot;$(pwd):/app&quot; -w /app composer:2 composer require --dev waynestate/proctor --no-scripts --ignore-platform-reqs
-docker run --rm -v &quot;$(pwd):/app&quot; -w /app composer:2 composer install --no-plugins --no-scripts --ignore-platform-reqs
-docker run --rm -v &quot;$(pwd):/app&quot; -w /app composer:2 vendor/bin/proctor check
+<div class="docs-tabs" data-tabs="linux / macos|windows"><div class="docs-tabs__panel" data-tab-label="Linux / macOS"><p class="docs-tabs__label">Linux / macOS</p><pre tabindex="0"><code class="language-sh">docker run --rm -v &quot;$(pwd):/app&quot; -v stack-composer-cache:/tmp/cache -w /app composer:2 composer require --dev waynestate/proctor --no-scripts --ignore-platform-reqs
+docker run --rm -v &quot;$(pwd):/app&quot; -v stack-composer-cache:/tmp/cache -w /app composer:2 composer install --no-plugins --no-scripts --ignore-platform-reqs
+docker run --rm -v &quot;$(pwd):/app&quot; -v stack-composer-cache:/tmp/cache -w /app composer:2 vendor/bin/proctor check
 </code></pre></div>
-<div class="docs-tabs__panel" data-tab-label="Windows"><p class="docs-tabs__label">Windows</p><pre tabindex="0"><code class="language-powershell">docker run --rm -v &quot;${PWD}:/app&quot; -w /app composer:2 composer require --dev waynestate/proctor --no-scripts --ignore-platform-reqs
-docker run --rm -v &quot;${PWD}:/app&quot; -w /app composer:2 composer install --no-plugins --no-scripts --ignore-platform-reqs
-docker run --rm -v &quot;${PWD}:/app&quot; -w /app composer:2 vendor/bin/proctor check
+<div class="docs-tabs__panel" data-tab-label="Windows"><p class="docs-tabs__label">Windows</p><pre tabindex="0"><code class="language-powershell">docker run --rm -v &quot;${PWD}:/app&quot; -v stack-composer-cache:/tmp/cache -w /app composer:2 composer require --dev waynestate/proctor --no-scripts --ignore-platform-reqs
+docker run --rm -v &quot;${PWD}:/app&quot; -v stack-composer-cache:/tmp/cache -w /app composer:2 composer install --no-plugins --no-scripts --ignore-platform-reqs
+docker run --rm -v &quot;${PWD}:/app&quot; -v stack-composer-cache:/tmp/cache -w /app composer:2 vendor/bin/proctor check
 </code></pre></div></div>
+<p>The <code>stack-composer-cache</code> volume keeps Composer's downloads between runs; Docker creates it the first time.</p>
 <h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
 <ul>
 <li><a href="components.html">Components</a></li>

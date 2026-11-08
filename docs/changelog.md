@@ -13,6 +13,7 @@ are Git tags.
 
 ## Unreleased
 
+- Docs: the Docker commands in the README and docs mount the shared `stack-composer-cache` volume, so Composer downloads are cached between runs.
 - Fixed: the README and docs describe the `portability` health check's `Host` as a bare IP address and the port (`Host: <ip>:<port>`) instead of printing a literal private address.
 - Fixed: the front page's "Same instance only" caution says git.wayne.edu has an instance runner and the stack's CI runs on it (it said git.wayne.edu had no runner yet), and its cast says Sourdough starts all five app shapes.
 - Fixed: `tests/check-sha-pins.ps1` runs again on Windows. PowerShell read `"$rel:"` in its failure message as a scope-qualified variable and refused to parse the script.

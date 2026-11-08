@@ -79,18 +79,20 @@ Include the components in your app's `.gitlab-ci.yml` as the [Quick start](https
 Linux / macOS
 
 ```sh
-docker run --rm -v "$(pwd):/app" -w /app composer:2 composer require --dev waynestate/proctor --no-scripts --ignore-platform-reqs
-docker run --rm -v "$(pwd):/app" -w /app composer:2 composer install --no-plugins --no-scripts --ignore-platform-reqs
-docker run --rm -v "$(pwd):/app" -w /app composer:2 vendor/bin/proctor check
+docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2 composer require --dev waynestate/proctor --no-scripts --ignore-platform-reqs
+docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2 composer install --no-plugins --no-scripts --ignore-platform-reqs
+docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2 vendor/bin/proctor check
 ```
 
 Windows
 
 ```powershell
-docker run --rm -v "${PWD}:/app" -w /app composer:2 composer require --dev waynestate/proctor --no-scripts --ignore-platform-reqs
-docker run --rm -v "${PWD}:/app" -w /app composer:2 composer install --no-plugins --no-scripts --ignore-platform-reqs
-docker run --rm -v "${PWD}:/app" -w /app composer:2 vendor/bin/proctor check
+docker run --rm -v "${PWD}:/app" -v stack-composer-cache:/tmp/cache -w /app composer:2 composer require --dev waynestate/proctor --no-scripts --ignore-platform-reqs
+docker run --rm -v "${PWD}:/app" -v stack-composer-cache:/tmp/cache -w /app composer:2 composer install --no-plugins --no-scripts --ignore-platform-reqs
+docker run --rm -v "${PWD}:/app" -v stack-composer-cache:/tmp/cache -w /app composer:2 vendor/bin/proctor check
 ```
+
+The `stack-composer-cache` volume keeps Composer's downloads between runs; Docker creates it the first time.
 
 ## Related[#](https://preflight.apps.wayne.edu/docs/reference/proof.html#related)
 
