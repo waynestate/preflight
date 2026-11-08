@@ -46,7 +46,11 @@
 <a rel="noopener" href="https://keepachangelog.com/en/1.1.0/">Keep a Changelog</a>; released versions
 are Git tags.</p>
 <h2 id="unreleased">Unreleased<a class="docs-heading-link" aria-label="Link to this section" href="#unreleased">#</a></h2>
+<ul>
+<li>Docs: the README, docs, front page and examples pin the 0.3.0 tag's commit SHA, and the GitHub workflow example moves from 0.1.1 to 0.3.0.</li>
+</ul>
 <h2 id="0-3-0-2026-11-08">0.3.0 (2026-11-08)<a class="docs-heading-link" aria-label="Link to this section" href="#0-3-0-2026-11-08">#</a></h2>
+<p>Tag commit: <code>23038dfe767f6ef60e3b2efca1128f53d9acdff7</code> (pin this SHA, with <code># 0.3.0</code> in a trailing comment).</p>
 <ul>
 <li>Changed (breaking for apps that pass a proxied <code>image</code>): every component whose image comes from Docker Hub (<code>proctor</code>, <code>php-test</code>, <code>composer-audit</code>, <code>sbom</code>, <code>pint</code>, <code>phpstan</code>, <code>eslint</code>, <code>secret-detection</code>, <code>package-publish</code>, <code>renovate</code>, <code>squire-kit</code>) has a new <code>image_prefix</code> input, default <code>${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}</code>, and pulls <code>image_prefix/image</code>, so Docker Hub is asked once and GitLab's Dependency Proxy serves the cached copy. <code>image</code> keeps its default and is now the path after the prefix. On a GitLab or group without the proxy, set <code>image_prefix: docker.io</code>. An app that passed <code>image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/...</code> only to reach the proxy drops that input when it moves to this version. <code>a11y</code> (mcr.microsoft.com) and <code>portability</code> (quay.io) are unchanged: the proxy serves Docker Hub only. <code>contract/inputs.json</code> lists the new input.</li>
 <li>Changed: the front page's deploy layer (<code>deploy/</code>) runs Squire's kit 0.6.0 (was 0.5.0): <code>scripts/release.sh</code> asks PROCTOR's deploy gate for a go or no-go on each release (a report, not a stop, unless <code>SQUIRE_PROCTOR=enforce</code>), and <code>.env.squire.example</code> lists the new setting. The layer's pins move to HELMET <code>^0.4</code> (locked 0.4.0) and PROCTOR <code>^0.7</code> (locked 0.7.0).</li>

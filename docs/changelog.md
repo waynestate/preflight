@@ -13,7 +13,11 @@ are Git tags.
 
 ## Unreleased
 
+- Docs: the README, docs, front page and examples pin the 0.3.0 tag's commit SHA, and the GitHub workflow example moves from 0.1.1 to 0.3.0.
+
 ## 0.3.0 (2026-11-08)
+
+Tag commit: `23038dfe767f6ef60e3b2efca1128f53d9acdff7` (pin this SHA, with `# 0.3.0` in a trailing comment).
 
 - Changed (breaking for apps that pass a proxied `image`): every component whose image comes from Docker Hub (`proctor`, `php-test`, `composer-audit`, `sbom`, `pint`, `phpstan`, `eslint`, `secret-detection`, `package-publish`, `renovate`, `squire-kit`) has a new `image_prefix` input, default `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}`, and pulls `image_prefix/image`, so Docker Hub is asked once and GitLab's Dependency Proxy serves the cached copy. `image` keeps its default and is now the path after the prefix. On a GitLab or group without the proxy, set `image_prefix: docker.io`. An app that passed `image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/...` only to reach the proxy drops that input when it moves to this version. `a11y` (mcr.microsoft.com) and `portability` (quay.io) are unchanged: the proxy serves Docker Hub only. `contract/inputs.json` lists the new input.
 - Changed: the front page's deploy layer (`deploy/`) runs Squire's kit 0.6.0 (was 0.5.0): `scripts/release.sh` asks PROCTOR's deploy gate for a go or no-go on each release (a report, not a stop, unless `SQUIRE_PROCTOR=enforce`), and `.env.squire.example` lists the new setting. The layer's pins move to HELMET `^0.4` (locked 0.4.0) and PROCTOR `^0.7` (locked 0.7.0).

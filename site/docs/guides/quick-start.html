@@ -54,7 +54,7 @@ components cannot run here.</p>
 <li>
 <p><strong>Add the include</strong> to the app's <code>.gitlab-ci.yml</code>:</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@&lt;full commit SHA&gt; # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
   inputs:
     test_command: vendor/bin/phpunit
 </code></pre>

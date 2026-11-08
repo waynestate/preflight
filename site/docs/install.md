@@ -23,20 +23,20 @@ All seven components
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@<full commit SHA> # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<full commit SHA> # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@<full commit SHA> # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@<full commit SHA> # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@<full commit SHA> # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@<full commit SHA> # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 One component
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       test_command: vendor/bin/phpunit
 ```

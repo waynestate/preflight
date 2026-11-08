@@ -60,7 +60,7 @@
 <li>
 <p>Move every Preflight include to the <code>0.3.0</code> tag in one change, pinned to the tag's full commit SHA with the tag in a trailing comment, and remove any proxied <code>image:</code> input in the same change (step 1 above):</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@&lt;full commit SHA&gt; # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 </code></pre>
 <p>Before:</p>
 <pre tabindex="0"><code class="language-yaml">  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@&lt;old SHA&gt; # 0.2.0
@@ -68,7 +68,7 @@
       image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/php:8.4-cli-trixie@sha256:&lt;digest&gt;
 </code></pre>
 <p>After:</p>
-<pre tabindex="0"><code class="language-yaml">  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@&lt;full commit SHA&gt; # 0.3.0
+<pre tabindex="0"><code class="language-yaml">  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       image: php:8.4-cli-trixie@sha256:&lt;digest&gt;
 </code></pre>

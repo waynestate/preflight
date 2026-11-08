@@ -34,7 +34,7 @@ Nothing was deprecated in 0.3.0.
 1. Move every Preflight include to the `0.3.0` tag in one change, pinned to the tag's full commit SHA with the tag in a trailing comment, and remove any proxied `image:` input in the same change (step 1 above):
    ```yaml
    include:
-     - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<full commit SHA> # 0.3.0
+     - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
    ```
    Before:
    ```yaml
@@ -44,7 +44,7 @@ Nothing was deprecated in 0.3.0.
    ```
    After:
    ```yaml
-     - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<full commit SHA> # 0.3.0
+     - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
        inputs:
          image: php:8.4-cli-trixie@sha256:<digest>
    ```

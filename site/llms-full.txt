@@ -50,7 +50,7 @@ older PHP or needing an extension the image lacks still gets its report.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       proctor_command: vendor/bin/proctor check --format=codequality
 ```
@@ -72,7 +72,7 @@ Runs the test command on each supported PHP version through `parallel:matrix`.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       test_command: vendor/bin/phpunit
 ```
@@ -122,7 +122,7 @@ Runs `composer audit --locked` and fails on advisories.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       working_dir: .
 ```
@@ -152,7 +152,7 @@ Generates a CycloneDX SBOM with `cyclonedx/cyclonedx-php-composer`, validates it
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       output: sbom.cdx.json
 ```
@@ -174,7 +174,7 @@ Runs the app's own [Laravel Pint](https://laravel.com/docs/12.x/pint) in test mo
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       config: pint.json
 ```
@@ -196,7 +196,7 @@ Runs the app's own [PHPStan](https://phpstan.org/) and fails the pipeline on sta
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       config: phpstan.neon
       memory_limit: 1G
@@ -220,7 +220,7 @@ Runs the app's own [ESLint](https://eslint.org/) (and [Prettier](https://prettie
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       eslint_args: .
 ```
@@ -243,7 +243,7 @@ Runs [Gitleaks](https://github.com/gitleaks/gitleaks) over the checked-out tree 
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/secret-detection@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/secret-detection@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 | Input | Type | Default | What it does |
@@ -268,7 +268,7 @@ curl and PHP, which the job uses for the registry round trip.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       group_id: "<your group id>"
 ```
@@ -295,7 +295,7 @@ auto-merges and what waits.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       git_author: "Preflight Bot <preflight-bot@example.com>"
 ```
@@ -333,7 +333,7 @@ No takeoff without a clean pre-flight.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       env: ["APP_KEY=${PORTABILITY_APP_KEY}", "APP_URL=https://myapp.example.edu"]
       session_login_path: /_portability/login
@@ -389,7 +389,7 @@ person to review. Every page gets a walk-round, in daylight and at night.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       pages: ["index.html", "docs/**/*.html"]
       wcag_tags: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]
@@ -430,7 +430,7 @@ recorded version, so a new Squire never turns main red by itself: Renovate's Squ
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       working_dir: deploy
 ```
@@ -481,7 +481,7 @@ on:
 
 jobs:
   ci:
-    uses: waynestate/preflight/.github/workflows/php-package.yml@<full commit SHA> # 0.3.0
+    uses: waynestate/preflight/.github/workflows/php-package.yml@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 This workflow ships in the `0.1.1` tag, so pin the full commit SHA of the
@@ -638,13 +638,13 @@ workflow:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@<full commit SHA> # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<full commit SHA> # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@<full commit SHA> # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@<full commit SHA> # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@<full commit SHA> # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@<full commit SHA> # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 The `workflow:rules` block must live in the app's own file. A component
@@ -878,7 +878,7 @@ Preflight is a set of GitLab CI/CD components. Add them to the `include:` block 
 
 ```
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@ # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 Already included in [WELD](https://weld.apps.wayne.edu/) and in every [Sourdough](https://sourdough.apps.wayne.edu/) app. Use Preflight on its own to give a GitLab project you already have the stack's CI checks.
@@ -954,7 +954,7 @@ Watches the cabin.
 Runs PROCTOR's checks and publishes them as a Code Quality report.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@ # 0.3.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 **6 inputs**
@@ -975,7 +975,7 @@ Three engines, all running.
 The test command on each supported PHP version, one job per version.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@ # 0.3.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 **6 inputs**
@@ -996,7 +996,7 @@ Checks the passenger list.
 `composer audit --locked`, failing on any advisory.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@ # 0.3.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 **3 inputs**
@@ -1014,7 +1014,7 @@ The cargo manifest.
 A validated CycloneDX SBOM, published as an artifact. The plugin installs globally, so the app's files stay as they are.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@ # 0.3.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 **4 inputs**
@@ -1033,7 +1033,7 @@ Uniform pressed.
 The app's own Laravel Pint in test mode. The app requires `laravel/pint` and ships a `pint.json`.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@ # 0.3.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 **4 inputs**
@@ -1052,7 +1052,7 @@ Instruments cross-checked.
 The app's own PHPStan, with a Code Quality report. The app requires `phpstan/phpstan` and ships a `phpstan.neon`.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@ # 0.3.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 **5 inputs**
@@ -1072,7 +1072,7 @@ The front cabin, too.
 The app's own ESLint and Prettier. The app requires `@waynestate/pinstripe`, `eslint` and `prettier`.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@ # 0.3.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 **5 inputs**
@@ -1092,7 +1092,7 @@ Two cockpits, one checklist.
 Components stay inside one GitLab instance, so GitHub mirrors call this reusable workflow instead: `composer ci` on each PHP version, then a Composer audit.
 
 ```
-uses: waynestate/preflight/.github/workflows/php-package.yml@ # 0.3.0
+uses: waynestate/preflight/.github/workflows/php-package.yml@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 **3 inputs**
@@ -1129,13 +1129,13 @@ workflow:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@ # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@ # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@ # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@ # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@ # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@ # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@ # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 2 Switches · project settings
@@ -1166,7 +1166,7 @@ on:
 
 jobs:
   ci:
-    uses: waynestate/preflight/.github/workflows/php-package.yml@ # 0.3.0
+    uses: waynestate/preflight/.github/workflows/php-package.yml@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 4 Ground check · your machine
@@ -1376,7 +1376,11 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ### Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Docs: the README, docs, front page and examples pin the 0.3.0 tag's commit SHA, and the GitHub workflow example moves from 0.1.1 to 0.3.0.
+
 ### 0.3.0 (2026-11-08)[#](https://preflight.apps.wayne.edu/docs/changelog.html#0-3-0-2026-11-08)
+
+Tag commit: `23038dfe767f6ef60e3b2efca1128f53d9acdff7` (pin this SHA, with `# 0.3.0` in a trailing comment).
 
 - Changed (breaking for apps that pass a proxied `image`): every component whose image comes from Docker Hub (`proctor`, `php-test`, `composer-audit`, `sbom`, `pint`, `phpstan`, `eslint`, `secret-detection`, `package-publish`, `renovate`, `squire-kit`) has a new `image_prefix` input, default `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}`, and pulls `image_prefix/image`, so Docker Hub is asked once and GitLab's Dependency Proxy serves the cached copy. `image` keeps its default and is now the path after the prefix. On a GitLab or group without the proxy, set `image_prefix: docker.io`. An app that passed `image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/...` only to reach the proxy drops that input when it moves to this version. `a11y` (mcr.microsoft.com) and `portability` (quay.io) are unchanged: the proxy serves Docker Hub only. `contract/inputs.json` lists the new input.
 - Changed: the front page's deploy layer (`deploy/`) runs Squire's kit 0.6.0 (was 0.5.0): `scripts/release.sh` asks PROCTOR's deploy gate for a go or no-go on each release (a report, not a stop, unless `SQUIRE_PROCTOR=enforce`), and `.env.squire.example` lists the new setting. The layer's pins move to HELMET `^0.4` (locked 0.4.0) and PROCTOR `^0.7` (locked 0.7.0).
@@ -1538,7 +1542,7 @@ Add the include to the app's `.gitlab-ci.yml`, pinned to a full commit SHA with 
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 With no inputs, the job serves the `site/` folder on a local port and checks every `.html` file in it at WCAG 2.1 AA.
@@ -1551,7 +1555,7 @@ To hold the stack's floor, WCAG 2.2 AA, and to name the pages:
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       site_dir: site
       pages: ["index.html", "docs/**/*.html"]
@@ -1604,7 +1608,7 @@ A site that has never been checked usually has a few findings. Land the gate fir
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       allow_failure: true
 ```
@@ -1617,7 +1621,7 @@ For pages a static folder cannot hold (a Laravel or raw-PHP app), point the job 
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       base_url: $CI_ENVIRONMENT_URL
       pages: ["/", "about", "apply"]
@@ -1659,7 +1663,7 @@ Goal: your app's pipeline fails whenever a locked dependency has a known advisor
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       working_dir: .
 ```
@@ -1737,7 +1741,7 @@ Add the include to the app's `.gitlab-ci.yml`, pinned to a full commit SHA with 
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       eslint_args: .
 ```
@@ -1809,7 +1813,7 @@ Add the include to the app's `.gitlab-ci.yml`, pinned to a full commit SHA with 
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       group_id: "<your group id>"
 ```
@@ -1851,7 +1855,7 @@ Goal: your app's test suite runs on each supported PHP version. The component ru
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       test_command: vendor/bin/phpunit
 ```
@@ -1949,7 +1953,7 @@ Add the include to the app's `.gitlab-ci.yml`, pinned to a commit SHA with the t
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       config: phpstan.neon
       memory_limit: 1G
@@ -2037,7 +2041,7 @@ Add the include to the app's `.gitlab-ci.yml`, pinned to a commit SHA with the t
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       config: pint.json
 ```
@@ -2115,7 +2119,7 @@ The job prints one `portability: <check>: problem: ...` line per problem as it f
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       env: ["APP_KEY=${PORTABILITY_APP_KEY}", "APP_URL=https://myapp.example.edu", "SESSION_DRIVER=cookie", "LOG_CHANNEL=stderr"]
       session_login_path: /_portability/login
@@ -2231,7 +2235,7 @@ Goal: your app's pipeline runs PROCTOR and publishes the result as a GitLab Code
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       proctor_command: vendor/bin/proctor check --format=codequality
 ```
@@ -2314,7 +2318,7 @@ Add the include to the runner project's `.gitlab-ci.yml`, pinned to a full commi
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       git_author: "Preflight Bot <preflight-bot@example.com>"
 ```
@@ -2357,7 +2361,7 @@ Add the include to the app's `.gitlab-ci.yml`, pinned to a commit SHA with the t
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       output: sbom.cdx.json
 ```
@@ -2461,7 +2465,7 @@ Add the include to the app's `.gitlab-ci.yml`, pinned to the full commit SHA of 
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/secret-detection@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/secret-detection@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 ### Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-secret-detection.html#inputs)
@@ -2537,7 +2541,7 @@ Add the include to the app's `.gitlab-ci.yml`, pinned to a full commit SHA with 
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       working_dir: deploy
 ```
@@ -2578,7 +2582,7 @@ To include the component before the kit is clean, let the job fail without faili
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       working_dir: deploy
       allow_failure: true # until 2026-12-01: kit cleanup
@@ -2728,7 +2732,7 @@ on:
 
 jobs:
   ci:
-    uses: waynestate/preflight/.github/workflows/php-package.yml@<full commit SHA> # 0.3.0
+    uses: waynestate/preflight/.github/workflows/php-package.yml@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 ### Pin the include to a commit SHA[#](https://preflight.apps.wayne.edu/docs/guides/github-mirrors.html#pin-the-include-to-a-commit-sha)
@@ -2917,7 +2921,7 @@ This quick start adds the `php-test` component to an app, the same way the front
 2. **Add the include** to the app's `.gitlab-ci.yml`:
    ```yaml
    include:
-     - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<full commit SHA> # 0.3.0
+     - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
      inputs:
        test_command: vendor/bin/phpunit
    ```
@@ -3153,13 +3157,13 @@ workflow:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@<full commit SHA> # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<full commit SHA> # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@<full commit SHA> # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@<full commit SHA> # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@<full commit SHA> # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@<full commit SHA> # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 Note
@@ -3189,7 +3193,7 @@ Preflight is a set of GitLab CI/CD components that give every WSU app the same c
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       test_command: vendor/bin/phpunit
 ```
@@ -3225,20 +3229,20 @@ All seven components
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@<full commit SHA> # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<full commit SHA> # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@<full commit SHA> # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@<full commit SHA> # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@<full commit SHA> # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@<full commit SHA> # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 One component
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       test_command: vendor/bin/phpunit
 ```
@@ -3298,7 +3302,7 @@ Runs `vendor/bin/proctor check --format=codequality` and publishes the result as
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       proctor_command: vendor/bin/proctor check --format=codequality
 ```
@@ -3322,7 +3326,7 @@ Runs the test command on each supported PHP version through `parallel:matrix`.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       test_command: vendor/bin/phpunit
 ```
@@ -3369,7 +3373,7 @@ Runs `composer audit --locked` and fails on advisories.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       working_dir: .
 ```
@@ -3395,7 +3399,7 @@ Generates a CycloneDX SBOM with `cyclonedx/cyclonedx-php-composer`, validates it
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       output: sbom.cdx.json
 ```
@@ -3419,7 +3423,7 @@ Runs the app's own [Laravel Pint](https://laravel.com/docs/12.x/pint) in test mo
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       config: pint.json
 ```
@@ -3443,7 +3447,7 @@ Runs the app's own [PHPStan](https://phpstan.org/) and fails the pipeline on sta
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       config: phpstan.neon
       memory_limit: 1G
@@ -3469,7 +3473,7 @@ Runs the app's own [ESLint](https://eslint.org/) (and [Prettier](https://prettie
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       eslint_args: .
 ```
@@ -3494,7 +3498,7 @@ Runs [Gitleaks](https://github.com/gitleaks/gitleaks) over the checked-out tree 
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/secret-detection@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/secret-detection@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 | Input | Type | Default | What it does |
@@ -3516,7 +3520,7 @@ Publishes a semantic version tag to the GitLab group's built-in Composer registr
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       group_id: "<your group id>"
 ```
@@ -3542,7 +3546,7 @@ Runs [Renovate](https://docs.renovatebot.com/) as a scheduled or manual job that
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       git_author: "Preflight Bot <preflight-bot@example.com>"
 ```
@@ -3565,7 +3569,7 @@ Proves the app image runs the way OpenShift, Coolify and plain Docker run it, no
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       env: ["APP_KEY=${PORTABILITY_APP_KEY}", "APP_URL=https://myapp.example.edu"]
       session_login_path: /_portability/login
@@ -3612,7 +3616,7 @@ Opens the app's pages in a real Chromium browser with Playwright and runs axe-co
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       pages: ["index.html", "docs/**/*.html"]
       wcag_tags: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]
@@ -3644,7 +3648,7 @@ Installs the Squire release a deploy kit records in its `.squire.json` and runs 
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       working_dir: deploy
 ```
@@ -4310,7 +4314,7 @@ Nothing was deprecated in 0.3.0.
 1. Move every Preflight include to the `0.3.0` tag in one change, pinned to the tag's full commit SHA with the tag in a trailing comment, and remove any proxied `image:` input in the same change (step 1 above):
    ```yaml
    include:
-     - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<full commit SHA> # 0.3.0
+     - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
    ```
    Before:
    ```yaml
@@ -4320,7 +4324,7 @@ Nothing was deprecated in 0.3.0.
    ```
    After:
    ```yaml
-     - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<full commit SHA> # 0.3.0
+     - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
        inputs:
          image: php:8.4-cli-trixie@sha256:<digest>
    ```

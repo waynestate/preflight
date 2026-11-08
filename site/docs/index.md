@@ -18,7 +18,7 @@ Preflight is a set of GitLab CI/CD components that give every WSU app the same c
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       test_command: vendor/bin/phpunit
 ```

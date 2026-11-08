@@ -32,7 +32,7 @@ Nothing was deprecated in 0.3.0.
 
    ```yaml
    include:
-     - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<full commit SHA> # 0.3.0
+     - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
    ```
 
    Before:
@@ -46,7 +46,7 @@ Nothing was deprecated in 0.3.0.
    After:
 
    ```yaml
-     - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<full commit SHA> # 0.3.0
+     - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
        inputs:
          image: php:8.4-cli-trixie@sha256:<digest>
    ```

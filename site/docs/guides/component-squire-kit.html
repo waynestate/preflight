@@ -85,7 +85,7 @@ on a runner that allows it, that merge request already carries the refreshed kit
 <h2 id="include-the-component">Include the component<a class="docs-heading-link" aria-label="Link to this section" href="#include-the-component">#</a></h2>
 <p>Add the include to the app's <code>.gitlab-ci.yml</code>, pinned to a full commit SHA with the tag in a trailing comment:</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@&lt;full commit SHA&gt; # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       working_dir: deploy
 </code></pre>
@@ -171,7 +171,7 @@ the image in Squire's templates and let the next Squire release carry it.</p>
 <h2 id="adopt-it-with-findings">Adopt it with findings<a class="docs-heading-link" aria-label="Link to this section" href="#adopt-it-with-findings">#</a></h2>
 <p>To include the component before the kit is clean, let the job fail without failing the pipeline:</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@&lt;full commit SHA&gt; # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       working_dir: deploy
       allow_failure: true # until 2026-12-01: kit cleanup

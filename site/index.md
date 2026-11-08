@@ -20,7 +20,7 @@ Preflight is a set of GitLab CI/CD components. Add them to the `include:` block 
 
 ```
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@ # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 Already included in [WELD](https://weld.apps.wayne.edu/) and in every [Sourdough](https://sourdough.apps.wayne.edu/) app. Use Preflight on its own to give a GitLab project you already have the stack's CI checks.
@@ -96,7 +96,7 @@ Watches the cabin.
 Runs PROCTOR's checks and publishes them as a Code Quality report.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@ # 0.3.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 **6 inputs**
@@ -117,7 +117,7 @@ Three engines, all running.
 The test command on each supported PHP version, one job per version.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@ # 0.3.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 **6 inputs**
@@ -138,7 +138,7 @@ Checks the passenger list.
 `composer audit --locked`, failing on any advisory.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@ # 0.3.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 **3 inputs**
@@ -156,7 +156,7 @@ The cargo manifest.
 A validated CycloneDX SBOM, published as an artifact. The plugin installs globally, so the app's files stay as they are.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@ # 0.3.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 **4 inputs**
@@ -175,7 +175,7 @@ Uniform pressed.
 The app's own Laravel Pint in test mode. The app requires `laravel/pint` and ships a `pint.json`.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@ # 0.3.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 **4 inputs**
@@ -194,7 +194,7 @@ Instruments cross-checked.
 The app's own PHPStan, with a Code Quality report. The app requires `phpstan/phpstan` and ships a `phpstan.neon`.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@ # 0.3.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 **5 inputs**
@@ -214,7 +214,7 @@ The front cabin, too.
 The app's own ESLint and Prettier. The app requires `@waynestate/pinstripe`, `eslint` and `prettier`.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@ # 0.3.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 **5 inputs**
@@ -234,7 +234,7 @@ Two cockpits, one checklist.
 Components stay inside one GitLab instance, so GitHub mirrors call this reusable workflow instead: `composer ci` on each PHP version, then a Composer audit.
 
 ```
-uses: waynestate/preflight/.github/workflows/php-package.yml@ # 0.3.0
+uses: waynestate/preflight/.github/workflows/php-package.yml@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 **3 inputs**
@@ -271,13 +271,13 @@ workflow:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@ # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@ # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@ # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@ # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@ # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@ # 0.3.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@ # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 2 Switches · project settings
@@ -308,7 +308,7 @@ on:
 
 jobs:
   ci:
-    uses: waynestate/preflight/.github/workflows/php-package.yml@ # 0.3.0
+    uses: waynestate/preflight/.github/workflows/php-package.yml@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
 ```
 
 4 Ground check · your machine

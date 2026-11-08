@@ -57,7 +57,7 @@ the GitLab group whose built-in Composer registry hosts the package:
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       group_id: "<your group id>"
 ```

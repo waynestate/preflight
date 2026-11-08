@@ -41,7 +41,7 @@ Add the include to the app's `.gitlab-ci.yml`, pinned to a full commit SHA with 
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@<full commit SHA> # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@23038dfe767f6ef60e3b2efca1128f53d9acdff7 # 0.3.0
     inputs:
       group_id: "<your group id>"
 ```
