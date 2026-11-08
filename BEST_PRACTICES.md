@@ -173,7 +173,7 @@ by SHA keep working afterwards. That is unverified.
 
 Sources: [GitLab: components, unpublishing](https://docs.gitlab.com/ci/components/).
 
-**How the stack holds it: Not yet.** There is no deprecation or removal policy in the repo or the design documents.
+**How the stack holds it: Documented.** `docs/guides/deprecation.md` sets the policy: tags never move, one release of deprecation notice, 6 months before a component is removed, and the Catalog toggle stays on while any version is pinned.
 
 ---
 

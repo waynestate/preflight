@@ -117,6 +117,10 @@
         {
           "title": "Template lint",
           "path": "guides/template-lint"
+        },
+        {
+          "title": "Deprecating a component",
+          "path": "guides/deprecation"
         }
       ]
     },
