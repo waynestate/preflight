@@ -50,14 +50,11 @@ The array input feeds `parallel:matrix` directly, so one job is created per PHP 
 
 ## Caching[#](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html#caching)
 
-The jobs always cache Composer downloads in `.composer-cache/` so repeat runs do not re-download every package. The cache key depends on `composer.lock` and is prefixed with the PHP version, so a dependency change invalidates the cache and each PHP version gets its own cache:
+The jobs always cache Composer downloads in `.composer-cache/` so repeat runs do not re-download every package. The cache key is fixed per PHP version, not a `composer.lock` hash (D-072), so a lock change downloads only the packages that changed and each PHP version gets its own cache:
 
 ```yaml
 cache:
-  key:
-    files:
-      - composer.lock
-    prefix: php-${PHP_VERSION}
+  key: preflight-php-${PHP_VERSION}
   paths:
     - .composer-cache/
   policy: pull-push

@@ -88,7 +88,7 @@ From `templates/php-test/template.yml`: one job is created per entry in `php_ver
 
 ### Caching[#](https://preflight.apps.wayne.edu/docs/reference/components.html#caching)
 
-The jobs always cache Composer downloads in `.composer-cache/` so repeat runs do not re-download every package. The cache key depends on `composer.lock` and is prefixed with the PHP version, so a dependency change invalidates the cache and each PHP version gets its own cache. The template sets `COMPOSER_CACHE_DIR` to `$CI_PROJECT_DIR/.composer-cache`, keys the cache on `composer.lock` with the prefix `php-${PHP_VERSION}`, caches the path `.composer-cache/`, and uses the policy `pull-push`.
+The jobs always cache Composer downloads in `.composer-cache/` so repeat runs do not re-download every package. The cache key is fixed per PHP version, not a `composer.lock` hash (D-072), so a lock change downloads only the packages that changed and each PHP version gets its own cache. The template sets `COMPOSER_CACHE_DIR` to `$CI_PROJECT_DIR/.composer-cache`, uses the fixed key `preflight-php-${PHP_VERSION}`, caches the path `.composer-cache/`, and uses the policy `pull-push`.
 
 ### Try the next PHP release without breaking the pipeline[#](https://preflight.apps.wayne.edu/docs/reference/components.html#try-the-next-php-release-without-breaking-the-pipeline)
 
@@ -230,7 +230,7 @@ include:
 | `eslint_args` | string | `.` | Arguments passed to eslint. |
 | `prettier` | boolean | `true` | Whether to also run `prettier --check`. |
 
-From `templates/eslint/template.yml`: the component does not install ESLint or Prettier itself; it runs `npm ci --ignore-scripts --cache .npm-cache` (the cache is keyed on `package-lock.json` and stores `.npm-cache/`), then `npx --no-install eslint` with the `eslint_args` value, and, while `prettier` is true, `npx --no-install prettier --check .`. The job is `interruptible: true` with a timeout of 15m.
+From `templates/eslint/template.yml`: the component does not install ESLint or Prettier itself; it runs `npm ci --ignore-scripts --cache .npm-cache` (the cache uses the fixed key `preflight-eslint` and stores `.npm-cache/`), then `npx --no-install eslint` with the `eslint_args` value, and, while `prettier` is true, `npx --no-install prettier --check .`. The job is `interruptible: true` with a timeout of 15m.
 
 ## secret-detection[#](https://preflight.apps.wayne.edu/docs/reference/components.html#secret-detection)
 

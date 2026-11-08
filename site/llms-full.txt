@@ -91,9 +91,9 @@ include:
 ##### Caching
 
 The jobs always cache Composer downloads in `.composer-cache/` so repeat runs
-do not re-download every package. The cache key depends on `composer.lock`
-and is prefixed with the PHP version, so a dependency change invalidates the
-cache and each PHP version gets its own cache.
+do not re-download every package. The cache key is fixed per PHP version, not
+a `composer.lock` hash (D-072), so a lock change downloads only the packages
+that changed and each PHP version gets its own cache.
 
 ##### Try the next PHP release without breaking the pipeline
 
@@ -760,7 +760,7 @@ Pins change only through a reviewed merge request.
 Docker Hub images come through the group's GitLab Dependency Proxy: each Docker Hub component pulls
 `image_prefix/image`, and `image_prefix` defaults to `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}`. On a GitLab or group
 without the proxy, set `image_prefix: docker.io`. Composer and npm downloads are cached per job (`.composer-cache/`,
-`.npm-cache/`), keyed on the lock file where there is one. `tests/check-dependency-cache.sh` (and its `.ps1` twin)
+`.npm-cache/`) under a fixed key, not a lock-file hash. `tests/check-dependency-cache.sh` (and its `.ps1` twin)
 fails a component that skips either. Details, and the upgrade step for apps that passed a proxied `image`:
 [Dependency caching](https://github.com/waynestate/preflight/blob/HEAD/docs/guides/dependency-caching.md).
 
@@ -1398,6 +1398,7 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ### Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Fixed: README, BEST_PRACTICES 4.8 and the caching guides describe the fixed cache keys (D-072).
 - Changed: php-test, phpstan, pint, proctor, sbom and eslint cache under a fixed key per job instead of a lock-file hash (D-072), so a lock change downloads only the packages that changed.
 - Fixed: the docs menu closes with Escape and hands focus back to its button (docs kit synced from Squire).
 - Fixed: the docs kit's copy button no longer covers the first line of code when it says Copied or Failed: over the code it keeps its resting width and shows a check or a cross when the word does not fit (docs kit synced from Squire).
@@ -1918,14 +1919,11 @@ The array input feeds `parallel:matrix` directly, so one job is created per PHP 
 
 ### Caching[#](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html#caching)
 
-The jobs always cache Composer downloads in `.composer-cache/` so repeat runs do not re-download every package. The cache key depends on `composer.lock` and is prefixed with the PHP version, so a dependency change invalidates the cache and each PHP version gets its own cache:
+The jobs always cache Composer downloads in `.composer-cache/` so repeat runs do not re-download every package. The cache key is fixed per PHP version, not a `composer.lock` hash (D-072), so a lock change downloads only the packages that changed and each PHP version gets its own cache:
 
 ```yaml
 cache:
-  key:
-    files:
-      - composer.lock
-    prefix: php-${PHP_VERSION}
+  key: preflight-php-${PHP_VERSION}
   paths:
     - .composer-cache/
   policy: pull-push
@@ -2302,7 +2300,7 @@ The job is `interruptible: true` with a `timeout: 30 minutes`. Its script:
 4. Changes into `working_dir` and runs `composer install --no-interaction --no-progress --no-plugins --no-scripts --ignore-platform-reqs`.
 5. Runs `proctor_command` and redirects the output to `"$CI_PROJECT_DIR/gl-code-quality-report.json"`. A plain redirect (not `tee`) keeps proctor's exit code as the job result, and the report is written at the project root so the artifact path is the same for every `working_dir`, including `.`.
 
-The job keeps Composer downloads in a cache under `.composer-cache/`, keyed on `composer.lock`, so repeat runs skip the download when the lock is unchanged.
+The job keeps Composer downloads in a cache under `.composer-cache/` with the fixed key `preflight-proctor` (D-072), so repeat runs skip downloads and a lock change fetches only what changed.
 
 The job publishes the report with `artifacts: when: always` as a GitLab Code Quality report (`reports: codequality: gl-code-quality-report.json`).
 
@@ -2688,13 +2686,13 @@ Each job that installs packages keeps them in the GitLab cache, inside the proje
 
 | Component | Path | Key |
 | --- | --- | --- |
-| `php-test` | `.composer-cache/` | `composer.lock`, prefixed with the PHP version |
-| `proctor`, `pint`, `phpstan`, `sbom` | `.composer-cache/` | `composer.lock` |
-| `squire-kit` | `.composer-cache/` | fixed (`preflight-squire-kit`); the kit's `.squire.json` sits in `working_dir`, which a key file cannot follow |
-| `eslint` | `.npm-cache/` | `package-lock.json` |
-| `a11y` | `.npm-cache/` | fixed (`preflight-a11y`); the checker's versions are pinned inputs |
+| `php-test` | `.composer-cache/` | fixed per PHP version (`preflight-php-${PHP_VERSION}`) |
+| `proctor`, `pint`, `phpstan`, `sbom` | `.composer-cache/` | fixed (`preflight-proctor`, `preflight-pint`, `preflight-phpstan`, `preflight-sbom`) |
+| `squire-kit` | `.composer-cache/` | fixed (`preflight-squire-kit`), unchanged |
+| `eslint` | `.npm-cache/` | fixed (`preflight-eslint`) |
+| `a11y` | `.npm-cache/` | fixed (`preflight-a11y`), unchanged |
 
-`COMPOSER_CACHE_DIR` and `NPM_CONFIG_CACHE` point the tools at those paths. A lock file change starts a fresh cache, so a cached run never installs a stale package: Composer and npm still resolve from the lock and only skip the download.
+`COMPOSER_CACHE_DIR` and `NPM_CONFIG_CACHE` point the tools at those paths. The keys are fixed (D-072) and installs still resolve from the lock, so a cached run never installs a stale package: Composer and npm only skip the download.
 
 ### Your own jobs[#](https://preflight.apps.wayne.edu/docs/guides/dependency-caching.html#your-own-jobs)
 
@@ -2708,9 +2706,7 @@ variables:
 composer-ci:
   image: ${IMAGE_PREFIX}/composer:2.10.3
   cache:
-    key:
-      files: [composer.lock]
-      prefix: composer
+    key: composer
     paths: [.cache/composer/]
   script:
     - composer install --no-interaction --no-progress --prefer-dist
@@ -3375,7 +3371,7 @@ From `templates/php-test/template.yml`: one job is created per entry in `php_ver
 
 #### Caching[#](https://preflight.apps.wayne.edu/docs/reference/components.html#caching)
 
-The jobs always cache Composer downloads in `.composer-cache/` so repeat runs do not re-download every package. The cache key depends on `composer.lock` and is prefixed with the PHP version, so a dependency change invalidates the cache and each PHP version gets its own cache. The template sets `COMPOSER_CACHE_DIR` to `$CI_PROJECT_DIR/.composer-cache`, keys the cache on `composer.lock` with the prefix `php-${PHP_VERSION}`, caches the path `.composer-cache/`, and uses the policy `pull-push`.
+The jobs always cache Composer downloads in `.composer-cache/` so repeat runs do not re-download every package. The cache key is fixed per PHP version, not a `composer.lock` hash (D-072), so a lock change downloads only the packages that changed and each PHP version gets its own cache. The template sets `COMPOSER_CACHE_DIR` to `$CI_PROJECT_DIR/.composer-cache`, uses the fixed key `preflight-php-${PHP_VERSION}`, caches the path `.composer-cache/`, and uses the policy `pull-push`.
 
 #### Try the next PHP release without breaking the pipeline[#](https://preflight.apps.wayne.edu/docs/reference/components.html#try-the-next-php-release-without-breaking-the-pipeline)
 
@@ -3517,7 +3513,7 @@ include:
 | `eslint_args` | string | `.` | Arguments passed to eslint. |
 | `prettier` | boolean | `true` | Whether to also run `prettier --check`. |
 
-From `templates/eslint/template.yml`: the component does not install ESLint or Prettier itself; it runs `npm ci --ignore-scripts --cache .npm-cache` (the cache is keyed on `package-lock.json` and stores `.npm-cache/`), then `npx --no-install eslint` with the `eslint_args` value, and, while `prettier` is true, `npx --no-install prettier --check .`. The job is `interruptible: true` with a timeout of 15m.
+From `templates/eslint/template.yml`: the component does not install ESLint or Prettier itself; it runs `npm ci --ignore-scripts --cache .npm-cache` (the cache uses the fixed key `preflight-eslint` and stores `.npm-cache/`), then `npx --no-install eslint` with the `eslint_args` value, and, while `prettier` is true, `npx --no-install prettier --check .`. The job is `interruptible: true` with a timeout of 15m.
 
 ### secret-detection[#](https://preflight.apps.wayne.edu/docs/reference/components.html#secret-detection)
 

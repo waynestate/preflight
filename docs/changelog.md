@@ -13,6 +13,7 @@ are Git tags.
 
 ## Unreleased
 
+- Fixed: README, BEST_PRACTICES 4.8 and the caching guides describe the fixed cache keys (D-072).
 - Changed: php-test, phpstan, pint, proctor, sbom and eslint cache under a fixed key per job instead of a lock-file hash (D-072), so a lock change downloads only the packages that changed.
 - Fixed: the docs menu closes with Escape and hands focus back to its button (docs kit synced from Squire).
 - Fixed: the docs kit's copy button no longer covers the first line of code when it says Copied or Failed: over the code it keeps its resting width and shows a check or a cross when the word does not fit (docs kit synced from Squire).

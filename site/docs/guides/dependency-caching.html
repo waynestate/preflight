@@ -119,34 +119,33 @@ project so GitLab can save and restore them:</p>
 <tr>
 <td><code>php-test</code></td>
 <td><code>.composer-cache/</code></td>
-<td><code>composer.lock</code>, prefixed with the PHP version</td>
+<td>fixed per PHP version (<code>preflight-php-${PHP_VERSION}</code>)</td>
 </tr>
 <tr>
 <td><code>proctor</code>, <code>pint</code>, <code>phpstan</code>, <code>sbom</code></td>
 <td><code>.composer-cache/</code></td>
-<td><code>composer.lock</code></td>
+<td>fixed (<code>preflight-proctor</code>, <code>preflight-pint</code>, <code>preflight-phpstan</code>, <code>preflight-sbom</code>)</td>
 </tr>
 <tr>
 <td><code>squire-kit</code></td>
 <td><code>.composer-cache/</code></td>
-<td>fixed (<code>preflight-squire-kit</code>); the kit's <code>.squire.json</code> sits in <code>working_dir</code>, which a key file cannot follow</td>
+<td>fixed (<code>preflight-squire-kit</code>), unchanged</td>
 </tr>
 <tr>
 <td><code>eslint</code></td>
 <td><code>.npm-cache/</code></td>
-<td><code>package-lock.json</code></td>
+<td>fixed (<code>preflight-eslint</code>)</td>
 </tr>
 <tr>
 <td><code>a11y</code></td>
 <td><code>.npm-cache/</code></td>
-<td>fixed (<code>preflight-a11y</code>); the checker's versions are pinned inputs</td>
+<td>fixed (<code>preflight-a11y</code>), unchanged</td>
 </tr>
 </tbody>
 </table></div>
-<p><code>COMPOSER_CACHE_DIR</code> and <code>NPM_CONFIG_CACHE</code> point the tools at those paths. A
-lock file change starts a fresh cache, so a cached run never installs a stale
-package: Composer and npm still resolve from the lock and only skip the
-download.</p>
+<p><code>COMPOSER_CACHE_DIR</code> and <code>NPM_CONFIG_CACHE</code> point the tools at those paths. The
+keys are fixed (D-072) and installs still resolve from the lock, so a cached
+run never installs a stale package: Composer and npm only skip the download.</p>
 <h2 id="your-own-jobs">Your own jobs<a class="docs-heading-link" aria-label="Link to this section" href="#your-own-jobs">#</a></h2>
 <p>The same pattern fits an app's own jobs, such as <code>composer-ci</code> or a front-end
 build. Sourdough's app templates ship it:</p>
@@ -157,9 +156,7 @@ build. Sourdough's app templates ship it:</p>
 composer-ci:
   image: ${IMAGE_PREFIX}/composer:2.10.3
   cache:
-    key:
-      files: [composer.lock]
-      prefix: composer
+    key: composer
     paths: [.cache/composer/]
   script:
     - composer install --no-interaction --no-progress --prefer-dist

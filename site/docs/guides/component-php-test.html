@@ -121,12 +121,9 @@
 <li>Runs <code>test_command</code>.</li>
 </ol>
 <h2 id="caching">Caching<a class="docs-heading-link" aria-label="Link to this section" href="#caching">#</a></h2>
-<p>The jobs always cache Composer downloads in <code>.composer-cache/</code> so repeat runs do not re-download every package. The cache key depends on <code>composer.lock</code> and is prefixed with the PHP version, so a dependency change invalidates the cache and each PHP version gets its own cache:</p>
+<p>The jobs always cache Composer downloads in <code>.composer-cache/</code> so repeat runs do not re-download every package. The cache key is fixed per PHP version, not a <code>composer.lock</code> hash (D-072), so a lock change downloads only the packages that changed and each PHP version gets its own cache:</p>
 <pre tabindex="0"><code class="language-yaml">cache:
-  key:
-    files:
-      - composer.lock
-    prefix: php-${PHP_VERSION}
+  key: preflight-php-${PHP_VERSION}
   paths:
     - .composer-cache/
   policy: pull-push
