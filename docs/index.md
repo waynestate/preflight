@@ -35,6 +35,6 @@ include:
 - [Install](install.md): the requirements, the include snippet, and how to verify the pipeline picked the component up.
 - [Reference](reference/components.md): every component, with its include example, inputs and defaults.
 
-Preflight 0.3.0; GitLab components are GA on the Free tier since GitLab 17.0; MIT licensed.
+Preflight 0.3.1; GitLab components are GA on the Free tier since GitLab 17.0; MIT licensed.
 
 Agents: fetch [https://preflight.apps.wayne.edu/llms.txt](https://preflight.apps.wayne.edu/llms.txt) for a machine-readable index of this manual.
