@@ -12,6 +12,7 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ## Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Changed: the deploy layer runs Squire's kit 0.7.1 (was 0.6.0): `.squire/php.ini` no longer sets the deprecated `session.sid_*` lines, web requests get a `disable_functions` list and Apache hardening (`.squire/php-web.ini`, `.squire/apache-hardening.conf`), and opcache gets production settings with `SQUIRE_OPCACHE_VALIDATE` as the one switch.
 - Docs: the docs home footer names 0.3.1 (it still said 0.3.0).
 - Changed: the front page deploy layer requires HELMET ^1.0 (lock at 1.0.1, was 0.4.0), like the rest of the stack; its shared front controller already runs on HELMET 1.0 in Squire, Sourdough and Pinstripe.
 - Docs: README, the guides, the docs pages and the examples pin the 0.3.1 tag commit, and the upgrading page has a 0.3.1 section.
