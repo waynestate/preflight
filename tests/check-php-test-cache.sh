@@ -2,14 +2,15 @@
 # check-php-test-cache.sh: does the php-test Composer cache stay correct?
 #
 # The php-test component caches Composer downloads so repeat runs do not
-# re-download every package. The cache is only useful if it is invalidated
-# when the dependencies change and if each PHP version gets its own cache.
-# This check fails if either guarantee is broken:
+# re-download every package. The key is fixed per PHP version (D-072):
+# Composer's cache is additive, so a lock change downloads only the packages
+# that changed, and each PHP version keeps its own cache. This check fails if
+# either guarantee is broken:
 #
-#   * the cache key stops depending on composer.lock, so a dependency change
-#     would silently reuse a stale cache; or
-#   * the cache key prefix stops including the PHP version, so the 8.4 and
-#     8.5 jobs would share a cache and clobber each other's downloads.
+#   * the cache key goes back to a lock-file hash (a files: or prefix: line),
+#     so every lock bump would miss the cache and refetch everything; or
+#   * the cache key stops including the PHP version, so the 8.4 and 8.5 jobs
+#     would share a cache and clobber each other's downloads.
 #
 # The cache block lives directly on the php-test job. The template is two
 # YAML documents separated by `---`; the jobs live in the second. This script
@@ -53,21 +54,25 @@ if [ "$cache_count" -ne 1 ]; then
   fail "expected exactly one job with a cache: block, found $cache_count"
 fi
 
-# The cache key must depend on composer.lock, so a lock change invalidates the
-# cache.
-if ! printf '%s\n' "$block" | grep -qE '^[[:blank:]]*-[[:blank:]]*composer\.lock[[:blank:]]*$'; then
-  fail "php-test cache key files do not include composer.lock"
+# The key must be fixed, not a lock-file hash (D-072): no files: line.
+if printf '%s\n' "$block" | grep -qE '^[[:blank:]]*files:'; then
+  fail "php-test cache key is a lock-file hash; use a fixed key (D-072)"
 fi
 
-# The cache key prefix must include the PHP version, so 8.4 and 8.5 jobs do
-# not share a cache.
-prefix=$(printf '%s\n' "$block" | grep -E '^[[:blank:]]*prefix:' | sed -E 's/^[[:blank:]]*prefix:[[:blank:]]*//')
-if [ -z "$prefix" ]; then
-  fail "php-test cache key has no prefix"
+# No prefix: line either: the whole key is the fixed name.
+if printf '%s\n' "$block" | grep -qE '^[[:blank:]]*prefix:'; then
+  fail "php-test cache key has a prefix; use a fixed key (D-072)"
+fi
+
+# The key must include the PHP version, so 8.4 and 8.5 jobs do not share a
+# cache.
+key=$(printf '%s\n' "$block" | grep -E '^[[:blank:]]*key:' | sed -E 's/^[[:blank:]]*key:[[:blank:]]*//')
+if [ -z "$key" ]; then
+  fail "php-test cache key does not include the PHP version"
 else
-  case $prefix in
+  case $key in
     *PHP_VERSION*) ;;
-    *) fail "php-test cache key prefix does not include the PHP version: $prefix" ;;
+    *) fail "php-test cache key does not include the PHP version: $key" ;;
   esac
 fi
 

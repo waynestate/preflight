@@ -6,6 +6,7 @@ are Git tags.
 
 ## Unreleased
 
+- Changed: php-test, phpstan, pint, proctor, sbom and eslint cache under a fixed key per job instead of a lock-file hash (D-072), so a lock change downloads only the packages that changed.
 - Fixed: the docs menu closes with Escape and hands focus back to its button (docs kit synced from Squire).
 - Fixed: the docs kit's copy button no longer covers the first line of code when it says Copied or Failed: over the code it keeps its resting width and shows a check or a cross when the word does not fit (docs kit synced from Squire).
 - Changed: the front page's version chip carries `data-docs-version`, so the docs builder (synced from Squire) keeps it on the docs stamp at every release and `composer docs:check` fails while it is stale.

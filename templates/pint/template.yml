@@ -45,13 +45,11 @@ spec:
   interruptible: true
   timeout: 10m
   # The cache is always on. COMPOSER_CACHE_DIR points Composer at a path
-  # inside the project so GitLab can cache it. The key depends on
-  # composer.lock, so a dependency change invalidates the cache.
+  # inside the project so GitLab can cache it. The key is fixed, not a
+  # composer.lock hash (D-072): Composer's cache is additive, so a lock
+  # change downloads only the packages that changed instead of everything.
   cache:
-    key:
-      files:
-        - composer.lock
-      prefix: pint
+    key: preflight-pint
     paths:
       - .composer-cache/
     policy: pull-push

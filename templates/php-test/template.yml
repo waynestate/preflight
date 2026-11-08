@@ -55,14 +55,13 @@ spec:
   interruptible: true
   timeout: 30 minutes
   # The cache is always on. COMPOSER_CACHE_DIR points Composer at a path
-  # inside the project so GitLab can cache it. The key depends on
-  # composer.lock and the PHP version, so a dependency change invalidates the
-  # cache and each PHP version gets its own.
+  # inside the project so GitLab can cache it. The key is fixed, not a
+  # composer.lock hash (D-072): Composer's cache is additive, so a lock
+  # change downloads only the packages that changed instead of everything.
+  # Each PHP version gets its own key, so matrix jobs do not overwrite each
+  # other.
   cache:
-    key:
-      files:
-        - composer.lock
-      prefix: php-${PHP_VERSION}
+    key: preflight-php-${PHP_VERSION}
     paths:
       - .composer-cache/
     policy: pull-push

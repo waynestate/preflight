@@ -48,10 +48,10 @@ spec:
   image: $[[ inputs.image_prefix ]]/$[[ inputs.image ]]
   interruptible: true
   timeout: 15m
+  # The key is fixed, not a package-lock.json hash (D-072): npm's cache is
+  # additive, so a lock change downloads only the packages that changed.
   cache:
-    key:
-      files:
-        - package-lock.json
+    key: preflight-eslint
     paths:
       - .npm-cache/
   script:
