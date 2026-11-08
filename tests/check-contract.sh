@@ -57,17 +57,17 @@ while IFS= read -r name; do
       | LC_ALL=C sort > "$tmpdir/tpl-in"
     yq eval ".components.$name.inputs[].name" "$CONTRACT" \
       | tr -d '"' | LC_ALL=C sort > "$tmpdir/c-in"
-    # A job key that is exactly $[[ inputs.job_name ]] stands for the default
-    # of the job_name input in the spec (document 0); resolve it to that name
-    # so the comparison below still checks the promised job name.
+    # Any job key containing $[[ inputs.job_name ]] is resolved with the
+    # job_name default from the spec (document 0), so $[[ inputs.job_name
+    # ]]-advisory becomes php-test-advisory. Hidden keys (a leading dot) are
+    # templates for extends:, not jobs, so they are skipped.
     job_default=$(yq eval -o=json 'select(document_index == 0) | .spec.inputs.job_name.default' "$tpl" | tr -d '"')
     yq eval -o=json 'select(document_index == 1) | keys[]' "$tpl" \
       | tr -d '"' | while IFS= read -r k; do
-        if [ "$k" = '$[[ inputs.job_name ]]' ]; then
-          printf '%s\n' "$job_default"
-        else
-          printf '%s\n' "$k"
-        fi
+        case "$k" in
+          .*) continue ;;
+        esac
+        printf '%s\n' "$(printf '%s' "$k" | sed 's/\$\[\[ inputs\.job_name \]\]/'"$job_default"'/g')"
       done | LC_ALL=C sort > "$tmpdir/tpl-jobs"
     yq eval ".components.$name.jobs[]" "$CONTRACT" \
       | tr -d '"' | LC_ALL=C sort > "$tmpdir/c-jobs"
