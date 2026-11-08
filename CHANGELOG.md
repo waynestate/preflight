@@ -6,6 +6,12 @@ are Git tags.
 
 ## Unreleased
 
+## 0.3.1 (2026-11-08)
+
+Fixed CI cache keys (D-072): every component that installs packages caches under a fixed key instead of a lock-file
+hash, and saves its cache even when the job fails, so a lock change or a dropped GitHub download refetches only what
+is missing. Inputs and job names are unchanged, so moving a pin from 0.3.0 is a one-line change.
+
 - Changed: every component saves its dependency cache even when the job fails (when: always), so a retry after a dropped download fetches only what is missing (D-072).
 - Fixed: README, BEST_PRACTICES 4.8 and the caching guides describe the fixed cache keys (D-072).
 - Changed: php-test, phpstan, pint, proctor, sbom and eslint cache under a fixed key per job instead of a lock-file hash (D-072), so a lock change downloads only the packages that changed.
