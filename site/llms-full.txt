@@ -1398,6 +1398,7 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ### Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Changed: the deploy layer requires PROCTOR ^0.8 (locked 0.8.0).
 - Docs: the README, docs, front page and examples pin the 0.3.0 tag's commit SHA, and the GitHub workflow example moves from 0.1.1 to 0.3.0.
 - Fixed: the front page said a11y and squire-kit were coming in the next tag; both shipped in 0.2.0. The checklist card gains an eighth check, a11y, which lights the A11Y lamp (it was a hatched "next tag" lamp), the placards add an a11y placard and name the five other components in 0.3.0, and "Deferred items" keeps only the contract suite and site freshness, with no date for the next tag. The README's checklist art is rebuilt to match: nine rows, all thirteen components in 0.3.0, and a components badge that reads 13 (it read 9).
 - Fixed: the README art kit (`scripts/readme-art`) reads job names from the `job_name` input every template now uses, puts the stage list on its own line (it ran past the panel), closes up the component list when it grows, and labels the license badge in US spelling.
