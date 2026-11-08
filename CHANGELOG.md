@@ -6,6 +6,7 @@ are Git tags.
 
 ## Unreleased
 
+- Fixed: the docs menu closes with Escape and hands focus back to its button (docs kit synced from Squire).
 - Changed: the deploy layer requires PROCTOR ^0.8 (locked 0.8.0).
 - Docs: the README, docs, front page and examples pin the 0.3.0 tag's commit SHA, and the GitHub workflow example moves from 0.1.1 to 0.3.0.
 - Fixed: the front page said a11y and squire-kit were coming in the next tag; both shipped in 0.2.0. The checklist card gains an eighth check, a11y, which lights the A11Y lamp (it was a hatched "next tag" lamp), the placards add an a11y placard and name the five other components in 0.3.0, and "Deferred items" keeps only the contract suite and site freshness, with no date for the next tag. The README's checklist art is rebuilt to match: nine rows, all thirteen components in 0.3.0, and a components badge that reads 13 (it read 9).
