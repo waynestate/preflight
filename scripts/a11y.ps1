@@ -8,11 +8,17 @@
 #   scripts\a11y.ps1                      Preflight's front page and docs, WCAG 2.2 AA
 #   scripts\a11y.ps1 -Site DIR -Pages '["index.html", "docs/**/*.html"]' `
 #     -Tags '["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]' -Report DIR
+#   scripts\a11y.ps1 -BaseUrl http://host.docker.internal:8000 -Pages '["/", "/apps"]'
 #
 # -Site is relative to the repo root; -Pages and -Tags are JSON lists;
-# -Report keeps gl-a11y-junit.xml and gl-a11y-report.json in DIR. The color
-# schemes and widths are the component's defaults. Exit 0 clean, 1 a
-# violation or a page that did not load, 2 a tool or configuration error.
+# -Report keeps gl-a11y-junit.xml and gl-a11y-report.json in DIR. -BaseUrl
+# checks a running site instead of a folder of HTML (default: the A11Y_BASE_URL
+# environment variable, or empty). The color schemes and widths are the
+# component's defaults. Exit 0 clean, 1 a violation or a page that did not
+# load, 2 a tool or configuration error.
+#
+# localhost inside the container is the container itself, so a site on the
+# host is reached as host.docker.internal.
 #
 # The repo is mounted read-only; npm's cache lives in a named volume, so
 # later runs install from it.
@@ -20,7 +26,8 @@ param(
   [string]$Site = "site",
   [string]$Pages = '["**/*.html"]',
   [string]$Tags = '["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]',
-  [string]$Report = ""
+  [string]$Report = "",
+  [string]$BaseUrl = $env:A11Y_BASE_URL
 )
 
 $ErrorActionPreference = "Stop"
@@ -57,7 +64,9 @@ if (-not $image -or -not $axeCore -or -not $axePw -or -not $pw) {
 
 $config = '{{"siteDir": "{0}", "pages": {1}, "tags": {2}, "colorSchemes": {3}, "widths": {4}, "axeCoreVersion": "{5}"}}' -f $Site, $Pages, $Tags, $schemes, $widths, $axeCore
 
-$dockerArgs = @("run", "--rm", "-v", "$((Get-Location).Path):/work:ro", "-v", "preflight-a11y-npm-cache:/root/.npm")
+# --add-host makes host.docker.internal reach the host on Linux too; Docker
+# Desktop already has it.
+$dockerArgs = @("run", "--rm", "--add-host=host.docker.internal:host-gateway", "-v", "$((Get-Location).Path):/work:ro", "-v", "preflight-a11y-npm-cache:/root/.npm")
 $reportDir = "/tmp/preflight-a11y/out"
 if ($Report) {
   New-Item -ItemType Directory -Force -Path $Report | Out-Null
@@ -76,6 +85,12 @@ $envLines = @(
   "A11Y_AXE_PLAYWRIGHT_VERSION=$axePw",
   "A11Y_AXE_CORE_VERSION=$axeCore"
 )
+# A non-empty base URL goes to the checker as the component's base_url input;
+# the checker refuses anything that is not http or https (exit 2), so no
+# validation here.
+if ($BaseUrl) {
+  $envLines += "A11Y_BASE_URL=$BaseUrl"
+}
 [IO.File]::WriteAllText($envFile, (($envLines -join "`n") + "`n"), [Text.UTF8Encoding]::new($false))
 
 # scripts/a11y-container.sh runs the component job's steps inside the image.

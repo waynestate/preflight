@@ -28,6 +28,7 @@ include:
 | `stage` | string | `test` | Pipeline stage for the job. |
 | `job_name` | string | `composer-audit` | Name of the job. Set it when you include this component more than once. |
 | `image` | string | `composer:2@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc` | Docker image for the job. |
+| `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `working_dir` | string | `.` | Directory to run composer audit in, relative to the project root. |
 | `abandoned` | string | `fail` | How composer audit treats abandoned packages: fail (default), report (list them, do not fail) or ignore. |
 

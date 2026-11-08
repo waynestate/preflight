@@ -329,6 +329,12 @@ survives input interpolation, and GitLab expands it in the image at job time, so
 There are no exemptions: `portability` builds and runs the app image inside its own job, so its `image` input is the
 Buildah image the job runs in, like every other component's.
 
+A component whose image comes from Docker Hub also takes `image_prefix` (default
+`${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}`, the group's Dependency Proxy), and its job's `image:` is
+`$[[ inputs.image_prefix ]]/$[[ inputs.image ]]`, so pulls are cached on GitLab instead of counted against Docker Hub's
+limit. `tests/check-dependency-cache.sh` (and its `.ps1` twin) fail if one skips the prefix or installs packages
+without a cache. See [Dependency caching](docs/guides/dependency-caching.md).
+
 ### 2.11 Print which component version ran
 Use `spec:component` and `$[[ component.sha ]]` or `$[[ component.version ]]` to write the component's own version into
 the job log.

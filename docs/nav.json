@@ -111,6 +111,10 @@
           "path": "guides/image-pins"
         },
         {
+          "title": "Dependency caching",
+          "path": "guides/dependency-caching"
+        },
+        {
           "title": "Template lint",
           "path": "guides/template-lint"
         }

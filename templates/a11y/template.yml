@@ -95,11 +95,21 @@ spec:
   allow_failure: $[[ inputs.allow_failure ]]
   interruptible: true
   timeout: 30 minutes
+  # The cache is always on. NPM_CONFIG_CACHE points npm at a path inside the
+  # project so GitLab can cache the checker's packages between runs. The
+  # versions are pinned inputs, not a lock file, so the key is fixed; npm
+  # keeps each version apart inside the cache.
+  cache:
+    key: preflight-a11y
+    paths:
+      - .npm-cache/
+    policy: pull-push
   variables:
     # A variable, not a script line, so GitLab expands $CI_ENVIRONMENT_URL
     # and the like, and the value never passes through the shell.
     A11Y_BASE_URL: "$[[ inputs.base_url ]]"
     NPM_CONFIG_UPDATE_NOTIFIER: "false"
+    NPM_CONFIG_CACHE: "$CI_PROJECT_DIR/.npm-cache"
   script:
     - echo "Preflight component $[[ component.name ]] $[[ component.version ]] (ref $[[ component.reference ]], sha $[[ component.sha ]])"
     - |

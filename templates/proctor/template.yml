@@ -14,6 +14,12 @@ spec:
       description: Docker image for the proctor job.
       type: string
       default: php:8.4-cli-trixie@sha256:9cf851bc2c1b37c3e59dfd677a3c3e56d485af5a47c93f629424bb039eafcb69
+    image_prefix:
+      description: "Registry path put in front of the image input. The default is this group's GitLab Dependency Proxy, so Docker Hub images are pulled once and then served from GitLab's cache. On a GitLab or group without the proxy, set it to docker.io."
+      type: string
+      default: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}"
+      # No trailing slash: the job joins the two as image_prefix/image.
+      regex: '^[^/\s](\S*[^/\s])?$'
     composer_version:
       description: Composer version to install.
       type: string
@@ -36,7 +42,7 @@ spec:
 ---
 "$[[ inputs.job_name ]]":
   stage: $[[ inputs.stage ]]
-  image: $[[ inputs.image ]]
+  image: $[[ inputs.image_prefix ]]/$[[ inputs.image ]]
   # Boolean input interpolated as a real YAML boolean (docs: an input that
   # replaces an entire YAML value is interpolated as its specified type).
   allow_failure: $[[ inputs.allow_failure ]]

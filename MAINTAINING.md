@@ -30,7 +30,7 @@ copy (see "Same instance only" in the README).
 | Contract tests, Linux and macOS | `sh tests/check-contract.sh`, and the other `tests/check-*.sh` |
 
 Each contract test comes as a `.sh` and `.ps1` pair that check the same thing (`check-contract`, `check-spec-keys`,
-`check-image-inputs`, `check-php-test-cache`, `check-working-dir-regex`, `check-path-input-regex`, `check-github-workflow`,
+`check-image-inputs`, `check-dependency-cache`, `check-php-test-cache`, `check-working-dir-regex`, `check-path-input-regex`, `check-github-workflow`,
 `check-proctor-install-flags`, `check-secret-detection`, `check-renovate-review`, `check-renovate-buildah`, `check-sha-pins`, `check-release-job`,
 `check-abandoned-input`, `check-component-version`, `check-input-interpolation`, `check-a11y-inline`, `check-portability-inline`, `check-renovate-squire-kit`, `check-squire-kit`). CI runs the `.sh` ones, except `check-abandoned-input`: the contract job's yq image has no Docker, and the test runs composer in the composer:2.10.3 image, so it stays out of the contract job's script list in `.gitlab-ci.yml`.
 Keep both in step when you change one.

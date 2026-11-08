@@ -23,6 +23,12 @@ spec:
       type: string
       default: "node:22.13-alpine@sha256:e2b39f7b64281324929257d0f8004fb6cb4bf0fdfb9aa8cedb235a766aec31da"
       description: "Container image used to run ESLint and Prettier."
+    image_prefix:
+      description: "Registry path put in front of the image input. The default is this group's GitLab Dependency Proxy, so Docker Hub images are pulled once and then served from GitLab's cache. On a GitLab or group without the proxy, set it to docker.io."
+      type: string
+      default: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}"
+      # No trailing slash: the job joins the two as image_prefix/image.
+      regex: '^[^/\s](\S*[^/\s])?$'
     working_dir:
       type: string
       default: "."
@@ -39,7 +45,7 @@ spec:
 ---
 "$[[ inputs.job_name ]]":
   stage: $[[ inputs.stage ]]
-  image: $[[ inputs.image ]]
+  image: $[[ inputs.image_prefix ]]/$[[ inputs.image ]]
   interruptible: true
   timeout: 15m
   cache:

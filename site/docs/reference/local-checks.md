@@ -114,7 +114,7 @@ windows
 scripts\a11y.ps1
 ```
 
-Options pick another folder, pages, tags or a folder for the reports: `--site=DIR --pages='["index.html"]' --tags='["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]' --report=DIR` (PowerShell: `-Site`, `-Pages`, `-Tags`, `-Report`).
+Options pick another folder, pages, tags, a running site or a folder for the reports: `--site=DIR --pages='["index.html"]' --tags='["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]' --base-url=URL --report=DIR` (PowerShell: `-Site`, `-Pages`, `-Tags`, `-BaseUrl`, `-Report`). With `--base-url=URL` (or the `A11Y_BASE_URL` environment variable) the gate checks a running site at URL instead of a folder of HTML, as the component's `base_url` input does in CI; `localhost` inside the container is the container itself, so a site on the host is reached as `host.docker.internal`.
 
 ## The accessibility fixtures[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#the-accessibility-fixtures)
 

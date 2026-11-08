@@ -40,5 +40,6 @@ Pins change only through a reviewed merge request.
 
 ## Related
 
+- [Dependency caching](dependency-caching.md): the `image_prefix` input in front of each pin, and the package caches.
 - [Template lint](template-lint.md): the unsafe CI patterns `composer ci` scans for before the fixture tests.
 - [Shared conventions](../reference/conventions.md): Composer vendor, license, PHP floor and JavaScript installs.

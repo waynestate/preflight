@@ -14,6 +14,12 @@ spec:
       description: Docker image for the sbom job.
       type: string
       default: composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc
+    image_prefix:
+      description: "Registry path put in front of the image input. The default is this group's GitLab Dependency Proxy, so Docker Hub images are pulled once and then served from GitLab's cache. On a GitLab or group without the proxy, set it to docker.io."
+      type: string
+      default: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}"
+      # No trailing slash: the job joins the two as image_prefix/image.
+      regex: '^[^/\s](\S*[^/\s])?$'
     omit_dev:
       description: Whether to omit dev dependencies from the SBOM.
       type: boolean
@@ -29,9 +35,22 @@ spec:
   # The composer image already ships Composer, so no install step is needed.
   # The CycloneDX plugin is installed globally so the app's composer.json is
   # never touched. --validate fails the job on an invalid SBOM.
-  image: $[[ inputs.image ]]
+  image: $[[ inputs.image_prefix ]]/$[[ inputs.image ]]
   interruptible: true
   timeout: 30 minutes
+  # The cache is always on. COMPOSER_CACHE_DIR points Composer at a path
+  # inside the project so GitLab can cache it. The key depends on
+  # composer.lock, so a dependency change invalidates the cache.
+  cache:
+    key:
+      files:
+        - composer.lock
+      prefix: sbom
+    paths:
+      - .composer-cache/
+    policy: pull-push
+  variables:
+    COMPOSER_CACHE_DIR: "$CI_PROJECT_DIR/.composer-cache"
   script:
     - echo "Preflight component $[[ component.name ]] $[[ component.version ]] (ref $[[ component.reference ]], sha $[[ component.sha ]])"
     # The SBOM lists what the lock installs, so the app's scripts never need to

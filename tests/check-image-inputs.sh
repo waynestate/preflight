@@ -51,7 +51,9 @@ for tpl in "$ROOT"/templates/*/template.yml; do
   # may be written inline (`image: $[[ inputs.image ]]`) or as a block
   # (`image:` then `name:`, as secret-detection does to also override the
   # entrypoint); either way the reference must be the input. No exemptions:
-  # every job and value that is not the image input fails.
+  # every job and value that is not the image input fails. The image input
+  # may follow the image_prefix input (`$[[ inputs.image_prefix ]]/...`),
+  # which check-dependency-cache requires for Docker Hub images.
   image_report=$(printf '%s\n' "$jobs" | awk '
     /^[A-Za-z0-9_-]+:/ {
       if (pending != "") print "job image block has no name: (" pending ")"
@@ -68,7 +70,7 @@ for tpl in "$ROOT"/templates/*/template.yml; do
       if ($0 ~ /^    name:[ \t]*/) {
         value = $0
         sub(/^    name:[ \t]*/, "", value)
-        if (value == "$[[ inputs.image ]]") { pending = ""; next }
+        if (value == "$[[ inputs.image ]]" || value == "$[[ inputs.image_prefix ]]/$[[ inputs.image ]]") { pending = ""; next }
         print "job image is not the image input (" job "): " value
       } else {
         print "job image block must start with name: (" job "): " $0
@@ -80,7 +82,7 @@ for tpl in "$ROOT"/templates/*/template.yml; do
       count++
       value = $0
       sub(/^  image:[ \t]*/, "", value)
-      if (value == "$[[ inputs.image ]]") next
+      if (value == "$[[ inputs.image ]]" || value == "$[[ inputs.image_prefix ]]/$[[ inputs.image ]]") next
       print "job image is not the image input (" job "): " value
     }
     END {
