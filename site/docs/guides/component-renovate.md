@@ -34,7 +34,7 @@ Add the include to the runner project's `.gitlab-ci.yml`, pinned to a full commi
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@<full commit SHA> # 0.3.0
     inputs:
       git_author: "Preflight Bot <preflight-bot@example.com>"
 ```

@@ -22,7 +22,7 @@ Add the include to the app's `.gitlab-ci.yml`, pinned to a commit SHA with the t
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@<full commit SHA> # 0.3.0
     inputs:
       config: phpstan.neon
       memory_limit: 1G

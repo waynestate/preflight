@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The eslint component | Preflight docs</title>
 <meta name="description" content="Runs the app&#039;s own ESLint and Prettier and fails the pipeline on lint or format errors.">
-<meta name="docs-version" content="0.2.0">
+<meta name="docs-version" content="0.3.0">
 <link rel="stylesheet" href="../../assets/wayne-ui/wayne-ui.css">
 <link rel="stylesheet" href="../../assets/docs.css">
 <link rel="stylesheet" href="../../docs/theme/preflight.css">
@@ -20,7 +20,7 @@
     <a class="brand" href="../../index.html">
       <img src="../../brand/preflight-avatar-256.png" width="36" height="36" alt="">
       <span class="brand__name">PREFLIGHT</span>
-      <span class="brand__tail">0.2.0</span>
+      <span class="brand__tail">0.3.0</span>
     </a>
     <nav class="topnav" aria-label="Site">
       <a class="topnav__section" href="../../index.html#checklist">Checklist</a>
@@ -66,7 +66,7 @@ ship an <code>eslint.config.js</code> (or point <code>eslint_args</code> at its 
 <p>Add the include to the app's <code>.gitlab-ci.yml</code>, pinned to a full commit SHA
 with the tag in a trailing comment:</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@&lt;full commit SHA&gt; # 0.3.0
     inputs:
       eslint_args: .
 </code></pre>
@@ -145,7 +145,7 @@ fails the pipeline.</p></aside>
   <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#what-the-job-does">What the job does</a></li><li class="docs-toc__item"><a href="#include-the-component">Include the component</a></li><li class="docs-toc__item"><a href="#inputs">Inputs</a></li><li class="docs-toc__item"><a href="#verify">Verify</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
-  <span>Documents Preflight <span data-docs-version>0.2.0</span></span>
+  <span>Documents Preflight <span data-docs-version>0.3.0</span></span>
   <span><a rel="noopener" href="https://github.com/waynestate/preflight">Source</a> <a href="component-eslint.md">Markdown</a></span>
 </footer>
 </body>

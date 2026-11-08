@@ -13,7 +13,7 @@ Goal: your app's test suite runs on each supported PHP version. The component ru
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<full commit SHA> # 0.3.0
     inputs:
       test_command: vendor/bin/phpunit
 ```

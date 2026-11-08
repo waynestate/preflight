@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>When the components run | Preflight docs</title>
 <meta name="description" content="The components are ordinary jobs, so they run whenever the app&#039;s pipeline runs.">
-<meta name="docs-version" content="0.2.0">
+<meta name="docs-version" content="0.3.0">
 <link rel="stylesheet" href="../../assets/wayne-ui/wayne-ui.css">
 <link rel="stylesheet" href="../../assets/docs.css">
 <link rel="stylesheet" href="../../docs/theme/preflight.css">
@@ -20,7 +20,7 @@
     <a class="brand" href="../../index.html">
       <img src="../../brand/preflight-avatar-256.png" width="36" height="36" alt="">
       <span class="brand__name">PREFLIGHT</span>
-      <span class="brand__tail">0.2.0</span>
+      <span class="brand__tail">0.3.0</span>
     </a>
     <nav class="topnav" aria-label="Site">
       <a class="topnav__section" href="../../index.html#checklist">Checklist</a>
@@ -54,13 +54,13 @@ branch, put a <code>workflow:rules</code> block in the app's own <code>.gitlab-c
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@&lt;full commit SHA&gt; # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@&lt;full commit SHA&gt; # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@&lt;full commit SHA&gt; # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@&lt;full commit SHA&gt; # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@&lt;full commit SHA&gt; # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@&lt;full commit SHA&gt; # 0.3.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@&lt;full commit SHA&gt; # 0.3.0
 </code></pre>
 <aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>The <code>workflow:rules</code> block must live in the app's own file. A component
 cannot set the pipeline's <code>workflow:rules</code> for the project that includes it,
@@ -79,7 +79,7 @@ so the <code>merge_request_event</code> rule goes in the app's <code>.gitlab-ci.
   <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#the-workflow-rules-block">The workflow:rules block</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
-  <span>Documents Preflight <span data-docs-version>0.2.0</span></span>
+  <span>Documents Preflight <span data-docs-version>0.3.0</span></span>
   <span><a rel="noopener" href="https://github.com/waynestate/preflight">Source</a> <a href="when-components-run.md">Markdown</a></span>
 </footer>
 </body>

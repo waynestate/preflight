@@ -10,18 +10,48 @@ generator: Squire agent-ready
 
 This page is the checklist for moving an app from one Preflight pin to the next, one released version at a time, newest first; every section follows `CHANGELOG.md`. Read the section for the version you are moving to, apply its steps, and verify on the next pipeline. Like a real preflight, the walk takes a few minutes and earns its keep: move the pin only after you have read the version notes.
 
-## Unreleased[#](https://preflight.apps.wayne.edu/docs/upgrading.html#unreleased)
+## 0.3.0[#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-3-0)
+
+Released 2026-11-08. Docker Hub images now come through the group's Dependency Proxy by default (a new `image_prefix` input), and more components cache their Composer and npm downloads.
 
 ### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking)
 
-Every component whose image comes from Docker Hub now pulls `image_prefix/image`, and `image_prefix` defaults to your group's Dependency Proxy (`${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}`). `image` keeps its default and is the path after the prefix. Only an app that overrides `image` needs to act:
+Every component whose image comes from Docker Hub (`proctor`, `php-test`, `composer-audit`, `sbom`, `pint`, `phpstan`, `eslint`, `secret-detection`, `package-publish`, `renovate`, `squire-kit`) now pulls `image_prefix/image`, and `image_prefix` defaults to your group's Dependency Proxy (`${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}`). `image` keeps its default and is the path after the prefix. Only an app that overrides `image`, or runs where the proxy is off, needs to act:
 
-1. If the override was `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/<image>` only to reach the proxy, delete the `image:` input; the default does the same.
+1. If the override was `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/<image>` only to reach the proxy, delete the `image:` input; the default does the same. Keeping it puts the prefix in twice, and the pull fails.
 2. If it names a different Docker Hub image, drop the `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/` part and keep the rest.
 3. If it names another registry, move the host and path into `image_prefix` and keep the rest in `image`.
 4. On a GitLab or group without the proxy, set `image_prefix: docker.io`.
 
-Verify: the job log's `Pulling docker image` line shows the prefix once. See [Dependency caching](https://preflight.apps.wayne.edu/docs/guides/dependency-caching.html).
+`a11y` (mcr.microsoft.com) and `portability` (quay.io) have no `image_prefix` and are unchanged: the proxy serves Docker Hub only.
+
+### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated)
+
+Nothing was deprecated in 0.3.0.
+
+### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps)
+
+1. Move every Preflight include to the `0.3.0` tag in one change, pinned to the tag's full commit SHA with the tag in a trailing comment, and remove any proxied `image:` input in the same change (step 1 above):
+   ```yaml
+   include:
+     - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<full commit SHA> # 0.3.0
+   ```
+   Before:
+   ```yaml
+     - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<old SHA> # 0.2.0
+       inputs:
+         image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/php:8.4-cli-trixie@sha256:<digest>
+   ```
+   After:
+   ```yaml
+     - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<full commit SHA> # 0.3.0
+       inputs:
+         image: php:8.4-cli-trixie@sha256:<digest>
+   ```
+2. On a GitLab or group without the Dependency Proxy, add `image_prefix: docker.io` to each Docker Hub include's `inputs`.
+3. A mirrored package moves the SHA in its GitHub workflow (`.github/workflows/ci.yml`) to the same commit.
+
+Verify: the job log's `Pulling docker image` line shows the prefix once, and each job's first line (`Preflight component <name> ...`) shows the new ref and sha. See [Dependency caching](https://preflight.apps.wayne.edu/docs/guides/dependency-caching.html).
 
 ## 0.2.0[#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-2-0)
 
@@ -49,11 +79,11 @@ Released 2026-11-03. The new pieces are opt-in: the `portability` component, a `
 
 0.1.4 has no breaking changes: the version adds a component, an input and preset rules, and removes nothing.
 
-### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated)
+### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated-1)
 
 Nothing was deprecated in 0.1.4.
 
-### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps)
+### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-1)
 
 Point each component include at the `0.1.4` tag, pinned to the tag's full commit SHA with the tag in a trailing comment:
 
@@ -92,11 +122,11 @@ Released 2026-11-03. Two consumer-facing changes: the `proctor` component instal
 
 0.1.3 has no breaking changes, but the `proctor` job now installs the app's dependencies with `composer install --no-plugins --no-scripts`, so the app's plugins and scripts never run inside the job.
 
-### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated-1)
+### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated-2)
 
 Nothing was deprecated in 0.1.3.
 
-### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-1)
+### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-2)
 
 Bump each component include to the `0.1.3` tag's full commit SHA, with the tag in a trailing comment:
 
@@ -126,11 +156,11 @@ Released 2026-10-29. The site gained the agent-ready kit (prompt blocks, Markdow
 
 0.1.2 has no breaking changes: the version touches the site, the README and the proof page, not the components.
 
-### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated-2)
+### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated-3)
 
 Nothing was deprecated in 0.1.2.
 
-### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-2)
+### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-3)
 
 Bump each component include to the `0.1.2` tag's full commit SHA, with the tag in a trailing comment:
 
@@ -151,11 +181,11 @@ Released 2026-10-29. Two new components: `package-publish`, which publishes a se
 
 0.1.1 has no breaking changes: the version adds components and changes only the repository's own PHPStan config.
 
-### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated-3)
+### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated-4)
 
 Nothing was deprecated in 0.1.1.
 
-### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-3)
+### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-4)
 
 Bump the existing includes to the `0.1.1` tag's full commit SHA, and add the new components where you want them:
 
@@ -199,11 +229,11 @@ Released 2026-10-27. First tagged release.
 
 0.1.0 is the first tagged release, so there is nothing to break: it is the baseline every later pin moves from.
 
-### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated-4)
+### Deprecated[#](https://preflight.apps.wayne.edu/docs/upgrading.html#deprecated-5)
 
 Nothing was deprecated in 0.1.0.
 
-### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-4)
+### Steps[#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-5)
 
 Include the components pinned to the `0.1.0` tag's full commit SHA:
 

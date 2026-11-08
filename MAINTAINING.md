@@ -10,7 +10,7 @@ lands on every runway at once. Walk around the plane before you push.
 - It is **not** a Composer library. `composer.json` is type `project` and exists only for its own tooling (template
   lint, Pint, PHPStan, `symfony/yaml`). It is not on Packagist.
 - `contract/inputs.json` is the contract every component's inputs must match.
-- **Who uses it:** every stack repo's `.gitlab-ci.yml` (components pinned at a tag, `@0.1.1` today) and
+- **Who uses it:** every stack repo's `.gitlab-ci.yml` (components pinned at a release tag or its commit SHA) and
   `.github/workflows/ci.yml` (the reusable workflow pinned by commit SHA).
 
 ## Where it lives

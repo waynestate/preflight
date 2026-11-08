@@ -3,10 +3,10 @@
 # merge requests across the group does not belong in a public mirror. Give
 # the token to a group bot account, never to a person's account.
 #
-# The 0.2.0 tag is not cut yet. Pin the current main SHA below until it is,
-# then swap in the 0.2.0 SHA once it is cut.
+# Pin the full commit SHA of the release tag, with the tag in a trailing
+# comment.
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@4ea4ac53c2e2d7e4fefec6f830c20f594bd04e6a # current main; use the 0.2.0 SHA once it is cut
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@<full commit SHA> # 0.3.0
     inputs:
       git_author: "Preflight Bot <preflight-bot@example.com>"
       dry_run: "null"

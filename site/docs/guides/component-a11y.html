@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The a11y component | Preflight docs</title>
 <meta name="description" content="Opens the app&#039;s pages in a real browser and fails the pipeline on accessibility violations (axe-core in Playwright).">
-<meta name="docs-version" content="0.2.0">
+<meta name="docs-version" content="0.3.0">
 <link rel="stylesheet" href="../../assets/wayne-ui/wayne-ui.css">
 <link rel="stylesheet" href="../../assets/docs.css">
 <link rel="stylesheet" href="../../docs/theme/preflight.css">
@@ -20,7 +20,7 @@
     <a class="brand" href="../../index.html">
       <img src="../../brand/preflight-avatar-256.png" width="36" height="36" alt="">
       <span class="brand__name">PREFLIGHT</span>
-      <span class="brand__tail">0.2.0</span>
+      <span class="brand__tail">0.3.0</span>
     </a>
     <nav class="topnav" aria-label="Site">
       <a class="topnav__section" href="../../index.html#checklist">Checklist</a>
@@ -72,14 +72,14 @@ person. The report counts the items axe-core could not decide (&quot;to review b
 <h2 id="include-the-component">Include the component<a class="docs-heading-link" aria-label="Link to this section" href="#include-the-component">#</a></h2>
 <p>Add the include to the app's <code>.gitlab-ci.yml</code>, pinned to a full commit SHA with the tag in a trailing comment:</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@&lt;full commit SHA&gt; # 0.2.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@&lt;full commit SHA&gt; # 0.3.0
 </code></pre>
 <p>With no inputs, the job serves the <code>site/</code> folder on a local port and checks every <code>.html</code> file in it at WCAG 2.1 AA.</p>
 <aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>The a11y component ships in Preflight 0.2.0; 0.1.4 does not include it. Pin that tag's full commit SHA, or the full
 commit SHA of a commit at or after it.</p></aside>
 <p>To hold the stack's floor, WCAG 2.2 AA, and to name the pages:</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@&lt;full commit SHA&gt; # 0.2.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@&lt;full commit SHA&gt; # 0.3.0
     inputs:
       site_dir: site
       pages: [&quot;index.html&quot;, &quot;docs/**/*.html&quot;]
@@ -208,7 +208,7 @@ text.</p>
 <p>A site that has never been checked usually has a few findings. Land the gate first, fix the findings, then make it
 blocking:</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@&lt;full commit SHA&gt; # 0.2.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@&lt;full commit SHA&gt; # 0.3.0
     inputs:
       allow_failure: true
 </code></pre>
@@ -219,7 +219,7 @@ not become wallpaper.</p>
 <p>For pages a static folder cannot hold (a Laravel or raw-PHP app), point the job at a running copy, such as a review app
 or a pre-production deploy, and list the paths:</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@&lt;full commit SHA&gt; # 0.2.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@&lt;full commit SHA&gt; # 0.3.0
     inputs:
       base_url: $CI_ENVIRONMENT_URL
       pages: [&quot;/&quot;, &quot;about&quot;, &quot;apply&quot;]
@@ -250,7 +250,7 @@ token and no Docker socket.</p></aside>
   <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#what-the-job-checks">What the job checks</a></li><li class="docs-toc__item"><a href="#include-the-component">Include the component</a></li><li class="docs-toc__item"><a href="#inputs">Inputs</a></li><li class="docs-toc__item"><a href="#how-the-job-works">How the job works</a></li><li class="docs-toc__item"><a href="#reports">Reports</a></li><li class="docs-toc__item"><a href="#roll-it-out-on-a-site-with-findings">Roll it out on a site with findings</a></li><li class="docs-toc__item"><a href="#check-a-running-site">Check a running site</a></li><li class="docs-toc__item"><a href="#run-it-on-your-desk">Run it on your desk</a></li><li class="docs-toc__item"><a href="#verify">Verify</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
-  <span>Documents Preflight <span data-docs-version>0.2.0</span></span>
+  <span>Documents Preflight <span data-docs-version>0.3.0</span></span>
   <span><a rel="noopener" href="https://github.com/waynestate/preflight">Source</a> <a href="component-a11y.md">Markdown</a></span>
 </footer>
 </body>

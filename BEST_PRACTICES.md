@@ -101,7 +101,7 @@ Why: the catalog gives typed discovery and lets consumers pin an exact or partia
 Sources: [GitLab: components, publishing](https://docs.gitlab.com/ci/components/).
 
 **How the stack holds it: Documented.** The layout is right (`templates/<name>/template.yml`, a README), and the tag-triggered `release` job now exists in this repository's own pipeline: pushing a protected tag creates the GitLab Release with the commit SHA in its notes, after the test and audit stages. The Catalog entry still depends on the first tag run, because the release job has not run for a tag yet.
-The README examples pin `@0.1.1` for every component and the GitHub workflow.
+The README examples pin the latest release (0.3.0) for every component and the GitHub workflow.
 
 ### 1.4 Keep inputs and job names stable inside a major version
 Do not rename an input, change its type, or rename a job in a minor release.

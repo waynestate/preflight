@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Upgrading | Preflight docs</title>
 <meta name="description" content="How to move an app from one Preflight pin to the next.">
-<meta name="docs-version" content="0.2.0">
+<meta name="docs-version" content="0.3.0">
 <link rel="stylesheet" href="../assets/wayne-ui/wayne-ui.css">
 <link rel="stylesheet" href="../assets/docs.css">
 <link rel="stylesheet" href="../docs/theme/preflight.css">
@@ -20,7 +20,7 @@
     <a class="brand" href="../index.html">
       <img src="../brand/preflight-avatar-256.png" width="36" height="36" alt="">
       <span class="brand__name">PREFLIGHT</span>
-      <span class="brand__tail">0.2.0</span>
+      <span class="brand__tail">0.3.0</span>
     </a>
     <nav class="topnav" aria-label="Site">
       <a class="topnav__section" href="../index.html#checklist">Checklist</a>
@@ -42,16 +42,45 @@
     <main id="main">
       <article class="docs-article"><h1 id="upgrading">Upgrading<a class="docs-heading-link" aria-label="Link to this section" href="#upgrading">#</a></h1>
 <p>This page is the checklist for moving an app from one Preflight pin to the next, one released version at a time, newest first; every section follows <code>CHANGELOG.md</code>. Read the section for the version you are moving to, apply its steps, and verify on the next pipeline. Like a real preflight, the walk takes a few minutes and earns its keep: move the pin only after you have read the version notes.</p>
-<h2 id="unreleased">Unreleased<a class="docs-heading-link" aria-label="Link to this section" href="#unreleased">#</a></h2>
+<h2 id="0-3-0">0.3.0<a class="docs-heading-link" aria-label="Link to this section" href="#0-3-0">#</a></h2>
+<p>Released 2026-11-08. Docker Hub images now come through the group's Dependency Proxy by default (a new <code>image_prefix</code> input), and more components cache their Composer and npm downloads.</p>
 <h3 id="breaking">Breaking<a class="docs-heading-link" aria-label="Link to this section" href="#breaking">#</a></h3>
-<p>Every component whose image comes from Docker Hub now pulls <code>image_prefix/image</code>, and <code>image_prefix</code> defaults to your group's Dependency Proxy (<code>${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}</code>). <code>image</code> keeps its default and is the path after the prefix. Only an app that overrides <code>image</code> needs to act:</p>
+<p>Every component whose image comes from Docker Hub (<code>proctor</code>, <code>php-test</code>, <code>composer-audit</code>, <code>sbom</code>, <code>pint</code>, <code>phpstan</code>, <code>eslint</code>, <code>secret-detection</code>, <code>package-publish</code>, <code>renovate</code>, <code>squire-kit</code>) now pulls <code>image_prefix/image</code>, and <code>image_prefix</code> defaults to your group's Dependency Proxy (<code>${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}</code>). <code>image</code> keeps its default and is the path after the prefix. Only an app that overrides <code>image</code>, or runs where the proxy is off, needs to act:</p>
 <ol>
-<li>If the override was <code>${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/&lt;image&gt;</code> only to reach the proxy, delete the <code>image:</code> input; the default does the same.</li>
+<li>If the override was <code>${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/&lt;image&gt;</code> only to reach the proxy, delete the <code>image:</code> input; the default does the same. Keeping it puts the prefix in twice, and the pull fails.</li>
 <li>If it names a different Docker Hub image, drop the <code>${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/</code> part and keep the rest.</li>
 <li>If it names another registry, move the host and path into <code>image_prefix</code> and keep the rest in <code>image</code>.</li>
 <li>On a GitLab or group without the proxy, set <code>image_prefix: docker.io</code>.</li>
 </ol>
-<p>Verify: the job log's <code>Pulling docker image</code> line shows the prefix once. See <a href="guides/dependency-caching.html">Dependency caching</a>.</p>
+<p><code>a11y</code> (mcr.microsoft.com) and <code>portability</code> (quay.io) have no <code>image_prefix</code> and are unchanged: the proxy serves Docker Hub only.</p>
+<h3 id="deprecated">Deprecated<a class="docs-heading-link" aria-label="Link to this section" href="#deprecated">#</a></h3>
+<p>Nothing was deprecated in 0.3.0.</p>
+<h3 id="steps">Steps<a class="docs-heading-link" aria-label="Link to this section" href="#steps">#</a></h3>
+<ol>
+<li>
+<p>Move every Preflight include to the <code>0.3.0</code> tag in one change, pinned to the tag's full commit SHA with the tag in a trailing comment, and remove any proxied <code>image:</code> input in the same change (step 1 above):</p>
+<pre tabindex="0"><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@&lt;full commit SHA&gt; # 0.3.0
+</code></pre>
+<p>Before:</p>
+<pre tabindex="0"><code class="language-yaml">  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@&lt;old SHA&gt; # 0.2.0
+    inputs:
+      image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/php:8.4-cli-trixie@sha256:&lt;digest&gt;
+</code></pre>
+<p>After:</p>
+<pre tabindex="0"><code class="language-yaml">  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@&lt;full commit SHA&gt; # 0.3.0
+    inputs:
+      image: php:8.4-cli-trixie@sha256:&lt;digest&gt;
+</code></pre>
+</li>
+<li>
+<p>On a GitLab or group without the Dependency Proxy, add <code>image_prefix: docker.io</code> to each Docker Hub include's <code>inputs</code>.</p>
+</li>
+<li>
+<p>A mirrored package moves the SHA in its GitHub workflow (<code>.github/workflows/ci.yml</code>) to the same commit.</p>
+</li>
+</ol>
+<p>Verify: the job log's <code>Pulling docker image</code> line shows the prefix once, and each job's first line (<code>Preflight component &lt;name&gt; ...</code>) shows the new ref and sha. See <a href="guides/dependency-caching.html">Dependency caching</a>.</p>
 <h2 id="0-2-0">0.2.0<a class="docs-heading-link" aria-label="Link to this section" href="#0-2-0">#</a></h2>
 <h3 id="breaking-1">Breaking<a class="docs-heading-link" aria-label="Link to this section" href="#breaking-1">#</a></h3>
 <p>The <code>portability</code> component is now one job, <code>portability</code> (named by a new <code>job_name</code> input), instead of <code>portability-build</code> and <code>portability-run</code>, and it checks what ADR-0010 asks for instead of the goss list. It builds the image with Buildah and runs it in the same job, so nothing is pushed to the container registry and no app image is pulled. Only an app that already includes <code>portability</code> from 0.1.4 needs to act:</p>
@@ -74,9 +103,9 @@ This release needs GitLab 18.7 or later: every component now declares <code>spec
 <p>Released 2026-11-03. The new pieces are opt-in: the <code>portability</code> component, a <code>job_name</code> input on every component except <code>portability</code>, and a stricter Renovate preset.</p>
 <h3 id="breaking-2">Breaking<a class="docs-heading-link" aria-label="Link to this section" href="#breaking-2">#</a></h3>
 <p>0.1.4 has no breaking changes: the version adds a component, an input and preset rules, and removes nothing.</p>
-<h3 id="deprecated">Deprecated<a class="docs-heading-link" aria-label="Link to this section" href="#deprecated">#</a></h3>
+<h3 id="deprecated-1">Deprecated<a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-1">#</a></h3>
 <p>Nothing was deprecated in 0.1.4.</p>
-<h3 id="steps">Steps<a class="docs-heading-link" aria-label="Link to this section" href="#steps">#</a></h3>
+<h3 id="steps-1">Steps<a class="docs-heading-link" aria-label="Link to this section" href="#steps-1">#</a></h3>
 <p>Point each component include at the <code>0.1.4</code> tag, pinned to the tag's full commit SHA with the tag in a trailing comment:</p>
 <pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
@@ -99,9 +128,9 @@ This release needs GitLab 18.7 or later: every component now declares <code>spec
 <p>Released 2026-11-03. Two consumer-facing changes: the <code>proctor</code> component installs the app with <code>--no-plugins --no-scripts</code>, and the shared Renovate preset stopped auto-merging the pins that every pipeline runs.</p>
 <h3 id="breaking-3">Breaking<a class="docs-heading-link" aria-label="Link to this section" href="#breaking-3">#</a></h3>
 <p>0.1.3 has no breaking changes, but the <code>proctor</code> job now installs the app's dependencies with <code>composer install --no-plugins --no-scripts</code>, so the app's plugins and scripts never run inside the job.</p>
-<h3 id="deprecated-1">Deprecated<a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-1">#</a></h3>
+<h3 id="deprecated-2">Deprecated<a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-2">#</a></h3>
 <p>Nothing was deprecated in 0.1.3.</p>
-<h3 id="steps-1">Steps<a class="docs-heading-link" aria-label="Link to this section" href="#steps-1">#</a></h3>
+<h3 id="steps-2">Steps<a class="docs-heading-link" aria-label="Link to this section" href="#steps-2">#</a></h3>
 <p>Bump each component include to the <code>0.1.3</code> tag's full commit SHA, with the tag in a trailing comment:</p>
 <pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@&lt;full commit SHA&gt; # 0.1.3
@@ -118,9 +147,9 @@ This release needs GitLab 18.7 or later: every component now declares <code>spec
 <p>Released 2026-10-29. The site gained the agent-ready kit (prompt blocks, Markdown twins, llms.txt) from Squire, and the proof page moved to a private site that needs a Wayne State sign-in.</p>
 <h3 id="breaking-4">Breaking<a class="docs-heading-link" aria-label="Link to this section" href="#breaking-4">#</a></h3>
 <p>0.1.2 has no breaking changes: the version touches the site, the README and the proof page, not the components.</p>
-<h3 id="deprecated-2">Deprecated<a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-2">#</a></h3>
+<h3 id="deprecated-3">Deprecated<a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-3">#</a></h3>
 <p>Nothing was deprecated in 0.1.2.</p>
-<h3 id="steps-2">Steps<a class="docs-heading-link" aria-label="Link to this section" href="#steps-2">#</a></h3>
+<h3 id="steps-3">Steps<a class="docs-heading-link" aria-label="Link to this section" href="#steps-3">#</a></h3>
 <p>Bump each component include to the <code>0.1.2</code> tag's full commit SHA, with the tag in a trailing comment:</p>
 <pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@&lt;full commit SHA&gt; # 0.1.2
@@ -131,9 +160,9 @@ This release needs GitLab 18.7 or later: every component now declares <code>spec
 <p>Released 2026-10-29. Two new components: <code>package-publish</code>, which publishes a semantic version tag to the GitLab group's built-in Composer registry, and <code>renovate</code>, with the shared preset <code>renovate/default.json</code>. The reusable GitHub Actions workflow for mirrors ships in this tag too.</p>
 <h3 id="breaking-5">Breaking<a class="docs-heading-link" aria-label="Link to this section" href="#breaking-5">#</a></h3>
 <p>0.1.1 has no breaking changes: the version adds components and changes only the repository's own PHPStan config.</p>
-<h3 id="deprecated-3">Deprecated<a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-3">#</a></h3>
+<h3 id="deprecated-4">Deprecated<a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-4">#</a></h3>
 <p>Nothing was deprecated in 0.1.1.</p>
-<h3 id="steps-3">Steps<a class="docs-heading-link" aria-label="Link to this section" href="#steps-3">#</a></h3>
+<h3 id="steps-4">Steps<a class="docs-heading-link" aria-label="Link to this section" href="#steps-4">#</a></h3>
 <p>Bump the existing includes to the <code>0.1.1</code> tag's full commit SHA, and add the new components where you want them:</p>
 <pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@&lt;full commit SHA&gt; # 0.1.1
@@ -160,9 +189,9 @@ jobs:
 <p>Released 2026-10-27. First tagged release.</p>
 <h3 id="breaking-6">Breaking<a class="docs-heading-link" aria-label="Link to this section" href="#breaking-6">#</a></h3>
 <p>0.1.0 is the first tagged release, so there is nothing to break: it is the baseline every later pin moves from.</p>
-<h3 id="deprecated-4">Deprecated<a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-4">#</a></h3>
+<h3 id="deprecated-5">Deprecated<a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-5">#</a></h3>
 <p>Nothing was deprecated in 0.1.0.</p>
-<h3 id="steps-4">Steps<a class="docs-heading-link" aria-label="Link to this section" href="#steps-4">#</a></h3>
+<h3 id="steps-5">Steps<a class="docs-heading-link" aria-label="Link to this section" href="#steps-5">#</a></h3>
 <p>Include the components pinned to the <code>0.1.0</code> tag's full commit SHA:</p>
 <pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@&lt;full commit SHA&gt; # 0.1.0
@@ -182,10 +211,10 @@ jobs:
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../docs/troubleshooting.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">Troubleshooting</span></a><a class="docs-pager__link docs-pager__link--next" href="../docs/changelog.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">Changelog</span></a></nav>
   </div>
-  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#unreleased">Unreleased</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking">Breaking</a></li><li class="docs-toc__item"><a href="#0-2-0">0.2.0</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-1">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed">Changed</a></li><li class="docs-toc__item"><a href="#0-1-4">0.1.4</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-2">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#deprecated">Deprecated</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps">Steps</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#how-to-verify">How to verify</a></li><li class="docs-toc__item"><a href="#0-1-3">0.1.3</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-3">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#deprecated-1">Deprecated</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps-1">Steps</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#how-to-verify-1">How to verify</a></li><li class="docs-toc__item"><a href="#0-1-2">0.1.2</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-4">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#deprecated-2">Deprecated</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps-2">Steps</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#how-to-verify-2">How to verify</a></li><li class="docs-toc__item"><a href="#0-1-1">0.1.1</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-5">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#deprecated-3">Deprecated</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps-3">Steps</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#how-to-verify-3">How to verify</a></li><li class="docs-toc__item"><a href="#0-1-0">0.1.0</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-6">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#deprecated-4">Deprecated</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps-4">Steps</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#how-to-verify-4">How to verify</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#0-3-0">0.3.0</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#deprecated">Deprecated</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps">Steps</a></li><li class="docs-toc__item"><a href="#0-2-0">0.2.0</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-1">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed">Changed</a></li><li class="docs-toc__item"><a href="#0-1-4">0.1.4</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-2">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#deprecated-1">Deprecated</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps-1">Steps</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#how-to-verify">How to verify</a></li><li class="docs-toc__item"><a href="#0-1-3">0.1.3</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-3">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#deprecated-2">Deprecated</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps-2">Steps</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#how-to-verify-1">How to verify</a></li><li class="docs-toc__item"><a href="#0-1-2">0.1.2</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-4">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#deprecated-3">Deprecated</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps-3">Steps</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#how-to-verify-2">How to verify</a></li><li class="docs-toc__item"><a href="#0-1-1">0.1.1</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-5">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#deprecated-4">Deprecated</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps-4">Steps</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#how-to-verify-3">How to verify</a></li><li class="docs-toc__item"><a href="#0-1-0">0.1.0</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-6">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#deprecated-5">Deprecated</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps-5">Steps</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#how-to-verify-4">How to verify</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
-  <span>Documents Preflight <span data-docs-version>0.2.0</span></span>
+  <span>Documents Preflight <span data-docs-version>0.3.0</span></span>
   <span><a rel="noopener" href="https://github.com/waynestate/preflight">Source</a> <a href="upgrading.md">Markdown</a></span>
 </footer>
 </body>

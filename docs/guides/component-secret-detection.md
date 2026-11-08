@@ -46,7 +46,7 @@ comment:
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/secret-detection@<full commit SHA> # 0.2.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/secret-detection@<full commit SHA> # 0.3.0
 ```
 
 ## Inputs

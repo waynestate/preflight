@@ -7,18 +7,54 @@ description: How to move an app from one Preflight pin to the next.
 
 This page is the checklist for moving an app from one Preflight pin to the next, one released version at a time, newest first; every section follows `CHANGELOG.md`. Read the section for the version you are moving to, apply its steps, and verify on the next pipeline. Like a real preflight, the walk takes a few minutes and earns its keep: move the pin only after you have read the version notes.
 
-## Unreleased
+## 0.3.0
+
+Released 2026-11-08. Docker Hub images now come through the group's Dependency Proxy by default (a new `image_prefix` input), and more components cache their Composer and npm downloads.
 
 ### Breaking
 
-Every component whose image comes from Docker Hub now pulls `image_prefix/image`, and `image_prefix` defaults to your group's Dependency Proxy (`${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}`). `image` keeps its default and is the path after the prefix. Only an app that overrides `image` needs to act:
+Every component whose image comes from Docker Hub (`proctor`, `php-test`, `composer-audit`, `sbom`, `pint`, `phpstan`, `eslint`, `secret-detection`, `package-publish`, `renovate`, `squire-kit`) now pulls `image_prefix/image`, and `image_prefix` defaults to your group's Dependency Proxy (`${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}`). `image` keeps its default and is the path after the prefix. Only an app that overrides `image`, or runs where the proxy is off, needs to act:
 
-1. If the override was `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/<image>` only to reach the proxy, delete the `image:` input; the default does the same.
+1. If the override was `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/<image>` only to reach the proxy, delete the `image:` input; the default does the same. Keeping it puts the prefix in twice, and the pull fails.
 2. If it names a different Docker Hub image, drop the `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/` part and keep the rest.
 3. If it names another registry, move the host and path into `image_prefix` and keep the rest in `image`.
 4. On a GitLab or group without the proxy, set `image_prefix: docker.io`.
 
-Verify: the job log's `Pulling docker image` line shows the prefix once. See [Dependency caching](guides/dependency-caching.md).
+`a11y` (mcr.microsoft.com) and `portability` (quay.io) have no `image_prefix` and are unchanged: the proxy serves Docker Hub only.
+
+### Deprecated
+
+Nothing was deprecated in 0.3.0.
+
+### Steps
+
+1. Move every Preflight include to the `0.3.0` tag in one change, pinned to the tag's full commit SHA with the tag in a trailing comment, and remove any proxied `image:` input in the same change (step 1 above):
+
+   ```yaml
+   include:
+     - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<full commit SHA> # 0.3.0
+   ```
+
+   Before:
+
+   ```yaml
+     - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<old SHA> # 0.2.0
+       inputs:
+         image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/php:8.4-cli-trixie@sha256:<digest>
+   ```
+
+   After:
+
+   ```yaml
+     - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<full commit SHA> # 0.3.0
+       inputs:
+         image: php:8.4-cli-trixie@sha256:<digest>
+   ```
+
+2. On a GitLab or group without the Dependency Proxy, add `image_prefix: docker.io` to each Docker Hub include's `inputs`.
+3. A mirrored package moves the SHA in its GitHub workflow (`.github/workflows/ci.yml`) to the same commit.
+
+Verify: the job log's `Pulling docker image` line shows the prefix once, and each job's first line (`Preflight component <name> ...`) shows the new ref and sha. See [Dependency caching](guides/dependency-caching.md).
 
 ## 0.2.0
 

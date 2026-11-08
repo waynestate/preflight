@@ -22,7 +22,7 @@ Add the include to the app's `.gitlab-ci.yml`, pinned to a commit SHA with the t
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@<full commit SHA> # 0.3.0
     inputs:
       config: pint.json
 ```

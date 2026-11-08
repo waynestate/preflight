@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The renovate component | Preflight docs</title>
 <meta name="description" content="Runs Renovate as a scheduled or manual job that bumps versions across the group&#039;s repositories and merges the green ones itself.">
-<meta name="docs-version" content="0.2.0">
+<meta name="docs-version" content="0.3.0">
 <link rel="stylesheet" href="../../assets/wayne-ui/wayne-ui.css">
 <link rel="stylesheet" href="../../assets/docs.css">
 <link rel="stylesheet" href="../../docs/theme/preflight.css">
@@ -20,7 +20,7 @@
     <a class="brand" href="../../index.html">
       <img src="../../brand/preflight-avatar-256.png" width="36" height="36" alt="">
       <span class="brand__name">PREFLIGHT</span>
-      <span class="brand__tail">0.2.0</span>
+      <span class="brand__tail">0.3.0</span>
     </a>
     <nav class="topnav" aria-label="Site">
       <a class="topnav__section" href="../../index.html#checklist">Checklist</a>
@@ -83,7 +83,7 @@ project and the masked values reach the job unchanged.</p></aside>
 <p>Add the include to the runner project's <code>.gitlab-ci.yml</code>, pinned to a full
 commit SHA with the tag in a trailing comment, and set <code>git_author</code>:</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@&lt;full commit SHA&gt; # 0.3.0
     inputs:
       git_author: &quot;Preflight Bot &lt;preflight-bot@example.com&gt;&quot;
 </code></pre>
@@ -162,7 +162,7 @@ To try it without changes, set <code>dry_run</code> to <code>lookup</code> or <c
   <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#what-the-job-does">What the job does</a></li><li class="docs-toc__item"><a href="#include-the-component">Include the component</a></li><li class="docs-toc__item"><a href="#inputs">Inputs</a></li><li class="docs-toc__item"><a href="#verify">Verify</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
-  <span>Documents Preflight <span data-docs-version>0.2.0</span></span>
+  <span>Documents Preflight <span data-docs-version>0.3.0</span></span>
   <span><a rel="noopener" href="https://github.com/waynestate/preflight">Source</a> <a href="component-renovate.md">Markdown</a></span>
 </footer>
 </body>
