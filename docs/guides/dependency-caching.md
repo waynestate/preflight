@@ -78,16 +78,15 @@ project so GitLab can save and restore them:
 
 | Component | Path | Key |
 |---|---|---|
-| `php-test` | `.composer-cache/` | `composer.lock`, prefixed with the PHP version |
-| `proctor`, `pint`, `phpstan`, `sbom` | `.composer-cache/` | `composer.lock` |
-| `squire-kit` | `.composer-cache/` | fixed (`preflight-squire-kit`); the kit's `.squire.json` sits in `working_dir`, which a key file cannot follow |
-| `eslint` | `.npm-cache/` | `package-lock.json` |
-| `a11y` | `.npm-cache/` | fixed (`preflight-a11y`); the checker's versions are pinned inputs |
+| `php-test` | `.composer-cache/` | fixed per PHP version (`preflight-php-${PHP_VERSION}`) |
+| `proctor`, `pint`, `phpstan`, `sbom` | `.composer-cache/` | fixed (`preflight-proctor`, `preflight-pint`, `preflight-phpstan`, `preflight-sbom`) |
+| `squire-kit` | `.composer-cache/` | fixed (`preflight-squire-kit`), unchanged |
+| `eslint` | `.npm-cache/` | fixed (`preflight-eslint`) |
+| `a11y` | `.npm-cache/` | fixed (`preflight-a11y`), unchanged |
 
-`COMPOSER_CACHE_DIR` and `NPM_CONFIG_CACHE` point the tools at those paths. A
-lock file change starts a fresh cache, so a cached run never installs a stale
-package: Composer and npm still resolve from the lock and only skip the
-download.
+`COMPOSER_CACHE_DIR` and `NPM_CONFIG_CACHE` point the tools at those paths. The
+keys are fixed (D-072) and installs still resolve from the lock, so a cached
+run never installs a stale package: Composer and npm only skip the download.
 
 ## Your own jobs
 
@@ -102,9 +101,7 @@ variables:
 composer-ci:
   image: ${IMAGE_PREFIX}/composer:2.10.3
   cache:
-    key:
-      files: [composer.lock]
-      prefix: composer
+    key: composer
     paths: [.cache/composer/]
   script:
     - composer install --no-interaction --no-progress --prefer-dist

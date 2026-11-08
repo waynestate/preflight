@@ -101,9 +101,9 @@ include:
 #### Caching
 
 The jobs always cache Composer downloads in `.composer-cache/` so repeat runs
-do not re-download every package. The cache key depends on `composer.lock`
-and is prefixed with the PHP version, so a dependency change invalidates the
-cache and each PHP version gets its own cache.
+do not re-download every package. The cache key is fixed per PHP version, not
+a `composer.lock` hash (D-072), so a lock change downloads only the packages
+that changed and each PHP version gets its own cache.
 
 #### Try the next PHP release without breaking the pipeline
 
@@ -771,7 +771,7 @@ Pins change only through a reviewed merge request.
 Docker Hub images come through the group's GitLab Dependency Proxy: each Docker Hub component pulls
 `image_prefix/image`, and `image_prefix` defaults to `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}`. On a GitLab or group
 without the proxy, set `image_prefix: docker.io`. Composer and npm downloads are cached per job (`.composer-cache/`,
-`.npm-cache/`), keyed on the lock file where there is one. `tests/check-dependency-cache.sh` (and its `.ps1` twin)
+`.npm-cache/`) under a fixed key, not a lock-file hash. `tests/check-dependency-cache.sh` (and its `.ps1` twin)
 fails a component that skips either. Details, and the upgrade step for apps that passed a proxied `image`:
 [Dependency caching](docs/guides/dependency-caching.md).
 

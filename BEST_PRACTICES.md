@@ -580,19 +580,21 @@ Sources: [OpenSSF Scorecard: Vulnerabilities](https://github.com/ossf/scorecard/
 
 **How the stack holds it: Documented.** The README's "Run it on a schedule" note under `composer-audit` says to create a weekly pipeline schedule on the default branch (project settings, Build, Pipeline schedules), and the component carries no `rules:` block, so it runs in scheduled pipelines. The schedule itself is a project setting that Preflight cannot create or check.
 
-### 4.8 Cache dependencies by lock hash and keep protected and unprotected caches apart
-Key the Composer cache on `composer.lock`. Leave GitLab's separation of protected and unprotected caches on.
+### 4.8 Cache dependencies under a fixed key and keep protected and unprotected caches apart
+Cache Composer and npm downloads under a fixed key per job, not a lock-file hash (D-072). Leave GitLab's separation of protected and unprotected caches on.
 
 Why: pipelines run faster, and an unreviewed branch cannot poison the cache that a protected branch uses.
 
 Sources: [GitLab: caching](https://docs.gitlab.com/ci/caching/).
 
-**How the stack holds it: Checked.** `php-test` and `proctor` cache Composer downloads in `.composer-cache/`, keyed on `composer.lock`, so a dependency change invalidates the cache; `php-test` prefixes the key with the PHP version, so each PHP version gets its own cache. `tests/check-php-test-cache.sh` (and its `.ps1` twin) fail if the key stops depending on `composer.lock` or the prefix stops including the PHP version, and `tests/check-proctor-cache.sh` (and its `.ps1` twin) fail if the proctor key stops depending on `composer.lock` or the prefix stops being `proctor`. `composer-audit` still defines no cache.
+**How the stack holds it: Checked.** `php-test`, `proctor`, `pint`, `phpstan`, `sbom` and `squire-kit` cache Composer downloads in `.composer-cache/`, and `eslint` and `a11y` cache npm downloads in `.npm-cache/`, each under a fixed key: `preflight-php-${PHP_VERSION}` for `php-test`, one key per PHP version, and `preflight-proctor`, `preflight-pint`, `preflight-phpstan`, `preflight-sbom`, `preflight-squire-kit`, `preflight-eslint` and `preflight-a11y` for the rest. `tests/check-php-test-cache` (and its `.ps1` twin) fail if the key turns back into a lock-file hash or drops the PHP version, and `tests/check-proctor-cache` (and its `.ps1` twin) fail if the proctor key turns back into a lock-file hash. `composer-audit` still defines no cache.
 
 Second pass: GitLab appends `-protected` or `-non_protected` to every cache key. Pipelines on protected branches or tags,
 and pipelines started by a Maintainer or Owner, get `-protected`. The separation is on by default and GitLab calls it
-"a security feature", to be switched off only when every Developer is highly trusted. Use `cache:key:files` on
-`composer.lock`. GitLab's page also warns that after a cache clear, unpinned dependencies can pull a newer unreviewed
+"a security feature", to be switched off only when every Developer is highly trusted. GitLab suggests cache:key:files on
+composer.lock; the stack does not follow it (D-072), because this runner has no shared cache and a lock-hash key
+refetches every package on each lock bump. GitLab's page also warns that after a cache clear, unpinned dependencies can
+pull a newer unreviewed
 release. GitLab's page has no PHP or Composer example, so the Composer cache directory setup is not covered by a source.
 
 ### 4.9 Name the version of every tool you download
@@ -1037,7 +1039,7 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
 13. 3.2: Recommend branch and CI-file protection for app repos.
 14. 3.4: Add a `workflow:rules` example to the README.
 15. Done: 2.5: Build job names from an input so one project can include a component twice.
-16. Done: 4.8: `php-test` and `proctor` carry a Composer cache keyed on `composer.lock`, kept in place by `tests/check-php-test-cache` and `tests/check-proctor-cache`.
+16. Done: 4.8: every Composer and npm component caches under a fixed key (D-072), kept in place by `tests/check-php-test-cache` and `tests/check-proctor-cache`.
 17. Done (advisory): 5.1: Added secret detection to Preflight's own pipeline as an advisory job (`allow_failure:
     true`); it turns blocking after a week of green pipelines.
 18. Done: 5.2: Documented the job token allowlist rule in the README: list only the projects a private-package install
