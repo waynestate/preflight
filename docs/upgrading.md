@@ -7,6 +7,45 @@ description: How to move an app from one Preflight pin to the next.
 
 This page is the checklist for moving an app from one Preflight pin to the next, one released version at a time, newest first; every section follows `CHANGELOG.md`. Read the section for the version you are moving to, apply its steps, and verify on the next pipeline. Like a real preflight, the walk takes a few minutes and earns its keep: move the pin only after you have read the version notes.
 
+## 0.4.0
+
+Released 2026-11-08. Two new inputs and a Composer floor. The proctor component's `git_depth` (default `"0"`) clones
+the full history, so PROCTOR's override-approver check can read git blame on every override line instead of reporting
+could-not-run past GitLab's 20-commit default. php-test's `php_advisory_version` runs one more PHP version, such as a
+release candidate, in a separate job that may fail. php-test and proctor refuse a `composer_version` older than 2.9.6,
+the floor with the 2026 security fixes.
+
+### Breaking
+
+An include that sets `composer_version` on php-test or proctor to a version older than 2.9.6 no longer starts: GitLab
+rejects the input before the pipeline runs. The default (2.10.3) is unaffected, and no other input, default or job
+name changed.
+
+### Deprecated
+
+Nothing was deprecated in 0.4.0.
+
+### Steps
+
+1. If an include sets `composer_version` below 2.9.6, remove the input (the default is 2.10.3) or set 2.9.6 or later.
+2. Point each component include at the `0.4.0` tag, pinned to the tag's full commit SHA with the tag in a trailing
+   comment:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@87d9b6fc6b0ed302dd729986525282cd7b567ebd # 0.4.0
+```
+
+3. Optional: on a very large repository, set the proctor component's `git_depth` to a number such as `50`; override
+   lines older than that then report could-not-run. To hear about the next PHP early, set php-test's
+   `php_advisory_version`, for example `8.6.0RC2`.
+
+### How to verify
+
+The pipeline is green, the proctor job log's fetch line no longer says `git depth set to 20` (unless you set
+`git_depth`), and with `php_advisory_version` set a `php-test-advisory` job runs and may fail without failing the
+pipeline.
+
 ## 0.3.1
 
 Released 2026-11-08. Every component that installs packages caches under a fixed key per component (such as `preflight-pint`, or `preflight-php-8.4` for one PHP version of `php-test`) instead of a lock-file hash, and saves its cache even when the job fails (D-072). A lock change, or a retry after a dropped download, fetches only what is missing.

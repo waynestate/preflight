@@ -6,7 +6,11 @@ are Git tags.
 
 ## Unreleased
 
+- Docs: README, the guides, the docs pages and the examples pin the 0.4.0 tag commit, and the upgrading page has a 0.4.0 section.
+
 ## 0.4.0 (2026-11-08)
+
+Tag commit: `87d9b6fc6b0ed302dd729986525282cd7b567ebd` (pin this SHA, with `# 0.4.0` in a trailing comment).
 
 Two new inputs and a Composer floor: the proctor component's `git_depth` clones the full history so PROCTOR's
 override-approver check can read git blame, php-test's `php_advisory_version` runs the next PHP in a job that may fail,

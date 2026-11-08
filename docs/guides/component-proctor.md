@@ -13,7 +13,7 @@ Goal: your app's pipeline runs PROCTOR and publishes the result as a GitLab Code
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@b90323b5823287a7840095d0d5f0682aaeedf327 # 0.3.1
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@87d9b6fc6b0ed302dd729986525282cd7b567ebd # 0.4.0
     inputs:
       proctor_command: vendor/bin/proctor check --format=codequality
 ```
