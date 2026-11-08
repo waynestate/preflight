@@ -29,6 +29,6 @@ include:
 - [Install](https://preflight.apps.wayne.edu/docs/install.html): the requirements, the include snippet, and how to verify the pipeline picked the component up.
 - [Reference](https://preflight.apps.wayne.edu/docs/reference/components.html): every component, with its include example, inputs and defaults.
 
-Preflight 0.3.1; GitLab components are GA on the Free tier since GitLab 17.0; MIT licensed.
+Preflight 0.4.0; GitLab components are GA on the Free tier since GitLab 17.0; MIT licensed.
 
 Agents: fetch [https://preflight.apps.wayne.edu/llms.txt](https://preflight.apps.wayne.edu/llms.txt) for a machine-readable index of this manual.

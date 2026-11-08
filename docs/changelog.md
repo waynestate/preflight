@@ -13,6 +13,15 @@ are Git tags.
 
 ## Unreleased
 
+## 0.4.0 (2026-11-08)
+
+Two new inputs and a Composer floor: the proctor component's `git_depth` clones the full history so PROCTOR's
+override-approver check can read git blame, php-test's `php_advisory_version` runs the next PHP in a job that may fail,
+and php-test and proctor refuse a `composer_version` older than 2.9.6. Preflight's own pipeline now proves ten
+components fail a bad app (eslint, secret-detection and sbom are new), runs the real PROCTOR, and the deploy layer moves
+to Squire's kit 0.7.1 and HELMET ^1.0.
+
+- Docs: BEST_PRACTICES 3.3 is tagged `Partly`, not `Not yet`: PROCTOR's `ci-pipelines` check reads `.gitlab-ci.yml` and `.github/workflows/ci.yml`, and the entry names the four flags still missing.
 - Added: a must-fail fixture for the secret-detection component (`tests/secret-detection-clean`, `tests/check-secret-detection-fails.sh` and its Windows twin, the `must-fail-secret-detection` job): Preflight's pipeline proves Gitleaks fails on a token in the app's code, skips vendor/ and node_modules/, and redacts the value.
 - Added: a must-fail fixture for the sbom component (`tests/sbom-clean`, `tests/sbom-fails`, `tests/check-sbom-fails.sh` and its Windows twin, the `must-fail-sbom` job): Preflight's pipeline proves the job fails when Composer fails and that the SBOM leaves dev packages out.
 - Added: a must-fail fixture for the eslint component (`tests/eslint-fails`, `tests/check-eslint-fails.sh` and its Windows twin, the `must-fail-eslint` job): Preflight's pipeline proves the job fails on an ESLint error and passes a clean app.
