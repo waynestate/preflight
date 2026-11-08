@@ -24,6 +24,11 @@ spec:
       description: PHP versions to test against, one job per entry (for example "8.3"). Each job runs the newest patch release of that version.
       type: array
       default: ["8.3", "8.4", "8.5"]
+    php_advisory_version:
+      description: "One more PHP version (for example a release candidate tag such as 8.6.0RC2) tested in a separate job that may fail. Empty: no advisory job."
+      type: string
+      default: ""
+      regex: '^$|^[0-9]+\.[0-9]+([.][0-9A-Za-z]+)*$'
     composer_version:
       description: Composer version to install.
       type: string
@@ -40,17 +45,7 @@ spec:
       default: "."
       regex: '^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$'
 ---
-"$[[ inputs.job_name ]]":
-  stage: $[[ inputs.stage ]]
-  # An array input that replaces an entire YAML value is interpolated as its
-  # specified type (docs: Input types), so the array feeds parallel:matrix
-  # directly. One job is created per PHP version; PHP_VERSION becomes a
-  # CI/CD variable in each job, which the image input's default expands. The
-  # default image is deliberately tag-pinned (see README, "Updating image
-  # pins").
-  parallel:
-    matrix:
-      - PHP_VERSION: $[[ inputs.php_versions ]]
+".$[[ inputs.job_name ]]-base":
   image: $[[ inputs.image_prefix ]]/$[[ inputs.image ]]
   interruptible: true
   timeout: 30 minutes
@@ -88,3 +83,27 @@ spec:
     - cd "$[[ inputs.working_dir ]]"
     - composer install --no-interaction --no-progress
     - $[[ inputs.test_command ]]
+
+"$[[ inputs.job_name ]]":
+  extends: .$[[ inputs.job_name ]]-base
+  stage: $[[ inputs.stage ]]
+  # An array input that replaces an entire YAML value is interpolated as its
+  # specified type (docs: Input types), so the array feeds parallel:matrix
+  # directly. One job is created per PHP version; PHP_VERSION becomes a
+  # CI/CD variable in each job, which the image input's default expands. The
+  # default image is deliberately tag-pinned (see README, "Updating image
+  # pins").
+  parallel:
+    matrix:
+      - PHP_VERSION: $[[ inputs.php_versions ]]
+
+"$[[ inputs.job_name ]]-advisory":
+  extends: .$[[ inputs.job_name ]]-base
+  stage: $[[ inputs.stage ]]
+  allow_failure: true
+  variables:
+    PHP_VERSION: "$[[ inputs.php_advisory_version ]]"
+  rules:
+    - if: $PHP_VERSION == null || $PHP_VERSION == ""
+      when: never
+    - when: on_success
