@@ -145,7 +145,9 @@ project so GitLab can save and restore them:</p>
 </table></div>
 <p><code>COMPOSER_CACHE_DIR</code> and <code>NPM_CONFIG_CACHE</code> point the tools at those paths. The
 keys are fixed (D-072) and installs still resolve from the lock, so a cached
-run never installs a stale package: Composer and npm only skip the download.</p>
+run never installs a stale package: Composer and npm only skip the download.
+Every component cache also saves with <code>when: always</code>, so a retry after a
+dropped download fetches only what is missing.</p>
 <h2 id="your-own-jobs">Your own jobs<a class="docs-heading-link" aria-label="Link to this section" href="#your-own-jobs">#</a></h2>
 <p>The same pattern fits an app's own jobs, such as <code>composer-ci</code> or a front-end
 build. Sourdough's app templates ship it:</p>
@@ -158,6 +160,7 @@ composer-ci:
   cache:
     key: composer
     paths: [.cache/composer/]
+    when: always
   script:
     - composer install --no-interaction --no-progress --prefer-dist
     - composer ci

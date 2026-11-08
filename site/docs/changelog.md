@@ -12,6 +12,7 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ## Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Changed: every component saves its dependency cache even when the job fails (when: always), so a retry after a dropped download fetches only what is missing (D-072).
 - Fixed: README, BEST_PRACTICES 4.8 and the caching guides describe the fixed cache keys (D-072).
 - Changed: php-test, phpstan, pint, proctor, sbom and eslint cache under a fixed key per job instead of a lock-file hash (D-072), so a lock change downloads only the packages that changed.
 - Fixed: the docs menu closes with Escape and hands focus back to its button (docs kit synced from Squire).

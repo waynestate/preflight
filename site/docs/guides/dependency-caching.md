@@ -61,7 +61,7 @@ Each job that installs packages keeps them in the GitLab cache, inside the proje
 | `eslint` | `.npm-cache/` | fixed (`preflight-eslint`) |
 | `a11y` | `.npm-cache/` | fixed (`preflight-a11y`), unchanged |
 
-`COMPOSER_CACHE_DIR` and `NPM_CONFIG_CACHE` point the tools at those paths. The keys are fixed (D-072) and installs still resolve from the lock, so a cached run never installs a stale package: Composer and npm only skip the download.
+`COMPOSER_CACHE_DIR` and `NPM_CONFIG_CACHE` point the tools at those paths. The keys are fixed (D-072) and installs still resolve from the lock, so a cached run never installs a stale package: Composer and npm only skip the download. Every component cache also saves with `when: always`, so a retry after a dropped download fetches only what is missing.
 
 ## Your own jobs[#](https://preflight.apps.wayne.edu/docs/guides/dependency-caching.html#your-own-jobs)
 
@@ -77,6 +77,7 @@ composer-ci:
   cache:
     key: composer
     paths: [.cache/composer/]
+    when: always
   script:
     - composer install --no-interaction --no-progress --prefer-dist
     - composer ci
