@@ -12,9 +12,10 @@
 # (BEST_PRACTICES 2.11). This script checks both halves with plain string
 # matching: the spec document (everything before the last `---` line) must
 # carry a two-space-indented `component:` key, and the first list item of
-# each job's before_script or script must contain `Preflight component`. It
-# needs no yq and runs in the mikefarah/yq image and on any Linux or macOS
-# box.
+# each job's before_script or script must contain `Preflight component`. A
+# job may get its script from a hidden job through `extends:`, and the
+# check follows that one level. It needs no yq and runs in the
+# mikefarah/yq image and on any Linux or macOS box.
 
 set -u
 
@@ -54,12 +55,21 @@ for tpl in "$ROOT"/templates/*/template.yml; do
   report=$(printf '%s\n' "$jobs" | awk '
     { line = $0 }
     line ~ /^"[^"]*":[ \t]*$/ || line ~ /^[A-Za-z_][A-Za-z0-9_.-]*:[ \t]*$/ {
-      if (job != "" && !haveFirst) print "NOSCRIPT|" job
+      if (job != "") {
+        njobs++
+        ord[njobs] = job
+        has[job] = haveFirst
+        ok[job] = firstOk
+        kind[job] = scriptKind
+        extOf[job] = ext
+      }
       job = line
       sub(/:[ \t]*$/, "", job)
       haveFirst = 0
+      firstOk = 0
       wantFirst = 0
       scriptKind = ""
+      ext = ""
       next
     }
     job == "" { next }
@@ -71,14 +81,53 @@ for tpl in "$ROOT"/templates/*/template.yml; do
       if (scriptKind == "") { scriptKind = "script"; wantFirst = 1 }
       next
     }
+    line ~ /^  extends:[ \t]*/ {
+      v = line
+      sub(/^  extends:[ \t]*/, "", v)
+      sub(/[ \t]+$/, "", v)
+      sub(/^"/, "", v)
+      sub(/"$/, "", v)
+      if (v != "") ext = v
+      next
+    }
     line ~ /^  [A-Za-z_]/ { wantFirst = 0; next }
     wantFirst && line ~ /^    - / {
       haveFirst = 1
       wantFirst = 0
-      if (line !~ /Preflight component/) print "FIRST|" job "|" scriptKind
+      firstOk = (line ~ /Preflight component/) ? 1 : 0
     }
     END {
-      if (job != "" && !haveFirst) print "NOSCRIPT|" job
+      if (job != "") {
+        njobs++
+        ord[njobs] = job
+        has[job] = haveFirst
+        ok[job] = firstOk
+        kind[job] = scriptKind
+        extOf[job] = ext
+      }
+      for (i = 1; i <= njobs; i++) {
+        j = ord[i]
+        if (has[j]) {
+          if (!ok[j]) print "FIRST|" j "|" kind[j]
+          continue
+        }
+        e = extOf[j]
+        target = ""
+        if (e != "") {
+          for (k = 1; k <= njobs; k++) {
+            nm = ord[k]
+            sub(/^"/, "", nm)
+            sub(/"$/, "", nm)
+            if (nm == e) { target = ord[k]; break }
+          }
+        }
+        if (target != "" && has[target]) {
+          if (ok[target]) continue
+          print "FIRST|" j "|" kind[target]
+          continue
+        }
+        print "NOSCRIPT|" j
+      }
     }
   ')
   if [ -n "$report" ]; then
