@@ -10,7 +10,8 @@
         { "name": "composer_version", "type": "string", "default": "2.10.3" },
         { "name": "allow_failure", "type": "boolean", "default": false },
         { "name": "proctor_command", "type": "string", "default": "vendor/bin/proctor check --format=codequality" },
-        { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" }
+        { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" },
+        { "name": "git_depth", "type": "string", "default": "0", "regex": "^[0-9]+$" }
       ],
       "jobs": ["proctor"]
     },
