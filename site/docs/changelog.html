@@ -46,7 +46,11 @@
 <a rel="noopener" href="https://keepachangelog.com/en/1.1.0/">Keep a Changelog</a>; released versions
 are Git tags.</p>
 <h2 id="unreleased">Unreleased<a class="docs-heading-link" aria-label="Link to this section" href="#unreleased">#</a></h2>
+<ul>
+<li>Docs: README, the guides, the docs pages and the examples pin the 0.3.1 tag commit, and the upgrading page has a 0.3.1 section.</li>
+</ul>
 <h2 id="0-3-1-2026-11-08">0.3.1 (2026-11-08)<a class="docs-heading-link" aria-label="Link to this section" href="#0-3-1-2026-11-08">#</a></h2>
+<p>Tag commit: <code>b90323b5823287a7840095d0d5f0682aaeedf327</code> (pin this SHA, with <code># 0.3.1</code> in a trailing comment).</p>
 <p>Fixed CI cache keys (D-072): every component that installs packages caches under a fixed key instead of a lock-file
 hash, and saves its cache even when the job fails, so a lock change or a dropped GitHub download refetches only what
 is missing. Inputs and job names are unchanged, so moving a pin from 0.3.0 is a one-line change.</p>
