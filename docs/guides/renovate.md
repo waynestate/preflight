@@ -103,7 +103,7 @@ Squire's own data owns that image.
 The `quay.io/buildah/stable` image (the `image` default of the
 portability component) is matched to `-immutable` tags only. Red Hat re-pushed
 v1.43.5 under the mutable tag and garbage-collected the old digest, which broke
-an image job, so DRAWBRIDGE and SQUIRE now pin the immutable form,
+an image job, so Drawbridge and Squire now pin the immutable form,
 `v1.43.5-immutable@sha256:...`. The preset carries a packageRule for
 `quay.io/buildah/stable` with a regex versioning that only matches
 `vX.Y.Z-immutable` tags, so Renovate proposes updates within the immutable tags
