@@ -37,7 +37,7 @@ include:
 > [!NOTE]
 > The one-job component on this page ships in 0.2.0. 0.1.4 carries an earlier two-job version (`portability-build` and `portability-run`, checked with goss); see [Upgrading](../upgrading.md). Pin the full commit SHA of the release tag you use.
 
-With no `start_command`, the job runs the image's own `ENTRYPOINT` and `CMD`, exactly as the platforms do. Put secrets such as `APP_KEY` in CI/CD variables and name them in `env`: `$NAME` and `${NAME}` in `env` and `build_args` values are replaced from the job's variables.
+With no `start_command`, the job runs the image's own `ENTRYPOINT` and `CMD`, exactly as the platforms do. An Apache image (Squire's portable image, a Sourdough or WELD app) needs no `start_command` shim for Buildah: the job gives each replica stdio its uid owns and a process group of its own, as a container runtime does (see [What the job emulates](#what-the-job-emulates)). Put secrets such as `APP_KEY` in CI/CD variables and name them in `env`: `$NAME` and `${NAME}` in `env` and `build_args` values are replaced from the job's variables.
 
 > [!WARNING]
 > The runner must allow user namespaces, which Buildah's chroot isolation uses. Ordinary unprivileged Docker-executor runners do; no privileged mode, Docker-in-Docker or registry is needed.
@@ -67,7 +67,7 @@ The component is one job, named by `job_name` (default `portability`). It runs i
 
 1. Builds the image with `buildah bud`, from `dockerfile` in `context`, with `build_args`. Nothing is pushed: the image stays in the job's own storage.
 2. Reads the image's `ENTRYPOINT` and `CMD`, makes two copies of its filesystem (replicas A and B) and runs the static parts of `strict-boot` and `env-only` on them.
-3. Starts both replicas with `buildah run --user <uid>:0 --cap-drop=ALL` and the `env` input; B gets `port + 1` through `port_env`.
+3. Starts both replicas with `buildah run --user <uid>:0 --cap-drop=ALL` and the `env` input, each through a small launcher that gives it its own stdio and session; B gets `port + 1` through `port_env`.
 4. Waits up to `boot_timeout` seconds for each replica's health path, then runs `health`, `env-only`, `forwarded-headers`, `session-hop`, `logs` and `sigterm` with curl.
 5. Stops both replicas and compares what changed on disk against `writable_paths` and `runtime_paths`.
 
@@ -85,6 +85,10 @@ The checks run in an unprivileged job, so a few things are emulated rather than 
 - **PID 1.** `buildah run` starts no PID namespace, so the main process is not PID 1. The job checks that it handles SIGTERM, and fails it when it dies of the signal's default action, which PID 1 would ignore.
 - **No new privileges.** Every capability is dropped, but `buildah run` has no `no-new-privileges` flag. The uid has no passwd entry, so set-uid tools have little to grab.
 - **Networking.** Both replicas share the job's network namespace; the second one listens on `port + 1`.
+- **Stdio and process group.** On its own, `buildah run` differs from every container runtime twice. It hands the app stdout and stderr pipes owned by root, so an app running as the uid cannot reopen them (Apache fails with `could not open error log file /proc/self/fd/2`). And it starts no session, so the app shares a process group with `buildah-chroot-exec`, which runs as the same uid and SIGKILLs the app when the app signals its own group on SIGTERM (Apache's graceful stop does). runc and CRI-O do neither. So the job starts each replica through a launcher: it pipes stdout and stderr through `cat`, on a pipe the uid owns, then execs the app through `setsid`, keeping its pid, so the `sigterm` check still signals the app itself. The launcher uses the Buildah image's own `bash`, `setsid` and `cat` (its `/usr`, bind-mounted read-only at `/.preflight/usr` for the run only), so the app image needs none of them and nothing is written into it.
+
+> [!NOTE]
+> Before 0.5.0 an Apache image needed a `start_command` shim such as `exec setsid bash -c 'exec > >(exec cat) 2>&1; exec <entrypoint>'`. Remove it when you upgrade: the job now does both itself, and a `setsid` inside the launcher's session forks the app away from the replica's main process, so `health` fails.
 
 ## Inputs
 
@@ -118,7 +122,7 @@ The `image` default is an immutable tag (`-immutable`) pinned by digest, because
 
 ## Verify locally
 
-`tests/check-portability.sh` (and its `.ps1` twin) run the same probe in the same Buildah image against `tests/portability/app`: once clean, where every check must pass, and once per flaw (needs root, writes outside its paths, fixed port, host-bound health, a baked `.env`, trusts any proxy, file logs, file sessions, no SIGTERM handler), where the targeted check must fail. Preflight's own pipeline runs the component on the clean fixture and this check as `must-fail-portability`. See [Local checks](../reference/local-checks.md) for the commands.
+`tests/check-portability.sh` (and its `.ps1` twin) run the same probe in the same Buildah image against `tests/portability/app`: once clean, where every check must pass, and once per flaw (needs root, writes outside its paths, fixed port, host-bound health, a baked `.env`, trusts any proxy, file logs, file sessions, no SIGTERM handler), where the targeted check must fail. Two more builds must pass every check: one reopens `/proc/self/fd/2` and one signals its whole process group on SIGTERM, as Apache does; they fail without the launcher. Preflight's own pipeline runs the component on the clean fixture and this check as `must-fail-portability`. See [Local checks](../reference/local-checks.md) for the commands.
 
 ## Related
 

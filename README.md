@@ -907,7 +907,8 @@ docker run --rm -v "$(pwd)/tests/fixture-app:/app" -w /app php:8.4-cli vendor/bi
 Run the portability fixtures with Docker. The check runs the component's own
 probe in its own Buildah image against `tests/portability/app`, once clean
 and once per flaw, and exits 0 only when the clean build passes and each flaw
-fails the check it targets. `seccomp=unconfined` lets Buildah open a user
+fails the check it targets (two regression builds, an Apache-style stderr
+reopen and group signal, must pass too). `seccomp=unconfined` lets Buildah open a user
 namespace; it is not `--privileged`:
 
 ```sh

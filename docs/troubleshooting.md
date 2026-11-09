@@ -188,6 +188,14 @@ The main process must handle SIGTERM and exit by itself within `stop_timeout`, b
 - **Fix:** start the app under an init that forwards signals (`tini`, `dumb-init`) or a server that handles SIGTERM itself (php-fpm, FrankenPHP); in a shell entrypoint, trap TERM and stop the child.
 - **Check:** `portability: sigterm: pass` with `handled SIGTERM and exited by itself`.
 
+### portability: an Apache image fails after the upgrade to 0.5.0
+
+Since 0.5.0 the job gives each replica stdio its uid owns and a session of its own, so the `start_command` shim older releases needed is in the way.
+
+- **Cause:** `start_command` still runs `setsid` (for example `exec setsid bash -c 'exec > >(exec cat) 2>&1; exec squire-entrypoint'`). Inside the job's launcher the shell already leads its own session, so `setsid` forks the app away from the replica's main process, and the replica never answers: `health` fails with `last answer: 000`.
+- **Fix:** delete the `start_command` input, so the job runs the image's own `ENTRYPOINT` and `CMD`.
+- **Check:** `portability: health: pass` and `portability: sigterm: pass`.
+
 ### portability: session-hop: FAIL with "set session_login_path"
 
 `session-hop` needs a route that signs in a test user and one that answers 200 only for a signed-in user.
