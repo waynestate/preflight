@@ -392,10 +392,12 @@ Sources: [OWASP CICD-SEC-1 Insufficient Flow Control Mechanisms](https://owasp.o
 [OpenSSF Scorecard: SAST](https://github.com/ossf/scorecard/blob/main/docs/checks.md) (a check for whether analysis
 runs at all).
 
-**How the stack holds it: Partly.** PROCTOR's `ci-pipelines` check reads `.gitlab-ci.yml` and
+**How the stack holds it: Checked.** PROCTOR's `ci-pipelines` check reads `.gitlab-ci.yml` and
 `.github/workflows/ci.yml`: it fails a stack package whose pipeline is missing or runs no `composer ci`, and warns when
-the pipeline switches Composer's audit off or runs `composer update`. Nothing yet flags a missing Preflight include, an
-unpinned include, `allow_failure: true` on a gate or a missing `proctor` job. Rollcall's "apps with CI" number is a
+the pipeline switches Composer's audit off or runs `composer update`. PROCTOR's `preflight-pinned` check warns on an
+include not pinned to a version or SHA, and its `preflight-gates` check (2026-11-09) warns on no Preflight include
+(`proctor/preflight-gates/no-include`), `allow_failure` on a gate (`proctor/preflight-gates/allow-failure`) and no
+proctor job (`proctor/preflight-gates/no-proctor-job`). Both warn and never fail. Rollcall's "apps with CI" number is a
 plan.
 
 ### 3.4 Control when pipelines run, once, in the app
@@ -1042,7 +1044,8 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
 1. 6.1: Make the `proctor` default command work (bundled policy), then add it to PROCTOR's and CREED's pipelines.
 2. 7.2: Add a failing fixture for `package-publish`'s moved-version path (it needs a live registry). The other
    components have theirs, and Preflight's pipeline runs the real PROCTOR.
-3. 3.3: Add a check or Rollcall report for apps that skip, unpin or weaken Preflight.
+3. Done: 3.3: PROCTOR's `preflight-pinned` and `preflight-gates` checks flag apps that skip, unpin or weaken
+   Preflight. A Rollcall fleet report of the same is still a plan.
 4. Done: 4.1: Image digests stay pinned, and the pins that matter most move through review: the shared preset
    `renovate/default.json` turns off automerge (and platform automerge) for updates inside the templates, the
    contract and this repository's own pipeline, and for component include version bumps, labelling them
