@@ -68,7 +68,7 @@ include:
 |-------|------|---------|--------------|
 | `stage` | string | `deploy` | Pipeline stage for the job. |
 | `job_name` | string | `package-publish` | Name of the job. Set it when you include this component more than once. |
-| `image` | string | `composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48` | Docker image for the job. The default ships curl and PHP, which the job uses for the registry round trip. |
+| `image` | string | `composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0` | Docker image for the job. The default ships curl and PHP, which the job uses for the registry round trip. |
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `group_id` | string | none | Numeric id of the GitLab group whose built-in Composer registry hosts the package. Required. |
 | `read_token_variable` | string | `PACKAGE_READ_TOKEN` | Name of the masked CI variable holding a token with the `read_package_registry` scope, used to read the registry before publishing. |

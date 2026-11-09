@@ -127,11 +127,11 @@ pwsh -File tests/check-a11y.ps1
 
 ```sh tab="linux"
 docker run --rm -v "$(pwd):/app" -w /app php:8.3-cli-trixie sh tests/check-php-test-fails.sh
-docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48 sh tests/check-phpstan-fails.sh
-docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48 sh tests/check-pint-fails.sh
+docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 sh tests/check-phpstan-fails.sh
+docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 sh tests/check-pint-fails.sh
 docker run --rm -v "$(pwd):/app" -w /app node:22.13-alpine@sha256:e2b39f7b64281324929257d0f8004fb6cb4bf0fdfb9aa8cedb235a766aec31da sh tests/check-eslint-fails.sh
 docker run --rm --entrypoint sh -v "$(pwd):/app" -w /app zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f tests/check-secret-detection-fails.sh
-docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -e COMPOSER_CACHE_DIR=/tmp/cache -w /app composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48 sh tests/check-sbom-fails.sh
+docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -e COMPOSER_CACHE_DIR=/tmp/cache -w /app composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 sh tests/check-sbom-fails.sh
 ```
 
 ```powershell tab="windows"
@@ -146,7 +146,7 @@ pwsh -File tests/check-sbom-fails.ps1
 `tests/check-composer-audit-fails.sh` (and its `.ps1` twin) does the same for `composer-audit`. It asserts the job has no `allow_failure`, no `--ignore-unreachable` and no swallowed exit code, renders the template's own script lines with each case's inputs, and runs them on copies of `tests/fixture-app` (must pass) and the locks in `tests/audit-fixtures`: `advisory` (laravel/framework v9.0.0, must fail naming CVE-2024-52301) and `malware` (aikido/endpoint-test 0.0.1, Aikido's harmless test package, must fail naming it on the malware list) in every `abandoned` mode, and `abandoned`, which must fail only in `fail` mode. composer audit asks Packagist for advisories and filter lists, so it needs the network; offline, the clean case fails, so it never passes by accident. The `must-fail-composer-audit` job runs it in CI. `tests/check-abandoned-input.sh` keeps the offline half (the input's default, regex and flag in the template and the contract) and runs in the contract job.
 
 ```sh tab="linux"
-docker run --rm -v "$(pwd):/app:ro" -w /app composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48 sh tests/check-composer-audit-fails.sh
+docker run --rm -v "$(pwd):/app:ro" -w /app composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 sh tests/check-composer-audit-fails.sh
 ```
 
 ```powershell tab="windows"

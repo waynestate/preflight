@@ -527,6 +527,10 @@ metadata served by a malicious repository. Fixed versions are 2.9.6 and 2.2.27. 
 (2026-06-04), 2.10.2 (2026-07-01) and 2.10.3 (2026-08-27), including a Perforce URL injection (CVE-2026-84361) and a
 bin path symlink traversal (CVE-2026-59944). The mitigation advice in the news report is to run Composer only on projects
 from trusted sources.
+Composer 2.11.0 (2026-10-29) fixed two more: package names in `installed.json` that could escape the vendor directory
+(GHSA-c968-33g3-wh7p) and inline repository HTTP headers, such as API tokens, written into `composer.lock`
+(GHSA-fm2w-xgf2-f9fh). 2.11.1 (2026-10-30) fixed regressions only. Composer's maintenance table no longer lists 2.10.x,
+so the stack pins 2.11.1.
 Composer 2.10.0 also began enforcing `allow-plugins` for old lock files. The 2.10.3 and 2.11.0-RC1 details come from the
 Composer GitHub releases page, which was read in this pass. The CVE records on NVD were not read.
 
@@ -553,9 +557,9 @@ Sources: [Composer CLI: audit](https://getcomposer.org/doc/03-cli.md);
 
 **How the stack holds it: Checked.** The `composer-audit` job fails on Composer's exit code. Composer also fails on
 malware and, by its configured default, on abandoned packages, and PROCTOR's own audit check reads only advisories.
-The two can disagree. The job's image is digest-pinned (`composer:2@sha256:...`, see the README's "Updating image
+The two can disagree. The job's image is digest-pinned (`composer:2.11.1@sha256:...`, see the README's "Updating image
 pins"), so the rules depend on the pinned digest, not on where the `composer:2` tag points. Tested on that digest
-(Composer 2.10.3): `tests/check-composer-audit-fails` (run in CI by `must-fail-composer-audit`) runs the template's
+(Composer 2.11.1, and before it 2.10.3): `tests/check-composer-audit-fails` (run in CI by `must-fail-composer-audit`) runs the template's
 own lines and proves an advisory and a malware-flagged version exit 1 in every `abandoned` mode, an abandoned package
 exits 1 only in `fail` mode, and the clean fixture app exits 0.
 
@@ -571,7 +575,7 @@ Second pass, corrections and detail from Composer's current docs:
   version already in a lock file fails the install. Packagist takes the data from Aikido (since March 2026).
 - Resolved by test: Composer's config page lists `policy.abandoned.audit` with default `fail` (and the older
   `audit.abandoned` defaulting to `fail` since Composer 2.7), while the Packagist 2.10 post says audit "only reports"
-  abandoned packages. The config page is right: on Composer 2.10.3, `composer audit --locked` exits 1 on
+  abandoned packages. The config page is right: on Composer 2.10.3 and 2.11.1, `composer audit --locked` exits 1 on
   `tests/audit-fixtures/abandoned` with no flag or `--abandoned=fail`, and 0 with `report` or `ignore` (see 7.2).
 - Malware, by test: `composer audit --locked` also reads Packagist's `malware` filter list (Composer's
   `policy.malware.audit`, default `fail`), and the `--abandoned` flag does not relax it: the malware fixture exits 1 in
@@ -620,12 +624,12 @@ Sources: [GitLab: pipeline security, shell tools](https://docs.gitlab.com/ci/pip
 [Composer: download, versioned releases with checksums](https://getcomposer.org/download/).
 
 **How the stack holds it: Enforced.** `proctor` and `php-test` install the Composer release named by the
-`composer_version` input (default `2.10.3`, which must match `^2\.\d+\.\d+$`), after checking the installer's SHA-384.
-`composer-audit` uses a digest-pinned `composer:2` image.
+`composer_version` input (default `2.11.1`, which must match `^2\.\d+\.\d+$`), after checking the installer's SHA-384.
+`composer-audit` uses a digest-pinned `composer:2.11.1` image.
 
 Second pass: this practice pulls two ways, and the guide should say so. A pinned Composer is repeatable, but Composer
-shipped security releases on 2026-04 (2.9.6), 2026-06-04 (2.10.1), 2026-07-01 (2.10.2) and 2026-08-27 (2.10.3), and
-2.11.0-RC1 (2026-10-22) lists more. Composer 2.2 is a long-term release that gets critical security fixes only, with a
+shipped security releases on 2026-04 (2.9.6), 2026-06-04 (2.10.1), 2026-07-01 (2.10.2), 2026-08-27 (2.10.3) and
+2026-10-29 (2.11.0), and 2.10.x is no longer maintained. Composer 2.2 is a long-term release that gets critical security fixes only, with a
 stated minimum maintenance date of 2026-12-31. So pin a version, and move the pin through a reviewed change (see 1.7). Do
 not pin and forget. Composer's download page publishes a SHA-256 file and a PGP signature for each versioned `composer.phar`.
 The page's own installer example now shows a fixed SHA-384 value and points to `composer.github.io/pubkeys.html` for
@@ -661,15 +665,17 @@ Why: 2026 had real Composer supply chain incidents. The Packagist team names the
 tokens used to move or add tags. Packagist now imports Aikido malware results (since March 2026) and is making stable
 versions immutable. The same post says `composer install` from an existing lock reproduces the locked commit hashes,
 while `update` and `require` can rewrite lock entries. It also says a minimum release age (cooldown) policy is designed
-but not available yet. Composer 2.10 deprecates falling back from a failed dist download to a source download, because
-that could install a version a repository had blocked, and 2.11.0-RC1 removes the `source-fallback` option. The runner
-images need `git` today (see the apt line in the templates), so check whether any app depends on the fallback.
+but not available yet; Composer 2.11.0 shipped it as `policy.cooldown`. 2.11 is now Preflight's default image, and the
+setting stays off: no component sets it, and whether apps should is CREED's call. Composer 2.10 deprecates falling back
+from a failed dist download to a source download, because that could install a version a repository had blocked, and
+2.11.0 removed the `source-fallback` option. No Preflight component sets it. The runner images need `git` today (see
+the apt line in the templates), so check whether any app depends on the fallback.
 
 Sources: [Packagist: supply chain security update](https://blog.packagist.com/an-update-on-composer-packagist-supply-chain-security);
 [Packagist: Composer 2.10 release](https://blog.packagist.com/composer-2-10-release/).
 
 **How the stack holds it: Checked.** `php-test` and `proctor` install the Composer release named by the `composer_version`
-input (default `2.10.3`), and `composer-audit` runs on a digest-pinned `composer:2` image, so the 2.10 behavior is chosen,
+input (default `2.11.1`), and `composer-audit` runs on a digest-pinned `composer:2.11.1` image, so the 2.11 behavior is chosen,
 not picked up by accident. The `contract` job keeps the defaults matched to `contract/inputs.json`, and
 `must-fail-composer-audit` proves the audit still fails a lock holding a malware-flagged version
 (`tests/audit-fixtures/malware`); reviewing lock changes after an `update` or `require` stays a human step.
@@ -1096,7 +1102,7 @@ Added in the second pass (2026-10-27):
     request. A critical CI-related GitLab patch shipped on 2026-10-12.
 26. 6.2 (updated): Derive the PHP matrix from the policy, and add 8.6 to the policy path when it is released. The
     default list has already dropped 8.2.
-27. 4.9 and 4.6 (updated): Pin Composer to a named release with a reviewed bump path, and require 2.9.6 or later (2.10.3 is
+27. 4.9 and 4.6 (updated): Pin Composer to a named release with a reviewed bump path, and require 2.9.6 or later (2.11.1 is
     current), because of the April to August 2026 Composer security fixes.
 28. Done: 4.6 and 7.2 (updated): fixtures for an advisory, an abandoned package and a malware-flagged version run in
     `must-fail-composer-audit` (`tests/check-composer-audit-fails`), and 4.6 records the real exit codes; the conflict

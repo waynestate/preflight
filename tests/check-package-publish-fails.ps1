@@ -2,7 +2,7 @@
 # offline guards still stop a bad release?
 #
 # Windows twin of check-package-publish-fails.sh. The .sh is the payload of
-# a container: it runs inside the template's image (composer:2.10.3, pinned
+# a container: it runs inside the template's image (composer:2.11.1, pinned
 # by digest in templates/package-publish/template.yml) and performs the
 # template's own first two script blocks (the tag guard and the
 # composer.json guard) on copies of the fixtures in a temp dir. This wrapper
@@ -10,7 +10,7 @@
 # Docker:
 #
 #   docker run --rm -v "<repo>:/app" -w /app \
-#     composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48 \
+#     composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 \
 #     sh tests/check-package-publish-fails.sh
 #
 # One result line per case goes to stdout; a fixture's output is printed
@@ -21,7 +21,7 @@ $ErrorActionPreference = "Stop"
 
 $Root = Split-Path -Parent $PSScriptRoot
 
-$Image = "composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48"
+$Image = "composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0"
 $Template = Join-Path $Root "templates/package-publish/template.yml"
 
 $status = 0

@@ -89,7 +89,7 @@ include:
 | `job_name` | string | `proctor` | Name of the job. Set it when you include this component more than once. |
 | `image` | string | `php:8.4-cli-trixie@sha256:9cf851bc2c1b37c3e59dfd677a3c3e56d485af5a47c93f629424bb039eafcb69` | Docker image for the job. |
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
-| `composer_version` | string | `2.10.3` | Composer version to install. |
+| `composer_version` | string | `2.11.1` | Composer version to install. |
 | `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline. |
 | `proctor_command` | string | `vendor/bin/proctor check --format=codequality` | The proctor command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
@@ -113,7 +113,7 @@ include:
 | `image` | string | `php:${PHP_VERSION}-cli-trixie` | Docker image for the jobs. The default carries the literal `${PHP_VERSION}`, which GitLab expands in the image at job time. |
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `php_versions` | array | `["8.3", "8.4", "8.5"]` | PHP versions to test against. |
-| `composer_version` | string | `2.10.3` | Composer version to install. |
+| `composer_version` | string | `2.11.1` | Composer version to install. |
 | `test_command` | string | `vendor/bin/phpunit` | The test command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
 
@@ -160,7 +160,7 @@ include:
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the job. |
 | `job_name` | string | `composer-audit` | Name of the job. Set it when you include this component more than once. |
-| `image` | string | `composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48` | Docker image for the job. |
+| `image` | string | `composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0` | Docker image for the job. |
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `working_dir` | string | `.` | Directory to run composer audit in, relative to the project root. |
 | `abandoned` | string | `fail` | How composer audit treats abandoned packages: fail (default), report (list them, do not fail) or ignore. |
@@ -195,7 +195,7 @@ include:
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the job. |
 | `job_name` | string | `sbom` | Name of the job. Set it when you include this component more than once. |
-| `image` | string | `composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48` | Docker image for the job. |
+| `image` | string | `composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0` | Docker image for the job. |
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `omit_dev` | boolean | `true` | Whether to omit dev dependencies from the SBOM. |
 | `output` | string | `sbom.cdx.json` | Path of the SBOM file to publish, relative to the project root. It must be a relative path; GitLab refuses the pipeline at creation if it is not. |
@@ -217,7 +217,7 @@ include:
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the job. |
 | `job_name` | string | `pint` | Name of the job. Set it when you include this component more than once. |
-| `image` | string | `composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48` | Docker image for the job. |
+| `image` | string | `composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0` | Docker image for the job. |
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `config` | string | `pint.json` | Path to the app's Pint config file. It must be a relative path; GitLab refuses the pipeline at creation if it is not. |
 | `working_dir` | string | `.` | Directory to run Pint in, relative to the project root. |
@@ -240,7 +240,7 @@ include:
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the job. |
 | `job_name` | string | `phpstan` | Name of the job. Set it when you include this component more than once. |
-| `image` | string | `composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48` | Docker image for the job. |
+| `image` | string | `composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0` | Docker image for the job. |
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `config` | string | `phpstan.neon` | Path to the app's PHPStan config file. It must be a relative path; GitLab refuses the pipeline at creation if it is not. |
 | `memory_limit` | string | `1G` | Memory limit passed to PHPStan. A PHP size such as `1G`, `512M` or `-1`; GitLab refuses the pipeline at creation if it is not. |
@@ -311,7 +311,7 @@ include:
 |-------|------|---------|--------------|
 | `stage` | string | `deploy` | Pipeline stage for the job. |
 | `job_name` | string | `package-publish` | Name of the job. Set it when you include this component more than once. |
-| `image` | string | `composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48` | Docker image for the job. The default ships curl and PHP, which the job uses for the registry round trip. |
+| `image` | string | `composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0` | Docker image for the job. The default ships curl and PHP, which the job uses for the registry round trip. |
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `group_id` | string | none | Numeric id of the GitLab group whose built-in Composer registry hosts the package. Required. |
 | `read_token_variable` | string | `PACKAGE_READ_TOKEN` | Name of the masked CI variable holding a token with the `read_package_registry` scope, used to read the registry before publishing. |
@@ -476,7 +476,7 @@ a repository cleans up its first findings, set `allow_failure: true`.
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the job. |
 | `job_name` | string | `squire-kit` | Name of the job. Set it when you include this component more than once. |
-| `image` | string | `composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48` | Docker image for the job. It needs PHP 8.3 or later and Composer. |
+| `image` | string | `composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0` | Docker image for the job. It needs PHP 8.3 or later and Composer. |
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `working_dir` | string | `.` | The kit folder: the one holding `.squire.json`, relative to the project root. |
 | `squire_version` | string | `""` | Squire release to check against, `x.y.z`. Empty reads the version recorded in `.squire.json`. |
@@ -883,8 +883,8 @@ Run the must-fail fixtures with Docker; each proves its component (`php-test`, `
 
 ```sh
 docker run --rm -v "$(pwd):/app" -w /app php:8.3-cli-trixie sh tests/check-php-test-fails.sh
-docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48 sh tests/check-phpstan-fails.sh
-docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48 sh tests/check-pint-fails.sh
+docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 sh tests/check-phpstan-fails.sh
+docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 sh tests/check-pint-fails.sh
 ```
 
 ```powershell
@@ -898,7 +898,7 @@ known advisory, one with a malware-flagged version and one with an abandoned pac
 `abandoned` is `fail`). It asks Packagist, so it needs the network. The `must-fail-composer-audit` job runs it in CI.
 
 ```sh
-docker run --rm -v "$(pwd):/app:ro" -w /app composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48 sh tests/check-composer-audit-fails.sh
+docker run --rm -v "$(pwd):/app:ro" -w /app composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 sh tests/check-composer-audit-fails.sh
 ```
 
 ```powershell

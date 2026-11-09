@@ -67,7 +67,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           coverage: none
-          tools: composer:2.10.3
+          tools: composer:2.11.1
 
       - name: Cache Composer dependencies
         # The download cache is keyed per PHP version so the parallel matrix
@@ -100,7 +100,7 @@ jobs:
         with:
           php-version: ${{ fromJSON(inputs.php-versions)[0] }}
           coverage: none
-          tools: composer:2.10.3
+          tools: composer:2.11.1
 
       - name: Audit the lock file
         # --locked audits the exact versions in composer.lock; without a lock

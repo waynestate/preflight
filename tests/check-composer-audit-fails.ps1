@@ -3,7 +3,7 @@
 # abandoned package, and pass a clean one?
 #
 # Windows twin of check-composer-audit-fails.sh. The .sh is the payload of
-# a container: it runs inside the template's image (composer:2.10.3, pinned
+# a container: it runs inside the template's image (composer:2.11.1, pinned
 # by digest in templates/composer-audit/template.yml), renders the
 # template's own script lines per case and runs them on copies of
 # tests/fixture-app (clean) and tests/audit-fixtures/advisory, malware and
@@ -11,7 +11,7 @@
 # then runs the .sh in that image with Docker, on a read-only mount:
 #
 #   docker run --rm -v "<repo>:/app:ro" -w /app \
-#     composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48 \
+#     composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 \
 #     sh tests/check-composer-audit-fails.sh
 #
 # composer audit asks Packagist for advisories and filter lists, so this
@@ -24,7 +24,7 @@ $ErrorActionPreference = "Stop"
 
 $Root = Split-Path -Parent $PSScriptRoot
 
-$Image = "composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48"
+$Image = "composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0"
 $Template = Join-Path $Root "templates/composer-audit/template.yml"
 
 $status = 0

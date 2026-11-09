@@ -12,7 +12,7 @@
 #   tests/phpstan-fails   non-zero exit, the report names the type error
 #                         (the must-fail case)
 #
-# It runs inside the template's image (composer:2.10.3, pinned by digest in
+# It runs inside the template's image (composer:2.11.1, pinned by digest in
 # templates/phpstan/template.yml), where it performs the template's own
 # commands from templates/phpstan/template.yml for each fixture, in a copy
 # in a temp dir: composer install --no-interaction --no-progress
@@ -22,7 +22,7 @@
 # output is printed only for a case that went wrong. Run it with
 #
 #   docker run --rm -v "$(pwd):/app" -w /app \
-#     composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48 \
+#     composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 \
 #     sh tests/check-phpstan-fails.sh
 #
 # Its twin, check-phpstan-fails.ps1, does the same on Windows.

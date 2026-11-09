@@ -14,7 +14,7 @@
 # It runs inside the template's image (php:8.3-cli-trixie, the template's
 # default for PHP 8.3, the stack's floor), where it performs the template's
 # own steps from templates/php-test/template.yml: apt-get unzip and git,
-# Composer 2.10.3 from getcomposer.org with its SHA-384 verified, then for
+# Composer 2.11.1 from getcomposer.org with its SHA-384 verified, then for
 # each fixture a copy in a temp dir, composer install
 # --no-interaction --no-progress, vendor/bin/phpunit. One result line per
 # case goes to stdout; a fixture's output is printed only for a case that
@@ -58,7 +58,7 @@ cd "$bootstrap_dir"
 apt-get update && apt-get install -y --no-install-recommends unzip git
 php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
 php -r "if (hash_file('sha384', 'composer-setup.php') !== trim(file_get_contents('https://composer.github.io/installer.sig'))) { unlink('composer-setup.php'); exit(1); }"
-php composer-setup.php --quiet --install-dir=/usr/local/bin --filename=composer --version=2.10.3
+php composer-setup.php --quiet --install-dir=/usr/local/bin --filename=composer --version=2.11.1
 rm composer-setup.php
 EOF
 )

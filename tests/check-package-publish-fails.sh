@@ -21,7 +21,7 @@
 #   tests/package-publish-badtag, CI_COMMIT_TAG=v1.2.3
 #       exit 0 (the clean case)
 #
-# It runs inside the template's image (composer:2.10.3, pinned by digest in
+# It runs inside the template's image (composer:2.11.1, pinned by digest in
 # templates/package-publish/template.yml), which ships the php the name
 # guard needs. The moved-version path talks to the registry and stays
 # untested here. One result line per case goes to stdout; a fixture's
@@ -29,7 +29,7 @@
 # Run it with
 #
 #   docker run --rm -v "$(pwd):/app" -w /app \
-#     composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48 \
+#     composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 \
 #     sh tests/check-package-publish-fails.sh
 #
 # Its twin, check-package-publish-fails.ps1, does the same on Windows.

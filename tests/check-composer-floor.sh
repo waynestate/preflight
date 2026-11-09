@@ -4,7 +4,7 @@
 # versions below the stack's floor?
 #
 # Both components install the Composer named by composer_version (default
-# 2.10.3). The stack's floor is 2.9.6 (BEST_PRACTICES 4.6 and 4.9): a
+# 2.11.1). The stack's floor is 2.9.6 (BEST_PRACTICES 4.6 and 4.9): a
 # Composer from before the 2026 security fixes must be refused at pipeline
 # creation, not discovered at install time. The pattern accepts 2.9.6 to
 # 2.9.x and 2.10.0 and later, and refuses 2.9.5, 2.8.x, 2.0.0 and 3.x.

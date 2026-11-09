@@ -36,11 +36,11 @@
 # so it keeps no cache. One result line per case goes to stdout; a case's
 # output is printed only when it went wrong.
 #
-# It runs inside the template's image (composer:2.10.3, pinned by digest in
+# It runs inside the template's image (composer:2.11.1, pinned by digest in
 # templates/composer-audit/template.yml). Run it with
 #
 #   docker run --rm -v "$(pwd):/app:ro" -w /app \
-#     composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48 \
+#     composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 \
 #     sh tests/check-composer-audit-fails.sh
 #
 # Its twin, check-composer-audit-fails.ps1, does the same on Windows.

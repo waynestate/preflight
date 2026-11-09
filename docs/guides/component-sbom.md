@@ -77,7 +77,7 @@ The path is the `output` input, and the artifact expires in 30 days.
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the job. |
 | `job_name` | string | `sbom` | Name of the job. Set it when you include this component more than once. |
-| `image` | string | `composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48` | Docker image for the job. |
+| `image` | string | `composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0` | Docker image for the job. |
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `omit_dev` | boolean | `true` | Whether to omit dev dependencies from the SBOM. |
 | `output` | string | `sbom.cdx.json` | Path of the SBOM file to publish, relative to the project root. It must be a relative path; GitLab refuses the pipeline at creation if it is not. |

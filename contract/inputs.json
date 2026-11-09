@@ -7,7 +7,7 @@
         { "name": "job_name", "type": "string", "default": "proctor", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
         { "name": "image", "type": "string", "default": "php:8.4-cli-trixie@sha256:9cf851bc2c1b37c3e59dfd677a3c3e56d485af5a47c93f629424bb039eafcb69" },
         { "name": "image_prefix", "type": "string", "default": "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}", "regex": "^[^/\\s](\\S*[^/\\s])?$" },
-        { "name": "composer_version", "type": "string", "default": "2.10.3", "regex": "^2\\.(9\\.([6-9]|[1-9][0-9]+)|[1-9][0-9]+\\.[0-9]+)$" },
+        { "name": "composer_version", "type": "string", "default": "2.11.1", "regex": "^2\\.(9\\.([6-9]|[1-9][0-9]+)|[1-9][0-9]+\\.[0-9]+)$" },
         { "name": "allow_failure", "type": "boolean", "default": false },
         { "name": "proctor_command", "type": "string", "default": "vendor/bin/proctor check --format=codequality" },
         { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" },
@@ -23,7 +23,7 @@
         { "name": "image_prefix", "type": "string", "default": "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}", "regex": "^[^/\\s](\\S*[^/\\s])?$" },
         { "name": "php_versions", "type": "array", "default": ["8.3", "8.4", "8.5"] },
         { "name": "php_advisory_version", "type": "string", "default": "", "regex": "^$|^[0-9]+\\.[0-9]+([.][0-9A-Za-z]+)*$" },
-        { "name": "composer_version", "type": "string", "default": "2.10.3", "regex": "^2\\.(9\\.([6-9]|[1-9][0-9]+)|[1-9][0-9]+\\.[0-9]+)$" },
+        { "name": "composer_version", "type": "string", "default": "2.11.1", "regex": "^2\\.(9\\.([6-9]|[1-9][0-9]+)|[1-9][0-9]+\\.[0-9]+)$" },
         { "name": "test_command", "type": "string", "default": "vendor/bin/phpunit" },
         { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" }
       ],
@@ -33,7 +33,7 @@
       "inputs": [
         { "name": "stage", "type": "string", "default": "test" },
         { "name": "job_name", "type": "string", "default": "composer-audit", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
-        { "name": "image", "type": "string", "default": "composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48" },
+        { "name": "image", "type": "string", "default": "composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0" },
         { "name": "image_prefix", "type": "string", "default": "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}", "regex": "^[^/\\s](\\S*[^/\\s])?$" },
         { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" },
         { "name": "abandoned", "type": "string", "default": "fail", "regex": "^(fail|report|ignore)$" }
@@ -44,7 +44,7 @@
       "inputs": [
         { "name": "stage", "type": "string", "default": "test" },
         { "name": "job_name", "type": "string", "default": "sbom", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
-        { "name": "image", "type": "string", "default": "composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48" },
+        { "name": "image", "type": "string", "default": "composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0" },
         { "name": "image_prefix", "type": "string", "default": "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}", "regex": "^[^/\\s](\\S*[^/\\s])?$" },
         { "name": "omit_dev", "type": "boolean", "default": true },
         { "name": "output", "type": "string", "default": "sbom.cdx.json", "regex": "^[A-Za-z0-9_-][A-Za-z0-9._/-]*$" }
@@ -55,7 +55,7 @@
       "inputs": [
         { "name": "stage", "type": "string", "default": "test" },
         { "name": "job_name", "type": "string", "default": "pint", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
-        { "name": "image", "type": "string", "default": "composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48" },
+        { "name": "image", "type": "string", "default": "composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0" },
         { "name": "image_prefix", "type": "string", "default": "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}", "regex": "^[^/\\s](\\S*[^/\\s])?$" },
         { "name": "config", "type": "string", "default": "pint.json", "regex": "^[A-Za-z0-9_-][A-Za-z0-9._/-]*$" },
         { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" }
@@ -66,7 +66,7 @@
       "inputs": [
         { "name": "stage", "type": "string", "default": "test" },
         { "name": "job_name", "type": "string", "default": "phpstan", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
-        { "name": "image", "type": "string", "default": "composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48" },
+        { "name": "image", "type": "string", "default": "composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0" },
         { "name": "image_prefix", "type": "string", "default": "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}", "regex": "^[^/\\s](\\S*[^/\\s])?$" },
         { "name": "config", "type": "string", "default": "phpstan.neon", "regex": "^[A-Za-z0-9_-][A-Za-z0-9._/-]*$" },
         { "name": "memory_limit", "type": "string", "default": "1G", "regex": "^(-1|[0-9]+[KkMmGg]?)$" },
@@ -101,7 +101,7 @@
       "inputs": [
         { "name": "stage", "type": "string", "default": "deploy" },
         { "name": "job_name", "type": "string", "default": "package-publish", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
-        { "name": "image", "type": "string", "default": "composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48" },
+        { "name": "image", "type": "string", "default": "composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0" },
         { "name": "image_prefix", "type": "string", "default": "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}", "regex": "^[^/\\s](\\S*[^/\\s])?$" },
         { "name": "group_id", "type": "string" },
         { "name": "read_token_variable", "type": "string", "default": "PACKAGE_READ_TOKEN" }
@@ -170,7 +170,7 @@
       "inputs": [
         { "name": "stage", "type": "string", "default": "test" },
         { "name": "job_name", "type": "string", "default": "squire-kit", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
-        { "name": "image", "type": "string", "default": "composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48" },
+        { "name": "image", "type": "string", "default": "composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0" },
         { "name": "image_prefix", "type": "string", "default": "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}", "regex": "^[^/\\s](\\S*[^/\\s])?$" },
         { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" },
         { "name": "squire_version", "type": "string", "default": "", "regex": "^([0-9]+\\.[0-9]+\\.[0-9]+)?$" },
