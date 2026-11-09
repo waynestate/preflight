@@ -112,8 +112,11 @@ Sources: [GitLab: components, partial semver](https://docs.gitlab.com/ci/compone
 [GitLab: component examples, versioning](https://docs.gitlab.com/ci/components/examples/).
 
 **How the stack holds it: Checked.** `contract/inputs.json` lists each component's inputs (name, type, default) and
-job names. `tests/check-contract.sh` and `tests/check-contract.ps1` compare the templates with it on every pipeline,
-so a renamed input or job, a changed type or a changed default fails the `contract` job.
+job names. `tests/ComponentsContractTest.php` (PHPUnit, run by `composer test` inside `composer ci`) parses every
+template and fails on any drift, naming the component and the added, removed or changed key; `tests/check-contract.sh`
+and `tests/check-contract.ps1` make the same comparison in the `contract` job. A rename or a changed default is a
+breaking change: bump the major version and say so in `CHANGELOG.md`. When the change was made on purpose,
+`composer contract:update` rewrites the contract from the templates.
 
 ### 1.5 Know that components work only inside one GitLab instance
 A component can be used only by projects on the same instance. Another instance needs a mirror.
@@ -1077,7 +1080,10 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
     no Docker socket mount), a fresh ephemeral environment for every job, and no shell executor shared between
     projects.
 20. 5.4: Agree the list of hosts jobs may reach.
-21. 1.4: Add an inputs contract file and a test that catches a renamed input or job.
+21. Done: 1.4: The inputs contract is `contract/inputs.json`, held by `tests/ComponentsContractTest.php` (PHPUnit, in
+    `composer ci`) and `tests/check-contract.sh` with its `.ps1` twin (the contract job); a renamed input or job, a
+    changed type or a changed default fails the build, and `composer contract:update` rewrites the contract when the
+    change was made on purpose.
 22. 2.3 and 2.6: Lint templates for global keys, and explain which components may be weakened.
 23. 3.1: Publish the "components do not force" limit in the README.
 24. 5.3 and 5.4 and 7.3: git.wayne.edu now has an instance runner, and the stack's CI runs on it; every product in the stack still strongly recommends a git.wayne.edu instance runner, so that capacity stays there. What remains open: 5.4's list of hosts jobs may reach.

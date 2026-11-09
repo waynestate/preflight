@@ -34,7 +34,7 @@ docker run --rm -v "${PWD}:/app" -v stack-composer-cache:/tmp/cache -w /app comp
 
 The `stack-composer-cache` volume keeps Composer's downloads between runs; Docker creates it the first time.
 
-In PowerShell, use `${PWD}` instead of `$(pwd)`. `composer ci` is the whole gate: it runs the template lint, the fixture tests, Pint, PHPStan, the agent-ready file check and the docs site check, in that order.
+In PowerShell, use `${PWD}` instead of `$(pwd)`. `composer ci` is the whole gate: it runs the template lint, the fixture tests, Pint, PHPStan, the unit tests, the agent-ready file check and the docs site check, in that order.
 
 ## Composer scripts[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#composer-scripts)
 
@@ -47,12 +47,15 @@ The scripts from `composer.json`:
         "php bin/lint-templates --test",
         "@lint",
         "@analyse",
+        "@test",
         "@site:agent-ready-check",
         "@docs:check"
     ],
     "lint": "pint --test",
     "fix": "pint",
     "analyse": "phpstan analyse --memory-limit=1G",
+    "test": "phpunit",
+    "contract:update": "php bin/contract-update.php",
     "site:agent-ready": "php bin/agent-ready.php",
     "site:agent-ready-check": "php bin/agent-ready.php --check",
     "docs": "php bin/docs-site.php",
@@ -62,10 +65,12 @@ The scripts from `composer.json`:
 
 | Script | Runs | What it does |
 | --- | --- | --- |
-| `ci` | the array above | The full CI gate: template lint, fixture tests, Pint, PHPStan, agent-ready files, docs site. |
+| `ci` | the array above | The full CI gate: template lint, fixture tests, Pint, PHPStan, unit tests, agent-ready files, docs site. |
 | `lint` | `pint --test` | Run Pint in test mode; fails on style errors without changing files. |
 | `fix` | `pint` | Run Pint and rewrite the files it finds. |
 | `analyse` | `phpstan analyse --memory-limit=1G` | Run PHPStan with a 1G memory limit. |
+| `test` | `phpunit` | Run the PHPUnit suite: the inputs contract test (`tests/ComponentsContractTest.php`) and the regeneration stability test. |
+| `contract:update` | `php bin/contract-update.php` | Rewrite `contract/inputs.json` from `templates/`. Run it only when the change is deliberate; a rename or a changed default is a breaking change that needs a new major version. |
 | `site:agent-ready` | `php bin/agent-ready.php` | Rewrite the Markdown twins, llms.txt, llms-full.txt, robots.txt and sitemap.xml in `site/` (Squire's agent-ready kit). |
 | `site:agent-ready-check` | `php bin/agent-ready.php --check` | Fail when the agent-ready files are stale, a page lacks its Markdown link, a prompt drifts from the docs, or the kit was edited here. |
 | `docs` | `php bin/docs-site.php` | Build the docs site from `docs/` into `site/docs/` (Squire's docs builder): render the pages, fill the generated command and environment reference, and stamp the current version. |

@@ -51,6 +51,7 @@ are Git tags.</p>
 <li>Changed: every template default and doc pins composer 2.10.3 by one digest (sha256:2cf27542...), the same build the rest of the stack uses; composer-audit's default names 2.10.3 instead of the floating 2 tag.</li>
 <li>Added: a must-fail check for package-publish (<code>tests/check-package-publish-fails.sh</code>, its .ps1 twin and the <code>must-fail-package-publish</code> job): a non-semver tag and a missing composer.json still stop the release before any registry contact.</li>
 <li>Docs: README, the guides, the docs pages and the examples pin the 0.4.0 tag commit, and the upgrading page has a 0.4.0 section.</li>
+<li>Added: a PHPUnit suite (<code>tests/ComponentsContractTest.php</code>, run as <code>composer test</code> inside <code>composer ci</code>) that parses every template and fails when a component no longer matches <code>contract/inputs.json</code>, naming the component and the added, removed or changed input or job and saying a rename is a breaking change; <code>composer contract:update</code> rewrites the contract from the templates when the change was made on purpose, and this run records the renovate <code>dry_run</code> regex the template already carries.</li>
 </ul>
 <h2 id="0-4-0-2026-11-08">0.4.0 (2026-11-08)<a class="docs-heading-link" aria-label="Link to this section" href="#0-4-0-2026-11-08">#</a></h2>
 <p>Tag commit: <code>87d9b6fc6b0ed302dd729986525282cd7b567ebd</code> (pin this SHA, with <code># 0.4.0</code> in a trailing comment).</p>

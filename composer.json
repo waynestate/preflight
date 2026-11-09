@@ -21,11 +21,17 @@
         "laravel/pint": "^1.32",
         "league/commonmark": "^2.10",
         "phpstan/phpstan": "^2.3",
+        "phpunit/phpunit": "^12.0",
         "waynestate/pinstripe": "^0.1"
     },
     "autoload": {
         "psr-4": {
             "WayneState\\Preflight\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "WayneState\\Preflight\\Tests\\": "tests/"
         }
     },
     "config": {
@@ -43,19 +49,24 @@
             "php bin/lint-templates --test",
             "@lint",
             "@analyse",
+            "@test",
             "@site:agent-ready-check",
             "@docs:check"
         ],
         "lint": "pint --test",
         "fix": "pint",
         "analyse": "phpstan analyse --memory-limit=1G",
+        "test": "phpunit",
+        "contract:update": "php bin/contract-update.php",
         "site:agent-ready": "php bin/agent-ready.php",
         "site:agent-ready-check": "php bin/agent-ready.php --check",
         "docs": "php bin/docs-site.php",
         "docs:check": "php bin/docs-site.php --check"
     },
     "scripts-descriptions": {
-        "ci": "The full CI gate: template lint, fixture tests, Pint, PHPStan, agent-ready files, docs site.",
+        "ci": "The full CI gate: template lint, fixture tests, Pint, PHPStan, unit tests, agent-ready files, docs site.",
+        "test": "Run the PHPUnit suite: the inputs contract test and the regeneration stability test.",
+        "contract:update": "Rewrite contract/inputs.json from templates/. Run it only when the change is deliberate; a rename or a changed default is a breaking change.",
         "site:agent-ready": "Rewrite the Markdown twins, llms.txt, llms-full.txt, robots.txt and sitemap.xml in site/ (Squire's agent-ready kit).",
         "site:agent-ready-check": "Fail when the agent-ready files are stale, a page lacks its Markdown link, a prompt drifts from the docs, or the kit was edited here.",
         "docs": "Build the docs site from docs/ into site/docs/ (Squire's docs builder): render the pages, fill the generated command and environment reference, and stamp the current version.",

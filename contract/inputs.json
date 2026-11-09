@@ -114,7 +114,7 @@
         { "name": "image", "type": "string", "default": "renovate/renovate:44.192.2@sha256:37960a62ba1faa9079a7c4eead9b3f4470748a64ecd207e06c09fd8858673e17" },
         { "name": "image_prefix", "type": "string", "default": "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}", "regex": "^[^/\\s](\\S*[^/\\s])?$" },
         { "name": "autodiscover_filter", "type": "string", "default": "$CI_PROJECT_NAMESPACE/*" },
-        { "name": "dry_run", "type": "string", "default": "null" },
+        { "name": "dry_run", "type": "string", "default": "null", "regex": "^(null|lookup|full)$" },
         { "name": "git_author", "type": "string" },
         { "name": "squire_kit_tasks", "type": "boolean", "default": false }
       ],

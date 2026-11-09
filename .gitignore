@@ -2,4 +2,5 @@
 /vendor/
 .npm-cache/
 .composer-cache/
+.phpunit.cache/
 

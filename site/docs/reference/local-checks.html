@@ -52,7 +52,7 @@ docker run --rm -v &quot;$(pwd):/app&quot; -v stack-composer-cache:/tmp/cache -w
 docker run --rm -v &quot;${PWD}:/app&quot; -v stack-composer-cache:/tmp/cache -w /app composer:2 composer ci
 </code></pre></div></div>
 <p>The <code>stack-composer-cache</code> volume keeps Composer's downloads between runs; Docker creates it the first time.</p>
-<p>In PowerShell, use <code>${PWD}</code> instead of <code>$(pwd)</code>. <code>composer ci</code> is the whole gate: it runs the template lint, the fixture tests, Pint, PHPStan, the agent-ready file check and the docs site check, in that order.</p>
+<p>In PowerShell, use <code>${PWD}</code> instead of <code>$(pwd)</code>. <code>composer ci</code> is the whole gate: it runs the template lint, the fixture tests, Pint, PHPStan, the unit tests, the agent-ready file check and the docs site check, in that order.</p>
 <h2 id="composer-scripts">Composer scripts<a class="docs-heading-link" aria-label="Link to this section" href="#composer-scripts">#</a></h2>
 <p>The scripts from <code>composer.json</code>:</p>
 <pre tabindex="0"><code class="language-json">{
@@ -61,12 +61,15 @@ docker run --rm -v &quot;${PWD}:/app&quot; -v stack-composer-cache:/tmp/cache -w
         &quot;php bin/lint-templates --test&quot;,
         &quot;@lint&quot;,
         &quot;@analyse&quot;,
+        &quot;@test&quot;,
         &quot;@site:agent-ready-check&quot;,
         &quot;@docs:check&quot;
     ],
     &quot;lint&quot;: &quot;pint --test&quot;,
     &quot;fix&quot;: &quot;pint&quot;,
     &quot;analyse&quot;: &quot;phpstan analyse --memory-limit=1G&quot;,
+    &quot;test&quot;: &quot;phpunit&quot;,
+    &quot;contract:update&quot;: &quot;php bin/contract-update.php&quot;,
     &quot;site:agent-ready&quot;: &quot;php bin/agent-ready.php&quot;,
     &quot;site:agent-ready-check&quot;: &quot;php bin/agent-ready.php --check&quot;,
     &quot;docs&quot;: &quot;php bin/docs-site.php&quot;,
@@ -85,7 +88,7 @@ docker run --rm -v &quot;${PWD}:/app&quot; -v stack-composer-cache:/tmp/cache -w
 <tr>
 <td><code>ci</code></td>
 <td>the array above</td>
-<td>The full CI gate: template lint, fixture tests, Pint, PHPStan, agent-ready files, docs site.</td>
+<td>The full CI gate: template lint, fixture tests, Pint, PHPStan, unit tests, agent-ready files, docs site.</td>
 </tr>
 <tr>
 <td><code>lint</code></td>
@@ -101,6 +104,16 @@ docker run --rm -v &quot;${PWD}:/app&quot; -v stack-composer-cache:/tmp/cache -w
 <td><code>analyse</code></td>
 <td><code>phpstan analyse --memory-limit=1G</code></td>
 <td>Run PHPStan with a 1G memory limit.</td>
+</tr>
+<tr>
+<td><code>test</code></td>
+<td><code>phpunit</code></td>
+<td>Run the PHPUnit suite: the inputs contract test (<code>tests/ComponentsContractTest.php</code>) and the regeneration stability test.</td>
+</tr>
+<tr>
+<td><code>contract:update</code></td>
+<td><code>php bin/contract-update.php</code></td>
+<td>Rewrite <code>contract/inputs.json</code> from <code>templates/</code>. Run it only when the change is deliberate; a rename or a changed default is a breaking change that needs a new major version.</td>
 </tr>
 <tr>
 <td><code>site:agent-ready</code></td>

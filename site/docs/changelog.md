@@ -16,6 +16,7 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 - Changed: every template default and doc pins composer 2.10.3 by one digest (sha256:2cf27542...), the same build the rest of the stack uses; composer-audit's default names 2.10.3 instead of the floating 2 tag.
 - Added: a must-fail check for package-publish (`tests/check-package-publish-fails.sh`, its .ps1 twin and the `must-fail-package-publish` job): a non-semver tag and a missing composer.json still stop the release before any registry contact.
 - Docs: README, the guides, the docs pages and the examples pin the 0.4.0 tag commit, and the upgrading page has a 0.4.0 section.
+- Added: a PHPUnit suite (`tests/ComponentsContractTest.php`, run as `composer test` inside `composer ci`) that parses every template and fails when a component no longer matches `contract/inputs.json`, naming the component and the added, removed or changed input or job and saying a rename is a breaking change; `composer contract:update` rewrites the contract from the templates when the change was made on purpose, and this run records the renovate `dry_run` regex the template already carries.
 
 ## 0.4.0 (2026-11-08)[#](https://preflight.apps.wayne.edu/docs/changelog.html#0-4-0-2026-11-08)
 
