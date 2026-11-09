@@ -24,6 +24,13 @@ if [ "$flaw" = writes-root ]; then
   echo boot > /var/www/html/boot.txt
 fi
 
+if [ "$flaw" = reopens-stderr ]; then
+  # Not a flaw: Apache opens /proc/self/fd/2 for its error log. A container
+  # runtime gives the app's uid stdio it may reopen. If the open is refused,
+  # exec stops this shell, so the app never boots.
+  exec 2> /proc/self/fd/2
+fi
+
 echo "fixture: serving on 0.0.0.0:$port (flaw: $flaw)" >&2
 
 if [ "$flaw" = no-term-handler ]; then
@@ -32,5 +39,11 @@ fi
 
 php -S "0.0.0.0:$port" -t /app/public &
 pid=$!
-trap 'kill -TERM "$pid" 2>/dev/null; wait "$pid" || true; echo "fixture: stopped cleanly" >&2; exit 0' TERM INT
+if [ "$flaw" = signals-group ]; then
+  # Not a flaw: Apache's graceful stop signals its whole process group. In a
+  # container that group is the app's own, so this reaches only the app.
+  trap 'trap "" TERM; kill -TERM 0; wait "$pid" || true; echo "fixture: stopped the group cleanly" >&2; exit 0' TERM INT
+else
+  trap 'kill -TERM "$pid" 2>/dev/null; wait "$pid" || true; echo "fixture: stopped cleanly" >&2; exit 0' TERM INT
+fi
 wait "$pid"

@@ -15,6 +15,15 @@
 #   file-sessions    sessions live on the replica's own disk (session-hop)
 #   no-term-handler  the main process has no SIGTERM handler (sigterm)
 #
+# Two more values are not flaws but things every container runtime allows,
+# which Buildah alone refuses unless the probe's launcher evens them out.
+# Both must pass every check:
+#
+#   reopens-stderr   the app reopens /proc/self/fd/2 as its uid, as Apache
+#                    does for its error log
+#   signals-group    on SIGTERM the app signals its whole process group, as
+#                    Apache's graceful stop does
+#
 # BASE_REGISTRY lets Preflight's own pipeline pull the base image through the
 # GitLab Dependency Proxy; the default is Docker Hub. The base is pinned by its
 # multi-arch list digest, because the runner is arm64 and laptops are not.

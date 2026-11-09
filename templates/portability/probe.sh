@@ -28,6 +28,11 @@
 # network namespace, so curl reaches it on the pod address. Buildah needs the
 # runner to allow user namespaces, which ordinary unprivileged jobs do.
 #
+# Buildah is not a container runtime, and it starts a process two ways no
+# runtime does, so the probe evens them out (see "launcher" below): each
+# replica gets stdout and stderr its uid owns, and a session of its own. An
+# app needs no start_command shim for either.
+#
 # Usage: sh probe.sh <inputs file>. The inputs file holds one KEY=VALUE per
 # line (the component writes it from its inputs; tests/check-portability.sh
 # writes its own). Array values are JSON-style lists: ["a", "b"]. $NAME and
@@ -266,17 +271,91 @@ if wanted env-only; then
   done
 fi
 
+# ---------------------------------------------------------------- launcher
+
+# Two things `buildah run` does that no container runtime does, and that
+# break apps which run fine on OpenShift, Coolify and Docker:
+#
+#   stdio    Buildah hands the app stdout and stderr pipes owned by root. An
+#            app running as the uid may write to them but not reopen them,
+#            and Apache opens /proc/self/fd/2 for its error log ("could not
+#            open error log file"). runc and CRI-O give the uid its stdio.
+#   group    Buildah starts no session, so the app shares the job's process
+#            group with buildah-chroot-exec, which runs as the same uid. An
+#            app that signals its whole group on SIGTERM, as Apache's
+#            graceful stop does, signals buildah-chroot-exec too, and that
+#            SIGKILLs the app. In a container the group is the app's own.
+#
+# So each replica starts in a few lines of bash that pipe stdout and stderr
+# through cat (a pipe the uid owns, so reopening it works), then exec the
+# app through setsid (a session and process group of its own). Every exec
+# keeps the pid, so the app is still the replica's main process, the one the
+# sigterm check signals. The cat is forked before setsid, so the app's group
+# signals miss it and the last lines still reach the log. The image needs no
+# bash, setsid or cat: the job's own /usr is bind-mounted read-only at
+# /.preflight/usr and they run through the job's own loader, never touching
+# the image's libraries. The mount lives in the replica's mount namespace
+# only, so nothing lands in the image. A job image without them (the pinned
+# Buildah image has them) starts replicas as Buildah does, with a note.
+
+# usr_path NAME: NAME's real path, when it is under /usr.
+usr_path() {
+  p=$(command -v "$1" 2>/dev/null) || return 1
+  p=$(readlink -f "$p" 2>/dev/null) || return 1
+  case "$p" in /usr/*) printf '%s\n' "$p" ;; *) return 1 ;; esac
+}
+
+LAUNCH=no
+host_ld=""
+for f in /usr/lib64/ld-linux-*.so.* /usr/lib/ld-linux-*.so.*; do
+  [ -e "$f" ] || continue
+  host_ld=$(readlink -f "$f" 2>/dev/null)
+  break
+done
+case "$host_ld" in /usr/*) ;; *) host_ld="" ;; esac
+host_bash=$(usr_path bash)
+host_setsid=$(usr_path setsid)
+host_cat=$(usr_path cat)
+if [ -n "$host_ld" ] && [ -n "$host_bash" ] && [ -n "$host_setsid" ] && [ -n "$host_cat" ]; then
+  LAUNCH=yes
+  PF_LD="/.preflight$host_ld"
+  PF_LIB="/.preflight/usr/lib64:/.preflight/usr/lib"
+else
+  say "note: the job image has no glibc loader, bash, setsid or cat under /usr, so replicas start as Buildah starts them: root-owned stdout and stderr, and the job's process group"
+fi
+
+# The launcher's own lines, run by bash as $0 preflight-launch, then the
+# loader, library path, cat and setsid, then the app's argv. When it already
+# leads its process group, setsid would fork and the main process would
+# exit, so it execs the app directly (its group is its own already).
+LAUNCH_SCRIPT='ld=$1 lib=$2 cat=$3 setsid=$4
+shift 4
+exec > >(exec "$ld" --library-path "$lib" "$cat") 2>&1
+read -r st < "/proc/$$/stat"
+st=${st##*) }
+st=${st#* }
+st=${st#* }
+if [ "${st%% *}" = "$$" ]; then exec "$@"; fi
+exec "$ld" --library-path "$lib" "$setsid" "$@"'
+
 : > "$WORK/marker"
 sleep 1
 
 # start_replica NAME PORT: buildah run in the background, as uid:0, with no
-# capabilities, the env input and the port variable.
+# capabilities, the env input and the port variable, through the launcher.
 start_replica() {
   name=$1
   rport=$2
   set -- --user "$UID_NUM:0" --cap-drop=ALL --env "$PORT_ENV=$rport"
   while IFS= read -r e; do set -- "$@" --env "$e"; done < "$WORK/env.list"
+  if [ "$LAUNCH" = yes ]; then
+    set -- "$@" --mount "type=bind,source=/usr,destination=/.preflight/usr,ro"
+  fi
   set -- "$@" "$(cat "$WORK/$name.ctr")" --
+  if [ "$LAUNCH" = yes ]; then
+    set -- "$@" "$PF_LD" --library-path "$PF_LIB" "/.preflight$host_bash" -c "$LAUNCH_SCRIPT" preflight-launch \
+      "$PF_LD" "$PF_LIB" "/.preflight$host_cat" "/.preflight$host_setsid"
+  fi
   if [ -n "$START_COMMAND" ]; then
     set -- "$@" sh -c "$START_COMMAND"
   else

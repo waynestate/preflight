@@ -16,6 +16,13 @@
 #   file-logs        logs fails (a log file under storage/logs)
 #   file-sessions    session-hop fails (sessions on one replica's disk)
 #   no-term-handler  sigterm fails (no SIGTERM handler in the main process)
+#   reopens-stderr   every check passes (the app reopens /proc/self/fd/2)
+#   signals-group    every check passes (the app signals its process group
+#                    on SIGTERM)
+#
+# The last two are regression cases for the probe's launcher: Buildah alone
+# refuses both (root-owned stdio; a group shared with buildah-chroot-exec,
+# which SIGKILLs the app), and every container runtime allows them.
 #
 # A flaw passes only when the probe exits non-zero AND names the expected
 # check as FAIL, so a build error or a wrong-reason failure is caught too.
@@ -50,7 +57,7 @@ fi
 export STORAGE_DRIVER="${STORAGE_DRIVER:-vfs}"
 export BUILDAH_ISOLATION="${BUILDAH_ISOLATION:-chroot}"
 
-CASES="none:pass needs-root:strict-boot writes-root:strict-boot fixed-port:strict-boot host-bound:health dotenv:env-only trusts-proxy:forwarded-headers file-logs:logs file-sessions:session-hop no-term-handler:sigterm"
+CASES="none:pass needs-root:strict-boot writes-root:strict-boot fixed-port:strict-boot host-bound:health dotenv:env-only trusts-proxy:forwarded-headers file-logs:logs file-sessions:session-hop no-term-handler:sigterm reopens-stderr:pass signals-group:pass"
 
 # In GitLab, pull the fixture's base image through the Dependency Proxy. The
 # probe replaces ${NAME} from the job's variables.

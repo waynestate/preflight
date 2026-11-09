@@ -217,9 +217,10 @@ must-fail-sbom:
 
 # The must-fail fixtures for the portability component: the check runs the
 # component's own probe (templates/portability/probe.sh, which the template
-# carries byte for byte) on the clean fixture and on nine flawed builds of
-# it, and passes only when the clean one passes and each flaw fails the
-# check it targets. Runs in the component's own Buildah image, pinned by
+# carries byte for byte) on the clean fixture, on nine flawed builds of it
+# and on two that only Buildah alone would refuse (Apache's stdio reopen
+# and group signal), and passes only when the clean and the two regression
+# builds pass and each flaw fails the check it targets. Runs in the component's own Buildah image, pinned by
 # digest; it needs user namespaces, not a privileged runner. quay.io, not
 # Docker Hub, so it skips the Dependency Proxy.
 must-fail-portability:
