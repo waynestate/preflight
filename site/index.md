@@ -78,7 +78,7 @@ Checklist complete. Tray tables up, tests green.
 - PHPSTAN
 - ESLINT
 - A11Y
-- CONTRACTcoming soon
+- CONTRACT
 - FRESHNESScoming soon
 - CLEARED FOR TAKEOFF
 
@@ -88,9 +88,9 @@ Cockpit placards
 
 ## Eight checks, one include each
 
-Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All eight are in the 0.4.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Five more components ship in the same tag, and the docs cover each one: `secret-detection`, `squire-kit`, `portability`, `package-publish` and `renovate`. New in 0.3.0: every component that pulls from Docker Hub goes through GitLab's Dependency Proxy on its own (the `image_prefix` input), so Docker Hub is asked once.
+Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All eight are in the 0.4.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Five more components ship in the same tag, and the docs cover each one: `secret-detection`, `squire-kit`, `portability`, `package-publish` and `renovate`. New in 0.4.0: `php-test` can run one extra PHP version as an advisory job, `proctor` takes a `git_depth`, and Composer has a 2.9.6 floor. Every input on these placards is held to [a written contract](https://preflight.apps.wayne.edu/#contract).
 
-in 0.3.0
+in 0.4.0
 
 ### proctor
 
@@ -111,7 +111,7 @@ Runs PROCTOR's checks and publishes them as a Code Quality report.
 - **proctor_command**: `vendor/bin/proctor check --format=codequality`
 - **working_dir**: `.`
 
-in 0.3.0
+in 0.4.0
 
 ### php-test
 
@@ -132,7 +132,7 @@ The test command on each supported PHP version, one job per version.
 - **test_command**: `vendor/bin/phpunit`
 - **working_dir**: `.`
 
-in 0.3.0
+in 0.4.0
 
 ### composer-audit
 
@@ -150,7 +150,7 @@ Checks the passenger list.
 - **image**: `composer:2@sha256:…`
 - **working_dir**: `.`
 
-in 0.3.0
+in 0.4.0
 
 ### sbom
 
@@ -169,7 +169,7 @@ A validated CycloneDX SBOM, published as an artifact. The plugin installs global
 - **omit_dev**: `true`
 - **output**: `sbom.cdx.json`
 
-in 0.3.0
+in 0.4.0
 
 ### pint
 
@@ -188,7 +188,7 @@ The app's own Laravel Pint in test mode. The app requires `laravel/pint` and shi
 - **config**: `pint.json`
 - **working_dir**: `.`
 
-in 0.3.0
+in 0.4.0
 
 ### phpstan
 
@@ -208,7 +208,7 @@ The app's own PHPStan, with a Code Quality report. The app requires `phpstan/php
 - **memory_limit**: `1G`
 - **working_dir**: `.`
 
-in 0.3.0
+in 0.4.0
 
 ### eslint
 
@@ -228,7 +228,7 @@ The app's own ESLint and Prettier. The app requires `@waynestate/pinstripe`, `es
 - **eslint_args**: `.`
 - **prettier**: `true`
 
-in 0.3.0
+in 0.4.0
 
 ### a11y
 
@@ -249,7 +249,7 @@ Opens the pages in Chromium and fails on any axe-core violation, with the reflow
 - **base_url**: `""`
 - **wcag_tags**: `wcag21aa` and below
 
-in 0.3.0
+in 0.4.0
 
 ### php-package.yml
 
@@ -269,10 +269,46 @@ uses: waynestate/preflight/.github/workflows/php-package.yml@87d9b6fc6b0ed302dd7
 
 ### Deferred items
 
-On the list, not yet on board. Nothing to include until they land, and the next tag has no date yet. The accessibility suite and the Squire kit check left this list in 0.2.0.
+On the list, not yet on board. Nothing to include until it lands, and the next tag has no date yet. The accessibility suite and the Squire kit check left this list in 0.2.0; the contract suite left it after 0.4.0 and lights the CONTRACT lamp now (see [The inputs contract](https://preflight.apps.wayne.edu/#contract)).
 
-- Coming soonContract suiteNamed in the best practices as coming later. Not built yet.
 - Coming soonSite freshnessPlanned. Not in this repo yet.
+
+Type certificate
+
+## The inputs contract
+
+Your `include:` lines lean on names: an input like `php_versions`, a job called `php-test` that your own file may extend. Every one of them is written down in `contract/inputs.json`, and Preflight's build fails the moment a template drifts from it.
+
+Type certificate data sheet
+
+`php-test`
+
+**php-test inputs in contract/inputs.json. Rows marked revised changed from 0.3.1 to 0.4.0.**
+
+| Input | Type | Default |
+| --- | --- | --- |
+| `stage` | string | `test` |
+| `job_name` | string | `php-test` |
+| `image_prefix` | string | the Dependency Proxy |
+| `php_versions` | array | `8.3` `8.4` `8.5` |
+| `php_advisory_version` New: adds a `php-test-advisory` job | string | `""` (off) |
+| `composer_version` Revised: floor of 2.9.6 | string | `2.10.3` |
+| `test_command` | string | `vendor/bin/phpunit` |
+| `working_dir` | string | `.` |
+
+One of thirteen entries, abridged. A bar in the margin marks a line revised from 0.3.1 to 0.4.0, which also gave `proctor` a `git_depth` input.
+
+1. **Renames are announced.** An input or job is renamed or removed only in a release whose Upgrading notes list it under Breaking. Before 1.0 that is a new minor, never a patch.
+2. **Tighter counts too.** A pattern that stops a value you used to pass is breaking, and gets the same notice.
+3. **Defaults move in the open.** Image digests are defaults, and Renovate moves them. Leave an input unset and you get the new default when you move the pin.
+
+Before you move a pin, read the diff:
+
+```
+$ git diff 0.3.1 0.4.0 -- contract/inputs.json
+```
+
+[The inputs contract, in full](https://preflight.apps.wayne.edu/docs/guides/inputs-contract.html) [Upgrading](https://preflight.apps.wayne.edu/docs/upgrading.html)
 
 Quick start
 
@@ -337,7 +373,7 @@ jobs:
 
 ### Run Preflight's own checks locally
 
-From a clone of this repo: the template lint, its fixture tests, Pint and PHPStan through `composer ci`, then the inputs contract.
+From a clone of this repo: the template lint, its fixture tests, the inputs contract test, Pint and PHPStan through `composer ci`, then the contract job's own check. Changed an input on purpose? `composer contract:update` rewrites `contract/inputs.json` for the same commit.
 
 **Windows**
 
@@ -507,7 +543,7 @@ Preflight's own preflight
 - `image-latest` an image on `latest`
 - `image-no-digest` a warning: tagged, but not pinned by digest
 
-A known warning goes in `lint-allow.yml`, and every entry needs a `reason`, so someone has to write down why. On every pipeline, `contract/inputs.json` also holds each input's name, type and default, and each job's name, steady within a major version.
+A known warning goes in `lint-allow.yml`, and every entry needs a `reason`, so someone has to write down why. On every pipeline, `tests/ComponentsContractTest.php` also holds each template to [`contract/inputs.json`](https://preflight.apps.wayne.edu/#contract): every input's name, type, default and pattern, and every job's name.
 
 Wayne State app stack
 

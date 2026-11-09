@@ -276,7 +276,7 @@
   /* -------------------------------------------------------- reveals */
   if (motion && "IntersectionObserver" in window) {
     var revealables = [];
-    document.querySelectorAll(".section__head, .placard, .inop, .plan__box, .poh, .selfcheck, .card").forEach(function (el) {
+    document.querySelectorAll(".section__head, .placard, .inop, .sheet, .contract__terms, .plan__box, .poh, .selfcheck, .card").forEach(function (el) {
       el.setAttribute("data-reveal", "");
       revealables.push(el);
     });

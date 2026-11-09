@@ -206,7 +206,7 @@
               <p class="item__why">axe-core in Playwright on the app's pages, light and dark, at 320 and 1280 px. WCAG 2.1 AA by default; one input adds 2.2 AA.</p>
               <code class="item__cmd">node check.mjs config.json</code>
             </li>
-            <li class="item item--final" data-step="8" data-lights="cleared">
+            <li class="item item--final" data-step="8" data-lights="contract cleared">
               <p class="item__row"><span class="item__name">Clearance</span><span class="item__dots" aria-hidden="true"></span><span class="item__resp">Cleared for takeoff</span><span class="item__tick" aria-hidden="true"></span></p>
               <p class="item__why">Every gate green. The release is free to leave for Citadel.</p>
             </li>
@@ -229,7 +229,7 @@
               <li class="lamp" data-lamp="phpstan"><span class="lamp__face">PHPSTAN</span></li>
               <li class="lamp" data-lamp="eslint"><span class="lamp__face">ESLINT</span></li>
               <li class="lamp" data-lamp="a11y"><span class="lamp__face">A11Y</span></li>
-              <li class="lamp lamp--soon"><span class="lamp__face">CONTRACT<small>coming soon</small></span></li>
+              <li class="lamp" data-lamp="contract"><span class="lamp__face">CONTRACT</span></li>
               <li class="lamp lamp--soon"><span class="lamp__face">FRESHNESS<small>coming soon</small></span></li>
               <li class="lamp lamp--wide" data-lamp="cleared"><span class="lamp__face" data-clearance>CLEARED FOR TAKEOFF</span></li>
             </ul>
@@ -302,14 +302,14 @@
       <div class="section__head">
         <p class="eyebrow">Cockpit placards</p>
         <h2 id="components-title">Eight checks, one include each</h2>
-        <p>Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All eight are in the 0.4.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Five more components ship in the same tag, and the docs cover each one: <code>secret-detection</code>, <code>squire-kit</code>, <code>portability</code>, <code>package-publish</code> and <code>renovate</code>. New in 0.3.0: every component that pulls from Docker Hub goes through GitLab's Dependency Proxy on its own (the <code>image_prefix</code> input), so Docker Hub is asked once.</p>
+        <p>Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All eight are in the 0.4.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Five more components ship in the same tag, and the docs cover each one: <code>secret-detection</code>, <code>squire-kit</code>, <code>portability</code>, <code>package-publish</code> and <code>renovate</code>. New in 0.4.0: <code>php-test</code> can run one extra PHP version as an advisory job, <code>proctor</code> takes a <code>git_depth</code>, and Composer has a 2.9.6 floor. Every input on these placards is held to <a href="#contract">a written contract</a>.</p>
       </div>
 
       <div class="placards">
 
         <article class="placard">
           <span class="placard__screws" aria-hidden="true"></span>
-          <p class="placard__tag placard__tag--tagged">in 0.3.0</p>
+          <p class="placard__tag placard__tag--tagged">in 0.4.0</p>
           <h3 class="placard__name">proctor</h3>
           <p class="placard__aside">Watches the cabin.</p>
           <p class="placard__line">Runs PROCTOR's checks and publishes them as a Code Quality report.</p>
@@ -329,7 +329,7 @@
 
         <article class="placard">
           <span class="placard__screws" aria-hidden="true"></span>
-          <p class="placard__tag placard__tag--tagged">in 0.3.0</p>
+          <p class="placard__tag placard__tag--tagged">in 0.4.0</p>
           <h3 class="placard__name">php-test</h3>
           <p class="placard__aside">Three engines, all running.</p>
           <p class="placard__line">The test command on each supported PHP version, one job per version.</p>
@@ -349,7 +349,7 @@
 
         <article class="placard">
           <span class="placard__screws" aria-hidden="true"></span>
-          <p class="placard__tag placard__tag--tagged">in 0.3.0</p>
+          <p class="placard__tag placard__tag--tagged">in 0.4.0</p>
           <h3 class="placard__name">composer-audit</h3>
           <p class="placard__aside">Checks the passenger list.</p>
           <p class="placard__line"><code>composer audit --locked</code>, failing on any advisory.</p>
@@ -366,7 +366,7 @@
 
         <article class="placard">
           <span class="placard__screws" aria-hidden="true"></span>
-          <p class="placard__tag">in 0.3.0</p>
+          <p class="placard__tag">in 0.4.0</p>
           <h3 class="placard__name">sbom</h3>
           <p class="placard__aside">The cargo manifest.</p>
           <p class="placard__line">A validated CycloneDX SBOM, published as an artifact. The plugin installs globally, so the app's files stay as they are.</p>
@@ -384,7 +384,7 @@
 
         <article class="placard">
           <span class="placard__screws" aria-hidden="true"></span>
-          <p class="placard__tag">in 0.3.0</p>
+          <p class="placard__tag">in 0.4.0</p>
           <h3 class="placard__name">pint</h3>
           <p class="placard__aside">Uniform pressed.</p>
           <p class="placard__line">The app's own Laravel Pint in test mode. The app requires <code>laravel/pint</code> and ships a <code>pint.json</code>.</p>
@@ -402,7 +402,7 @@
 
         <article class="placard">
           <span class="placard__screws" aria-hidden="true"></span>
-          <p class="placard__tag">in 0.3.0</p>
+          <p class="placard__tag">in 0.4.0</p>
           <h3 class="placard__name">phpstan</h3>
           <p class="placard__aside">Instruments cross-checked.</p>
           <p class="placard__line">The app's own PHPStan, with a Code Quality report. The app requires <code>phpstan/phpstan</code> and ships a <code>phpstan.neon</code>.</p>
@@ -421,7 +421,7 @@
 
         <article class="placard">
           <span class="placard__screws" aria-hidden="true"></span>
-          <p class="placard__tag">in 0.3.0</p>
+          <p class="placard__tag">in 0.4.0</p>
           <h3 class="placard__name">eslint</h3>
           <p class="placard__aside">The front cabin, too.</p>
           <p class="placard__line">The app's own ESLint and Prettier. The app requires <code>@waynestate/pinstripe</code>, <code>eslint</code> and <code>prettier</code>.</p>
@@ -440,7 +440,7 @@
 
         <article class="placard">
           <span class="placard__screws" aria-hidden="true"></span>
-          <p class="placard__tag">in 0.3.0</p>
+          <p class="placard__tag">in 0.4.0</p>
           <h3 class="placard__name">a11y</h3>
           <p class="placard__aside">Boarding for every passenger.</p>
           <p class="placard__line">Opens the pages in Chromium and fails on any axe-core violation, with the reflow check at 320 px. It serves a static <code>site_dir</code>, or checks a running app at <code>base_url</code>.</p>
@@ -461,7 +461,7 @@
         <!-- Not a component: the reusable workflow for GitHub mirrors. -->
         <article class="placard placard--alt">
           <span class="placard__screws" aria-hidden="true"></span>
-          <p class="placard__tag">in 0.3.0</p>
+          <p class="placard__tag">in 0.4.0</p>
           <h3 class="placard__name">php-package.yml</h3>
           <p class="placard__aside">Two cockpits, one checklist.</p>
           <p class="placard__line">Components stay inside one GitLab instance, so GitHub mirrors call this reusable workflow instead: <code>composer ci</code> on each PHP version, then a Composer audit.</p>
@@ -479,11 +479,62 @@
 
       <div class="deferred">
         <h3 class="deferred__title">Deferred items</h3>
-        <p class="deferred__note">On the list, not yet on board. Nothing to include until they land, and the next tag has no date yet. The accessibility suite and the Squire kit check left this list in 0.2.0.</p>
+        <p class="deferred__note">On the list, not yet on board. Nothing to include until it lands, and the next tag has no date yet. The accessibility suite and the Squire kit check left this list in 0.2.0; the contract suite left it after 0.4.0 and lights the CONTRACT lamp now (see <a href="#contract">The inputs contract</a>).</p>
         <ul class="deferred__list">
-          <li class="inop"><span class="inop__sticker">Coming soon</span><span class="inop__name">Contract suite</span><span class="inop__line">Named in the best practices as coming later. Not built yet.</span></li>
           <li class="inop"><span class="inop__sticker">Coming soon</span><span class="inop__name">Site freshness</span><span class="inop__line">Planned. Not in this repo yet.</span></li>
         </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================== contract -->
+  <!-- The inputs contract as a type certificate data sheet. Revised lines carry
+       a change bar in the margin, the way a flight manual marks an amendment;
+       with motion on, the bars draw in and the revision stamp lands. -->
+  <section class="section section--contract" id="contract" aria-labelledby="contract-title">
+    <div class="wsu-container">
+      <div class="section__head">
+        <p class="eyebrow">Type certificate</p>
+        <h2 id="contract-title">The inputs contract</h2>
+        <p>Your <code>include:</code> lines lean on names: an input like <code>php_versions</code>, a job called <code>php-test</code> that your own file may extend. Every one of them is written down in <code>contract/inputs.json</code>, and Preflight's build fails the moment a template drifts from it.</p>
+      </div>
+
+      <div class="contract">
+        <figure class="sheet" aria-labelledby="sheet-cap">
+          <div class="sheet__head">
+            <p class="sheet__kicker">Type certificate data sheet</p>
+            <p class="sheet__title"><code>php-test</code></p>
+            <p class="sheet__rev" aria-hidden="true">Amdt<br><b>0.4.0</b></p>
+          </div>
+          <table class="sheet__table">
+            <caption class="wsu-sr-only">php-test inputs in contract/inputs.json. Rows marked revised changed from 0.3.1 to 0.4.0.</caption>
+            <thead>
+              <tr><th scope="col">Input</th><th scope="col">Type</th><th scope="col">Default</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row"><code>stage</code></th><td>string</td><td><code>test</code></td></tr>
+              <tr><th scope="row"><code>job_name</code></th><td>string</td><td><code>php-test</code></td></tr>
+              <tr><th scope="row"><code>image_prefix</code></th><td>string</td><td>the Dependency Proxy</td></tr>
+              <tr><th scope="row"><code>php_versions</code></th><td>array</td><td><code>8.3</code> <code>8.4</code> <code>8.5</code></td></tr>
+              <tr class="is-amended" style="--bar: 0"><th scope="row"><code>php_advisory_version</code><span class="sheet__note">New: adds a <code>php-test-advisory</code> job</span></th><td>string</td><td><code>""</code> (off)</td></tr>
+              <tr class="is-amended" style="--bar: 1"><th scope="row"><code>composer_version</code><span class="sheet__note">Revised: floor of 2.9.6</span></th><td>string</td><td><code>2.10.3</code></td></tr>
+              <tr><th scope="row"><code>test_command</code></th><td>string</td><td><code>vendor/bin/phpunit</code></td></tr>
+              <tr><th scope="row"><code>working_dir</code></th><td>string</td><td><code>.</code></td></tr>
+            </tbody>
+          </table>
+          <figcaption class="sheet__foot" id="sheet-cap">One of thirteen entries, abridged. A bar in the margin marks a line revised from 0.3.1 to 0.4.0, which also gave <code>proctor</code> a <code>git_depth</code> input.</figcaption>
+        </figure>
+
+        <div class="contract__terms">
+          <ol class="terms">
+            <li><b>Renames are announced.</b> An input or job is renamed or removed only in a release whose Upgrading notes list it under Breaking. Before 1.0 that is a new minor, never a patch.</li>
+            <li><b>Tighter counts too.</b> A pattern that stops a value you used to pass is breaking, and gets the same notice.</li>
+            <li><b>Defaults move in the open.</b> Image digests are defaults, and Renovate moves them. Leave an input unset and you get the new default when you move the pin.</li>
+          </ol>
+          <p class="contract__lede">Before you move a pin, read the diff:</p>
+<pre class="term"><code><span class="t-dim">$</span> git diff 0.3.1 0.4.0 -- contract/inputs.json</code></pre>
+          <p class="contract__more"><a href="docs/guides/inputs-contract.html">The inputs contract, in full</a> <span aria-hidden="true">·</span> <a href="docs/upgrading.html">Upgrading</a></p>
+        </div>
       </div>
     </div>
   </section>
@@ -573,7 +624,7 @@ jobs:
         <article class="plan__box">
           <p class="plan__field"><span class="plan__num">4</span> Ground check · your machine</p>
           <h3>Run Preflight's own checks locally</h3>
-          <p>From a clone of this repo: the template lint, its fixture tests, Pint and PHPStan through <code>composer ci</code>, then the inputs contract.</p>
+          <p>From a clone of this repo: the template lint, its fixture tests, the inputs contract test, Pint and PHPStan through <code>composer ci</code>, then the contract job's own check. Changed an input on purpose? <code>composer contract:update</code> rewrites <code>contract/inputs.json</code> for the same commit.</p>
           <div class="wsu-tabs os-tabs" data-tabs>
             <div class="wsu-tabs__list" role="tablist" aria-label="Operating system">
               <button class="wsu-tabs__tab" role="tab" type="button" id="tab-win" aria-controls="panel-win" aria-selected="true">Windows</button>
@@ -757,7 +808,7 @@ Output: the renovate.json, what auto-merges and what waits, then your questions.
             <li><code>image-latest</code> <span>an image on <code>latest</code></span></li>
             <li class="is-warn"><code>image-no-digest</code> <span>a warning: tagged, but not pinned by digest</span></li>
           </ul>
-          <p class="selfcheck__foot">A known warning goes in <code>lint-allow.yml</code>, and every entry needs a <code>reason</code>, so someone has to write down why. On every pipeline, <code>contract/inputs.json</code> also holds each input's name, type and default, and each job's name, steady within a major version.</p>
+          <p class="selfcheck__foot">A known warning goes in <code>lint-allow.yml</code>, and every entry needs a <code>reason</code>, so someone has to write down why. On every pipeline, <code>tests/ComponentsContractTest.php</code> also holds each template to <a href="#contract"><code>contract/inputs.json</code></a>: every input's name, type, default and pattern, and every job's name.</p>
         </div>
       </div>
     </div>

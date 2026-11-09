@@ -7,6 +7,8 @@ description: How to move an app from one Preflight pin to the next.
 
 This page is the checklist for moving an app from one Preflight pin to the next, one released version at a time, newest first; every section follows `CHANGELOG.md`. Read the section for the version you are moving to, apply its steps, and verify on the next pipeline. Like a real preflight, the walk takes a few minutes and earns its keep: move the pin only after you have read the version notes.
 
+Every input and job name a component offers is recorded in `contract/inputs.json`, and Preflight's build fails when a template drifts from it, so the file is the exact list of what moved. Before you move a pin, diff it between your tag and the next one (for example `git diff 0.3.1 0.4.0 -- contract/inputs.json` in a clone of Preflight) and check each line against that version's Breaking and Steps below. [The inputs contract](guides/inputs-contract.md) explains what each kind of change means for your include.
+
 ## 0.4.0
 
 Released 2026-11-08. Two new inputs and a Composer floor. The proctor component's `git_depth` (default `"0"`) clones

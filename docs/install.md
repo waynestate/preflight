@@ -54,3 +54,4 @@ default. A green job means the check passed.
 - [The a11y component](guides/component-a11y.md): the accessibility gate for a site's pages, in 0.2.0.
 - [The squire-kit component](guides/component-squire-kit.md): the check that a deploy kit still matches its Squire release, in 0.2.0.
 - [Reference](reference/components.md): every component, with its inputs and defaults.
+- [The inputs contract](guides/inputs-contract.md): what a pin promises your includes, and how to see what moved before you move it.

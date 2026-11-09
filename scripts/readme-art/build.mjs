@@ -41,7 +41,7 @@ const MAX_BYTES = 300 * 1024; // every file in docs/readme/ stays at or under th
 const FORBIDDEN = /noug[a]t|snu[.]gs|citadel/i; // internal names never ship in art
 
 // The tag every component ships in. The page's placards must agree with it.
-const COMPONENT_TAG = "0.3.0";
+const COMPONENT_TAG = "0.4.0";
 
 // Preflight's own palette, as declared in site/assets/preflight.css.
 const C = {
@@ -228,7 +228,14 @@ function readTemplates() {
       : key;
     if (!job) fail(`templates/${d.name}: the job_name input has no default`);
     const body = text.slice(text.indexOf(`\n${key}:`));
-    const timeout = body.match(/^\s+timeout:\s*(.+?)\s*$/m)?.[1];
+    let timeout = body.match(/^\s+timeout:\s*(.+?)\s*$/m)?.[1];
+    if (!timeout) {
+      // A job that extends a hidden base job (php-test since 0.4.0) gets its
+      // timeout from that base, which sits above it in the file.
+      const base = body.match(/^ {2}extends:\s*(.+?)\s*$/m)?.[1];
+      const at = base ? text.indexOf(`\n"${base}":`) : -1;
+      if (at >= 0) timeout = text.slice(at).match(/^\s+timeout:\s*(.+?)\s*$/m)?.[1];
+    }
     if (!timeout) fail(`templates/${d.name}: job ${job} has no timeout`);
     const matrix = /^\s+parallel:\s*$/m.test(body) && /^\s+matrix:\s*$/m.test(body);
     // The stage, in the order a template can set it: the spec's `stage` input
@@ -571,14 +578,14 @@ async function buildChecklist(page, templates) {
     .filter((it) => it.tpl)
     .map((it) => `${it.name} (${it.tpl.job}): ${it.resp}`)
     .join("; ");
-  const desc = `PREFLIGHT's checklist card, "${d.title}". ${jobSummary}; then ${items.at(-1).name}: ${items.at(-1).resp}. Each item is ticked in turn and its lamp on the annunciator panel goes green; ${d.lamps
+  const desc = `Preflight's checklist card, "${d.title}". ${jobSummary}; then ${items.at(-1).name}: ${items.at(-1).resp}. Each item is ticked in turn and its lamp on the annunciator panel goes green; ${d.lamps
     .filter((l) => l.soon)
     .map((l) => l.face)
     .join(", ")} are marked coming soon. ${d.foot}`;
   assertTextClean(desc, "checklist description");
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-labelledby="pf-title pf-desc">
-  <title id="pf-title">PREFLIGHT's before-takeoff checklist, run on every push</title>
+  <title id="pf-title">Preflight's before-takeoff checklist, run on every push</title>
   <desc id="pf-desc">${esc(desc)}</desc>
   <style>
 ${fontCss}

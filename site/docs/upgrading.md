@@ -10,6 +10,8 @@ generator: Squire agent-ready
 
 This page is the checklist for moving an app from one Preflight pin to the next, one released version at a time, newest first; every section follows `CHANGELOG.md`. Read the section for the version you are moving to, apply its steps, and verify on the next pipeline. Like a real preflight, the walk takes a few minutes and earns its keep: move the pin only after you have read the version notes.
 
+Every input and job name a component offers is recorded in `contract/inputs.json`, and Preflight's build fails when a template drifts from it, so the file is the exact list of what moved. Before you move a pin, diff it between your tag and the next one (for example `git diff 0.3.1 0.4.0 -- contract/inputs.json` in a clone of Preflight) and check each line against that version's Breaking and Steps below. [The inputs contract](https://preflight.apps.wayne.edu/docs/guides/inputs-contract.html) explains what each kind of change means for your include.
+
 ## 0.4.0[#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-4-0)
 
 Released 2026-11-08. Two new inputs and a Composer floor. The proctor component's `git_depth` (default `"0"`) clones the full history, so PROCTOR's override-approver check can read git blame on every override line instead of reporting could-not-run past GitLab's 20-commit default. php-test's `php_advisory_version` runs one more PHP version, such as a release candidate, in a separate job that may fail. php-test and proctor refuse a `composer_version` older than 2.9.6, the floor with the 2026 security fixes.

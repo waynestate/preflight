@@ -53,3 +53,4 @@ Push the change. The components are ordinary jobs, so they run whenever the app'
 - [The a11y component](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html): the accessibility gate for a site's pages, in 0.2.0.
 - [The squire-kit component](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html): the check that a deploy kit still matches its Squire release, in 0.2.0.
 - [Reference](https://preflight.apps.wayne.edu/docs/reference/components.html): every component, with its inputs and defaults.
+- [The inputs contract](https://preflight.apps.wayne.edu/docs/guides/inputs-contract.html): what a pin promises your includes, and how to see what moved before you move it.

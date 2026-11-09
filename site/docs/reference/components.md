@@ -14,7 +14,7 @@ Note
 
 Components are GA on the Free tier since GitLab 17.0. They work only within the same GitLab instance that hosts this project.
 
-![Preflight's before-takeoff checklist card. 1 PROCTOR, checked; 2 PHP tests, 8.3, 8.4 and 8.5 pass; 3 Composer audit, no advisories; 4 SBOM, validated; 5 Pint, clean; 6 PHPStan, no errors; 7 ESLint and Prettier, clean; 8 a11y with axe-core, no violations; 9 clearance, cleared for takeoff. Beside it the annunciator panel lights a green lamp per check, with contract and freshness marked coming soon, and lists all thirteen components, every one in the 0.3.0 tag.](https://preflight.apps.wayne.edu/docs/readme/checklist.svg)
+![Preflight's before-takeoff checklist card. 1 PROCTOR, checked; 2 PHP tests, 8.3, 8.4 and 8.5 pass; 3 Composer audit, no advisories; 4 SBOM, validated; 5 Pint, clean; 6 PHPStan, no errors; 7 ESLint and Prettier, clean; 8 a11y with axe-core, no violations; 9 clearance, cleared for takeoff. Beside it the annunciator panel lights a green lamp per check, the contract lamp with the clearance and freshness marked coming soon, and lists all thirteen components, every one in the 0.4.0 tag.](https://preflight.apps.wayne.edu/docs/readme/checklist.svg)
 
 The checklist, item by item, with each item's job and timeout read from `templates/`:
 
@@ -28,7 +28,7 @@ The checklist, item by item, with each item's job and timeout read from `templat
 | 6 | PHPStan | `phpstan` | 10m |
 | 7 | ESLint and Prettier | `eslint` | 15m |
 
-The `a11y`, `squire-kit` and `portability` components are the next items on the card. They ship in 0.2.0 (`portability` in its one-job form), so the picture above, drawn before them, does not show them yet:
+The card runs the seven above and `a11y`; `squire-kit` and `portability` (in its one-job form) are on the panel's component list instead. All three have shipped since 0.2.0:
 
 | # | Item | Job | Timeout |
 | --- | --- | --- | --- |
@@ -37,6 +37,16 @@ The `a11y`, `squire-kit` and `portability` components are the next items on the 
 | 10 | Runs off Citadel: strict boot and six portability checks | `portability` | 30 minutes |
 
 Every job the templates define is `interruptible: true`. Every component takes a `job_name` input whose default is the job's usual name; set it when one project includes the same component more than once.
+
+## The inputs contract[#](https://preflight.apps.wayne.edu/docs/reference/components.html#the-inputs-contract)
+
+The inputs and job names on this page are a promise, written down in `contract/inputs.json`: every input's name, type, default and allowed pattern, and every job each component adds. Preflight's own build fails when a template drifts from it (`tests/ComponentsContractTest.php` in `composer ci`, and the `contract` job), so a change reaches a tag only on purpose, with the file rewritten by `composer contract:update` in the same commit. An input or job is renamed or removed only in a release whose [Upgrading](https://preflight.apps.wayne.edu/docs/upgrading.html) section lists it under Breaking; before 1.0 that is a new minor, never a patch. To see exactly what moved between your pin and the next tag:
+
+```
+git diff 0.3.1 0.4.0 -- contract/inputs.json
+```
+
+[The inputs contract](https://preflight.apps.wayne.edu/docs/guides/inputs-contract.html) has the whole story: what counts as breaking, why defaults still move, and how to read the diff.
 
 ## proctor[#](https://preflight.apps.wayne.edu/docs/reference/components.html#proctor)
 

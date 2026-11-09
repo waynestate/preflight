@@ -45,10 +45,28 @@ the same GitLab instance that hosts this project.
 ## Components
 
 <div align="center">
-  <img src="docs/readme/checklist.svg" width="100%" alt="Preflight's before-takeoff checklist card. 1 PROCTOR, checked; 2 PHP tests, 8.3, 8.4 and 8.5 pass; 3 Composer audit, no advisories; 4 SBOM, validated; 5 Pint, clean; 6 PHPStan, no errors; 7 ESLint and Prettier, clean; 8 a11y with axe-core, no violations; 9 clearance, cleared for takeoff. Beside it the annunciator panel lights a green lamp per check, with contract and freshness marked coming soon, and lists all thirteen components, every one in the 0.3.0 tag.">
+  <img src="docs/readme/checklist.svg" width="100%" alt="Preflight's before-takeoff checklist card. 1 PROCTOR, checked; 2 PHP tests, 8.3, 8.4 and 8.5 pass; 3 Composer audit, no advisories; 4 SBOM, validated; 5 Pint, clean; 6 PHPStan, no errors; 7 ESLint and Prettier, clean; 8 a11y with axe-core, no violations; 9 clearance, cleared for takeoff. Beside it the annunciator panel lights a green lamp per check, the contract lamp with the clearance and freshness marked coming soon, and lists all thirteen components, every one in the 0.4.0 tag.">
 </div>
 
 <div align="center"><sub>The checklist, item by item, with each item's job and timeout read from <code>templates/</code>.</sub></div>
+
+### The inputs contract
+
+The inputs and job names below are a promise, written down in
+[`contract/inputs.json`](contract/inputs.json): every input's name, type, default
+and pattern, and every job each component adds. Preflight's own build fails when a
+template drifts from it (`tests/ComponentsContractTest.php` in `composer ci`, and the
+`contract` job), so the surface changes only on purpose, with the file rewritten by
+`composer contract:update` in the same commit. An input or job is renamed or removed
+only in a release whose [Upgrading](docs/upgrading.md) section lists it under Breaking,
+and before 1.0 that is a new minor, never a patch. Before you move a pin, see what moved:
+
+```
+git diff 0.3.1 0.4.0 -- contract/inputs.json
+```
+
+[The inputs contract](docs/guides/inputs-contract.md) explains what counts as breaking
+and why defaults such as image digests still move between releases.
 
 ### proctor
 

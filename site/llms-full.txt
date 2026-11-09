@@ -40,6 +40,24 @@ the same GitLab instance that hosts this project.
 
 ### Components
 
+#### The inputs contract
+
+The inputs and job names below are a promise, written down in
+[`contract/inputs.json`](https://github.com/waynestate/preflight/blob/HEAD/contract/inputs.json): every input's name, type, default
+and pattern, and every job each component adds. Preflight's own build fails when a
+template drifts from it (`tests/ComponentsContractTest.php` in `composer ci`, and the
+`contract` job), so the surface changes only on purpose, with the file rewritten by
+`composer contract:update` in the same commit. An input or job is renamed or removed
+only in a release whose [Upgrading](https://github.com/waynestate/preflight/blob/HEAD/docs/upgrading.md) section lists it under Breaking,
+and before 1.0 that is a new minor, never a patch. Before you move a pin, see what moved:
+
+```
+git diff 0.3.1 0.4.0 -- contract/inputs.json
+```
+
+[The inputs contract](https://github.com/waynestate/preflight/blob/HEAD/docs/guides/inputs-contract.md) explains what counts as breaking
+and why defaults such as image digests still move between releases.
+
 #### proctor
 
 Runs `vendor/bin/proctor check --format=codequality` and publishes the
@@ -954,7 +972,7 @@ Checklist complete. Tray tables up, tests green.
 - PHPSTAN
 - ESLINT
 - A11Y
-- CONTRACTcoming soon
+- CONTRACT
 - FRESHNESScoming soon
 - CLEARED FOR TAKEOFF
 
@@ -964,9 +982,9 @@ Cockpit placards
 
 ### Eight checks, one include each
 
-Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All eight are in the 0.4.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Five more components ship in the same tag, and the docs cover each one: `secret-detection`, `squire-kit`, `portability`, `package-publish` and `renovate`. New in 0.3.0: every component that pulls from Docker Hub goes through GitLab's Dependency Proxy on its own (the `image_prefix` input), so Docker Hub is asked once.
+Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All eight are in the 0.4.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Five more components ship in the same tag, and the docs cover each one: `secret-detection`, `squire-kit`, `portability`, `package-publish` and `renovate`. New in 0.4.0: `php-test` can run one extra PHP version as an advisory job, `proctor` takes a `git_depth`, and Composer has a 2.9.6 floor. Every input on these placards is held to [a written contract](https://preflight.apps.wayne.edu/#contract).
 
-in 0.3.0
+in 0.4.0
 
 #### proctor
 
@@ -987,7 +1005,7 @@ Runs PROCTOR's checks and publishes them as a Code Quality report.
 - **proctor_command**: `vendor/bin/proctor check --format=codequality`
 - **working_dir**: `.`
 
-in 0.3.0
+in 0.4.0
 
 #### php-test
 
@@ -1008,7 +1026,7 @@ The test command on each supported PHP version, one job per version.
 - **test_command**: `vendor/bin/phpunit`
 - **working_dir**: `.`
 
-in 0.3.0
+in 0.4.0
 
 #### composer-audit
 
@@ -1026,7 +1044,7 @@ Checks the passenger list.
 - **image**: `composer:2@sha256:…`
 - **working_dir**: `.`
 
-in 0.3.0
+in 0.4.0
 
 #### sbom
 
@@ -1045,7 +1063,7 @@ A validated CycloneDX SBOM, published as an artifact. The plugin installs global
 - **omit_dev**: `true`
 - **output**: `sbom.cdx.json`
 
-in 0.3.0
+in 0.4.0
 
 #### pint
 
@@ -1064,7 +1082,7 @@ The app's own Laravel Pint in test mode. The app requires `laravel/pint` and shi
 - **config**: `pint.json`
 - **working_dir**: `.`
 
-in 0.3.0
+in 0.4.0
 
 #### phpstan
 
@@ -1084,7 +1102,7 @@ The app's own PHPStan, with a Code Quality report. The app requires `phpstan/php
 - **memory_limit**: `1G`
 - **working_dir**: `.`
 
-in 0.3.0
+in 0.4.0
 
 #### eslint
 
@@ -1104,7 +1122,7 @@ The app's own ESLint and Prettier. The app requires `@waynestate/pinstripe`, `es
 - **eslint_args**: `.`
 - **prettier**: `true`
 
-in 0.3.0
+in 0.4.0
 
 #### a11y
 
@@ -1125,7 +1143,7 @@ Opens the pages in Chromium and fails on any axe-core violation, with the reflow
 - **base_url**: `""`
 - **wcag_tags**: `wcag21aa` and below
 
-in 0.3.0
+in 0.4.0
 
 #### php-package.yml
 
@@ -1145,10 +1163,46 @@ uses: waynestate/preflight/.github/workflows/php-package.yml@87d9b6fc6b0ed302dd7
 
 #### Deferred items
 
-On the list, not yet on board. Nothing to include until they land, and the next tag has no date yet. The accessibility suite and the Squire kit check left this list in 0.2.0.
+On the list, not yet on board. Nothing to include until it lands, and the next tag has no date yet. The accessibility suite and the Squire kit check left this list in 0.2.0; the contract suite left it after 0.4.0 and lights the CONTRACT lamp now (see [The inputs contract](https://preflight.apps.wayne.edu/#contract)).
 
-- Coming soonContract suiteNamed in the best practices as coming later. Not built yet.
 - Coming soonSite freshnessPlanned. Not in this repo yet.
+
+Type certificate
+
+### The inputs contract
+
+Your `include:` lines lean on names: an input like `php_versions`, a job called `php-test` that your own file may extend. Every one of them is written down in `contract/inputs.json`, and Preflight's build fails the moment a template drifts from it.
+
+Type certificate data sheet
+
+`php-test`
+
+**php-test inputs in contract/inputs.json. Rows marked revised changed from 0.3.1 to 0.4.0.**
+
+| Input | Type | Default |
+| --- | --- | --- |
+| `stage` | string | `test` |
+| `job_name` | string | `php-test` |
+| `image_prefix` | string | the Dependency Proxy |
+| `php_versions` | array | `8.3` `8.4` `8.5` |
+| `php_advisory_version` New: adds a `php-test-advisory` job | string | `""` (off) |
+| `composer_version` Revised: floor of 2.9.6 | string | `2.10.3` |
+| `test_command` | string | `vendor/bin/phpunit` |
+| `working_dir` | string | `.` |
+
+One of thirteen entries, abridged. A bar in the margin marks a line revised from 0.3.1 to 0.4.0, which also gave `proctor` a `git_depth` input.
+
+1. **Renames are announced.** An input or job is renamed or removed only in a release whose Upgrading notes list it under Breaking. Before 1.0 that is a new minor, never a patch.
+2. **Tighter counts too.** A pattern that stops a value you used to pass is breaking, and gets the same notice.
+3. **Defaults move in the open.** Image digests are defaults, and Renovate moves them. Leave an input unset and you get the new default when you move the pin.
+
+Before you move a pin, read the diff:
+
+```
+$ git diff 0.3.1 0.4.0 -- contract/inputs.json
+```
+
+[The inputs contract, in full](https://preflight.apps.wayne.edu/docs/guides/inputs-contract.html) [Upgrading](https://preflight.apps.wayne.edu/docs/upgrading.html)
 
 Quick start
 
@@ -1213,7 +1267,7 @@ jobs:
 
 #### Run Preflight's own checks locally
 
-From a clone of this repo: the template lint, its fixture tests, Pint and PHPStan through `composer ci`, then the inputs contract.
+From a clone of this repo: the template lint, its fixture tests, the inputs contract test, Pint and PHPStan through `composer ci`, then the contract job's own check. Changed an input on purpose? `composer contract:update` rewrites `contract/inputs.json` for the same commit.
 
 **Windows**
 
@@ -1383,7 +1437,7 @@ Preflight's own preflight
 - `image-latest` an image on `latest`
 - `image-no-digest` a warning: tagged, but not pinned by digest
 
-A known warning goes in `lint-allow.yml`, and every entry needs a `reason`, so someone has to write down why. On every pipeline, `contract/inputs.json` also holds each input's name, type and default, and each job's name, steady within a major version.
+A known warning goes in `lint-allow.yml`, and every entry needs a `reason`, so someone has to write down why. On every pipeline, `tests/ComponentsContractTest.php` also holds each template to [`contract/inputs.json`](https://preflight.apps.wayne.edu/#contract): every input's name, type, default and pattern, and every job's name.
 
 Wayne State app stack
 
@@ -1421,6 +1475,7 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 - Added: a must-fail check for package-publish (`tests/check-package-publish-fails.sh`, its .ps1 twin and the `must-fail-package-publish` job): a non-semver tag and a missing composer.json still stop the release before any registry contact.
 - Docs: README, the guides, the docs pages and the examples pin the 0.4.0 tag commit, and the upgrading page has a 0.4.0 section.
 - Added: a PHPUnit suite (`tests/ComponentsContractTest.php`, run as `composer test` inside `composer ci`) that parses every template and fails when a component no longer matches `contract/inputs.json`, naming the component and the added, removed or changed input or job and saying a rename is a breaking change; `composer contract:update` rewrites the contract from the templates when the change was made on purpose, and this run records the renovate `dry_run` regex the template already carries.
+- Docs: the inputs contract is documented where component users look: a new guide (`docs/guides/inputs-contract.md`, in the docs menu), sections in the README and the components reference, a diff-the-contract step in Upgrading, a link from Install, and a "Type certificate" section on the front page whose data sheet marks the lines 0.4.0 revised; the CONTRACT lamp is live, the "New in" line and the README checklist art speak for 0.4.0, and BEST_PRACTICES marks backlog item 6.1 (the `proctor` default command, now in PROCTOR's and CREED's pipelines) done.
 
 ### 0.4.0 (2026-11-08)[#](https://preflight.apps.wayne.edu/docs/changelog.html#0-4-0-2026-11-08)
 
@@ -2997,6 +3052,68 @@ A red `php-test-next` job is an early warning, not a stop. Drop the `allow_failu
 
 ---
 
+Source: https://preflight.apps.wayne.edu/docs/guides/inputs-contract.html
+
+## The inputs contract[#](https://preflight.apps.wayne.edu/docs/guides/inputs-contract.html#the-inputs-contract)
+
+Your app's `include:` lines lean on names: `php_versions`, `working_dir`, a job called `php-test` that your own `.gitlab-ci.yml` may extend. This page says what Preflight promises about those names, where the promise is written down, and how to read what changed before you move a pin. A pilot reads the weight and balance sheet before takeoff, not after the wheels leave the runway.
+
+### What the contract holds[#](https://preflight.apps.wayne.edu/docs/guides/inputs-contract.html#what-the-contract-holds)
+
+[`contract/inputs.json`](https://git.wayne.edu/enterprise-apps/preflight/-/blob/main/contract/inputs.json) lists every component in `templates/`, and for each one:
+
+- every input, in template order, with its `type`, its `default` (when it has one) and its `regex` (when the template limits the value);
+- every job the component adds, by name (php-test adds `php-test`, and `php-test-advisory` when `php_advisory_version` is set).
+
+An entry looks like this (php-test, abridged):
+
+```json
+"php-test": {
+  "inputs": [
+    { "name": "php_versions", "type": "array", "default": ["8.3", "8.4", "8.5"] },
+    { "name": "php_advisory_version", "type": "string", "default": "", "regex": "^$|^[0-9]+\\.[0-9]+([.][0-9A-Za-z]+)*$" },
+    { "name": "test_command", "type": "string", "default": "vendor/bin/phpunit" },
+    { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" }
+  ],
+  "jobs": ["php-test", "php-test-advisory"]
+}
+```
+
+### How Preflight holds itself to it[#](https://preflight.apps.wayne.edu/docs/guides/inputs-contract.html#how-preflight-holds-itself-to-it)
+
+The templates cannot drift from the file. Two checks compare them on every Preflight pipeline:
+
+- `tests/ComponentsContractTest.php`, a PHPUnit suite that `composer ci` runs. It parses every template and fails on any difference, naming the component and the input or job that was added, removed or changed, and it says that a rename is a breaking change.
+- `tests/check-contract.sh` and its `.ps1` twin, in the `contract` job, which make the same comparison and also reject any top-level key in a template that is not one of its jobs (no `default:`, `variables:` or `workflow:` leaking into your pipeline).
+
+When a change to the surface is made on purpose, the same commit rewrites the file with `composer contract:update`, so the change shows up in review as a diff of `contract/inputs.json`, not as a surprise in your pipeline.
+
+### What that means for your pin[#](https://preflight.apps.wayne.edu/docs/guides/inputs-contract.html#what-that-means-for-your-pin)
+
+- **Renames and removals are announced.** An input or job is renamed or removed only in a release whose section in [Upgrading](https://preflight.apps.wayne.edu/docs/upgrading.html) lists it under Breaking. Before 1.0, Preflight treats the minor number as the major one: breaking changes land in a new minor (0.3 to 0.4), and a patch (0.3.0 to 0.3.1) keeps every input, default and job name.
+- **A tighter `regex` counts as breaking.** A value your include used to pass can stop passing; 0.4.0's Composer floor on `composer_version` is the example, and its Upgrading section says so.
+- **Defaults move, in the open.** Pinned image digests are defaults too, and Renovate moves them between releases. If your include leaves an input unset, you get the new default when you move the pin; the contract diff shows each one.
+- **Your own job overrides keep working** as long as the job name is in the contract. Overriding a job by a name that is not there (an internal helper, a hidden `.key`) is not covered.
+
+### See what moved between two tags[#](https://preflight.apps.wayne.edu/docs/guides/inputs-contract.html#see-what-moved-between-two-tags)
+
+From a clone of Preflight, diff the contract between the tag you pin and the one you are moving to:
+
+```
+git diff 0.3.1 0.4.0 -- contract/inputs.json
+```
+
+From 0.3.1 to 0.4.0 that shows proctor's new `git_depth` input, php-test's `php_advisory_version` input and its `php-test-advisory` job, and the Composer floor (`regex`) on both components' `composer_version`. Every line of that diff should have a matching line in the version's Upgrading section; if one does not, open an issue.
+
+### Related[#](https://preflight.apps.wayne.edu/docs/guides/inputs-contract.html#related)
+
+- [Upgrading](https://preflight.apps.wayne.edu/docs/upgrading.html): what each release changed, and the steps to move a pin.
+- [Components](https://preflight.apps.wayne.edu/docs/reference/components.html): every component, with its inputs and defaults.
+- [Include a component twice](https://preflight.apps.wayne.edu/docs/guides/include-twice.html): the `job_name` input every component takes.
+- [Local checks](https://preflight.apps.wayne.edu/docs/reference/local-checks.html): `composer test`, `composer contract:update` and the rest of the scripts.
+
+---
+
 Source: https://preflight.apps.wayne.edu/docs/guides/instance-runner.html
 
 ## Strongly recommended: a git.wayne.edu instance runner[#](https://preflight.apps.wayne.edu/docs/guides/instance-runner.html#strongly-recommended-a-git-wayne-edu-instance-runner)
@@ -3405,6 +3522,7 @@ Push the change. The components are ordinary jobs, so they run whenever the app'
 - [The a11y component](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html): the accessibility gate for a site's pages, in 0.2.0.
 - [The squire-kit component](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html): the check that a deploy kit still matches its Squire release, in 0.2.0.
 - [Reference](https://preflight.apps.wayne.edu/docs/reference/components.html): every component, with its inputs and defaults.
+- [The inputs contract](https://preflight.apps.wayne.edu/docs/guides/inputs-contract.html): what a pin promises your includes, and how to see what moved before you move it.
 
 ---
 
@@ -3418,7 +3536,7 @@ Note
 
 Components are GA on the Free tier since GitLab 17.0. They work only within the same GitLab instance that hosts this project.
 
-![Preflight's before-takeoff checklist card. 1 PROCTOR, checked; 2 PHP tests, 8.3, 8.4 and 8.5 pass; 3 Composer audit, no advisories; 4 SBOM, validated; 5 Pint, clean; 6 PHPStan, no errors; 7 ESLint and Prettier, clean; 8 a11y with axe-core, no violations; 9 clearance, cleared for takeoff. Beside it the annunciator panel lights a green lamp per check, with contract and freshness marked coming soon, and lists all thirteen components, every one in the 0.3.0 tag.](https://preflight.apps.wayne.edu/docs/readme/checklist.svg)
+![Preflight's before-takeoff checklist card. 1 PROCTOR, checked; 2 PHP tests, 8.3, 8.4 and 8.5 pass; 3 Composer audit, no advisories; 4 SBOM, validated; 5 Pint, clean; 6 PHPStan, no errors; 7 ESLint and Prettier, clean; 8 a11y with axe-core, no violations; 9 clearance, cleared for takeoff. Beside it the annunciator panel lights a green lamp per check, the contract lamp with the clearance and freshness marked coming soon, and lists all thirteen components, every one in the 0.4.0 tag.](https://preflight.apps.wayne.edu/docs/readme/checklist.svg)
 
 The checklist, item by item, with each item's job and timeout read from `templates/`:
 
@@ -3432,7 +3550,7 @@ The checklist, item by item, with each item's job and timeout read from `templat
 | 6 | PHPStan | `phpstan` | 10m |
 | 7 | ESLint and Prettier | `eslint` | 15m |
 
-The `a11y`, `squire-kit` and `portability` components are the next items on the card. They ship in 0.2.0 (`portability` in its one-job form), so the picture above, drawn before them, does not show them yet:
+The card runs the seven above and `a11y`; `squire-kit` and `portability` (in its one-job form) are on the panel's component list instead. All three have shipped since 0.2.0:
 
 | # | Item | Job | Timeout |
 | --- | --- | --- | --- |
@@ -3441,6 +3559,16 @@ The `a11y`, `squire-kit` and `portability` components are the next items on the 
 | 10 | Runs off Citadel: strict boot and six portability checks | `portability` | 30 minutes |
 
 Every job the templates define is `interruptible: true`. Every component takes a `job_name` input whose default is the job's usual name; set it when one project includes the same component more than once.
+
+### The inputs contract[#](https://preflight.apps.wayne.edu/docs/reference/components.html#the-inputs-contract)
+
+The inputs and job names on this page are a promise, written down in `contract/inputs.json`: every input's name, type, default and allowed pattern, and every job each component adds. Preflight's own build fails when a template drifts from it (`tests/ComponentsContractTest.php` in `composer ci`, and the `contract` job), so a change reaches a tag only on purpose, with the file rewritten by `composer contract:update` in the same commit. An input or job is renamed or removed only in a release whose [Upgrading](https://preflight.apps.wayne.edu/docs/upgrading.html) section lists it under Breaking; before 1.0 that is a new minor, never a patch. To see exactly what moved between your pin and the next tag:
+
+```
+git diff 0.3.1 0.4.0 -- contract/inputs.json
+```
+
+[The inputs contract](https://preflight.apps.wayne.edu/docs/guides/inputs-contract.html) has the whole story: what counts as breaking, why defaults still move, and how to read the diff.
 
 ### proctor[#](https://preflight.apps.wayne.edu/docs/reference/components.html#proctor)
 
@@ -4461,6 +4589,8 @@ Source: https://preflight.apps.wayne.edu/docs/upgrading.html
 ## Upgrading[#](https://preflight.apps.wayne.edu/docs/upgrading.html#upgrading)
 
 This page is the checklist for moving an app from one Preflight pin to the next, one released version at a time, newest first; every section follows `CHANGELOG.md`. Read the section for the version you are moving to, apply its steps, and verify on the next pipeline. Like a real preflight, the walk takes a few minutes and earns its keep: move the pin only after you have read the version notes.
+
+Every input and job name a component offers is recorded in `contract/inputs.json`, and Preflight's build fails when a template drifts from it, so the file is the exact list of what moved. Before you move a pin, diff it between your tag and the next one (for example `git diff 0.3.1 0.4.0 -- contract/inputs.json` in a clone of Preflight) and check each line against that version's Breaking and Steps below. [The inputs contract](https://preflight.apps.wayne.edu/docs/guides/inputs-contract.html) explains what each kind of change means for your include.
 
 ### 0.4.0[#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-4-0)
 
