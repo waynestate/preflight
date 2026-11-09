@@ -85,6 +85,20 @@ include:
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
 | `git_depth` | string | `"0"` | How many commits the job clones (GitLab's `GIT_DEPTH`); the default `0` clones the full history, so PROCTOR's override-approver check can see who wrote each override. |
 
+The job also keeps PROCTOR's JSON report (what `--format=json` prints) as
+`proctor.json` in its artifact, for 30 days, whether it passed or failed.
+That file is what Rollcall reads with `ROLLCALL_PROCTOR_SOURCE=gitlab`: the
+fleet census takes each app's newest `proctor.json` instead of a folder of
+reports someone copied by hand. It needs PROCTOR 0.11.0 or later (`proctor
+check --record`). The job asks the app's own PROCTOR (`check --help`) and adds
+`--record "$CI_PROJECT_DIR/proctor.json"` only when it lists the option, so
+PROCTOR 0.10.0 and older run exactly as before and the runner just warns that
+`proctor.json` matched no files. The flag is added only to a plain
+`proctor check` command (letters, digits, spaces and `/ . _ = : , @ % + -`, no
+`--record` of its own); a `gate` command, or one with quotes, `$`, `;`, `&&`
+or a pipe, is left as written. The proctor line's exit code still decides the
+job.
+
 #### php-test
 
 Runs the test command on each supported PHP version through `parallel:matrix`.
@@ -990,7 +1004,7 @@ in 0.4.0
 
 Watches the cabin.
 
-Runs PROCTOR's checks and publishes them as a Code Quality report.
+Runs PROCTOR's checks, publishes a Code Quality report and, from the next release, keeps `proctor.json` for Rollcall.
 
 ```
 - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@87d9b6fc6b0ed302dd729986525282cd7b567ebd # 0.4.0
@@ -1470,6 +1484,7 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ### Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Added: the proctor job keeps PROCTOR's JSON report as `proctor.json` in its artifact (`paths: [proctor.json]`, `expire_in: 30 days`, still `when: always` next to the Code Quality report), the file Rollcall reads with `ROLLCALL_PROCTOR_SOURCE=gitlab`. A guard adds `--record "$CI_PROJECT_DIR/proctor.json"` only when `proctor_command` is a plain `proctor check` line (no quotes, `$` or shell operators, no `--record` of its own) and the app's PROCTOR lists `--record` in its help (0.11.0 and later); PROCTOR 0.10.0 and older run exactly as before and the runner only warns that `proctor.json` matched no files. The proctor line alone still decides the job. `tests/check-proctor-fails` (sh and ps1) now runs the template's own guard and command line on three fakes: no `--record` (`tests/fixture-app`), a clean one with it (new `tests/proctor-record`) and the must-fail one with it (`tests/proctor-fails`), plus a gate command and a quoted one that must not get the flag.
 - Changed: every component default, Preflight's own CI and the docs move from Composer 2.10.3 to 2.11.1 (`composer:2.11.1@sha256:8de2184c...`, the multi-arch list digest; php-test's and proctor's `composer_version` default is `2.11.1`). Composer 2.11.0 fixed GHSA-c968-33g3-wh7p (package names that could escape the vendor directory) and GHSA-fm2w-xgf2-f9fh (inline repository headers written into `composer.lock`), and 2.10.x is no longer maintained. 2.11 removed `source-fallback`; no component sets it, and no component sets `policy.cooldown`. An app that overrides the `image` input (or sets `composer_version`) keeps its own pin and is unaffected.
 - Changed: the deploy kit is Squire 0.10.0 (was 0.7.1): release.sh keeps Composer and npm download caches in the app folder and the gate takes SQUIRE_PHP_RUNTIME; the compose file, health.php and .env.squire.example follow the template, and the portable image files are added.
 - Added: a must-fail check for composer-audit (`tests/check-composer-audit-fails.sh`, its .ps1 twin, the `must-fail-composer-audit` job and a malware fixture in `tests/audit-fixtures/malware`): Preflight's pipeline now runs the template's own lines and proves a known advisory and a malware-flagged version fail in every `abandoned` mode, an abandoned package fails only in `fail` mode, and a clean app passes. `tests/check-abandoned-input` keeps only its offline half and joins the contract job.
@@ -2436,11 +2451,32 @@ The job is `interruptible: true` with a `timeout: 30 minutes`. Its script:
 2. Copies the official Composer installer from `getcomposer.org` and verifies its SHA-384 against the signature fetched at runtime from `composer.github.io/installer.sig`. On a mismatch the check deletes the installer and exits 1. No `$` variables appear in the `php -r` code, so GitLab CI variable expansion cannot corrupt it.
 3. Runs the installer quietly with `--install-dir=/usr/local/bin --filename=composer` and the pinned `composer_version`, so Composer lands on PATH, then removes `composer-setup.php`.
 4. Changes into `working_dir` and runs `composer install --no-interaction --no-progress --no-plugins --no-scripts --ignore-platform-reqs`.
-5. Runs `proctor_command` and redirects the output to `"$CI_PROJECT_DIR/gl-code-quality-report.json"`. A plain redirect (not `tee`) keeps proctor's exit code as the job result, and the report is written at the project root so the artifact path is the same for every `working_dir`, including `.`.
+5. Decides whether to add `--record` (see [Keep the JSON report for Rollcall](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html#keep-the-json-report-for-rollcall)): only for a plain `proctor check` command whose PROCTOR lists `--record` in `check --help`.
+6. Runs `proctor_command`, plus `--record "$CI_PROJECT_DIR/proctor.json"` when step 5 said so, and redirects the output to `"$CI_PROJECT_DIR/gl-code-quality-report.json"`. A plain redirect (not `tee`) keeps proctor's exit code as the job result, and the report is written at the project root so the artifact path is the same for every `working_dir`, including `.`.
 
 The job keeps Composer downloads in a cache under `.composer-cache/` with the fixed key `preflight-proctor` (D-072), so repeat runs skip downloads and a lock change fetches only what changed.
 
-The job publishes the report with `artifacts: when: always` as a GitLab Code Quality report (`reports: codequality: gl-code-quality-report.json`).
+The job publishes the report with `artifacts: when: always` as a GitLab Code Quality report (`reports: codequality: gl-code-quality-report.json`), and keeps `proctor.json` in the same artifact (`paths: [proctor.json]`, `expire_in: 30 days`).
+
+### Keep the JSON report for Rollcall[#](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html#keep-the-json-report-for-rollcall)
+
+Goal: Rollcall, the fleet census, shows your app's latest PROCTOR result without anyone copying reports around. With `ROLLCALL_PROCTOR_SOURCE=gitlab`, Rollcall reads `proctor.json` from the artifact of the newest finished `proctor` job on your default branch, passed or failed. That file is PROCTOR's JSON report, the same document `--format=json` prints, written by `proctor check --record` next to the Code Quality output.
+
+Nothing to set: the job does it when your app's PROCTOR is 0.11.0 or later. Before it runs the command, the job checks three things, and adds `--record "$CI_PROJECT_DIR/proctor.json"` only when all hold:
+
+1. `proctor_command` is a plain `proctor check` line: letters, digits, spaces and `/ . _ = : , @ % + -` only. A command with quotes, `$`, `;`, `&&` or a pipe is left as written, so the flag never lands on whatever runs after a shell operator. A `gate` command is left alone too: its `--record` writes a deploy verdict, not the report Rollcall reads.
+2. The command does not pass `--record` itself.
+3. Your PROCTOR lists `--record` in `proctor check --help` (the job runs the command up to `proctor check`, then `--help`; the rest is left off because Symfony's help has its own `--format` and would refuse `codequality`).
+
+On PROCTOR 0.10.0 or older the job runs exactly as before (those releases exit 2 on an unknown option, so the flag is never sent), the log says no `proctor.json` was kept, and the runner warns `proctor.json: no matching files` while the job keeps its result. Move the app to PROCTOR 0.11.0 or later (`composer require --dev waynestate/proctor:^0.11`, since a `^0.10` constraint stops below 0.11) to start feeding Rollcall.
+
+Note
+
+The guard never changes pass or fail: its `--help` run's exit code is ignored, and the proctor line alone decides the job, as before. When Rollcall reads the job under another name, set `ROLLCALL_PROCTOR_JOB` to your `job_name`.
+
+Tip
+
+A custom command that the guard skips can keep the file on its own: add `--record "$CI_PROJECT_DIR/proctor.json"` to it. The artifact path is the same.
 
 Tip
 
@@ -3595,7 +3631,7 @@ include:
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
 | `git_depth` | string | `"0"` | How many commits the job clones (GitLab's `GIT_DEPTH`); the default `0` clones the full history, so PROCTOR's override-approver check can see who wrote each override. |
 
-From `templates/proctor/template.yml`: the single job (named by `job_name`) runs in the `test` stage by default, is `interruptible: true`, and has a timeout of 30 minutes. It installs Composer with the official getcomposer.org installer, verifies the installer's SHA-384 against composer.github.io/installer.sig, and pins the installed version to `composer_version`. It then runs `composer install --no-interaction --no-progress --no-plugins --no-scripts --ignore-platform-reqs`, so the app's plugins and scripts never run with the job's access and the app's PHP version and extensions are not required. The command's output goes through a plain redirect (not `tee`) to `gl-code-quality-report.json` at the project root, which keeps PROCTOR's exit code as the job result and gives the artifact the same path for every `working_dir`, including `.`. The report is published as a Code Quality report with `when: always`.
+From `templates/proctor/template.yml`: the single job (named by `job_name`) runs in the `test` stage by default, is `interruptible: true`, and has a timeout of 30 minutes. It installs Composer with the official getcomposer.org installer, verifies the installer's SHA-384 against composer.github.io/installer.sig, and pins the installed version to `composer_version`. It then runs `composer install --no-interaction --no-progress --no-plugins --no-scripts --ignore-platform-reqs`, so the app's plugins and scripts never run with the job's access and the app's PHP version and extensions are not required. The command's output goes through a plain redirect (not `tee`) to `gl-code-quality-report.json` at the project root, which keeps PROCTOR's exit code as the job result and gives the artifact the same path for every `working_dir`, including `.`. The report is published as a Code Quality report with `when: always`. Before the command runs, a guard adds `--record "$CI_PROJECT_DIR/proctor.json"` when the command is a plain `proctor check` line (letters, digits, spaces and `/ . _ = : , @ % + -` only, no `--record` of its own) and the app's PROCTOR lists `--record` in its help (0.11.0 and later); the guard reads the command from the job variable `PREFLIGHT_PROCTOR_COMMAND` and cannot change the job's result. The artifact keeps `proctor.json` (`paths`, `expire_in: 30 days`), PROCTOR's JSON report for Rollcall's `ROLLCALL_PROCTOR_SOURCE=gitlab` reader; on PROCTOR 0.10.0 or older no file is written and the runner only warns.
 
 ### php-test[#](https://preflight.apps.wayne.edu/docs/reference/components.html#php-test)
 
