@@ -29,7 +29,7 @@ Add the include to the app's `.gitlab-ci.yml`, pinned to the full commit SHA of 
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/secret-detection@87d9b6fc6b0ed302dd729986525282cd7b567ebd # 0.4.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/secret-detection@60314791565a264e97cb210813ef4f3e76512402 # 0.5.0
 ```
 
 ## Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-secret-detection.html#inputs)

@@ -47,14 +47,14 @@ An app with no lock file (no `package-lock.json` or `npm-shrinkwrap.json`) passe
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<full commit SHA> # 0.5.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@60314791565a264e97cb210813ef4f3e76512402 # 0.5.0
 ```
 
 3. Optional: add `npm-audit` for an app with a front end:
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@<full commit SHA> # 0.5.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@60314791565a264e97cb210813ef4f3e76512402 # 0.5.0
     inputs:
       audit_level: high
 ```

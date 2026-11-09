@@ -16,7 +16,7 @@ Goal: your app's pipeline fails whenever a locked runtime npm package has a know
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@<full commit SHA> # 0.5.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@60314791565a264e97cb210813ef4f3e76512402 # 0.5.0
     inputs:
       working_dir: .
 ```

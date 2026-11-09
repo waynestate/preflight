@@ -13,7 +13,11 @@ are Git tags.
 
 ## Unreleased
 
+- Docs: README, the guides, the docs pages, the examples and the front page pin the 0.5.0 tag commit; the Upgrading page and the npm-audit examples name it in place of the full commit SHA placeholder, and the front page placards say "in 0.5.0" and count npm-audit among the components that ship in the tag.
+
 ## 0.5.0 (2026-11-09)
+
+Tag commit: `60314791565a264e97cb210813ef4f3e76512402` (pin this SHA, with `# 0.5.0` in a trailing comment).
 
 A new component and a probe that boots Apache the way a container runtime does: `npm-audit` fails on npm advisories
 at or above `audit_level` (default `high`), the portability job starts each replica with stdio its uid owns and a
