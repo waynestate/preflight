@@ -6,6 +6,7 @@ are Git tags.
 
 ## Unreleased
 
+- Added: a must-fail check for package-publish (`tests/check-package-publish-fails.sh`, its .ps1 twin and the `must-fail-package-publish` job): a non-semver tag and a missing composer.json still stop the release before any registry contact.
 - Docs: README, the guides, the docs pages and the examples pin the 0.4.0 tag commit, and the upgrading page has a 0.4.0 section.
 
 ## 0.4.0 (2026-11-08)

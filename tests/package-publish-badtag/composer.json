@@ -1,0 +1,4 @@
+{
+    "name": "acme/demo",
+    "description": "Preflight must-fail fixture: a valid package for the package-publish offline guards."
+}

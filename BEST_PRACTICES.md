@@ -992,8 +992,10 @@ carries one unused `const`, against the clean case in `tests/eslint-clean` (`tes
 `sbom` runs Composer and the CycloneDX plugin on `tests/sbom-fails`, whose `composer.lock` is not valid JSON,
 against the clean case in `tests/sbom-clean`, whose SBOM lists `psr/log` and not the dev-only `psr/container`
 (`tests/check-sbom-fails`, run in CI by `must-fail-sbom`).
-Still missing: a malware-flagged version fixture for `composer-audit` (see 4.6 and 4.11), and a must-fail fixture
-for `package-publish`; `renovate` is a config, not a job, so it has nothing to fail.
+Still missing: a malware-flagged version fixture for `composer-audit` (see 4.6 and 4.11); `package-publish`'s
+offline guards are covered by `tests/check-package-publish-fails.sh` (run in CI by `must-fail-package-publish`),
+while its moved-version path needs a live registry and stays untested; `renovate` is a config, not a job, so it
+has nothing to fail.
 
 ### 7.3 Use the stack's own projects as the first users
 Each stack repo includes Preflight, pinned.
