@@ -358,7 +358,7 @@
             <summary>3 inputs</summary>
             <dl>
               <dt>stage</dt><dd><code>test</code></dd>
-              <dt>image</dt><dd><code>composer:2@sha256:…</code></dd>
+              <dt>image</dt><dd><code>composer:2.11.1@sha256:…</code></dd>
               <dt>working_dir</dt><dd><code>.</code></dd>
             </dl>
           </details>
@@ -636,8 +636,8 @@ jobs:
 <span class="t-dim">PS&gt;</span> composer ci
 <span class="t-dim">PS&gt;</span> pwsh -File tests/check-contract.ps1</code></pre>
               <p class="os-note">No PHP on the machine? Docker does it:</p>
-<pre class="term"><code><span class="t-dim">PS&gt;</span> docker run --rm -v "${PWD}:/app" -w /app composer:2 composer install
-<span class="t-dim">PS&gt;</span> docker run --rm -v "${PWD}:/app" -w /app composer:2 composer ci</code></pre>
+<pre class="term"><code><span class="t-dim">PS&gt;</span> docker run --rm -v "${PWD}:/app" -w /app composer:2.11.1 composer install
+<span class="t-dim">PS&gt;</span> docker run --rm -v "${PWD}:/app" -w /app composer:2.11.1 composer ci</code></pre>
             </div>
             <div class="wsu-tabs__panel" role="tabpanel" id="panel-nix" aria-labelledby="tab-nix" tabindex="0" hidden>
               <p class="os-note"><code>composer ci</code> needs PHP 8.3+ and Composer; the contract check needs yq v4.</p>
@@ -645,8 +645,8 @@ jobs:
 <span class="t-dim">$</span> composer ci
 <span class="t-dim">$</span> sh tests/check-contract.sh</code></pre>
               <p class="os-note">No PHP on the machine? Docker does it:</p>
-<pre class="term"><code><span class="t-dim">$</span> docker run --rm -v "$(pwd):/app" -w /app composer:2 composer install
-<span class="t-dim">$</span> docker run --rm -v "$(pwd):/app" -w /app composer:2 composer ci</code></pre>
+<pre class="term"><code><span class="t-dim">$</span> docker run --rm -v "$(pwd):/app" -w /app composer:2.11.1 composer install
+<span class="t-dim">$</span> docker run --rm -v "$(pwd):/app" -w /app composer:2.11.1 composer ci</code></pre>
             </div>
           </div>
         </article>

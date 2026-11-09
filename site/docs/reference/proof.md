@@ -79,17 +79,17 @@ Include the components in your app's `.gitlab-ci.yml` as the [Quick start](https
 Linux / macOS
 
 ```sh
-docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2 composer require --dev waynestate/proctor --no-scripts --ignore-platform-reqs
-docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2 composer install --no-plugins --no-scripts --ignore-platform-reqs
-docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2 vendor/bin/proctor check
+docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 composer require --dev waynestate/proctor --no-scripts --ignore-platform-reqs
+docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 composer install --no-plugins --no-scripts --ignore-platform-reqs
+docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 vendor/bin/proctor check
 ```
 
 Windows
 
 ```powershell
-docker run --rm -v "${PWD}:/app" -v stack-composer-cache:/tmp/cache -w /app composer:2 composer require --dev waynestate/proctor --no-scripts --ignore-platform-reqs
-docker run --rm -v "${PWD}:/app" -v stack-composer-cache:/tmp/cache -w /app composer:2 composer install --no-plugins --no-scripts --ignore-platform-reqs
-docker run --rm -v "${PWD}:/app" -v stack-composer-cache:/tmp/cache -w /app composer:2 vendor/bin/proctor check
+docker run --rm -v "${PWD}:/app" -v stack-composer-cache:/tmp/cache -w /app composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 composer require --dev waynestate/proctor --no-scripts --ignore-platform-reqs
+docker run --rm -v "${PWD}:/app" -v stack-composer-cache:/tmp/cache -w /app composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 composer install --no-plugins --no-scripts --ignore-platform-reqs
+docker run --rm -v "${PWD}:/app" -v stack-composer-cache:/tmp/cache -w /app composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 vendor/bin/proctor check
 ```
 
 The `stack-composer-cache` volume keeps Composer's downloads between runs; Docker creates it the first time.

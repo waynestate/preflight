@@ -464,7 +464,7 @@ Sources: [GitLab: pipeline security, Docker images](https://docs.gitlab.com/ci/p
 [OpenSSF Scorecard: Pinned-Dependencies](https://github.com/ossf/scorecard/blob/main/docs/checks.md).
 
 **How the stack holds it: Enforced.** The `proctor` and `composer-audit` image defaults carry a digest
-(`php:8.4-cli-trixie@sha256:...` and `composer:2@sha256:...`), and the README's "Updating image pins" says how to move them.
+(`php:8.4-cli-trixie@sha256:...` and `composer:2.11.1@sha256:...`), and the README's "Updating image pins" says how to move them.
 The exception is `php-test`: its matrix image `php:${PHP_VERSION}-cli-trixie` is still a tag, because each version would need its own digest.
 The template lint (`bin/lint-templates`, run by `composer ci`) fails on `latest` or tag-less images and warns on tag-only images, so a new template cannot drift back to an unpinned image without a reviewed `lint-allow.yml` entry.
 

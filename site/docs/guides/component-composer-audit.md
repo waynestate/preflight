@@ -38,7 +38,7 @@ The template adds regexes to three inputs: `job_name` must match `^[A-Za-z0-9_][
 
 ## What the job does[#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#what-the-job-does)
 
-The `composer:2` image already ships Composer, so no install step is needed. The job is `interruptible: true` with a `timeout: 30 minutes`. Its script changes into `working_dir` and runs `composer audit --locked` with `--abandoned` set to the `abandoned` input (see Abandoned packages below). The command exits non-zero when it finds advisories, which fails the job.
+The Composer image (`composer:2.11.1`, pinned by digest) already ships Composer, so no install step is needed. The job is `interruptible: true` with a `timeout: 30 minutes`. Its script changes into `working_dir` and runs `composer audit --locked` with `--abandoned` set to the `abandoned` input (see Abandoned packages below). The command exits non-zero when it finds advisories, which fails the job.
 
 Warning
 

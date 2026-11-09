@@ -146,7 +146,7 @@ include:
 | `working_dir` | string | `.` | Directory to run composer audit in, relative to the project root. |
 | `abandoned` | string | `fail` | How composer audit treats abandoned packages: fail (default), report (list them, do not fail) or ignore. |
 
-From `templates/composer-audit/template.yml`: the `composer:2` image already ships Composer, so there is no install step. The job runs `composer audit --locked` with `--abandoned` set to the `abandoned` input (`fail` by default, `report` or `ignore` to relax the abandoned check), which exits non-zero when it finds advisories, and fails the job. There is no `allow_failure` input: advisories must fail. The job is `interruptible: true` with a timeout of 30 minutes.
+From `templates/composer-audit/template.yml`: the Composer image (`composer:2.11.1`, pinned by digest) already ships Composer, so there is no install step. The job runs `composer audit --locked` with `--abandoned` set to the `abandoned` input (`fail` by default, `report` or `ignore` to relax the abandoned check), which exits non-zero when it finds advisories, and fails the job. There is no `allow_failure` input: advisories must fail. The job is `interruptible: true` with a timeout of 30 minutes.
 
 ### Run it on a schedule[#](https://preflight.apps.wayne.edu/docs/reference/components.html#run-it-on-a-schedule)
 

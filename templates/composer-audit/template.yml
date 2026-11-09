@@ -33,7 +33,7 @@ spec:
 ---
 "$[[ inputs.job_name ]]":
   stage: $[[ inputs.stage ]]
-  # The composer:2 image already ships Composer, so no install step is
+  # The composer image already ships Composer, so no install step is
   # needed. composer audit --locked exits non-zero when it finds advisories,
   # which fails the job. Abandoned packages fail by default (Composer's own
   # default); the abandoned input relaxes that on purpose: report lists them

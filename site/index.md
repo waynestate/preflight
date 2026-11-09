@@ -147,7 +147,7 @@ Checks the passenger list.
 **3 inputs**
 
 - **stage**: `test`
-- **image**: `composer:2@sha256:…`
+- **image**: `composer:2.11.1@sha256:…`
 - **working_dir**: `.`
 
 in 0.4.0
@@ -388,8 +388,8 @@ PS> pwsh -File tests/check-contract.ps1
 No PHP on the machine? Docker does it:
 
 ```
-PS> docker run --rm -v "${PWD}:/app" -w /app composer:2 composer install
-PS> docker run --rm -v "${PWD}:/app" -w /app composer:2 composer ci
+PS> docker run --rm -v "${PWD}:/app" -w /app composer:2.11.1 composer install
+PS> docker run --rm -v "${PWD}:/app" -w /app composer:2.11.1 composer ci
 ```
 
 **macOS · Linux**
@@ -405,8 +405,8 @@ $ sh tests/check-contract.sh
 No PHP on the machine? Docker does it:
 
 ```
-$ docker run --rm -v "$(pwd):/app" -w /app composer:2 composer install
-$ docker run --rm -v "$(pwd):/app" -w /app composer:2 composer ci
+$ docker run --rm -v "$(pwd):/app" -w /app composer:2.11.1 composer install
+$ docker run --rm -v "$(pwd):/app" -w /app composer:2.11.1 composer ci
 ```
 
 Crew resource management

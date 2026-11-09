@@ -884,8 +884,8 @@ Maintainers: how to build, test and release this project, and where its data com
 Run the template lint and the fixture tests with Docker:
 
 ```sh
-docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2 composer install
-docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2 composer ci
+docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 composer install
+docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 composer ci
 ```
 
 The `stack-composer-cache` volume keeps Composer's downloads between runs; Docker creates it the first time.
@@ -893,14 +893,14 @@ The `stack-composer-cache` volume keeps Composer's downloads between runs; Docke
 In PowerShell, use `${PWD}` instead of `$(pwd)`:
 
 ```powershell
-docker run --rm -v "${PWD}:/app" -v stack-composer-cache:/tmp/cache -w /app composer:2 composer install
-docker run --rm -v "${PWD}:/app" -v stack-composer-cache:/tmp/cache -w /app composer:2 composer ci
+docker run --rm -v "${PWD}:/app" -v stack-composer-cache:/tmp/cache -w /app composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 composer install
+docker run --rm -v "${PWD}:/app" -v stack-composer-cache:/tmp/cache -w /app composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 composer ci
 ```
 
 Run the PHP fixture app separately:
 
 ```sh
-docker run --rm -v "$(pwd)/tests/fixture-app:/app" -v stack-composer-cache:/tmp/cache -w /app composer:2 composer install
+docker run --rm -v "$(pwd)/tests/fixture-app:/app" -v stack-composer-cache:/tmp/cache -w /app composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 composer install
 docker run --rm -v "$(pwd)/tests/fixture-app:/app" -w /app php:8.4-cli vendor/bin/phpunit
 ```
 

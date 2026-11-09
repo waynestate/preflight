@@ -74,7 +74,7 @@ rewrite it with Squire (`squire update`, then `squire init`, on the folder) so i
 With only Docker:
 
 ```
-docker run --rm -v "${PWD}:/app" -w /app composer:2.11.1 sh -c "composer install --no-interaction && composer ci"
+docker run --rm -v "${PWD}:/app" -w /app composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 sh -c "composer install --no-interaction && composer ci"
 ```
 
 The fixture app in `tests/fixture-app` is what the components run against in CI. To run its tests by hand, install

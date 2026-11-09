@@ -34,7 +34,7 @@ include:
 
 ## What the job does
 
-The `composer:2` image already ships Composer, so no install step is needed. The job is `interruptible: true` with a `timeout: 30 minutes`. Its script changes into `working_dir` and runs `composer audit --locked` with `--abandoned` set to the `abandoned` input (see Abandoned packages below). The command exits non-zero when it finds advisories, which fails the job.
+The Composer image (`composer:2.11.1`, pinned by digest) already ships Composer, so no install step is needed. The job is `interruptible: true` with a `timeout: 30 minutes`. Its script changes into `working_dir` and runs `composer audit --locked` with `--abandoned` set to the `abandoned` input (see Abandoned packages below). The command exits non-zero when it finds advisories, which fails the job.
 
 > [!WARNING]
 > The component carries no `allow_failure` input on purpose: a known advisory must fail the pipeline.

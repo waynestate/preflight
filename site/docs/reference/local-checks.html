@@ -45,11 +45,11 @@
 <aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>Maintainers: how to build, test and release this project, and where its data comes from, is in <a rel="noopener" href="https://git.wayne.edu/enterprise-apps/preflight/-/blob/main/MAINTAINING.md">MAINTAINING.md</a> on the canonical repository.</p></aside>
 <h2 id="the-full-gate">The full gate<a class="docs-heading-link" aria-label="Link to this section" href="#the-full-gate">#</a></h2>
 <p>Run the template lint and the fixture tests with Docker:</p>
-<div class="docs-tabs" data-tabs="linux|windows"><div class="docs-tabs__panel" data-tab-label="linux"><p class="docs-tabs__label">linux</p><pre tabindex="0"><code class="language-sh">docker run --rm -v &quot;$(pwd):/app&quot; -v stack-composer-cache:/tmp/cache -w /app composer:2 composer install
-docker run --rm -v &quot;$(pwd):/app&quot; -v stack-composer-cache:/tmp/cache -w /app composer:2 composer ci
+<div class="docs-tabs" data-tabs="linux|windows"><div class="docs-tabs__panel" data-tab-label="linux"><p class="docs-tabs__label">linux</p><pre tabindex="0"><code class="language-sh">docker run --rm -v &quot;$(pwd):/app&quot; -v stack-composer-cache:/tmp/cache -w /app composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 composer install
+docker run --rm -v &quot;$(pwd):/app&quot; -v stack-composer-cache:/tmp/cache -w /app composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 composer ci
 </code></pre></div>
-<div class="docs-tabs__panel" data-tab-label="windows"><p class="docs-tabs__label">windows</p><pre tabindex="0"><code class="language-powershell">docker run --rm -v &quot;${PWD}:/app&quot; -v stack-composer-cache:/tmp/cache -w /app composer:2 composer install
-docker run --rm -v &quot;${PWD}:/app&quot; -v stack-composer-cache:/tmp/cache -w /app composer:2 composer ci
+<div class="docs-tabs__panel" data-tab-label="windows"><p class="docs-tabs__label">windows</p><pre tabindex="0"><code class="language-powershell">docker run --rm -v &quot;${PWD}:/app&quot; -v stack-composer-cache:/tmp/cache -w /app composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 composer install
+docker run --rm -v &quot;${PWD}:/app&quot; -v stack-composer-cache:/tmp/cache -w /app composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 composer ci
 </code></pre></div></div>
 <p>The <code>stack-composer-cache</code> volume keeps Composer's downloads between runs; Docker creates it the first time.</p>
 <p>In PowerShell, use <code>${PWD}</code> instead of <code>$(pwd)</code>. <code>composer ci</code> is the whole gate: it runs the template lint, the fixture tests, Pint, PHPStan, the unit tests, the agent-ready file check and the docs site check, in that order.</p>
@@ -139,7 +139,7 @@ docker run --rm -v &quot;${PWD}:/app&quot; -v stack-composer-cache:/tmp/cache -w
 </table></div>
 <h2 id="the-php-fixture-app">The PHP fixture app<a class="docs-heading-link" aria-label="Link to this section" href="#the-php-fixture-app">#</a></h2>
 <p>Run the PHP fixture app separately:</p>
-<pre tabindex="0"><code class="language-sh">docker run --rm -v &quot;$(pwd)/tests/fixture-app:/app&quot; -v stack-composer-cache:/tmp/cache -w /app composer:2 composer install
+<pre tabindex="0"><code class="language-sh">docker run --rm -v &quot;$(pwd)/tests/fixture-app:/app&quot; -v stack-composer-cache:/tmp/cache -w /app composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 composer install
 docker run --rm -v &quot;$(pwd)/tests/fixture-app:/app&quot; -w /app php:8.4-cli vendor/bin/phpunit
 </code></pre>
 <h2 id="the-portability-fixtures">The portability fixtures<a class="docs-heading-link" aria-label="Link to this section" href="#the-portability-fixtures">#</a></h2>
