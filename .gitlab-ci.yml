@@ -22,6 +22,12 @@ include:
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/sbom@$CI_COMMIT_SHA
     inputs:
       stage: audit
+  # The npm-audit component at this commit, on a lock with no advisory: it
+  # must pass. must-fail-npm-audit below proves a known advisory fails.
+  - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/npm-audit@$CI_COMMIT_SHA
+    inputs:
+      stage: audit
+      working_dir: tests/npm-audit-fixtures/clean
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/pint@$CI_COMMIT_SHA
     inputs:
       working_dir: tests/fixture-app
@@ -159,6 +165,23 @@ must-fail-composer-audit:
   image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0
   script:
     - sh tests/check-composer-audit-fails.sh
+
+# The must-fail fixtures for the npm-audit component: the check proves the
+# template keeps the job honest (no allow_failure, the gate's exit code
+# kept, the one || true on the report line only, the .npmrc override flags
+# in place), then runs the template's own script on fixed locks: lodash
+# 4.17.20 (GHSA-35jh-r3h4-6jhm, high) fails at high and medium and passes at
+# critical, an .npmrc that turns the audit off still fails, a dev-only
+# finding fails only with omit_dev false, and a clean lock, an app with no
+# lock and an unreachable registry behave as the docs say. npm audit asks
+# the registry, so this job needs outbound HTTPS, like the component; it
+# installs nothing, so it keeps no cache. Runs in the template's own image,
+# pinned by digest.
+must-fail-npm-audit:
+  stage: test
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/node:22.13-alpine@sha256:e2b39f7b64281324929257d0f8004fb6cb4bf0fdfb9aa8cedb235a766aec31da
+  script:
+    - sh tests/check-npm-audit-fails.sh
 
 # The must-fail fixture for the secret-detection component: the check proves
 # the template keeps the gitleaks dir line that lets Gitleaks' exit code be

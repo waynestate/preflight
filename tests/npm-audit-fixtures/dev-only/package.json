@@ -1,0 +1,12 @@
+{
+  "name": "npm-audit-dev-only",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Fixture for the npm-audit component: the vulnerable lodash is a dev dependency only.",
+  "dependencies": {
+    "is-number": "7.0.0"
+  },
+  "devDependencies": {
+    "lodash": "4.17.20"
+  }
+}

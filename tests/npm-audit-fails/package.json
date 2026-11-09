@@ -1,0 +1,9 @@
+{
+  "name": "npm-audit-fails",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Must-fail fixture for the npm-audit component: lodash 4.17.20 carries GHSA-35jh-r3h4-6jhm (high).",
+  "dependencies": {
+    "lodash": "4.17.20"
+  }
+}

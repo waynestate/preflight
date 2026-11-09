@@ -1,0 +1,6 @@
+{
+  "name": "npm-audit-no-lock",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Fixture for the npm-audit component: a package.json with no lock file, so there is nothing to audit."
+}

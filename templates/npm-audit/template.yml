@@ -1,0 +1,99 @@
+# npm-audit: run npm audit on the app's package-lock.json and fail on
+# advisories at or above audit_level.
+#
+# The front-end half of composer-audit. It reads the lock only (nothing is
+# installed), so the app's install scripts never run here.
+---
+spec:
+  component: [name, version, sha, reference]
+  description: "Run npm audit on the app's lock file and fail on advisories at or above a severity."
+  inputs:
+    stage:
+      type: string
+      default: test
+      description: "Pipeline stage for the npm-audit job."
+    job_name:
+      type: string
+      default: npm-audit
+      description: "Name of the job. Set it when you include this component more than once."
+      regex: '^[A-Za-z0-9_][A-Za-z0-9_.-]*$'
+    image:
+      type: string
+      default: "node:22.13-alpine@sha256:e2b39f7b64281324929257d0f8004fb6cb4bf0fdfb9aa8cedb235a766aec31da"
+      description: "Container image used to run npm audit."
+    image_prefix:
+      description: "Registry path put in front of the image input. The default is this group's GitLab Dependency Proxy, so Docker Hub images are pulled once and then served from GitLab's cache. On a GitLab or group without the proxy, set it to docker.io."
+      type: string
+      default: "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}"
+      # No trailing slash: the job joins the two as image_prefix/image.
+      regex: '^[^/\s](\S*[^/\s])?$'
+    working_dir:
+      type: string
+      default: "."
+      description: "Directory that holds package-lock.json, relative to the repository root."
+      regex: '^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$'
+    audit_level:
+      type: string
+      default: high
+      description: "Lowest severity that fails the job: low, moderate, high or critical. medium (the word CREED's policy and Composer use) means moderate."
+      regex: '^(low|moderate|medium|high|critical)$'
+    omit_dev:
+      type: boolean
+      default: true
+      description: "Whether the failing audit leaves dev dependencies out. A second, full report always lists them and never fails."
+---
+"$[[ inputs.job_name ]]":
+  stage: $[[ inputs.stage ]]
+  image: $[[ inputs.image_prefix ]]/$[[ inputs.image ]]
+  interruptible: true
+  timeout: 10 minutes
+  # npm audit installs nothing, but it fetches package metadata, and the
+  # app's own npm jobs keep a cache. The key is fixed (D-072) and is npm,
+  # with the path Sourdough's generated pipelines use, so this job reads the
+  # app's cache. It only pulls: an audit running next to the install job
+  # never overwrites the packages that job just downloaded.
+  cache:
+    key: npm
+    paths:
+      - .cache/npm/
+    policy: pull
+    when: always  # D-072; with policy: pull nothing is uploaded
+  variables:
+    npm_config_cache: "$CI_PROJECT_DIR/.cache/npm"
+    NPM_CONFIG_UPDATE_NOTIFIER: "false"
+  # No allow_failure input: an advisory at or above audit_level must fail.
+  # --audit=true --offline=false override an .npmrc that sets audit=false or
+  # offline=true: either makes npm skip the request and print "found 0
+  # vulnerabilities", a pass that audited nothing. An unreachable registry
+  # makes npm exit non-zero ("audit endpoint returned an error"); the job
+  # keeps that exit code and says why.
+  script:
+    - echo "Preflight component $[[ component.name ]] $[[ component.version ]] (ref $[[ component.reference ]], sha $[[ component.sha ]])"
+    - cd "$[[ inputs.working_dir ]]"
+    - |
+      set -eu
+      level="$[[ inputs.audit_level ]]"
+      if [ "$level" = medium ]; then level=moderate; fi
+      if [ ! -f package-lock.json ] && [ ! -f npm-shrinkwrap.json ]; then
+        echo "npm-audit: no lock file (package-lock.json or npm-shrinkwrap.json) in $[[ inputs.working_dir ]], nothing to audit."
+        exit 0
+      fi
+      if [ "$[[ inputs.omit_dev ]]" = "true" ]; then
+        omit="--omit=dev"
+        echo "npm-audit: failing on $level or higher in runtime dependencies; dev dependencies are reported after, never failing."
+      else
+        omit=""
+        echo "npm-audit: failing on $level or higher in all dependencies, dev ones included."
+      fi
+      log=$(mktemp)
+      if npm audit $omit --audit-level="$level" --audit=true --offline=false >"$log" 2>&1; then status=0; else status=$?; fi
+      cat "$log"
+      if [ "$status" -ne 0 ] && grep -q 'audit endpoint returned an error' "$log"; then
+        echo "npm-audit: the registry's audit endpoint could not be reached or refused the request, so nothing was audited. The job fails rather than pass unchecked: let the runner reach $(npm config get registry) over HTTPS."
+      fi
+      rm -f "$log"
+      if [ "$status" -ne 0 ]; then exit "$status"; fi
+      if [ -n "$omit" ]; then
+        echo "npm-audit: full report, dev dependencies included (information only, never fails the job):"
+        npm audit --audit=true --offline=false || true
+      fi

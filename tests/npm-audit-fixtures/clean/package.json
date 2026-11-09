@@ -1,0 +1,9 @@
+{
+  "name": "npm-audit-clean",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Clean fixture for the npm-audit component: one runtime package with no advisory.",
+  "dependencies": {
+    "is-number": "7.0.0"
+  }
+}

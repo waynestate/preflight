@@ -177,6 +177,18 @@
         { "name": "allow_failure", "type": "boolean", "default": false }
       ],
       "jobs": ["squire-kit"]
+    },
+    "npm-audit": {
+      "inputs": [
+        { "name": "stage", "type": "string", "default": "test" },
+        { "name": "job_name", "type": "string", "default": "npm-audit", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
+        { "name": "image", "type": "string", "default": "node:22.13-alpine@sha256:e2b39f7b64281324929257d0f8004fb6cb4bf0fdfb9aa8cedb235a766aec31da" },
+        { "name": "image_prefix", "type": "string", "default": "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}", "regex": "^[^/\\s](\\S*[^/\\s])?$" },
+        { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" },
+        { "name": "audit_level", "type": "string", "default": "high", "regex": "^(low|moderate|medium|high|critical)$" },
+        { "name": "omit_dev", "type": "boolean", "default": true }
+      ],
+      "jobs": ["npm-audit"]
     }
   }
 }
