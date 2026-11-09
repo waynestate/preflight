@@ -68,6 +68,9 @@ spec:
     COMPOSER_CACHE_DIR: "$CI_PROJECT_DIR/.composer-cache"
     # Full history by default: override-approver reads git blame (0 means no depth limit).
     GIT_DEPTH: "$[[ inputs.git_depth ]]"
+    # The command as text, read only by the --record guard in the script.
+    # GitLab fills it in as a value, so quotes in the command cannot break it.
+    PREFLIGHT_PROCTOR_COMMAND: $[[ inputs.proctor_command ]]
   script:
     - echo "Preflight component $[[ component.name ]] $[[ component.version ]] (ref $[[ component.reference ]], sha $[[ component.sha ]])"
     # php:8.4-cli-trixie does not ship Composer, unzip or git. The image is
@@ -91,11 +94,46 @@ spec:
     # PHP version and extensions are not required here: an app locked to
     # PHP 7, or needing gd or oci8, still gets its report.
     - composer install --no-interaction --no-progress --no-plugins --no-scripts --ignore-platform-reqs
+    # The --record guard. PROCTOR 0.11.0 and later can also write the JSON
+    # report (what --format=json prints) to a file, whatever --format says;
+    # Rollcall reads that file from this job's artifact. PROCTOR 0.10.0 and
+    # older exit 2 on the unknown option, so the flag is added only when
+    # all three hold:
+    #   * the command is a plain "proctor check" line: only letters, digits,
+    #     spaces and / . _ = : , @ % + - (no ; & | < > $ quotes or globs), so
+    #     the flag lands on proctor and not on whatever a shell operator runs
+    #     next. A gate command is left alone: its --record writes a deploy
+    #     verdict, not the report Rollcall reads.
+    #   * it does not already pass --record;
+    #   * the app's own PROCTOR lists --record in "check --help".
+    # The help run uses the command only up to "proctor check": Symfony's
+    # help has its own --format, so "check --format=codequality --help"
+    # fails with Unsupported format instead of printing the options.
+    # Nothing here can change the job's result: the help run's exit code is
+    # ignored, and the proctor line below still decides pass or fail.
+    - |
+      PREFLIGHT_PROCTOR_RECORD=
+      case "$PREFLIGHT_PROCTOR_COMMAND" in
+        *[!A-Za-z0-9\ /._=:,@%+-]*|*--record*) ;;
+        *proctor\ check|*proctor\ check\ *)
+          preflight_help=$(${PREFLIGHT_PROCTOR_COMMAND%%proctor check*}proctor check --help 2>/dev/null) || true
+          case "$preflight_help" in *--record*) PREFLIGHT_PROCTOR_RECORD=1 ;; esac
+          ;;
+      esac
+      if [ -n "$PREFLIGHT_PROCTOR_RECORD" ]; then echo "PROCTOR supports --record: keeping proctor.json as an artifact"; else echo "Not adding --record (PROCTOR 0.10.0 or older, or a custom command): no proctor.json this run"; fi
     # A plain redirect (not tee) keeps proctor's exit code as the job result.
     # The report is written at the project root so the artifact path is the
-    # same for every working_dir, including ".".
-    - $[[ inputs.proctor_command ]] > "$CI_PROJECT_DIR/gl-code-quality-report.json"
+    # same for every working_dir, including ".". The ${...:+...} adds
+    # --record "$CI_PROJECT_DIR/proctor.json" only when the guard set it.
+    - $[[ inputs.proctor_command ]] ${PREFLIGHT_PROCTOR_RECORD:+--record "$CI_PROJECT_DIR/proctor.json"} > "$CI_PROJECT_DIR/gl-code-quality-report.json"
+  # proctor.json is PROCTOR's JSON report, kept for Rollcall
+  # (ROLLCALL_PROCTOR_SOURCE=gitlab reads the newest finished proctor job's
+  # proctor.json, passed or failed). An older PROCTOR writes none: the
+  # runner then warns "no matching files" and the job keeps its result.
   artifacts:
     when: always
+    expire_in: 30 days
+    paths:
+      - proctor.json
     reports:
       codequality: gl-code-quality-report.json

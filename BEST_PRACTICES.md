@@ -291,7 +291,8 @@ Sources: [GitLab: Code Quality](https://docs.gitlab.com/ci/testing/code_quality/
 [GitLab: CI/CD YAML, `artifacts:when`](https://docs.gitlab.com/ci/yaml/).
 
 **How the stack holds it: Enforced.** The `proctor` template sets `artifacts: when: always` and
-`reports: codequality: gl-code-quality-report.json`. Code Quality is shown in the merge request Reports tab on every
+`reports: codequality: gl-code-quality-report.json`, and keeps PROCTOR's JSON report as `proctor.json` (`paths:`,
+30 days) for Rollcall when the app's PROCTOR has `check --record` (0.11.0 and later). Code Quality is shown in the merge request Reports tab on every
 tier; the pipeline tab needs Premium and the diff view needs Ultimate.
 
 Second pass: tiers re-checked and correct. One addition: GitLab deprecated its built-in CodeClimate-based Code Quality
@@ -364,7 +365,8 @@ Sources: [GitLab: includes, merge behavior](https://docs.gitlab.com/ci/yaml/incl
 [GitLab: pipeline execution policies (Ultimate)](https://docs.gitlab.com/user/application_security/policies/pipeline_execution_policies/).
 
 **How the stack holds it: Documented.** The stack's enforcement-points decision names the CI gate as point (c) and Fleet as point (e), which shows
-who skips CI. Rollcall does not read pipelines yet, so nothing reports skipped or weakened pipelines today.
+who skips CI. Rollcall reads each app's newest `proctor.json` from the proctor job's artifact
+(`ROLLCALL_PROCTOR_SOURCE=gitlab`), but it does not report skipped or weakened pipelines yet.
 
 Prior art (second pass): Drupal's shared GitLab templates, used by more than 2,000 contributed projects at the time of
 a December 2025 post, do not force anything. Most jobs are turned off by setting a variable to 0, and projects keep
@@ -987,8 +989,10 @@ Why: a component that never fails looks the same as one that works.
 Sources: [GitLab: components, testing](https://docs.gitlab.com/ci/components/).
 
 **How the stack holds it: Partly.** Ten components carry a fixture that must fail them, each kept in place by a
-check: `proctor` runs `tests/proctor-fails`, a fake proctor that prints one blocker finding and exits 1, against the
-clean stub in `tests/fixture-app` (`tests/check-proctor-fails`); `composer-audit` runs the template's own script
+check: `proctor` runs the template's own `--record` guard and command line on `tests/proctor-fails`, a fake proctor
+that prints one blocker finding and exits 1, against the clean stubs in `tests/fixture-app` (no `--record`, like
+PROCTOR 0.10.0) and `tests/proctor-record` (with it), and proves `proctor.json` is kept only when PROCTOR can write
+it (`tests/check-proctor-fails`); `composer-audit` runs the template's own script
 lines on `tests/audit-fixtures/advisory` (laravel/framework v9.0.0, which must fail naming CVE-2024-52301) and
 `tests/audit-fixtures/malware` (aikido/endpoint-test 0.0.1, Aikido's harmless package flagged on Packagist's malware
 list on purpose, which must fail naming it), both in every `abandoned` mode, and on `tests/audit-fixtures/abandoned`,

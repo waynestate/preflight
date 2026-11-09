@@ -1,0 +1,49 @@
+#!/bin/sh
+# Offline stand-in for the real PROCTOR (waynestate/proctor) at 0.11.0 or
+# later, on a clean app: prints an empty Code Quality report and exits 0,
+# and checks nothing. Its help lists --record, and --record FILE also
+# writes a JSON report there, the way the real `proctor check --record`
+# keeps what --format=json prints. tests/check-proctor-fails runs it to
+# prove the proctor job adds --record when PROCTOR has it.
+# Like Symfony's help, --help takes --format for itself (txt, xml, json,
+# md), so "check --format=codequality --help" fails instead of listing the
+# options, as the real PROCTOR does.
+for arg in "$@"; do
+  case $arg in
+    --help|-h)
+      for opt in "$@"; do
+        case $opt in
+          --format=txt|--format=xml|--format=json|--format=md) ;;
+          --format=*) echo "Unsupported format \"${opt#--format=}\"." >&2; exit 1 ;;
+        esac
+      done
+      ;;
+  esac
+done
+record=
+want=
+for arg in "$@"; do
+  if [ -n "$want" ]; then record=$arg; want=; continue; fi
+  case $arg in
+    --help|-h)
+      echo 'Usage:'
+      echo '  check [options]'
+      echo 'Options:'
+      echo '      --path=PATH        Path to the application to check.'
+      echo '      --format=FORMAT    Output format (text, json, codequality, sarif).'
+      echo '      --record=RECORD    Also write the JSON report to this file.'
+      exit 0
+      ;;
+    --record) want=1 ;;
+    --record=*) record=${arg#--record=} ;;
+  esac
+done
+if [ -n "$want" ]; then
+  echo 'The "--record" option requires a value.' >&2
+  exit 2
+fi
+if [ -n "$record" ]; then
+  echo '{"tool":"proctor","verdict":"pass","findings":[]}' > "$record"
+fi
+echo '[]'
+exit 0

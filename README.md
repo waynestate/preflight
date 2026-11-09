@@ -95,6 +95,20 @@ include:
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
 | `git_depth` | string | `"0"` | How many commits the job clones (GitLab's `GIT_DEPTH`); the default `0` clones the full history, so PROCTOR's override-approver check can see who wrote each override. |
 
+The job also keeps PROCTOR's JSON report (what `--format=json` prints) as
+`proctor.json` in its artifact, for 30 days, whether it passed or failed.
+That file is what Rollcall reads with `ROLLCALL_PROCTOR_SOURCE=gitlab`: the
+fleet census takes each app's newest `proctor.json` instead of a folder of
+reports someone copied by hand. It needs PROCTOR 0.11.0 or later (`proctor
+check --record`). The job asks the app's own PROCTOR (`check --help`) and adds
+`--record "$CI_PROJECT_DIR/proctor.json"` only when it lists the option, so
+PROCTOR 0.10.0 and older run exactly as before and the runner just warns that
+`proctor.json` matched no files. The flag is added only to a plain
+`proctor check` command (letters, digits, spaces and `/ . _ = : , @ % + -`, no
+`--record` of its own); a `gate` command, or one with quotes, `$`, `;`, `&&`
+or a pipe, is left as written. The proctor line's exit code still decides the
+job.
+
 ### php-test
 
 Runs the test command on each supported PHP version through `parallel:matrix`.

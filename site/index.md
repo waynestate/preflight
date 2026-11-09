@@ -96,7 +96,7 @@ in 0.4.0
 
 Watches the cabin.
 
-Runs PROCTOR's checks and publishes them as a Code Quality report.
+Runs PROCTOR's checks, publishes a Code Quality report and, from the next release, keeps `proctor.json` for Rollcall.
 
 ```
 - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@87d9b6fc6b0ed302dd729986525282cd7b567ebd # 0.4.0

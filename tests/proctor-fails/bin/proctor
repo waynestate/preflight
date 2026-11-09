@@ -2,6 +2,49 @@
 # Fake proctor that must fail: prints one blocking Code Quality finding
 # and exits 1. It is the must-fail case for the proctor component; the
 # clean case is tests/fixture-app. Like that stub it stands in for the
-# real PROCTOR (waynestate/proctor) and checks nothing.
+# real PROCTOR (waynestate/proctor) and checks nothing. It plays PROCTOR
+# 0.11.0 or later: its help lists --record, and --record FILE also writes
+# a JSON report there, so the check can prove the job still fails, and
+# still keeps proctor.json, when the record is on.
+# Like Symfony's help, --help takes --format for itself (txt, xml, json,
+# md), so "check --format=codequality --help" fails instead of listing the
+# options, as the real PROCTOR does.
+for arg in "$@"; do
+  case $arg in
+    --help|-h)
+      for opt in "$@"; do
+        case $opt in
+          --format=txt|--format=xml|--format=json|--format=md) ;;
+          --format=*) echo "Unsupported format \"${opt#--format=}\"." >&2; exit 1 ;;
+        esac
+      done
+      ;;
+  esac
+done
+record=
+want=
+for arg in "$@"; do
+  if [ -n "$want" ]; then record=$arg; want=; continue; fi
+  case $arg in
+    --help|-h)
+      echo 'Usage:'
+      echo '  check [options]'
+      echo 'Options:'
+      echo '      --path=PATH        Path to the application to check.'
+      echo '      --format=FORMAT    Output format (text, json, codequality, sarif).'
+      echo '      --record=RECORD    Also write the JSON report to this file.'
+      exit 0
+      ;;
+    --record) want=1 ;;
+    --record=*) record=${arg#--record=} ;;
+  esac
+done
+if [ -n "$want" ]; then
+  echo 'The "--record" option requires a value.' >&2
+  exit 2
+fi
+if [ -n "$record" ]; then
+  echo '{"tool":"proctor","verdict":"fail","findings":[{"check":"preflight-fixture","severity":"blocker"}]}' > "$record"
+fi
 echo '[{"description":"Fixture: a blocking finding the component must fail on","check_name":"preflight-fixture","fingerprint":"preflight-fixture-blocker-1","severity":"blocker","location":{"path":"app/Example.php","lines":{"begin":1}}}]'
 exit 1

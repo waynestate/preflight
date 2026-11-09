@@ -1,8 +1,40 @@
 #!/bin/sh
-# Offline stand-in for the real PROCTOR (waynestate/proctor): prints an empty
-# Code Quality report and exits 0, and checks nothing. It exists only for
-# tests/check-proctor-fails, which needs no Docker and no Composer; the
-# pipeline's proctor job runs the real PROCTOR from the fixture app's
-# require-dev.
+# Offline stand-in for the real PROCTOR (waynestate/proctor) at 0.10.0 or
+# older: prints an empty Code Quality report and exits 0, and checks nothing.
+# Like those releases it has no --record option: its help does not list one,
+# and passing it exits 2. It exists only for tests/check-proctor-fails, which
+# needs no Docker and no Composer; the pipeline's proctor job runs the real
+# PROCTOR from the fixture app's require-dev.
+# Like Symfony's help, --help takes --format for itself (txt, xml, json,
+# md), so "check --format=codequality --help" fails instead of listing the
+# options, as the real PROCTOR does.
+for arg in "$@"; do
+  case $arg in
+    --help|-h)
+      for opt in "$@"; do
+        case $opt in
+          --format=txt|--format=xml|--format=json|--format=md) ;;
+          --format=*) echo "Unsupported format \"${opt#--format=}\"." >&2; exit 1 ;;
+        esac
+      done
+      ;;
+  esac
+done
+for arg in "$@"; do
+  case $arg in
+    --help|-h)
+      echo 'Usage:'
+      echo '  check [options]'
+      echo 'Options:'
+      echo '      --path=PATH        Path to the application to check.'
+      echo '      --format=FORMAT    Output format (text, json, codequality, sarif).'
+      exit 0
+      ;;
+    --record|--record=*)
+      echo 'The "--record" option does not exist.' >&2
+      exit 2
+      ;;
+  esac
+done
 echo '[]'
 exit 0
