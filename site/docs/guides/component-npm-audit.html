@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The npm-audit component | Preflight docs</title>
 <meta name="description" content="Runs `npm audit` on the app&#039;s lock file and fails on advisories at or above a severity.">
-<meta name="docs-version" content="0.4.0">
+<meta name="docs-version" content="0.5.0">
 <link rel="stylesheet" href="../../assets/wayne-ui/wayne-ui.css">
 <link rel="stylesheet" href="../../assets/docs.css">
 <link rel="stylesheet" href="../../docs/theme/preflight.css">
@@ -20,7 +20,7 @@
     <a class="brand" href="../../index.html">
       <img src="../../brand/preflight-avatar-256.png" width="36" height="36" alt="">
       <span class="brand__name">PREFLIGHT</span>
-      <span class="brand__tail">0.4.0</span>
+      <span class="brand__tail">0.5.0</span>
     </a>
     <nav class="topnav" aria-label="Site">
       <a class="topnav__section" href="../../index.html#checklist">Checklist</a>
@@ -49,12 +49,13 @@ what each input does, and how CREED's severity words map to npm's.</p>
 <p>Goal: your app's pipeline fails whenever a locked runtime npm package has a known high or critical advisory. Add the
 include to your app's <code>.gitlab-ci.yml</code>:</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@&lt;full commit SHA&gt; # the first tag with npm-audit
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@&lt;full commit SHA&gt; # 0.5.0
     inputs:
       working_dir: .
 </code></pre>
-<p>npm-audit is on main and not in a tag yet: pin the commit SHA of the first release that lists it in the
-<a href="../changelog.html">Changelog</a>.</p>
+<p>npm-audit ships in Preflight 0.5.0; 0.4.0 does not include it. Pin that tag's full commit SHA, with the tag in a
+trailing comment, or the full commit SHA of a commit at or after it. The <a href="../upgrading.html">Upgrading</a> page has the
+0.5.0 checklist.</p>
 <h2 id="inputs">Inputs<a class="docs-heading-link" aria-label="Link to this section" href="#inputs">#</a></h2>
 <div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
 <thead>
@@ -200,7 +201,7 @@ so it runs in scheduled pipelines like any other.</p>
   <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#include-the-component">Include the component</a></li><li class="docs-toc__item"><a href="#inputs">Inputs</a></li><li class="docs-toc__item"><a href="#what-the-job-does">What the job does</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#why-audit-true-offline-false">Why --audit=true --offline=false</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#when-the-registry-cannot-be-reached">When the registry cannot be reached</a></li><li class="docs-toc__item"><a href="#severity-words">Severity words</a></li><li class="docs-toc__item"><a href="#caching">Caching</a></li><li class="docs-toc__item"><a href="#proof">Proof</a></li><li class="docs-toc__item"><a href="#run-it-on-a-schedule">Run it on a schedule</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
-  <span>Documents Preflight <span data-docs-version>0.4.0</span></span>
+  <span>Documents Preflight <span data-docs-version>0.5.0</span></span>
   <span><a rel="noopener" href="https://github.com/waynestate/preflight">Source</a> <a href="component-npm-audit.md">Markdown</a></span>
 </footer>
 </body>

@@ -16,12 +16,12 @@ Goal: your app's pipeline fails whenever a locked runtime npm package has a know
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@<full commit SHA> # the first tag with npm-audit
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@<full commit SHA> # 0.5.0
     inputs:
       working_dir: .
 ```
 
-npm-audit is on main and not in a tag yet: pin the commit SHA of the first release that lists it in the [Changelog](https://preflight.apps.wayne.edu/docs/changelog.html).
+npm-audit ships in Preflight 0.5.0; 0.4.0 does not include it. Pin that tag's full commit SHA, with the tag in a trailing comment, or the full commit SHA of a commit at or after it. The [Upgrading](https://preflight.apps.wayne.edu/docs/upgrading.html) page has the 0.5.0 checklist.
 
 ## Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#inputs)
 

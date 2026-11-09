@@ -36,7 +36,7 @@ The card runs the seven above and `a11y`; `squire-kit` and `portability` (in its
 | 9 | Squire deploy kit matches its release | `squire-kit` | 10 minutes |
 | 10 | Runs off Citadel: strict boot and six portability checks | `portability` | 30 minutes |
 
-New on main, not in a tag yet, and not on the card:
+New in 0.5.0, and not on the card:
 
 | # | Item | Job | Timeout |
 | --- | --- | --- | --- |
@@ -154,11 +154,11 @@ New advisories are published after code is merged, so a green pipeline today can
 
 ## npm-audit[#](https://preflight.apps.wayne.edu/docs/reference/components.html#npm-audit)
 
-Runs `npm audit` on the app's `package-lock.json` and fails on advisories at or above `audit_level` in runtime dependencies, then prints a full report with dev dependencies that never fails. On main, not in a tag yet.
+Runs `npm audit` on the app's `package-lock.json` and fails on advisories at or above `audit_level` in runtime dependencies, then prints a full report with dev dependencies that never fails. New in 0.5.0; 0.4.0 does not include it.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@<full commit SHA> # the first tag with npm-audit
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@<full commit SHA> # 0.5.0
     inputs:
       audit_level: high
 ```

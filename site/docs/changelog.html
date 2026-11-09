@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Changelog | Preflight docs</title>
 <meta name="description" content="All notable changes to this project.">
-<meta name="docs-version" content="0.4.0">
+<meta name="docs-version" content="0.5.0">
 <link rel="stylesheet" href="../assets/wayne-ui/wayne-ui.css">
 <link rel="stylesheet" href="../assets/docs.css">
 <link rel="stylesheet" href="../docs/theme/preflight.css">
@@ -20,7 +20,7 @@
     <a class="brand" href="../index.html">
       <img src="../brand/preflight-avatar-256.png" width="36" height="36" alt="">
       <span class="brand__name">PREFLIGHT</span>
-      <span class="brand__tail">0.4.0</span>
+      <span class="brand__tail">0.5.0</span>
     </a>
     <nav class="topnav" aria-label="Site">
       <a class="topnav__section" href="../index.html#checklist">Checklist</a>
@@ -46,7 +46,14 @@
 <a rel="noopener" href="https://keepachangelog.com/en/1.1.0/">Keep a Changelog</a>; released versions
 are Git tags.</p>
 <h2 id="unreleased">Unreleased<a class="docs-heading-link" aria-label="Link to this section" href="#unreleased">#</a></h2>
+<h2 id="0-5-0-2026-11-09">0.5.0 (2026-11-09)<a class="docs-heading-link" aria-label="Link to this section" href="#0-5-0-2026-11-09">#</a></h2>
+<p>A new component and a probe that boots Apache the way a container runtime does: <code>npm-audit</code> fails on npm advisories
+at or above <code>audit_level</code> (default <code>high</code>), the portability job starts each replica with stdio its uid owns and a
+session of its own (delete any <code>start_command</code> setsid shim in the same change as the bump, or <code>health</code> fails), the
+proctor job keeps PROCTOR's JSON report as <code>proctor.json</code> for Rollcall, and every Composer default is 2.11.1. The
+deploy layer moves to Squire's kit 0.10.2, HELMET ^1.2 and PROCTOR ^0.11.</p>
 <ul>
+<li>Docs: the Upgrading page has a 0.5.0 section; the npm-audit guide, the components reference and the README name 0.5.0 as the first tag with npm-audit (their include examples said &quot;the first tag with npm-audit&quot;); the docs home names 0.5.0.</li>
 <li>Docs: MAINTAINING's &quot;Who maintains it&quot; names a role, the stack maintainer, instead of a person, and says to reach them with an issue on git.wayne.edu.</li>
 <li>Changed: the front page deploy layer requires HELMET ^1.2, PROCTOR ^0.11 and CREED ^0.1.8 (locked 1.2.0, 0.11.0 and 0.1.8; were 1.0.1, 0.8.0 and 0.1.7). The fixture app requires PROCTOR ^0.11 (locked 0.11.0, was 0.8.0), so Preflight's own proctor job now runs a PROCTOR that writes <code>proctor.json</code> and the artifact keeps it; the fixture still passes every check and its <code>composer ci</code>. Preflight's dev tools take Pinstripe 0.1.4 (was 0.1.0), the newest release on Packagist.</li>
 <li>Changed: the deploy kit is Squire 0.10.2 (was 0.10.0), and so is the squire-kit fixture (<code>tests/squire-kit-fixture</code>, was 0.5.0): the kit names every image in full (<code>docker.io/library/...</code>) and takes the fallback base's Composer from a <code>COMPOSER_IMAGE</code> stage, <code>.squire/php.ini</code> sets <code>session.cookie_samesite = Lax</code>, and the portable image drops <code>node_modules/</code> after the frontend build. The fixture also takes the files Squire added since 0.5.0 (Apache hardening, <code>php-web.ini</code>, the portable image). <code>squire init --check</code> passes on both.</li>
@@ -252,10 +259,10 @@ deprecation checks now run on every analysis.</li>
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../docs/upgrading.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">Upgrading</span></a></nav>
   </div>
-  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#unreleased">Unreleased</a></li><li class="docs-toc__item"><a href="#0-4-0-2026-11-08">0.4.0 (2026-11-08)</a></li><li class="docs-toc__item"><a href="#0-3-1-2026-11-08">0.3.1 (2026-11-08)</a></li><li class="docs-toc__item"><a href="#0-3-0-2026-11-08">0.3.0 (2026-11-08)</a></li><li class="docs-toc__item"><a href="#0-2-0-2026-11-07">0.2.0 (2026-11-07)</a></li><li class="docs-toc__item"><a href="#0-1-4-2026-11-03">0.1.4 (2026-11-03)</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed">Changed</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#added">Added</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#fixed">Fixed</a></li><li class="docs-toc__item"><a href="#0-1-3-2026-11-03">0.1.3 (2026-11-03)</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#added-1">Added</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed-1">Changed</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#fixed-1">Fixed</a></li><li class="docs-toc__item"><a href="#0-1-2-2026-10-29">0.1.2 (2026-10-29)</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#added-2">Added</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#fixed-2">Fixed</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed-2">Changed</a></li><li class="docs-toc__item"><a href="#0-1-1-2026-10-29">0.1.1 (2026-10-29)</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#added-3">Added</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed-3">Changed</a></li><li class="docs-toc__item"><a href="#0-1-0-2026-10-27">0.1.0 (2026-10-27)</a></li></ul></nav>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#unreleased">Unreleased</a></li><li class="docs-toc__item"><a href="#0-5-0-2026-11-09">0.5.0 (2026-11-09)</a></li><li class="docs-toc__item"><a href="#0-4-0-2026-11-08">0.4.0 (2026-11-08)</a></li><li class="docs-toc__item"><a href="#0-3-1-2026-11-08">0.3.1 (2026-11-08)</a></li><li class="docs-toc__item"><a href="#0-3-0-2026-11-08">0.3.0 (2026-11-08)</a></li><li class="docs-toc__item"><a href="#0-2-0-2026-11-07">0.2.0 (2026-11-07)</a></li><li class="docs-toc__item"><a href="#0-1-4-2026-11-03">0.1.4 (2026-11-03)</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed">Changed</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#added">Added</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#fixed">Fixed</a></li><li class="docs-toc__item"><a href="#0-1-3-2026-11-03">0.1.3 (2026-11-03)</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#added-1">Added</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed-1">Changed</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#fixed-1">Fixed</a></li><li class="docs-toc__item"><a href="#0-1-2-2026-10-29">0.1.2 (2026-10-29)</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#added-2">Added</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#fixed-2">Fixed</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed-2">Changed</a></li><li class="docs-toc__item"><a href="#0-1-1-2026-10-29">0.1.1 (2026-10-29)</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#added-3">Added</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed-3">Changed</a></li><li class="docs-toc__item"><a href="#0-1-0-2026-10-27">0.1.0 (2026-10-27)</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
-  <span>Documents Preflight <span data-docs-version>0.4.0</span></span>
+  <span>Documents Preflight <span data-docs-version>0.5.0</span></span>
   <span><a rel="noopener" href="https://github.com/waynestate/preflight">Source</a> <a href="changelog.md">Markdown</a></span>
 </footer>
 </body>

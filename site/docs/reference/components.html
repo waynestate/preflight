@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Components | Preflight docs</title>
 <meta name="description" content="Every component, with its include example, inputs and defaults.">
-<meta name="docs-version" content="0.4.0">
+<meta name="docs-version" content="0.5.0">
 <link rel="stylesheet" href="../../assets/wayne-ui/wayne-ui.css">
 <link rel="stylesheet" href="../../assets/docs.css">
 <link rel="stylesheet" href="../../docs/theme/preflight.css">
@@ -20,7 +20,7 @@
     <a class="brand" href="../../index.html">
       <img src="../../brand/preflight-avatar-256.png" width="36" height="36" alt="">
       <span class="brand__name">PREFLIGHT</span>
-      <span class="brand__tail">0.4.0</span>
+      <span class="brand__tail">0.5.0</span>
     </a>
     <nav class="topnav" aria-label="Site">
       <a class="topnav__section" href="../../index.html#checklist">Checklist</a>
@@ -130,7 +130,7 @@
 </tr>
 </tbody>
 </table></div>
-<p>New on main, not in a tag yet, and not on the card:</p>
+<p>New in 0.5.0, and not on the card:</p>
 <div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
 <thead>
 <tr>
@@ -372,9 +372,9 @@ php-test-next:
 <h3 id="run-it-on-a-schedule">Run it on a schedule<a class="docs-heading-link" aria-label="Link to this section" href="#run-it-on-a-schedule">#</a></h3>
 <p>New advisories are published after code is merged, so a green pipeline today can be stale tomorrow. Create a weekly pipeline schedule on the default branch: project settings, Build, Pipeline schedules. The component needs nothing extra; it carries no <code>rules:</code> block, so it runs in scheduled pipelines like any other. Creating the schedule is a project setting, not a file in the app's repo, and someone with Maintainer rights on the app must do it. It is the one preflight check that books its own flight time.</p>
 <h2 id="npm-audit">npm-audit<a class="docs-heading-link" aria-label="Link to this section" href="#npm-audit">#</a></h2>
-<p>Runs <code>npm audit</code> on the app's <code>package-lock.json</code> and fails on advisories at or above <code>audit_level</code> in runtime dependencies, then prints a full report with dev dependencies that never fails. On main, not in a tag yet.</p>
+<p>Runs <code>npm audit</code> on the app's <code>package-lock.json</code> and fails on advisories at or above <code>audit_level</code> in runtime dependencies, then prints a full report with dev dependencies that never fails. New in 0.5.0; 0.4.0 does not include it.</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@&lt;full commit SHA&gt; # the first tag with npm-audit
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@&lt;full commit SHA&gt; # 0.5.0
     inputs:
       audit_level: high
 </code></pre>
@@ -1199,7 +1199,7 @@ php-test-next:
   <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#the-inputs-contract">The inputs contract</a></li><li class="docs-toc__item"><a href="#proctor">proctor</a></li><li class="docs-toc__item"><a href="#php-test">php-test</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#caching">Caching</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#try-the-next-php-release-without-breaking-the-pipeline">Try the next PHP release without breaking the pipeline</a></li><li class="docs-toc__item"><a href="#composer-audit">composer-audit</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#run-it-on-a-schedule">Run it on a schedule</a></li><li class="docs-toc__item"><a href="#npm-audit">npm-audit</a></li><li class="docs-toc__item"><a href="#sbom">sbom</a></li><li class="docs-toc__item"><a href="#pint">pint</a></li><li class="docs-toc__item"><a href="#phpstan">phpstan</a></li><li class="docs-toc__item"><a href="#eslint">eslint</a></li><li class="docs-toc__item"><a href="#secret-detection">secret-detection</a></li><li class="docs-toc__item"><a href="#package-publish">package-publish</a></li><li class="docs-toc__item"><a href="#renovate">renovate</a></li><li class="docs-toc__item"><a href="#portability">portability</a></li><li class="docs-toc__item"><a href="#a11y">a11y</a></li><li class="docs-toc__item"><a href="#squire-kit">squire-kit</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
-  <span>Documents Preflight <span data-docs-version>0.4.0</span></span>
+  <span>Documents Preflight <span data-docs-version>0.5.0</span></span>
   <span><a rel="noopener" href="https://github.com/waynestate/preflight">Source</a> <a href="components.md">Markdown</a></span>
 </footer>
 </body>

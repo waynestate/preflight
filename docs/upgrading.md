@@ -9,6 +9,88 @@ This page is the checklist for moving an app from one Preflight pin to the next,
 
 Every input and job name a component offers is recorded in `contract/inputs.json`, and Preflight's build fails when a template drifts from it, so the file is the exact list of what moved. Before you move a pin, diff it between your tag and the next one (for example `git diff 0.3.1 0.4.0 -- contract/inputs.json` in a clone of Preflight) and check each line against that version's Breaking and Steps below. [The inputs contract](guides/inputs-contract.md) explains what each kind of change means for your include.
 
+## 0.5.0
+
+Released 2026-11-09. A new component, `npm-audit`, the front-end half of `composer-audit`; a portability probe that
+starts each replica the way a container runtime does, so an Apache image needs no `start_command` shim; a proctor job
+that keeps PROCTOR's JSON report as `proctor.json` for Rollcall; and Composer 2.11.1 in every default. No input or job
+was renamed or removed.
+
+### Breaking
+
+**The portability launcher.** The `portability` job now starts each replica through a launcher that gives it stdout
+and stderr its uid owns and a session of its own (`setsid`), as a container runtime does. An include that still
+carries a `start_command` shim calling `setsid` (WELD's was `exec setsid bash -c '...'`) breaks on 0.5.0: inside the
+launcher the shim forks the app away from the replica's main process, and `health` fails. Delete the shim in the same
+change as the bump. With an empty `start_command` the job runs the image's own `ENTRYPOINT` and `CMD`, which is what
+an Apache image (Squire's portable image, a Sourdough or WELD app) needs. A `start_command` that only starts the app,
+with no `setsid` and no stdio redirect, keeps working.
+
+### Deprecated
+
+Nothing was deprecated in 0.5.0.
+
+### Changed
+
+- **Composer 2.11.1.** Every Composer default moves from 2.10.3 to 2.11.1: the `composer-audit`, `sbom`, `pint`,
+  `phpstan`, `package-publish` and `squire-kit` images are `composer:2.11.1@sha256:8de2184c...` (the multi-arch list
+  digest), and php-test's and proctor's `composer_version` default is `2.11.1`. 2.11.0 fixed GHSA-c968-33g3-wh7p and
+  GHSA-fm2w-xgf2-f9fh, and 2.10 is no longer maintained. 2.11 drops the `source-fallback` setting; no component sets
+  it. An include that sets `image` or `composer_version` keeps its own pin.
+- **proctor keeps `proctor.json`.** The proctor job's artifact now keeps PROCTOR's JSON report as `proctor.json` for
+  30 days, next to the Code Quality report, whether the job passed or failed. That is the file Rollcall reads with
+  `ROLLCALL_PROCTOR_SOURCE=gitlab`. The job adds `--record "$CI_PROJECT_DIR/proctor.json"` itself, and only when
+  `proctor_command` is a plain `proctor check` line and the app's PROCTOR is 0.11.0 or later. On PROCTOR 0.10.0 or
+  older the job runs exactly as before and the runner warns that `proctor.json` matched no files. The proctor line's
+  exit code still decides the job.
+
+### New: npm-audit
+
+The `npm-audit` component runs `npm audit` on the app's `package-lock.json` in the `eslint` component's Node image and
+fails on an advisory at or above `audit_level` in a runtime dependency, then prints a full report that never fails.
+It is opt-in. Its inputs and defaults:
+
+- `audit_level`: `high` by default; `low`, `moderate`, `high` or `critical`. CREED's and Composer's word `medium` is
+  accepted too and maps to npm's `moderate`.
+- `omit_dev`: `true` by default, so the failing audit leaves dev dependencies out; the full report still lists them.
+- `working_dir`: `.` by default; the directory that holds `package-lock.json`, relative to the project root.
+- `stage`, `job_name`, `image` and `image_prefix`, as on the other components.
+
+An app with no lock file (no `package-lock.json` or `npm-shrinkwrap.json`) passes with a note,
+`npm-audit: no lock file ... nothing to audit.`, so a PHP-only app never goes red. An unreachable registry fails the
+job. See [The npm-audit component](guides/component-npm-audit.md).
+
+### Steps
+
+1. If an include of `portability` sets a `start_command` shim that calls `setsid`, delete the shim (or the whole
+   `start_command` line) in the same change as step 2.
+2. Point each component include at the `0.5.0` tag, pinned to the tag's full commit SHA with the tag in a trailing
+   comment:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@<full commit SHA> # 0.5.0
+```
+
+3. Optional: add `npm-audit` for an app with a front end:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@<full commit SHA> # 0.5.0
+    inputs:
+      audit_level: high
+```
+
+4. Optional: to feed Rollcall, move the app to PROCTOR 0.11.0 or later
+   (`composer require --dev waynestate/proctor:^0.11`).
+
+### How to verify
+
+The pipeline is green. The `portability` job passes all its checks with no shim, the composer-based jobs' `Pulling
+docker image` line names `composer:2.11.1`, and on PROCTOR 0.11.0 or later the proctor job's artifact holds
+`proctor.json`. With `npm-audit` included, its log ends with `npm audit`'s summary, or with the no-lock-file note.
+Checklist done, doors armed: cleared for takeoff.
+
 ## 0.4.0
 
 Released 2026-11-08. Two new inputs and a Composer floor. The proctor component's `git_depth` (default `"0"`) clones

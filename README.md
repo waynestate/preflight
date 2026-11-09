@@ -198,11 +198,11 @@ do it. It is the one preflight check that books its own flight time.
 
 The front-end half of `composer-audit`: runs `npm audit` on the app's `package-lock.json` and fails on an advisory at
 or above `audit_level` in a runtime dependency, then prints a full report, dev dependencies included, that never fails.
-On main, not in a tag yet.
+New in 0.5.0; 0.4.0 does not include it.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@<full commit SHA> # the first tag with npm-audit
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@<full commit SHA> # 0.5.0
     inputs:
       audit_level: high
 ```

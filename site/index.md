@@ -88,7 +88,7 @@ Cockpit placards
 
 ## Eight checks, one include each
 
-Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All eight are in the 0.4.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Five more components ship in the same tag, and the docs cover each one: `secret-detection`, `squire-kit`, `portability`, `package-publish` and `renovate`. On main for the next tag: `npm-audit`, the front-end half of `composer-audit`, which fails on a high or critical advisory in `package-lock.json`. New in 0.4.0: `php-test` can run one extra PHP version as an advisory job, `proctor` takes a `git_depth`, and Composer has a 2.9.6 floor. Every input on these placards is held to [a written contract](https://preflight.apps.wayne.edu/#contract).
+Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All eight are in the 0.4.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Five more components ship in the same tag, and the docs cover each one: `secret-detection`, `squire-kit`, `portability`, `package-publish` and `renovate`. New in 0.5.0: `npm-audit`, the front-end half of `composer-audit`, which fails on a high or critical advisory in `package-lock.json`, and `portability` boots an Apache image with no `start_command` shim. Since 0.4.0: `php-test` can run one extra PHP version as an advisory job, `proctor` takes a `git_depth`, and Composer has a 2.9.6 floor. Every input on these placards is held to [a written contract](https://preflight.apps.wayne.edu/#contract).
 
 in 0.4.0
 

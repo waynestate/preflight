@@ -12,6 +12,11 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ## Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+## 0.5.0 (2026-11-09)[#](https://preflight.apps.wayne.edu/docs/changelog.html#0-5-0-2026-11-09)
+
+A new component and a probe that boots Apache the way a container runtime does: `npm-audit` fails on npm advisories at or above `audit_level` (default `high`), the portability job starts each replica with stdio its uid owns and a session of its own (delete any `start_command` setsid shim in the same change as the bump, or `health` fails), the proctor job keeps PROCTOR's JSON report as `proctor.json` for Rollcall, and every Composer default is 2.11.1. The deploy layer moves to Squire's kit 0.10.2, HELMET ^1.2 and PROCTOR ^0.11.
+
+- Docs: the Upgrading page has a 0.5.0 section; the npm-audit guide, the components reference and the README name 0.5.0 as the first tag with npm-audit (their include examples said "the first tag with npm-audit"); the docs home names 0.5.0.
 - Docs: MAINTAINING's "Who maintains it" names a role, the stack maintainer, instead of a person, and says to reach them with an issue on git.wayne.edu.
 - Changed: the front page deploy layer requires HELMET ^1.2, PROCTOR ^0.11 and CREED ^0.1.8 (locked 1.2.0, 0.11.0 and 0.1.8; were 1.0.1, 0.8.0 and 0.1.7). The fixture app requires PROCTOR ^0.11 (locked 0.11.0, was 0.8.0), so Preflight's own proctor job now runs a PROCTOR that writes `proctor.json` and the artifact keeps it; the fixture still passes every check and its `composer ci`. Preflight's dev tools take Pinstripe 0.1.4 (was 0.1.0), the newest release on Packagist.
 - Changed: the deploy kit is Squire 0.10.2 (was 0.10.0), and so is the squire-kit fixture (`tests/squire-kit-fixture`, was 0.5.0): the kit names every image in full (`docker.io/library/...`) and takes the fallback base's Composer from a `COMPOSER_IMAGE` stage, `.squire/php.ini` sets `session.cookie_samesite = Lax`, and the portable image drops `node_modules/` after the frontend build. The fixture also takes the files Squire added since 0.5.0 (Apache hardening, `php-web.ini`, the portable image). `squire init --check` passes on both.
