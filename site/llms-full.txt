@@ -1470,6 +1470,7 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ### Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Changed: the deploy kit is Squire 0.10.0 (was 0.7.1): release.sh keeps Composer and npm download caches in the app folder and the gate takes SQUIRE_PHP_RUNTIME; the compose file, health.php and .env.squire.example follow the template, and the portable image files are added.
 - Added: a must-fail check for composer-audit (`tests/check-composer-audit-fails.sh`, its .ps1 twin, the `must-fail-composer-audit` job and a malware fixture in `tests/audit-fixtures/malware`): Preflight's pipeline now runs the template's own lines and proves a known advisory and a malware-flagged version fail in every `abandoned` mode, an abandoned package fails only in `fail` mode, and a clean app passes. `tests/check-abandoned-input` keeps only its offline half and joins the contract job.
 - Changed: every template default and doc pins composer 2.10.3 by one digest (sha256:2cf27542...), the same build the rest of the stack uses; composer-audit's default names 2.10.3 instead of the floating 2 tag.
 - Added: a must-fail check for package-publish (`tests/check-package-publish-fails.sh`, its .ps1 twin and the `must-fail-package-publish` job): a non-semver tag and a missing composer.json still stop the release before any registry contact.

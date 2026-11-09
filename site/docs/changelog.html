@@ -47,6 +47,7 @@
 are Git tags.</p>
 <h2 id="unreleased">Unreleased<a class="docs-heading-link" aria-label="Link to this section" href="#unreleased">#</a></h2>
 <ul>
+<li>Changed: the deploy kit is Squire 0.10.0 (was 0.7.1): release.sh keeps Composer and npm download caches in the app folder and the gate takes SQUIRE_PHP_RUNTIME; the compose file, health.php and .env.squire.example follow the template, and the portable image files are added.</li>
 <li>Added: a must-fail check for composer-audit (<code>tests/check-composer-audit-fails.sh</code>, its .ps1 twin, the <code>must-fail-composer-audit</code> job and a malware fixture in <code>tests/audit-fixtures/malware</code>): Preflight's pipeline now runs the template's own lines and proves a known advisory and a malware-flagged version fail in every <code>abandoned</code> mode, an abandoned package fails only in <code>fail</code> mode, and a clean app passes. <code>tests/check-abandoned-input</code> keeps only its offline half and joins the contract job.</li>
 <li>Changed: every template default and doc pins composer 2.10.3 by one digest (sha256:2cf27542...), the same build the rest of the stack uses; composer-audit's default names 2.10.3 instead of the floating 2 tag.</li>
 <li>Added: a must-fail check for package-publish (<code>tests/check-package-publish-fails.sh</code>, its .ps1 twin and the <code>must-fail-package-publish</code> job): a non-semver tag and a missing composer.json still stop the release before any registry contact.</li>
