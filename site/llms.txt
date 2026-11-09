@@ -23,6 +23,7 @@ Every page below is Markdown. The HTML pages send the same Markdown to a client 
 - [The a11y component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-a11y.md): Opens the app's pages in a real browser and fails the pipeline on accessibility violations (axe-core in Playwright).
 - [The composer-audit component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.md): Runs `composer audit --locked` and fails on advisories.
 - [The eslint component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-eslint.md): Runs the app's own ESLint and Prettier and fails the pipeline on lint or format errors.
+- [The npm-audit component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.md): Runs `npm audit` on the app's lock file and fails on advisories at or above a severity.
 - [The package-publish component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-package-publish.md): Publishes a semantic version tag to the GitLab group's built-in Composer registry.
 - [The php-test component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-php-test.md): Runs the test command on each supported PHP version through `parallel:matrix`.
 - [The phpstan component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.md): Runs the app's own PHPStan and fails the pipeline on static analysis errors, writing a GitLab Code Quality report.

@@ -102,6 +102,20 @@ The job log names an abandoned package in the lock. An abandoned package is one 
 - **Fix:** upgrade the package or move to its successor where the log names one. While that is not possible, set the `abandoned` input on the include: `report` lists the abandoned packages without failing the job (right for an old app with abandoned transitive packages), `ignore` does not look at them at all. Advisories still fail the job in every mode.
 - **Check:** with `report`, the job is green and its log lists the abandoned packages; with `fail`, the job fails until the lock no longer holds one.
 
+### npm-audit fails with "audit endpoint returned an error"
+
+The job log ends with `npm-audit: the registry's audit endpoint could not be reached or refused the request, so nothing was audited.`
+
+- **Cause:** the runner cannot reach the npm registry over HTTPS, or the app's `.npmrc` names a registry that does not serve npm's audit endpoints (`/-/npm/v1/security/advisories/bulk`).
+- **Fix:** let the runner reach the registry the log names, or point the audit at one that serves the endpoints. The job never passes without an answer.
+- **Check:** the job log shows npm's report (`found 0 vulnerabilities` or a list) instead of the error.
+
+### npm-audit fails on a dev-only package
+
+- **Cause:** `omit_dev` is `false`, so the gate audits dev dependencies too.
+- **Fix:** upgrade the package, or leave `omit_dev` at its default, `true`: the gate then reads runtime dependencies only, and the full report after it still lists the dev finding without failing.
+- **Check:** the gate's lines say `failing on high or higher in runtime dependencies`.
+
 ### composer install stops: the lock needs another PHP or an extension
 
 The job log stops at `composer install` with `your php version (8.4.x) does not satisfy that requirement`, or with `requires ext-gd * -> it is missing from your system` (gd, oci8 and ldap are the usual ones). The `php-test`, `pint` and `phpstan` jobs install the app to run it, so they need what the app needs.

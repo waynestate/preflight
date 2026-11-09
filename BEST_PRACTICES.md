@@ -7,7 +7,7 @@ Status: draft, checked against sources on 2026-10-27, with a second research pas
 ## What this covers
 
 Preflight is a set of GitLab CI/CD components that every stack project and WSU app includes with
-`include: component:`. Today it has thirteen: `php-test` (PHP versions through `parallel:matrix`), `composer-audit`,
+`include: component:`. Today it has fourteen: `php-test` (PHP versions through `parallel:matrix`), `composer-audit`, `npm-audit`,
 `proctor`, `sbom`, `pint`, `phpstan`, `eslint`, `secret-detection`, `a11y` (the accessibility suite, 6.5),
 `portability`, `package-publish`, `renovate` and `squire-kit` (a deploy kit still matches its Squire release). A contract suite comes later.
 
@@ -192,7 +192,7 @@ the run.
 Sources: [GitLab: CI/CD inputs](https://docs.gitlab.com/ci/inputs/);
 [GitLab: component examples](https://docs.gitlab.com/ci/components/examples/).
 
-**How the stack holds it: Enforced.** All thirteen templates use `spec:inputs` with types, descriptions and defaults.
+**How the stack holds it: Enforced.** All fourteen templates use `spec:inputs` with types, descriptions and defaults.
 GitLab rejects a wrong type or an unknown input at pipeline creation. The first pipeline, back when Preflight had
 three components, passed all six jobs with the array input.
 
@@ -236,7 +236,7 @@ Why: global keys leak into the consuming pipeline.
 
 Sources: [GitLab: component examples](https://docs.gitlab.com/ci/components/examples/).
 
-**How the stack holds it: Enforced.** All thirteen templates follow it. `tests/check-contract.sh` fails on any top-level
+**How the stack holds it: Enforced.** All fourteen templates follow it. `tests/check-contract.sh` fails on any top-level
 key that is not a job named in `contract/inputs.json`, so a template cannot add a global key. The README's "Which jobs
 may be allowed to fail" explains why only `proctor`, `secret-detection` and `a11y` take `allow_failure`.
 
@@ -310,8 +310,8 @@ A job timeout cannot exceed the runner's timeout.
 
 Sources: [GitLab: CI/CD YAML, `timeout` and `interruptible`](https://docs.gitlab.com/ci/yaml/).
 
-**How the stack holds it: Documented.** All thirteen templates set `interruptible: true` and a `timeout` of their own:
-`10m` for pint and phpstan, `10 minutes` for squire-kit, `15m` for eslint, `30 minutes` for composer-audit, package-publish, php-test, proctor,
+**How the stack holds it: Documented.** All fourteen templates set `interruptible: true` and a `timeout` of their own:
+`10m` for pint and phpstan, `10 minutes` for squire-kit and npm-audit, `15m` for eslint, `30 minutes` for composer-audit, package-publish, php-test, proctor,
 sbom, secret-detection, a11y and portability, and `1 hour` for renovate. What stays open is the cancellation half: whether a superseded pipeline is actually
 canceled still needs `workflow:auto_cancel` in the app's own file, which a component cannot force (see 3.1).
 
@@ -447,7 +447,7 @@ by a hostile `composer.json`, which is exactly what a contributed branch can car
 Sources: [GitLab: merge request pipelines](https://docs.gitlab.com/ci/pipelines/merge_request_pipelines/);
 [GitLab: CI/CD variables](https://docs.gitlab.com/ci/variables/).
 
-**How the stack holds it: Documented.** All thirteen templates use no secrets, which limits the harm, and the README
+**How the stack holds it: Documented.** All fourteen templates use no secrets, which limits the harm, and the README
 documents the rule: review a fork's `.gitlab-ci.yml` before running its pipeline, and never give it protected variables.
 
 ---
@@ -565,6 +565,16 @@ pins"), so the rules depend on the pinned digest, not on where the `composer:2` 
 own lines and proves an advisory and a malware-flagged version exit 1 in every `abandoned` mode, an abandoned package
 exits 1 only in `fail` mode, and the clean fixture app exits 0.
 
+The front-end half is the `npm-audit` job: `npm audit --omit=dev --audit-level=high` (both inputs) on the app's
+`package-lock.json`, failing on npm's exit code with no `allow_failure`, then a full report with dev dependencies that
+never fails. It passes `--audit=true --offline=false`, because an `.npmrc` with `audit=false` or `offline=true` makes npm
+skip the request and print "found 0 vulnerabilities" (tested on npm 10.9.2). An unreachable registry fails the job; an
+app with no lock file passes with a "nothing to audit" line. `audit_level` takes CREED's `medium` and runs it as npm's
+`moderate`. `tests/check-npm-audit-fails` (run in CI by `must-fail-npm-audit`) runs the template's own script and proves
+a high advisory (lodash 4.17.20, GHSA-35jh-r3h4-6jhm) fails at `high` and `medium` and passes at `critical`, the
+`.npmrc` trap still fails, a dev-only finding fails only with `omit_dev: false`, and an unreachable registry fails a
+clean lock.
+
 Second pass, corrections and detail from Composer's current docs:
 
 - Composer 2.10.0 (2026-05-28) changed the `audit` exit code to 0 on success and 1 if anything fails. Earlier releases
@@ -607,7 +617,7 @@ Why: pipelines run faster, and an unreviewed branch cannot poison the cache that
 
 Sources: [GitLab: caching](https://docs.gitlab.com/ci/caching/).
 
-**How the stack holds it: Checked.** `php-test`, `proctor`, `pint`, `phpstan`, `sbom` and `squire-kit` cache Composer downloads in `.composer-cache/`, and `eslint` and `a11y` cache npm downloads in `.npm-cache/`, each under a fixed key: `preflight-php-${PHP_VERSION}` for `php-test`, one key per PHP version, and `preflight-proctor`, `preflight-pint`, `preflight-phpstan`, `preflight-sbom`, `preflight-squire-kit`, `preflight-eslint` and `preflight-a11y` for the rest. `tests/check-php-test-cache` (and its `.ps1` twin) fail if the key turns back into a lock-file hash or drops the PHP version, and `tests/check-proctor-cache` (and its `.ps1` twin) fail if the proctor key turns back into a lock-file hash. `composer-audit` still defines no cache. Every component cache also saves with `when: always`, so a retry after a dropped download fetches only what is missing, and `tests/check-dependency-cache` fails on a block without it.
+**How the stack holds it: Checked.** `php-test`, `proctor`, `pint`, `phpstan`, `sbom` and `squire-kit` cache Composer downloads in `.composer-cache/`, and `eslint` and `a11y` cache npm downloads in `.npm-cache/`, each under a fixed key: `preflight-php-${PHP_VERSION}` for `php-test`, one key per PHP version, and `preflight-proctor`, `preflight-pint`, `preflight-phpstan`, `preflight-sbom`, `preflight-squire-kit`, `preflight-eslint` and `preflight-a11y` for the rest. `tests/check-php-test-cache` (and its `.ps1` twin) fail if the key turns back into a lock-file hash or drops the PHP version, and `tests/check-proctor-cache` (and its `.ps1` twin) fail if the proctor key turns back into a lock-file hash. `composer-audit` still defines no cache. `npm-audit` installs nothing; it reads the app's own npm cache under the fixed key `npm` and path `.cache/npm/` (the ones Sourdough's generated pipelines use) with `policy: pull`, so it never overwrites what the install job downloaded. Every component cache also saves with `when: always`, so a retry after a dropped download fetches only what is missing, and `tests/check-dependency-cache` fails on a block without it.
 
 Second pass: GitLab appends `-protected` or `-non_protected` to every cache key. Pipelines on protected branches or tags,
 and pipelines started by a Maintainer or Owner, get `-protected`. The separation is on by default and GitLab calls it
@@ -695,7 +705,7 @@ Sources: [Semgrep: Shai-Hulud second wave](https://semgrep.dev/blog/2025/digging
 [Better Stack: Shai-Hulud](https://betterstack.com/community/guides/scaling-nodejs/shai-hulud-attack/). These were read as
 search summaries only, so details are unverified.
 
-**How the stack holds it: Documented.** README.md "Shared conventions" records the rule. The `eslint` component runs `npm ci --ignore-scripts`.
+**How the stack holds it: Documented.** README.md "Shared conventions" records the rule. The `eslint` component runs `npm ci --ignore-scripts`. The `npm-audit` component reads only the lock and runs no package code at all.
 
 ### 4.13 Generate a CycloneDX SBOM and validate it
 Produce a software bill of materials for every release, and fail the build on an invalid one.
@@ -785,7 +795,7 @@ Sources: [GitLab: CI/CD variables](https://docs.gitlab.com/ci/variables/);
 [GitLab: pipeline security, secrets](https://docs.gitlab.com/ci/pipeline_security/);
 [OWASP CICD-SEC-6 Insufficient Credential Hygiene](https://owasp.org/www-project-top-10-ci-cd-security-risks/).
 
-**How the stack holds it: Documented.** The thirteen templates use no secrets, which is good. Nothing fails if a later
+**How the stack holds it: Documented.** The fourteen templates use no secrets, which is good. Nothing fails if a later
 template adds one. The repository's own pipeline now runs GitLab's pipeline secret detection as an advisory job
 (`secret_detection` with `allow_failure: true`, kept in place by `tests/check-secret-detection.sh` and its `.ps1`
 twin); the plan is to make it blocking after a week of green pipelines. Whether it runs on the git.wayne.edu

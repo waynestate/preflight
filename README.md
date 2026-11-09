@@ -194,6 +194,35 @@ pipelines like any other. Creating the schedule is a project setting, not a
 file in the app's repo, and someone with Maintainer rights on the app must
 do it. It is the one preflight check that books its own flight time.
 
+### npm-audit
+
+The front-end half of `composer-audit`: runs `npm audit` on the app's `package-lock.json` and fails on an advisory at
+or above `audit_level` in a runtime dependency, then prints a full report, dev dependencies included, that never fails.
+On main, not in a tag yet.
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@<full commit SHA> # the first tag with npm-audit
+    inputs:
+      audit_level: high
+```
+
+| Input | Type | Default | What it does |
+|-------|------|---------|--------------|
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `npm-audit` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `node:22.13-alpine@sha256:e2b39f7b64281324929257d0f8004fb6cb4bf0fdfb9aa8cedb235a766aec31da` | Docker image for the job (the `eslint` component's pin). |
+| `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
+| `working_dir` | string | `.` | Directory that holds `package-lock.json`, relative to the project root. |
+| `audit_level` | string | `high` | Lowest severity that fails the job: `low`, `moderate`, `high` or `critical`; `medium` (CREED's and Composer's word) means `moderate`. |
+| `omit_dev` | boolean | `true` | Whether the failing audit leaves dev dependencies out. The full report always lists them. |
+
+An app with no lock file passes with a "nothing to audit" line, so a repo with no front end never goes red. The job
+passes `--audit=true --offline=false`, because an `.npmrc` with `audit=false` or `offline=true` makes npm print "found 0
+vulnerabilities" without asking anyone. An unreachable registry fails the job with a message that says so. Preflight's
+own `must-fail-npm-audit` job proves all of this on fixed locks. The severity map and the details:
+[The npm-audit component](docs/guides/component-npm-audit.md).
+
 ### sbom
 
 Generates a CycloneDX SBOM with `cyclonedx/cyclonedx-php-composer`, validates it, and publishes it as an artifact. The plugin is installed globally, so the app's `composer.json` is never touched.
@@ -716,7 +745,7 @@ Four components take an `allow_failure` input, all defaulting to `false`: `proct
 `squire-kit`. A policy finding is a warning while an app adopts PROCTOR's rules, a secret finding while a repo
 allowlists its first false positives, an accessibility finding while a site fixes what the gate found on its first run,
 and a kit finding while a repo puts its deploy kit back to Squire's files, so each job may fail without failing the
-pipeline during adoption; the first three still write their reports. `composer-audit` has no such input on purpose: a known advisory must fail the pipeline. The other jobs have no
+pipeline during adoption; the first three still write their reports. `composer-audit` and `npm-audit` have no such input on purpose: a known advisory must fail the pipeline. The other jobs have no
 `allow_failure` input either.
 
 No template adds a global key such as `default:`, `variables:`, `workflow:` or `stages:`. `tests/check-contract.sh`
@@ -917,6 +946,19 @@ docker run --rm -v "$(pwd):/app:ro" -w /app composer:2.11.1@sha256:8de2184c6de22
 
 ```powershell
 pwsh -File tests/check-composer-audit-fails.ps1
+```
+
+`tests/check-npm-audit-fails.sh` does the same for `npm-audit`: a clean lock and an app with no lock must pass, and
+lodash 4.17.20 (GHSA-35jh-r3h4-6jhm) must fail at `high` and `medium` (and with an `.npmrc` that turns the audit off)
+and pass at `critical`; a dev-only finding fails only with `omit_dev: false`, and an unreachable registry fails a clean
+lock. It asks the npm registry, so it needs the network. The `must-fail-npm-audit` job runs it in CI.
+
+```sh
+docker run --rm -v "$(pwd):/app:ro" -v stack-npm-cache:/root/.npm -w /app node:22.13-alpine@sha256:e2b39f7b64281324929257d0f8004fb6cb4bf0fdfb9aa8cedb235a766aec31da sh tests/check-npm-audit-fails.sh
+```
+
+```powershell
+pwsh -File tests/check-npm-audit-fails.ps1
 ```
 
 <details>

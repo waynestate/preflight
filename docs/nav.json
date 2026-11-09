@@ -35,6 +35,10 @@
           "path": "guides/component-composer-audit"
         },
         {
+          "title": "The npm-audit component",
+          "path": "guides/component-npm-audit"
+        },
+        {
           "title": "The sbom component",
           "path": "guides/component-sbom"
         },

@@ -32,6 +32,12 @@ The card runs the seven above and `a11y`; `squire-kit` and `portability` (in its
 | 9 | Squire deploy kit matches its release | `squire-kit` | 10 minutes |
 | 10 | Runs off Citadel: strict boot and six portability checks | `portability` | 30 minutes |
 
+New on main, not in a tag yet, and not on the card:
+
+| # | Item | Job | Timeout |
+|---|------|-----|---------|
+| 11 | npm audit, high or critical in runtime dependencies by default | `npm-audit` | 10 minutes |
+
 Every job the templates define is `interruptible: true`. Every component takes a `job_name` input whose default is the job's usual name; set it when one project includes the same component more than once.
 
 ## The inputs contract
@@ -141,6 +147,29 @@ From `templates/composer-audit/template.yml`: the `composer:2` image already shi
 ### Run it on a schedule
 
 New advisories are published after code is merged, so a green pipeline today can be stale tomorrow. Create a weekly pipeline schedule on the default branch: project settings, Build, Pipeline schedules. The component needs nothing extra; it carries no `rules:` block, so it runs in scheduled pipelines like any other. Creating the schedule is a project setting, not a file in the app's repo, and someone with Maintainer rights on the app must do it. It is the one preflight check that books its own flight time.
+
+## npm-audit
+
+Runs `npm audit` on the app's `package-lock.json` and fails on advisories at or above `audit_level` in runtime dependencies, then prints a full report with dev dependencies that never fails. On main, not in a tag yet.
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@<full commit SHA> # the first tag with npm-audit
+    inputs:
+      audit_level: high
+```
+
+| Input | Type | Default | What it does |
+|-------|------|---------|--------------|
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `npm-audit` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `node:22.13-alpine@sha256:e2b39f7b64281324929257d0f8004fb6cb4bf0fdfb9aa8cedb235a766aec31da` | Docker image for the job (the `eslint` component's pin). |
+| `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
+| `working_dir` | string | `.` | Directory that holds `package-lock.json`, relative to the project root. |
+| `audit_level` | string | `high` | Lowest severity that fails the job: `low`, `moderate`, `high` or `critical`; `medium` (CREED's and Composer's word) means `moderate`. |
+| `omit_dev` | boolean | `true` | Whether the failing audit leaves dev dependencies out. The full report always lists them. |
+
+From `templates/npm-audit/template.yml`: with no `package-lock.json` (or `npm-shrinkwrap.json`) the job prints "nothing to audit" and passes. Otherwise it runs `npm audit --omit=dev --audit-level=<audit_level> --audit=true --offline=false` and keeps npm's exit code; the two flags stop an `.npmrc` with `audit=false` or `offline=true` from faking a pass. An unreachable registry fails the job with a message saying so. Nothing is installed. The cache is the app's own (key `npm`, path `.cache/npm/`, `policy: pull`). There is no `allow_failure` input. The job is `interruptible: true` with a timeout of 10 minutes. [The npm-audit component](../guides/component-npm-audit.md) has the severity map and the proof.
 
 ## sbom
 

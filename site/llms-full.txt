@@ -184,6 +184,35 @@ pipelines like any other. Creating the schedule is a project setting, not a
 file in the app's repo, and someone with Maintainer rights on the app must
 do it. It is the one preflight check that books its own flight time.
 
+#### npm-audit
+
+The front-end half of `composer-audit`: runs `npm audit` on the app's `package-lock.json` and fails on an advisory at
+or above `audit_level` in a runtime dependency, then prints a full report, dev dependencies included, that never fails.
+On main, not in a tag yet.
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@<full commit SHA> # the first tag with npm-audit
+    inputs:
+      audit_level: high
+```
+
+| Input | Type | Default | What it does |
+|-------|------|---------|--------------|
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `npm-audit` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `node:22.13-alpine@sha256:e2b39f7b64281324929257d0f8004fb6cb4bf0fdfb9aa8cedb235a766aec31da` | Docker image for the job (the `eslint` component's pin). |
+| `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
+| `working_dir` | string | `.` | Directory that holds `package-lock.json`, relative to the project root. |
+| `audit_level` | string | `high` | Lowest severity that fails the job: `low`, `moderate`, `high` or `critical`; `medium` (CREED's and Composer's word) means `moderate`. |
+| `omit_dev` | boolean | `true` | Whether the failing audit leaves dev dependencies out. The full report always lists them. |
+
+An app with no lock file passes with a "nothing to audit" line, so a repo with no front end never goes red. The job
+passes `--audit=true --offline=false`, because an `.npmrc` with `audit=false` or `offline=true` makes npm print "found 0
+vulnerabilities" without asking anyone. An unreachable registry fails the job with a message that says so. Preflight's
+own `must-fail-npm-audit` job proves all of this on fixed locks. The severity map and the details:
+[The npm-audit component](https://github.com/waynestate/preflight/blob/HEAD/docs/guides/component-npm-audit.md).
+
 #### sbom
 
 Generates a CycloneDX SBOM with `cyclonedx/cyclonedx-php-composer`, validates it, and publishes it as an artifact. The plugin is installed globally, so the app's `composer.json` is never touched.
@@ -706,7 +735,7 @@ Four components take an `allow_failure` input, all defaulting to `false`: `proct
 `squire-kit`. A policy finding is a warning while an app adopts PROCTOR's rules, a secret finding while a repo
 allowlists its first false positives, an accessibility finding while a site fixes what the gate found on its first run,
 and a kit finding while a repo puts its deploy kit back to Squire's files, so each job may fail without failing the
-pipeline during adoption; the first three still write their reports. `composer-audit` has no such input on purpose: a known advisory must fail the pipeline. The other jobs have no
+pipeline during adoption; the first three still write their reports. `composer-audit` and `npm-audit` have no such input on purpose: a known advisory must fail the pipeline. The other jobs have no
 `allow_failure` input either.
 
 No template adds a global key such as `default:`, `variables:`, `workflow:` or `stages:`. `tests/check-contract.sh`
@@ -908,6 +937,19 @@ docker run --rm -v "$(pwd):/app:ro" -w /app composer:2.11.1@sha256:8de2184c6de22
 pwsh -File tests/check-composer-audit-fails.ps1
 ```
 
+`tests/check-npm-audit-fails.sh` does the same for `npm-audit`: a clean lock and an app with no lock must pass, and
+lodash 4.17.20 (GHSA-35jh-r3h4-6jhm) must fail at `high` and `medium` (and with an `.npmrc` that turns the audit off)
+and pass at `critical`; a dev-only finding fails only with `omit_dev: false`, and an unreachable registry fails a clean
+lock. It asks the npm registry, so it needs the network. The `must-fail-npm-audit` job runs it in CI.
+
+```sh
+docker run --rm -v "$(pwd):/app:ro" -v stack-npm-cache:/root/.npm -w /app node:22.13-alpine@sha256:e2b39f7b64281324929257d0f8004fb6cb4bf0fdfb9aa8cedb235a766aec31da sh tests/check-npm-audit-fails.sh
+```
+
+```powershell
+pwsh -File tests/check-npm-audit-fails.ps1
+```
+
 ### The cast
 
 ---
@@ -996,7 +1038,7 @@ Cockpit placards
 
 ### Eight checks, one include each
 
-Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All eight are in the 0.4.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Five more components ship in the same tag, and the docs cover each one: `secret-detection`, `squire-kit`, `portability`, `package-publish` and `renovate`. New in 0.4.0: `php-test` can run one extra PHP version as an advisory job, `proctor` takes a `git_depth`, and Composer has a 2.9.6 floor. Every input on these placards is held to [a written contract](https://preflight.apps.wayne.edu/#contract).
+Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All eight are in the 0.4.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Five more components ship in the same tag, and the docs cover each one: `secret-detection`, `squire-kit`, `portability`, `package-publish` and `renovate`. On main for the next tag: `npm-audit`, the front-end half of `composer-audit`, which fails on a high or critical advisory in `package-lock.json`. New in 0.4.0: `php-test` can run one extra PHP version as an advisory job, `proctor` takes a `git_depth`, and Composer has a 2.9.6 floor. Every input on these placards is held to [a written contract](https://preflight.apps.wayne.edu/#contract).
 
 in 0.4.0
 
@@ -1204,7 +1246,7 @@ Type certificate data sheet
 | `test_command` | string | `vendor/bin/phpunit` |
 | `working_dir` | string | `.` |
 
-One of thirteen entries, abridged. A bar in the margin marks a line revised from 0.3.1 to 0.4.0, which also gave `proctor` a `git_depth` input.
+One of fourteen entries on main, abridged. A bar in the margin marks a line revised from 0.3.1 to 0.4.0, which also gave `proctor` a `git_depth` input.
 
 1. **Renames are announced.** An input or job is renamed or removed only in a release whose Upgrading notes list it under Breaking. Before 1.0 that is a new minor, never a patch.
 2. **Tighter counts too.** A pattern that stops a value you used to pass is breaking, and gets the same notice.
@@ -1484,6 +1526,7 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ### Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Added: the `npm-audit` component, the front-end half of `composer-audit` (CREED backlog 23, practice 41). It runs `npm audit --omit=dev --audit-level=<audit_level>` on the app's `package-lock.json` in the `eslint` component's Node image and fails at or above the level (default `high`), then prints a full report with dev dependencies that never fails. Inputs: `stage`, `job_name`, `image`, `image_prefix`, `working_dir`, `audit_level` (`low`, `moderate`, `high`, `critical`; CREED's `medium` runs as npm's `moderate`) and `omit_dev` (default `true`). No lock file passes with a "nothing to audit" line; an unreachable registry fails with a message; `--audit=true --offline=false` stop an `.npmrc` from faking a pass. It reads the app's npm cache (fixed key `npm`, `.cache/npm/`, pull only, D-072). Proof: `tests/check-npm-audit-fails.sh` (and its `.ps1` twin), the `tests/npm-audit-fails` lock (lodash 4.17.20, GHSA-35jh-r3h4-6jhm) and `tests/npm-audit-fixtures`, run by the new `must-fail-npm-audit` job; Preflight's pipeline also includes the component on the clean fixture. New docs page: The npm-audit component.
 - Added: the proctor job keeps PROCTOR's JSON report as `proctor.json` in its artifact (`paths: [proctor.json]`, `expire_in: 30 days`, still `when: always` next to the Code Quality report), the file Rollcall reads with `ROLLCALL_PROCTOR_SOURCE=gitlab`. A guard adds `--record "$CI_PROJECT_DIR/proctor.json"` only when `proctor_command` is a plain `proctor check` line (no quotes, `$` or shell operators, no `--record` of its own) and the app's PROCTOR lists `--record` in its help (0.11.0 and later); PROCTOR 0.10.0 and older run exactly as before and the runner only warns that `proctor.json` matched no files. The proctor line alone still decides the job. `tests/check-proctor-fails` (sh and ps1) now runs the template's own guard and command line on three fakes: no `--record` (`tests/fixture-app`), a clean one with it (new `tests/proctor-record`) and the must-fail one with it (`tests/proctor-fails`), plus a gate command and a quoted one that must not get the flag.
 - Changed: every component default, Preflight's own CI and the docs move from Composer 2.10.3 to 2.11.1 (`composer:2.11.1@sha256:8de2184c...`, the multi-arch list digest; php-test's and proctor's `composer_version` default is `2.11.1`). Composer 2.11.0 fixed GHSA-c968-33g3-wh7p (package names that could escape the vendor directory) and GHSA-fm2w-xgf2-f9fh (inline repository headers written into `composer.lock`), and 2.10.x is no longer maintained. 2.11 removed `source-fallback`; no component sets it, and no component sets `policy.cooldown`. An app that overrides the `image` input (or sets `composer_version`) keeps its own pin and is unaffected.
 - Changed: the deploy kit is Squire 0.10.0 (was 0.7.1): release.sh keeps Composer and npm download caches in the app folder and the gate takes SQUIRE_PHP_RUNTIME; the compose file, health.php and .env.squire.example follow the template, and the portable image files are added.
@@ -1940,6 +1983,96 @@ The `eslint` job has no `allow_failure` input: a lint or format error fails the 
 - [The phpstan component](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html): the static analysis check for the PHP side.
 - [Include a component twice](https://preflight.apps.wayne.edu/docs/guides/include-twice.html): the `job_name` input in action.
 - [Reference](https://preflight.apps.wayne.edu/docs/reference/components.html): every component, with its inputs and defaults.
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html
+
+## The npm-audit component[#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#the-npm-audit-component)
+
+The front-end half of [composer-audit](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html): this component runs `npm audit` on the app's `package-lock.json` and fails the pipeline on an advisory at or above `audit_level` (`high` by default) in a runtime dependency. Then it prints a full report, dev dependencies included, that never fails. This page shows how to add it, what each input does, and how CREED's severity words map to npm's.
+
+### Include the component[#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#include-the-component)
+
+Goal: your app's pipeline fails whenever a locked runtime npm package has a known high or critical advisory. Add the include to your app's `.gitlab-ci.yml`:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@<full commit SHA> # the first tag with npm-audit
+    inputs:
+      working_dir: .
+```
+
+npm-audit is on main and not in a tag yet: pin the commit SHA of the first release that lists it in the [Changelog](https://preflight.apps.wayne.edu/docs/changelog.html).
+
+### Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#inputs)
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `npm-audit` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `node:22.13-alpine@sha256:e2b39f7b64281324929257d0f8004fb6cb4bf0fdfb9aa8cedb235a766aec31da` | Docker image for the job: the same Node image and digest the `eslint` component pins. |
+| `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
+| `working_dir` | string | `.` | Directory that holds `package-lock.json`, relative to the project root. |
+| `audit_level` | string | `high` | Lowest severity that fails the job: `low`, `moderate`, `high` or `critical`. `medium` is accepted too and means `moderate` (see Severity words below). |
+| `omit_dev` | boolean | `true` | Whether the failing audit leaves dev dependencies out. The full report after it always lists them and never fails. |
+
+Note
+
+The template adds regexes to three inputs: `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`, `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$` and `audit_level` must match `^(low|moderate|medium|high|critical)$`.
+
+### What the job does[#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#what-the-job-does)
+
+The job is `interruptible: true` with a `timeout: 10 minutes`. Its script changes into `working_dir`, then:
+
+1. **No lock, nothing to audit.** With no `package-lock.json` (or `npm-shrinkwrap.json`) the job prints `npm-audit: no lock file (package-lock.json or npm-shrinkwrap.json) in <dir>, nothing to audit.` and passes. An app with no front end never goes red.
+2. **The gate.** `npm audit --omit=dev --audit-level=<audit_level> --audit=true --offline=false` (no `--omit=dev` when `omit_dev` is `false`). npm exits non-zero on an advisory at or above the level, and the job keeps that exit code.
+3. **The full report.** When `omit_dev` is `true`, a second `npm audit` lists every finding, dev dependencies included, and never fails the job. A dev-only finding shows up in the log without stopping the merge.
+
+`npm audit` reads only the lock. Nothing is installed, so no package's install script runs in this job.
+
+Warning
+
+The component carries no `allow_failure` input on purpose: an advisory at or above `audit_level` must fail the pipeline. To let one advisory through while a fix lands, raise `audit_level` for a short time and say why in the merge request, or move the package to a fixed version.
+
+#### Why `--audit=true --offline=false` [#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#why-audit-true-offline-false)
+
+An app's own `.npmrc` can carry `audit=false` or `offline=true`. Either one makes `npm audit` skip the request, print `found 0 vulnerabilities` and exit 0: a pass that audited nothing. The two flags override the file, so the job always asks the registry.
+
+#### When the registry cannot be reached[#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#when-the-registry-cannot-be-reached)
+
+`npm audit` posts the lock's package tree to the registry's audit endpoint, so the job needs outbound HTTPS to the registry (`registry.npmjs.org` unless the app's `.npmrc` names another). When the endpoint cannot be reached, or the registry does not offer one, npm exits non-zero with `audit endpoint returned an error`, and the job adds `npm-audit: the registry's audit endpoint could not be reached or refused the request, so nothing was audited.` It fails rather than passes unchecked. A private registry that proxies npm must also serve npm's audit endpoints (`/-/npm/v1/security/advisories/bulk`, with `/-/npm/v1/security/audits/quick` as npm's fallback), or the job fails on every run.
+
+### Severity words[#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#severity-words)
+
+CREED's policy (`rules.audit_severity_threshold` in `policy.json`, read by PROCTOR) and Composer use `low`, `medium`, `high` and `critical`. npm uses `low`, `moderate`, `high` and `critical` (plus `info` and `none`, which this component does not accept: `none` would never fail and `info` fails on notes). The map:
+
+| CREED and Composer | npm (`--audit-level`) |
+| --- | --- |
+| `low` | `low` |
+| `medium` | `moderate` |
+| `high` | `high` |
+| `critical` | `critical` |
+
+So `audit_level` takes the policy's value as it is: `audit_level: medium` runs `npm audit --audit-level=moderate`, and the log says `failing on moderate or higher`. The default, `high`, matches the stack policy's `audit_severity_threshold`.
+
+### Caching[#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#caching)
+
+The job installs nothing, but npm fetches package metadata while it reports. It reads the app's own npm cache: the fixed key `npm` and the path `.cache/npm/` (`npm_config_cache` points there), the ones Sourdough's generated pipelines use, with `policy: pull`. The audit never uploads, so an audit running next to the app's install job cannot overwrite the packages that job just downloaded (D-072). In an app with no npm cache of its own the job simply starts cold.
+
+### Proof[#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#proof)
+
+Preflight's own pipeline keeps these promises with the `must-fail-npm-audit` job. It runs this template's own script on fixed locks: lodash 4.17.20 (GHSA-35jh-r3h4-6jhm, high) fails at `high` and `medium` and passes at `critical`, an `.npmrc` that turns the audit off still fails, the same lodash as a dev dependency fails only with `omit_dev: false`, a clean lock and an app with no lock pass, and an unreachable registry fails a clean lock. The pipeline also includes the component on the clean fixture, where it must pass. A smoke detector is only worth the batteries if someone pressed the test button.
+
+### Run it on a schedule[#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#run-it-on-a-schedule)
+
+New advisories are published after code is merged. The weekly pipeline schedule from [composer-audit](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#run-it-on-a-schedule) covers this job too: it carries no `rules:` block, so it runs in scheduled pipelines like any other.
+
+### Related[#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#related)
+
+- [The composer-audit component](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html)
+- [The eslint component](https://preflight.apps.wayne.edu/docs/guides/component-eslint.html)
+- [Dependency caching](https://preflight.apps.wayne.edu/docs/guides/dependency-caching.html)
 
 ---
 
@@ -2866,6 +2999,8 @@ Each job that installs packages keeps them in the GitLab cache, inside the proje
 | `eslint` | `.npm-cache/` | fixed (`preflight-eslint`) |
 | `a11y` | `.npm-cache/` | fixed (`preflight-a11y`), unchanged |
 
+`npm-audit` installs nothing, so it keeps no cache of its own. It reads the app's npm cache instead: key `npm`, path `.cache/npm/` (`npm_config_cache`), the ones Sourdough's generated pipelines use, with `policy: pull`, so an audit next to the app's install job never overwrites what that job downloaded.
+
 `COMPOSER_CACHE_DIR` and `NPM_CONFIG_CACHE` point the tools at those paths. The keys are fixed (D-072) and installs still resolve from the lock, so a cached run never installs a stale package: Composer and npm only skip the download. Every component cache also saves with `when: always`, so a retry after a dropped download fetches only what is missing.
 
 ### Your own jobs[#](https://preflight.apps.wayne.edu/docs/guides/dependency-caching.html#your-own-jobs)
@@ -3413,7 +3548,7 @@ An included component is a set of ordinary jobs. The app's own `.gitlab-ci.yml` 
 
 ### Which jobs may be allowed to fail[#](https://preflight.apps.wayne.edu/docs/guides/what-components-cannot-force.html#which-jobs-may-be-allowed-to-fail)
 
-Four components take an `allow_failure` input, all defaulting to `false`: `proctor`, `secret-detection`, `a11y` and `squire-kit`. A policy finding is a warning while an app adopts PROCTOR's rules, a secret finding while a repo allowlists its first false positives, an accessibility finding while a site fixes what the gate found on its first run, and a kit finding while a repo puts its deploy kit back to Squire's files, so each job may fail without failing the pipeline during adoption; the first three still write their reports. `composer-audit` has no such input on purpose: a known advisory must fail the pipeline. The other jobs have no `allow_failure` input either.
+Four components take an `allow_failure` input, all defaulting to `false`: `proctor`, `secret-detection`, `a11y` and `squire-kit`. A policy finding is a warning while an app adopts PROCTOR's rules, a secret finding while a repo allowlists its first false positives, an accessibility finding while a site fixes what the gate found on its first run, and a kit finding while a repo puts its deploy kit back to Squire's files, so each job may fail without failing the pipeline during adoption; the first three still write their reports. `composer-audit` and `npm-audit` have no such input on purpose: a known advisory must fail the pipeline. The other jobs have no `allow_failure` input either.
 
 No template adds a global key such as `default:`, `variables:`, `workflow:` or `stages:`. `tests/check-contract.sh` (and its `.ps1` twin) fails on any top-level key in a template that is not a job named in `contract/inputs.json`, so a global key fails `composer ci`.
 
@@ -3596,6 +3731,12 @@ The card runs the seven above and `a11y`; `squire-kit` and `portability` (in its
 | 9 | Squire deploy kit matches its release | `squire-kit` | 10 minutes |
 | 10 | Runs off Citadel: strict boot and six portability checks | `portability` | 30 minutes |
 
+New on main, not in a tag yet, and not on the card:
+
+| # | Item | Job | Timeout |
+| --- | --- | --- | --- |
+| 11 | npm audit, high or critical in runtime dependencies by default | `npm-audit` | 10 minutes |
+
 Every job the templates define is `interruptible: true`. Every component takes a `job_name` input whose default is the job's usual name; set it when one project includes the same component more than once.
 
 ### The inputs contract[#](https://preflight.apps.wayne.edu/docs/reference/components.html#the-inputs-contract)
@@ -3705,6 +3846,29 @@ From `templates/composer-audit/template.yml`: the `composer:2` image already shi
 #### Run it on a schedule[#](https://preflight.apps.wayne.edu/docs/reference/components.html#run-it-on-a-schedule)
 
 New advisories are published after code is merged, so a green pipeline today can be stale tomorrow. Create a weekly pipeline schedule on the default branch: project settings, Build, Pipeline schedules. The component needs nothing extra; it carries no `rules:` block, so it runs in scheduled pipelines like any other. Creating the schedule is a project setting, not a file in the app's repo, and someone with Maintainer rights on the app must do it. It is the one preflight check that books its own flight time.
+
+### npm-audit[#](https://preflight.apps.wayne.edu/docs/reference/components.html#npm-audit)
+
+Runs `npm audit` on the app's `package-lock.json` and fails on advisories at or above `audit_level` in runtime dependencies, then prints a full report with dev dependencies that never fails. On main, not in a tag yet.
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@<full commit SHA> # the first tag with npm-audit
+    inputs:
+      audit_level: high
+```
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `npm-audit` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `node:22.13-alpine@sha256:e2b39f7b64281324929257d0f8004fb6cb4bf0fdfb9aa8cedb235a766aec31da` | Docker image for the job (the `eslint` component's pin). |
+| `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
+| `working_dir` | string | `.` | Directory that holds `package-lock.json`, relative to the project root. |
+| `audit_level` | string | `high` | Lowest severity that fails the job: `low`, `moderate`, `high` or `critical`; `medium` (CREED's and Composer's word) means `moderate`. |
+| `omit_dev` | boolean | `true` | Whether the failing audit leaves dev dependencies out. The full report always lists them. |
+
+From `templates/npm-audit/template.yml`: with no `package-lock.json` (or `npm-shrinkwrap.json`) the job prints "nothing to audit" and passes. Otherwise it runs `npm audit --omit=dev --audit-level=<audit_level> --audit=true --offline=false` and keeps npm's exit code; the two flags stop an `.npmrc` with `audit=false` or `offline=true` from faking a pass. An unreachable registry fails the job with a message saying so. Nothing is installed. The cache is the app's own (key `npm`, path `.cache/npm/`, `policy: pull`). There is no `allow_failure` input. The job is `interruptible: true` with a timeout of 10 minutes. [The npm-audit component](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html) has the severity map and the proof.
 
 ### sbom[#](https://preflight.apps.wayne.edu/docs/reference/components.html#sbom)
 
@@ -4207,6 +4371,20 @@ windows
 pwsh -File tests/check-composer-audit-fails.ps1
 ```
 
+`tests/check-npm-audit-fails.sh` (and its `.ps1` twin) does the same for `npm-audit`. It asserts the job has no `allow_failure`, keeps the gate's exit code, carries `--audit=true --offline=false` and has no `|| true` outside the full report, renders the template's own script with each case's inputs, and runs it on copies of `tests/npm-audit-fails` (lodash 4.17.20, GHSA-35jh-r3h4-6jhm: must fail at `high`, at `medium` and with an `.npmrc` that turns the audit off, and pass at `critical`) and `tests/npm-audit-fixtures`: `clean` (must pass), `dev-only` (passes with `omit_dev` true while the full report names the advisory, fails with `false`) and `no-lock` (passes with "nothing to audit"). A last case points npm at a closed local port and must fail the clean lock. npm audit asks the registry, so it needs the network; offline, the clean case fails, so it never passes by accident. The `must-fail-npm-audit` job runs it in CI.
+
+linux
+
+```sh
+docker run --rm -v "$(pwd):/app:ro" -v stack-npm-cache:/root/.npm -w /app node:22.13-alpine@sha256:e2b39f7b64281324929257d0f8004fb6cb4bf0fdfb9aa8cedb235a766aec31da sh tests/check-npm-audit-fails.sh
+```
+
+windows
+
+```powershell
+pwsh -File tests/check-npm-audit-fails.ps1
+```
+
 ### The Squire kit checks[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#the-squire-kit-checks)
 
 `tests/check-renovate-squire-kit.sh` (and `.ps1`) checks the preset's Squire rule: the exact two post-upgrade commands, the kit-files rule, and the `squire_kit_tasks` allow-list the renovate component writes. It compiles the commands for sample upgrades and checks that each one matches an allowed pattern, and that 22 hostile variants (shell operators, `..` paths, another package or tool, an extra flag) match none. `tests/check-squire-kit.sh` (and `.ps1`) checks the `squire-kit` template: the version it reads, the install flags, `squire init --check` and its exit codes. The contract job runs both `.sh` files; the job itself runs on `tests/squire-kit-fixture` in Preflight's own pipeline.
@@ -4438,6 +4616,20 @@ The job log names an abandoned package in the lock. An abandoned package is one 
 - **Cause:** the lock holds a package marked abandoned, and the `abandoned` input is at its default, `fail`.
 - **Fix:** upgrade the package or move to its successor where the log names one. While that is not possible, set the `abandoned` input on the include: `report` lists the abandoned packages without failing the job (right for an old app with abandoned transitive packages), `ignore` does not look at them at all. Advisories still fail the job in every mode.
 - **Check:** with `report`, the job is green and its log lists the abandoned packages; with `fail`, the job fails until the lock no longer holds one.
+
+#### npm-audit fails with "audit endpoint returned an error"[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#npm-audit-fails-with-audit-endpoint-returned-an-error)
+
+The job log ends with `npm-audit: the registry's audit endpoint could not be reached or refused the request, so nothing was audited.`
+
+- **Cause:** the runner cannot reach the npm registry over HTTPS, or the app's `.npmrc` names a registry that does not serve npm's audit endpoints (`/-/npm/v1/security/advisories/bulk`).
+- **Fix:** let the runner reach the registry the log names, or point the audit at one that serves the endpoints. The job never passes without an answer.
+- **Check:** the job log shows npm's report (`found 0 vulnerabilities` or a list) instead of the error.
+
+#### npm-audit fails on a dev-only package[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#npm-audit-fails-on-a-dev-only-package)
+
+- **Cause:** `omit_dev` is `false`, so the gate audits dev dependencies too.
+- **Fix:** upgrade the package, or leave `omit_dev` at its default, `true`: the gate then reads runtime dependencies only, and the full report after it still lists the dev finding without failing.
+- **Check:** the gate's lines say `failing on high or higher in runtime dependencies`.
 
 #### composer install stops: the lock needs another PHP or an extension[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#composer-install-stops-the-lock-needs-another-php-or-an-extension)
 

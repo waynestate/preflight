@@ -302,7 +302,7 @@
       <div class="section__head">
         <p class="eyebrow">Cockpit placards</p>
         <h2 id="components-title">Eight checks, one include each</h2>
-        <p>Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All eight are in the 0.4.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Five more components ship in the same tag, and the docs cover each one: <code>secret-detection</code>, <code>squire-kit</code>, <code>portability</code>, <code>package-publish</code> and <code>renovate</code>. New in 0.4.0: <code>php-test</code> can run one extra PHP version as an advisory job, <code>proctor</code> takes a <code>git_depth</code>, and Composer has a 2.9.6 floor. Every input on these placards is held to <a href="#contract">a written contract</a>.</p>
+        <p>Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All eight are in the 0.4.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Five more components ship in the same tag, and the docs cover each one: <code>secret-detection</code>, <code>squire-kit</code>, <code>portability</code>, <code>package-publish</code> and <code>renovate</code>. On main for the next tag: <code>npm-audit</code>, the front-end half of <code>composer-audit</code>, which fails on a high or critical advisory in <code>package-lock.json</code>. New in 0.4.0: <code>php-test</code> can run one extra PHP version as an advisory job, <code>proctor</code> takes a <code>git_depth</code>, and Composer has a 2.9.6 floor. Every input on these placards is held to <a href="#contract">a written contract</a>.</p>
       </div>
 
       <div class="placards">
@@ -522,7 +522,7 @@
               <tr><th scope="row"><code>working_dir</code></th><td>string</td><td><code>.</code></td></tr>
             </tbody>
           </table>
-          <figcaption class="sheet__foot" id="sheet-cap">One of thirteen entries, abridged. A bar in the margin marks a line revised from 0.3.1 to 0.4.0, which also gave <code>proctor</code> a <code>git_depth</code> input.</figcaption>
+          <figcaption class="sheet__foot" id="sheet-cap">One of fourteen entries on main, abridged. A bar in the margin marks a line revised from 0.3.1 to 0.4.0, which also gave <code>proctor</code> a <code>git_depth</code> input.</figcaption>
         </figure>
 
         <div class="contract__terms">

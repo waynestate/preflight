@@ -84,6 +84,11 @@ project so GitLab can save and restore them:
 | `eslint` | `.npm-cache/` | fixed (`preflight-eslint`) |
 | `a11y` | `.npm-cache/` | fixed (`preflight-a11y`), unchanged |
 
+`npm-audit` installs nothing, so it keeps no cache of its own. It reads the
+app's npm cache instead: key `npm`, path `.cache/npm/` (`npm_config_cache`),
+the ones Sourdough's generated pipelines use, with `policy: pull`, so an audit
+next to the app's install job never overwrites what that job downloaded.
+
 `COMPOSER_CACHE_DIR` and `NPM_CONFIG_CACHE` point the tools at those paths. The
 keys are fixed (D-072) and installs still resolve from the lock, so a cached
 run never installs a stale package: Composer and npm only skip the download.

@@ -88,7 +88,7 @@ Cockpit placards
 
 ## Eight checks, one include each
 
-Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All eight are in the 0.4.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Five more components ship in the same tag, and the docs cover each one: `secret-detection`, `squire-kit`, `portability`, `package-publish` and `renovate`. New in 0.4.0: `php-test` can run one extra PHP version as an advisory job, `proctor` takes a `git_depth`, and Composer has a 2.9.6 floor. Every input on these placards is held to [a written contract](https://preflight.apps.wayne.edu/#contract).
+Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All eight are in the 0.4.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Five more components ship in the same tag, and the docs cover each one: `secret-detection`, `squire-kit`, `portability`, `package-publish` and `renovate`. On main for the next tag: `npm-audit`, the front-end half of `composer-audit`, which fails on a high or critical advisory in `package-lock.json`. New in 0.4.0: `php-test` can run one extra PHP version as an advisory job, `proctor` takes a `git_depth`, and Composer has a 2.9.6 floor. Every input on these placards is held to [a written contract](https://preflight.apps.wayne.edu/#contract).
 
 in 0.4.0
 
@@ -296,7 +296,7 @@ Type certificate data sheet
 | `test_command` | string | `vendor/bin/phpunit` |
 | `working_dir` | string | `.` |
 
-One of thirteen entries, abridged. A bar in the margin marks a line revised from 0.3.1 to 0.4.0, which also gave `proctor` a `git_depth` input.
+One of fourteen entries on main, abridged. A bar in the margin marks a line revised from 0.3.1 to 0.4.0, which also gave `proctor` a `git_depth` input.
 
 1. **Renames are announced.** An input or job is renamed or removed only in a release whose Upgrading notes list it under Breaking. Before 1.0 that is a new minor, never a patch.
 2. **Tighter counts too.** A pattern that stops a value you used to pass is breaking, and gets the same notice.

@@ -153,6 +153,16 @@ docker run --rm -v "$(pwd):/app:ro" -w /app composer:2.11.1@sha256:8de2184c6de22
 pwsh -File tests/check-composer-audit-fails.ps1
 ```
 
+`tests/check-npm-audit-fails.sh` (and its `.ps1` twin) does the same for `npm-audit`. It asserts the job has no `allow_failure`, keeps the gate's exit code, carries `--audit=true --offline=false` and has no `|| true` outside the full report, renders the template's own script with each case's inputs, and runs it on copies of `tests/npm-audit-fails` (lodash 4.17.20, GHSA-35jh-r3h4-6jhm: must fail at `high`, at `medium` and with an `.npmrc` that turns the audit off, and pass at `critical`) and `tests/npm-audit-fixtures`: `clean` (must pass), `dev-only` (passes with `omit_dev` true while the full report names the advisory, fails with `false`) and `no-lock` (passes with "nothing to audit"). A last case points npm at a closed local port and must fail the clean lock. npm audit asks the registry, so it needs the network; offline, the clean case fails, so it never passes by accident. The `must-fail-npm-audit` job runs it in CI.
+
+```sh tab="linux"
+docker run --rm -v "$(pwd):/app:ro" -v stack-npm-cache:/root/.npm -w /app node:22.13-alpine@sha256:e2b39f7b64281324929257d0f8004fb6cb4bf0fdfb9aa8cedb235a766aec31da sh tests/check-npm-audit-fails.sh
+```
+
+```powershell tab="windows"
+pwsh -File tests/check-npm-audit-fails.ps1
+```
+
 ## The Squire kit checks
 
 `tests/check-renovate-squire-kit.sh` (and `.ps1`) checks the preset's Squire rule: the exact two post-upgrade commands, the kit-files rule, and the `squire_kit_tasks` allow-list the renovate component writes. It compiles the commands for sample upgrades and checks that each one matches an allowed pattern, and that 22 hostile variants (shell operators, `..` paths, another package or tool, an extra flag) match none. `tests/check-squire-kit.sh` (and `.ps1`) checks the `squire-kit` template: the version it reads, the install flags, `squire init --check` and its exit codes. The contract job runs both `.sh` files; the job itself runs on `tests/squire-kit-fixture` in Preflight's own pipeline.
