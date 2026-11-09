@@ -7,9 +7,18 @@
 # scripts/parity.sh and parity.ps1 build it for you with `--fallback`:
 #   docker build -f .squire/base-fallback.Dockerfile -t squire/php-parity-base:8.4 .squire
 
-ARG PHP_IMAGE=php:8.4.27-apache
-ARG NODE_IMAGE=node:22-trixie-slim
+# Pinned by the digest of each multi-arch list (SQUIRE-30), so the same bytes build on an arm64 laptop or CI runner
+# and an amd64 server. To bump one, see Image hardening in the docs: read the new list's digest with
+# `docker buildx imagetools inspect`, check it lists linux/amd64 and linux/arm64, and replace the whole reference.
+# Every name is written in full, registry and all, because Buildah and Podman refuse a short name (`composer:2`)
+# where their short-name mode is enforcing. Each one is a build argument, so a pull-through proxy or a mirror swaps
+# only the registry part and keeps the tag and digest (Image hardening in the docs has the recipe).
+ARG PHP_IMAGE=docker.io/library/php:8.4.27-apache@sha256:884f64b47174de2c0e813270fe7b24a18605729fcebe201302d98c38805530d0
+ARG NODE_IMAGE=docker.io/library/node:22.23.4-trixie-slim@sha256:be1e2a3dc2c4fd68cdfadad2a696a280e0d2749098bee509230174d72fb768c6
+ARG COMPOSER_IMAGE=docker.io/library/composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0
 FROM ${NODE_IMAGE} AS node
+
+FROM ${COMPOSER_IMAGE} AS composer
 
 FROM ${PHP_IMAGE}
 
@@ -59,6 +68,11 @@ RUN { \
     } | tee "$APACHE_CONFDIR/conf-available/docker-php.conf" \
     && a2enconf docker-php
 
+# Apache says less about itself: ServerTokens Prod, ServerSignature Off, TraceEnable Off (SQUIRE-9). The zz- name loads
+# it after Debian's security.conf, so its values win.
+COPY apache-hardening.conf "$APACHE_CONFDIR/conf-available/zz-squire-hardening.conf"
+RUN a2enconf zz-squire-hardening
+
 # The extensions Citadel adds, minus oci8 and imagick.
 RUN set -eux; \
     savedAptMark="$(apt-mark showmanual)"; \
@@ -80,11 +94,16 @@ RUN set -eux; \
     apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
     rm -rf /var/lib/apt/lists/*
 
+# opcache (SQUIRE-10): newer official images load it already and PHP 8.5 builds it in; enable it only when missing.
+# The settings are in .squire/php.ini, which the app image copies in.
+RUN php -m | grep -qx 'Zend OPcache' || docker-php-ext-enable opcache
+
 # Composer's runtime tooling, plus Composer itself (Citadel downloads it at first boot; locally it is copied from the
-# pinned Composer image so the container does not need the network to start).
+# pinned Composer image so the container does not need the network to start). 2.11.1, because 2.10 is no longer
+# maintained and Composer, like Beethoven, keeps writing after the old score stops getting fixes.
 RUN apt-get update && apt-get install -y --no-install-recommends git openssh-client wget zip unzip curl \
     && rm -rf /var/lib/apt/lists/*
-COPY --from=composer:2.10.3 /usr/bin/composer /usr/local/bin/composer
+COPY --from=composer /usr/bin/composer /usr/local/bin/composer
 
 # Node 22 and corepack, copied from the official Node image instead of piping a setup script into a shell (S4).
 COPY --from=node /usr/local/bin/node /usr/local/bin/node
