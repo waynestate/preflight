@@ -1399,6 +1399,7 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ### Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Added: a must-fail check for package-publish (`tests/check-package-publish-fails.sh`, its .ps1 twin and the `must-fail-package-publish` job): a non-semver tag and a missing composer.json still stop the release before any registry contact.
 - Docs: README, the guides, the docs pages and the examples pin the 0.4.0 tag commit, and the upgrading page has a 0.4.0 section.
 
 ### 0.4.0 (2026-11-08)[#](https://preflight.apps.wayne.edu/docs/changelog.html#0-4-0-2026-11-08)

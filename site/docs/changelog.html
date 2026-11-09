@@ -47,6 +47,7 @@
 are Git tags.</p>
 <h2 id="unreleased">Unreleased<a class="docs-heading-link" aria-label="Link to this section" href="#unreleased">#</a></h2>
 <ul>
+<li>Added: a must-fail check for package-publish (<code>tests/check-package-publish-fails.sh</code>, its .ps1 twin and the <code>must-fail-package-publish</code> job): a non-semver tag and a missing composer.json still stop the release before any registry contact.</li>
 <li>Docs: README, the guides, the docs pages and the examples pin the 0.4.0 tag commit, and the upgrading page has a 0.4.0 section.</li>
 </ul>
 <h2 id="0-4-0-2026-11-08">0.4.0 (2026-11-08)<a class="docs-heading-link" aria-label="Link to this section" href="#0-4-0-2026-11-08">#</a></h2>
