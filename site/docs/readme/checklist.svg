@@ -67,7 +67,7 @@
   <g>
     
     <text x="74" y="202" font-family="'B612', Lato, 'Segoe UI', Helvetica, Arial, sans-serif" font-weight="700" font-size="19" letter-spacing="0.8" fill="#16211F"><tspan fill="#0E5A7D">1.</tspan> PROCTOR</text>
-    <line x1="202.2" y1="197" x2="669.8" y2="197" stroke="#A9A08C" stroke-width="2" stroke-dasharray="0.1 5" stroke-linecap="round"/>
+    <line x1="204.1" y1="197" x2="671.5" y2="197" stroke="#A9A08C" stroke-width="2" stroke-dasharray="0.1 5" stroke-linecap="round"/>
     <text x="754" y="202" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-weight="700" font-size="15" letter-spacing="0.6" fill="#3E4A47">CHECKED</text>
     <text class="on on0" x="754" y="202" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-weight="700" font-size="15" letter-spacing="0.6" fill="#0C5449">CHECKED</text>
     <text x="98" y="224" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="13" fill="#3E4A47">proctor · timeout 30 min</text>
@@ -78,7 +78,7 @@
   <g>
     
     <text x="74" y="264" font-family="'B612', Lato, 'Segoe UI', Helvetica, Arial, sans-serif" font-weight="700" font-size="19" letter-spacing="0.8" fill="#16211F"><tspan fill="#0E5A7D">2.</tspan> PHP TESTS</text>
-    <line x1="213.6" y1="259" x2="532.0" y2="259" stroke="#A9A08C" stroke-width="2" stroke-dasharray="0.1 5" stroke-linecap="round"/>
+    <line x1="216.2" y1="259" x2="537.0" y2="259" stroke="#A9A08C" stroke-width="2" stroke-dasharray="0.1 5" stroke-linecap="round"/>
     <text x="754" y="264" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-weight="700" font-size="15" letter-spacing="0.6" fill="#3E4A47">8.3 · 8.4 · 8.5 PASS</text>
     <text class="on on1" x="754" y="264" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-weight="700" font-size="15" letter-spacing="0.6" fill="#0C5449">8.3 · 8.4 · 8.5 PASS</text>
     <text x="98" y="286" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="13" fill="#3E4A47">php-test · parallel:matrix · timeout 30 min</text>
@@ -89,7 +89,7 @@
   <g>
     
     <text x="74" y="326" font-family="'B612', Lato, 'Segoe UI', Helvetica, Arial, sans-serif" font-weight="700" font-size="19" letter-spacing="0.8" fill="#16211F"><tspan fill="#0E5A7D">3.</tspan> COMPOSER AUDIT</text>
-    <line x1="284.6" y1="321" x2="606.2" y2="321" stroke="#A9A08C" stroke-width="2" stroke-dasharray="0.1 5" stroke-linecap="round"/>
+    <line x1="287.6" y1="321" x2="609.4" y2="321" stroke="#A9A08C" stroke-width="2" stroke-dasharray="0.1 5" stroke-linecap="round"/>
     <text x="754" y="326" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-weight="700" font-size="15" letter-spacing="0.6" fill="#3E4A47">NO ADVISORIES</text>
     <text class="on on2" x="754" y="326" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-weight="700" font-size="15" letter-spacing="0.6" fill="#0C5449">NO ADVISORIES</text>
     <text x="98" y="348" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="13" fill="#3E4A47">composer-audit · timeout 30 min</text>
@@ -100,7 +100,7 @@
   <g>
     
     <text x="74" y="388" font-family="'B612', Lato, 'Segoe UI', Helvetica, Arial, sans-serif" font-weight="700" font-size="19" letter-spacing="0.8" fill="#16211F"><tspan fill="#0E5A7D">4.</tspan> SBOM</text>
-    <line x1="167.6" y1="383" x2="648.6" y2="383" stroke="#A9A08C" stroke-width="2" stroke-dasharray="0.1 5" stroke-linecap="round"/>
+    <line x1="168.5" y1="383" x2="649.8" y2="383" stroke="#A9A08C" stroke-width="2" stroke-dasharray="0.1 5" stroke-linecap="round"/>
     <text x="754" y="388" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-weight="700" font-size="15" letter-spacing="0.6" fill="#3E4A47">VALIDATED</text>
     <text class="on on3" x="754" y="388" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-weight="700" font-size="15" letter-spacing="0.6" fill="#0C5449">VALIDATED</text>
     <text x="98" y="410" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="13" fill="#3E4A47">sbom · timeout 30 min</text>
@@ -111,7 +111,7 @@
   <g>
     
     <text x="74" y="450" font-family="'B612', Lato, 'Segoe UI', Helvetica, Arial, sans-serif" font-weight="700" font-size="19" letter-spacing="0.8" fill="#16211F"><tspan fill="#0E5A7D">5.</tspan> PINT</text>
-    <line x1="156.6" y1="445" x2="691.0" y2="445" stroke="#A9A08C" stroke-width="2" stroke-dasharray="0.1 5" stroke-linecap="round"/>
+    <line x1="157.1" y1="445" x2="692.3" y2="445" stroke="#A9A08C" stroke-width="2" stroke-dasharray="0.1 5" stroke-linecap="round"/>
     <text x="754" y="450" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-weight="700" font-size="15" letter-spacing="0.6" fill="#3E4A47">CLEAN</text>
     <text class="on on4" x="754" y="450" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-weight="700" font-size="15" letter-spacing="0.6" fill="#0C5449">CLEAN</text>
     <text x="98" y="472" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="13" fill="#3E4A47">pint · timeout 10 min</text>
@@ -122,7 +122,7 @@
   <g>
     
     <text x="74" y="512" font-family="'B612', Lato, 'Segoe UI', Helvetica, Arial, sans-serif" font-weight="700" font-size="19" letter-spacing="0.8" fill="#16211F"><tspan fill="#0E5A7D">6.</tspan> PHPSTAN</text>
-    <line x1="198.0" y1="507" x2="648.6" y2="507" stroke="#A9A08C" stroke-width="2" stroke-dasharray="0.1 5" stroke-linecap="round"/>
+    <line x1="200.3" y1="507" x2="650.8" y2="507" stroke="#A9A08C" stroke-width="2" stroke-dasharray="0.1 5" stroke-linecap="round"/>
     <text x="754" y="512" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-weight="700" font-size="15" letter-spacing="0.6" fill="#3E4A47">NO ERRORS</text>
     <text class="on on5" x="754" y="512" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-weight="700" font-size="15" letter-spacing="0.6" fill="#0C5449">NO ERRORS</text>
     <text x="98" y="534" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="13" fill="#3E4A47">phpstan · timeout 10 min</text>
@@ -133,7 +133,7 @@
   <g>
     
     <text x="74" y="574" font-family="'B612', Lato, 'Segoe UI', Helvetica, Arial, sans-serif" font-weight="700" font-size="19" letter-spacing="0.8" fill="#16211F"><tspan fill="#0E5A7D">7.</tspan> ESLINT · PRETTIER</text>
-    <line x1="291.2" y1="569" x2="691.0" y2="569" stroke="#A9A08C" stroke-width="2" stroke-dasharray="0.1 5" stroke-linecap="round"/>
+    <line x1="293.8" y1="569" x2="692.3" y2="569" stroke="#A9A08C" stroke-width="2" stroke-dasharray="0.1 5" stroke-linecap="round"/>
     <text x="754" y="574" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-weight="700" font-size="15" letter-spacing="0.6" fill="#3E4A47">CLEAN</text>
     <text class="on on6" x="754" y="574" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-weight="700" font-size="15" letter-spacing="0.6" fill="#0C5449">CLEAN</text>
     <text x="98" y="596" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="13" fill="#3E4A47">eslint · timeout 15 min</text>
@@ -144,7 +144,7 @@
   <g>
     
     <text x="74" y="636" font-family="'B612', Lato, 'Segoe UI', Helvetica, Arial, sans-serif" font-weight="700" font-size="19" letter-spacing="0.8" fill="#16211F"><tspan fill="#0E5A7D">8.</tspan> A11Y · AXE-CORE</text>
-    <line x1="281.4" y1="631" x2="606.2" y2="631" stroke="#A9A08C" stroke-width="2" stroke-dasharray="0.1 5" stroke-linecap="round"/>
+    <line x1="283.7" y1="631" x2="609.4" y2="631" stroke="#A9A08C" stroke-width="2" stroke-dasharray="0.1 5" stroke-linecap="round"/>
     <text x="754" y="636" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-weight="700" font-size="15" letter-spacing="0.6" fill="#3E4A47">NO VIOLATIONS</text>
     <text class="on on7" x="754" y="636" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-weight="700" font-size="15" letter-spacing="0.6" fill="#0C5449">NO VIOLATIONS</text>
     <text x="98" y="658" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="13" fill="#3E4A47">a11y · timeout 30 min</text>
@@ -155,7 +155,7 @@
   <g>
     <rect x="49" y="674" width="772" height="58" fill="#F4F1EA"/>
     <text x="74" y="698" font-family="'B612', Lato, 'Segoe UI', Helvetica, Arial, sans-serif" font-weight="700" font-size="19" letter-spacing="0.8" fill="#0C5449"><tspan fill="#0E5A7D">9.</tspan> CLEARANCE</text>
-    <line x1="222.6" y1="693" x2="542.6" y2="693" stroke="#A9A08C" stroke-width="2" stroke-dasharray="0.1 5" stroke-linecap="round"/>
+    <line x1="225.7" y1="693" x2="547.3" y2="693" stroke="#A9A08C" stroke-width="2" stroke-dasharray="0.1 5" stroke-linecap="round"/>
     <text x="754" y="698" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-weight="700" font-size="15" letter-spacing="0.6" fill="#3E4A47">CLEARED FOR TAKEOFF</text>
     <text class="on on8" x="754" y="698" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-weight="700" font-size="15" letter-spacing="0.6" fill="#0C5449">CLEARED FOR TAKEOFF</text>
     
@@ -224,19 +224,20 @@
     <g class="on on8"><rect x="886" y="374" width="332" height="66" rx="5" fill="#0D3A2A" stroke="#6CF2A6" stroke-opacity="0.55" filter="url(#glow)"/><text x="1052" y="413.12" text-anchor="middle" font-family="'B612', Lato, 'Segoe UI', Helvetica, Arial, sans-serif" font-weight="700" font-size="17" letter-spacing="2" fill="#6CF2A6">CLEARED FOR TAKEOFF</text></g>
   </g>
   <line x1="886" y1="462" x2="1218" y2="462" stroke="#FFCC33" stroke-opacity="0.5" stroke-width="1.5"/>
-  <text x="886" y="484" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-weight="700" font-size="12" letter-spacing="1.2" fill="#8E9BA0">INCLUDE: 13 COMPONENTS</text>
+  <text x="886" y="484" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-weight="700" font-size="12" letter-spacing="1.2" fill="#8E9BA0">INCLUDE: 14 COMPONENTS</text>
   <text x="886" y="502" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-weight="700" font-size="12" letter-spacing="1.2" fill="#8E9BA0">STAGE TEST · DEPLOY · SCHEDULED</text>
-  <text x="886" y="532" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="14" fill="#F4F1EA"><tspan fill="#FFCC33">- </tspan>proctor</text><text x="1218" y="532" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="12" letter-spacing="0.6" fill="#6CF2A6">IN 0.4.0</text>
-  <text x="886" y="551" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="14" fill="#F4F1EA"><tspan fill="#FFCC33">- </tspan>php-test</text><text x="1218" y="551" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="12" letter-spacing="0.6" fill="#6CF2A6">IN 0.4.0</text>
-  <text x="886" y="570" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="14" fill="#F4F1EA"><tspan fill="#FFCC33">- </tspan>composer-audit</text><text x="1218" y="570" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="12" letter-spacing="0.6" fill="#6CF2A6">IN 0.4.0</text>
-  <text x="886" y="589" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="14" fill="#F4F1EA"><tspan fill="#FFCC33">- </tspan>sbom</text><text x="1218" y="589" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="12" letter-spacing="0.6" fill="#6CF2A6">IN 0.4.0</text>
-  <text x="886" y="608" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="14" fill="#F4F1EA"><tspan fill="#FFCC33">- </tspan>pint</text><text x="1218" y="608" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="12" letter-spacing="0.6" fill="#6CF2A6">IN 0.4.0</text>
-  <text x="886" y="627" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="14" fill="#F4F1EA"><tspan fill="#FFCC33">- </tspan>phpstan</text><text x="1218" y="627" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="12" letter-spacing="0.6" fill="#6CF2A6">IN 0.4.0</text>
-  <text x="886" y="646" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="14" fill="#F4F1EA"><tspan fill="#FFCC33">- </tspan>eslint</text><text x="1218" y="646" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="12" letter-spacing="0.6" fill="#6CF2A6">IN 0.4.0</text>
-  <text x="886" y="665" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="14" fill="#F4F1EA"><tspan fill="#FFCC33">- </tspan>a11y</text><text x="1218" y="665" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="12" letter-spacing="0.6" fill="#6CF2A6">IN 0.4.0</text>
-  <text x="886" y="684" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="14" fill="#F4F1EA"><tspan fill="#FFCC33">- </tspan>package-publish</text><text x="1218" y="684" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="12" letter-spacing="0.6" fill="#6CF2A6">IN 0.4.0</text>
-  <text x="886" y="703" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="14" fill="#F4F1EA"><tspan fill="#FFCC33">- </tspan>portability</text><text x="1218" y="703" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="12" letter-spacing="0.6" fill="#6CF2A6">IN 0.4.0</text>
-  <text x="886" y="722" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="14" fill="#F4F1EA"><tspan fill="#FFCC33">- </tspan>renovate</text><text x="1218" y="722" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="12" letter-spacing="0.6" fill="#6CF2A6">IN 0.4.0</text>
-  <text x="886" y="741" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="14" fill="#F4F1EA"><tspan fill="#FFCC33">- </tspan>secret-detection</text><text x="1218" y="741" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="12" letter-spacing="0.6" fill="#6CF2A6">IN 0.4.0</text>
-  <text x="886" y="760" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="14" fill="#F4F1EA"><tspan fill="#FFCC33">- </tspan>squire-kit</text><text x="1218" y="760" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="12" letter-spacing="0.6" fill="#6CF2A6">IN 0.4.0</text>
+  <text x="886" y="528" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="14" fill="#F4F1EA"><tspan fill="#FFCC33">- </tspan>proctor</text><text x="1218" y="528" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="12" letter-spacing="0.6" fill="#6CF2A6">IN 0.5.0</text>
+  <text x="886" y="546" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="14" fill="#F4F1EA"><tspan fill="#FFCC33">- </tspan>php-test</text><text x="1218" y="546" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="12" letter-spacing="0.6" fill="#6CF2A6">IN 0.5.0</text>
+  <text x="886" y="564" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="14" fill="#F4F1EA"><tspan fill="#FFCC33">- </tspan>composer-audit</text><text x="1218" y="564" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="12" letter-spacing="0.6" fill="#6CF2A6">IN 0.5.0</text>
+  <text x="886" y="582" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="14" fill="#F4F1EA"><tspan fill="#FFCC33">- </tspan>sbom</text><text x="1218" y="582" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="12" letter-spacing="0.6" fill="#6CF2A6">IN 0.5.0</text>
+  <text x="886" y="600" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="14" fill="#F4F1EA"><tspan fill="#FFCC33">- </tspan>pint</text><text x="1218" y="600" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="12" letter-spacing="0.6" fill="#6CF2A6">IN 0.5.0</text>
+  <text x="886" y="618" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="14" fill="#F4F1EA"><tspan fill="#FFCC33">- </tspan>phpstan</text><text x="1218" y="618" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="12" letter-spacing="0.6" fill="#6CF2A6">IN 0.5.0</text>
+  <text x="886" y="636" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="14" fill="#F4F1EA"><tspan fill="#FFCC33">- </tspan>eslint</text><text x="1218" y="636" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="12" letter-spacing="0.6" fill="#6CF2A6">IN 0.5.0</text>
+  <text x="886" y="654" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="14" fill="#F4F1EA"><tspan fill="#FFCC33">- </tspan>a11y</text><text x="1218" y="654" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="12" letter-spacing="0.6" fill="#6CF2A6">IN 0.5.0</text>
+  <text x="886" y="672" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="14" fill="#F4F1EA"><tspan fill="#FFCC33">- </tspan>npm-audit</text><text x="1218" y="672" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="12" letter-spacing="0.6" fill="#6CF2A6">IN 0.5.0</text>
+  <text x="886" y="690" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="14" fill="#F4F1EA"><tspan fill="#FFCC33">- </tspan>package-publish</text><text x="1218" y="690" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="12" letter-spacing="0.6" fill="#6CF2A6">IN 0.5.0</text>
+  <text x="886" y="708" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="14" fill="#F4F1EA"><tspan fill="#FFCC33">- </tspan>portability</text><text x="1218" y="708" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="12" letter-spacing="0.6" fill="#6CF2A6">IN 0.5.0</text>
+  <text x="886" y="726" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="14" fill="#F4F1EA"><tspan fill="#FFCC33">- </tspan>renovate</text><text x="1218" y="726" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="12" letter-spacing="0.6" fill="#6CF2A6">IN 0.5.0</text>
+  <text x="886" y="744" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="14" fill="#F4F1EA"><tspan fill="#FFCC33">- </tspan>secret-detection</text><text x="1218" y="744" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="12" letter-spacing="0.6" fill="#6CF2A6">IN 0.5.0</text>
+  <text x="886" y="762" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="14" fill="#F4F1EA"><tspan fill="#FFCC33">- </tspan>squire-kit</text><text x="1218" y="762" text-anchor="end" font-family="'B612 Mono', ui-monospace, Consolas, monospace" font-size="12" letter-spacing="0.6" fill="#6CF2A6">IN 0.5.0</text>
 </svg>

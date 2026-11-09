@@ -41,7 +41,7 @@ const MAX_BYTES = 300 * 1024; // every file in docs/readme/ stays at or under th
 const FORBIDDEN = /noug[a]t|snu[.]gs|citadel/i; // internal names never ship in art
 
 // The tag every component ships in. The page's placards must agree with it.
-const COMPONENT_TAG = "0.4.0";
+const COMPONENT_TAG = "0.5.0";
 
 // Preflight's own palette, as declared in site/assets/preflight.css.
 const C = {
@@ -536,7 +536,7 @@ async function buildChecklist(page, templates) {
   const jobsY = lampsBottom + 44;
   // The include count and the stage list take a line each: on one line the
   // stages ran past the panel. The list starts below both.
-  const jobsTop = jobsY + 48;
+  const jobsTop = jobsY + 44;
   const paired = items.filter((it) => it.tpl);
   const unpaired = templates.filter((tp) => !paired.some((it) => it.tpl === tp));
   const listed = [
@@ -544,10 +544,11 @@ async function buildChecklist(page, templates) {
     ...unpaired.map((tp) => ({ job: tp.job, stage: tp.stage })),
   ];
   const stages = [...new Set(listed.map((it) => it.stage))].join(" · ");
-  // 23 units a row, closed up (never under 19) when the list grows past the
-  // panel; the overflow check below still catches a list that cannot fit.
+  // 23 units a row, closed up (never under 18, which still clears the 14 px
+  // names) when the list grows past the panel: fourteen components since
+  // 0.5.0. The overflow check below still catches a list that cannot fit.
   const rowRoom = (panelY + panelH - 24 - jobsTop) / Math.max(1, listed.length - 1);
-  const rowGap = Math.max(19, Math.min(23, Math.floor(rowRoom)));
+  const rowGap = Math.max(18, Math.min(23, Math.floor(rowRoom)));
   const tagLabel = `IN ${COMPONENT_TAG}`.toUpperCase();
   const jobsSvg = [
     `<text x="${panelX + lampPadX}" y="${jobsY}" font-family="${MONO}" font-weight="700" font-size="12" letter-spacing="1.2" fill="${C.glassText}">INCLUDE: ${listed.length} COMPONENTS</text>`,
