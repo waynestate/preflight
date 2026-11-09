@@ -319,7 +319,7 @@
             <dl>
               <dt>stage</dt><dd><code>test</code></dd>
               <dt>image</dt><dd><code>php:8.4-cli-trixie@sha256:…</code></dd>
-              <dt>composer_version</dt><dd><code>2.10.3</code></dd>
+              <dt>composer_version</dt><dd><code>2.11.1</code></dd>
               <dt>allow_failure</dt><dd><code>false</code></dd>
               <dt>proctor_command</dt><dd><code>vendor/bin/proctor check --format=codequality</code></dd>
               <dt>working_dir</dt><dd><code>.</code></dd>
@@ -340,7 +340,7 @@
               <dt>stage</dt><dd><code>test</code></dd>
               <dt>image</dt><dd><code>php:${PHP_VERSION}-cli-trixie</code></dd>
               <dt>php_versions</dt><dd><code>["8.3", "8.4", "8.5"]</code></dd>
-              <dt>composer_version</dt><dd><code>2.10.3</code></dd>
+              <dt>composer_version</dt><dd><code>2.11.1</code></dd>
               <dt>test_command</dt><dd><code>vendor/bin/phpunit</code></dd>
               <dt>working_dir</dt><dd><code>.</code></dd>
             </dl>
@@ -375,7 +375,7 @@
             <summary>4 inputs</summary>
             <dl>
               <dt>stage</dt><dd><code>test</code></dd>
-              <dt>image</dt><dd><code>composer:2.10.3@sha256:…</code></dd>
+              <dt>image</dt><dd><code>composer:2.11.1@sha256:…</code></dd>
               <dt>omit_dev</dt><dd><code>true</code></dd>
               <dt>output</dt><dd><code>sbom.cdx.json</code></dd>
             </dl>
@@ -393,7 +393,7 @@
             <summary>4 inputs</summary>
             <dl>
               <dt>stage</dt><dd><code>test</code></dd>
-              <dt>image</dt><dd><code>composer:2.10.3@sha256:…</code></dd>
+              <dt>image</dt><dd><code>composer:2.11.1@sha256:…</code></dd>
               <dt>config</dt><dd><code>pint.json</code></dd>
               <dt>working_dir</dt><dd><code>.</code></dd>
             </dl>
@@ -411,7 +411,7 @@
             <summary>5 inputs</summary>
             <dl>
               <dt>stage</dt><dd><code>test</code></dd>
-              <dt>image</dt><dd><code>composer:2.10.3@sha256:…</code></dd>
+              <dt>image</dt><dd><code>composer:2.11.1@sha256:…</code></dd>
               <dt>config</dt><dd><code>phpstan.neon</code></dd>
               <dt>memory_limit</dt><dd><code>1G</code></dd>
               <dt>working_dir</dt><dd><code>.</code></dd>
@@ -517,7 +517,7 @@
               <tr><th scope="row"><code>image_prefix</code></th><td>string</td><td>the Dependency Proxy</td></tr>
               <tr><th scope="row"><code>php_versions</code></th><td>array</td><td><code>8.3</code> <code>8.4</code> <code>8.5</code></td></tr>
               <tr class="is-amended" style="--bar: 0"><th scope="row"><code>php_advisory_version</code><span class="sheet__note">New: adds a <code>php-test-advisory</code> job</span></th><td>string</td><td><code>""</code> (off)</td></tr>
-              <tr class="is-amended" style="--bar: 1"><th scope="row"><code>composer_version</code><span class="sheet__note">Revised: floor of 2.9.6</span></th><td>string</td><td><code>2.10.3</code></td></tr>
+              <tr class="is-amended" style="--bar: 1"><th scope="row"><code>composer_version</code><span class="sheet__note">Revised: floor of 2.9.6</span></th><td>string</td><td><code>2.11.1</code></td></tr>
               <tr><th scope="row"><code>test_command</code></th><td>string</td><td><code>vendor/bin/phpunit</code></td></tr>
               <tr><th scope="row"><code>working_dir</code></th><td>string</td><td><code>.</code></td></tr>
             </tbody>
