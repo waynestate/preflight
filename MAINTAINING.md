@@ -117,5 +117,6 @@ and run PHPUnit inside it the same way.
 
 ## Who maintains it
 
-Adam Perkins, Wayne State University Enterprise Applications. Internal runbook (accounts, tokens, mirrors, runners):
+The stack maintainer (a role, not a named person), Wayne State University Enterprise Applications. To reach them,
+open an issue on git.wayne.edu. Internal runbook (accounts, tokens, mirrors, runners):
 ask Enterprise Applications.
