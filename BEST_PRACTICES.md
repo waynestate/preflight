@@ -549,7 +549,10 @@ Sources: [Composer CLI: audit](https://getcomposer.org/doc/03-cli.md);
 **How the stack holds it: Checked.** The `composer-audit` job fails on Composer's exit code. Composer also fails on
 malware and, by its configured default, on abandoned packages, and PROCTOR's own audit check reads only advisories.
 The two can disagree. The job's image is digest-pinned (`composer:2@sha256:...`, see the README's "Updating image
-pins"), so the rules depend on the pinned digest, not on where the `composer:2` tag points.
+pins"), so the rules depend on the pinned digest, not on where the `composer:2` tag points. Tested on that digest
+(Composer 2.10.3): `tests/check-composer-audit-fails` (run in CI by `must-fail-composer-audit`) runs the template's
+own lines and proves an advisory and a malware-flagged version exit 1 in every `abandoned` mode, an abandoned package
+exits 1 only in `fail` mode, and the clean fixture app exits 0.
 
 Second pass, corrections and detail from Composer's current docs:
 
@@ -561,11 +564,13 @@ Second pass, corrections and detail from Composer's current docs:
   `config.audit.ignore` today should plan to move it.
 - Malware: Composer 2.10 removes flagged versions from resolution and also checks at `composer install`, so a flagged
   version already in a lock file fails the install. Packagist takes the data from Aikido (since March 2026).
-- Conflict to resolve by test: Composer's config page lists `policy.abandoned.audit` with default `fail` (and the older
-  `audit.abandoned` defaulting to `fail` since Composer 2.7). The Packagist 2.10 post says audit "only reports" abandoned
-  packages. The first pass said audit fails on abandoned packages. The config page supports that, the blog wording does
-  not, and this pass did not run Composer. Add a fixture with an abandoned package and record the real exit code (see
-  7.2).
+- Resolved by test: Composer's config page lists `policy.abandoned.audit` with default `fail` (and the older
+  `audit.abandoned` defaulting to `fail` since Composer 2.7), while the Packagist 2.10 post says audit "only reports"
+  abandoned packages. The config page is right: on Composer 2.10.3, `composer audit --locked` exits 1 on
+  `tests/audit-fixtures/abandoned` with no flag or `--abandoned=fail`, and 0 with `report` or `ignore` (see 7.2).
+- Malware, by test: `composer audit --locked` also reads Packagist's `malware` filter list (Composer's
+  `policy.malware.audit`, default `fail`), and the `--abandoned` flag does not relax it: the malware fixture exits 1 in
+  every mode, with the package, the list, the source (`aikido`) and a `PKFE-` ID in the table.
 - `composer audit` has an `--ignore-unreachable` flag. Do not set it by default, because it hides the case where the
   advisory source cannot be reached. This is a recommendation, not a documented default.
 - `--abandoned=ignore|report|fail` and `COMPOSER_AUDIT_ABANDONED` let an app set its own rule. Decide the stack's rule
@@ -660,8 +665,9 @@ Sources: [Packagist: supply chain security update](https://blog.packagist.com/an
 
 **How the stack holds it: Checked.** `php-test` and `proctor` install the Composer release named by the `composer_version`
 input (default `2.10.3`), and `composer-audit` runs on a digest-pinned `composer:2` image, so the 2.10 behavior is chosen,
-not picked up by accident. The `contract` job keeps the defaults matched to `contract/inputs.json`; reviewing lock
-changes after an `update` or `require` stays a human step.
+not picked up by accident. The `contract` job keeps the defaults matched to `contract/inputs.json`, and
+`must-fail-composer-audit` proves the audit still fails a lock holding a malware-flagged version
+(`tests/audit-fixtures/malware`); reviewing lock changes after an `update` or `require` stays a human step.
 
 ### 4.12 When a JavaScript component arrives, install from the lock with scripts off
 For the Vue paths, a future Preflight job should use `npm ci`, turn off install scripts by default and allow them only
@@ -971,9 +977,12 @@ Sources: [GitLab: components, testing](https://docs.gitlab.com/ci/components/).
 
 **How the stack holds it: Partly.** Ten components carry a fixture that must fail them, each kept in place by a
 check: `proctor` runs `tests/proctor-fails`, a fake proctor that prints one blocker finding and exits 1, against the
-clean stub in `tests/fixture-app` (`tests/check-proctor-fails`); `composer-audit` runs `composer audit` on
-`tests/audit-fixtures/advisory`, which fails in every mode, and `tests/audit-fixtures/abandoned`, which fails only in
-`fail` mode (`tests/check-abandoned-input`); `a11y` checks the bad site in `tests/a11y-fixtures/bad`, which fails with
+clean stub in `tests/fixture-app` (`tests/check-proctor-fails`); `composer-audit` runs the template's own script
+lines on `tests/audit-fixtures/advisory` (laravel/framework v9.0.0, which must fail naming CVE-2024-52301) and
+`tests/audit-fixtures/malware` (aikido/endpoint-test 0.0.1, Aikido's harmless package flagged on Packagist's malware
+list on purpose, which must fail naming it), both in every `abandoned` mode, and on `tests/audit-fixtures/abandoned`,
+which fails only in `fail` mode, against the clean case in `tests/fixture-app` (`tests/check-composer-audit-fails`,
+run in CI by `must-fail-composer-audit`; it needs Packagist, and a run without it fails rather than passes); `a11y` checks the bad site in `tests/a11y-fixtures/bad`, which fails with
 each flaw named (`tests/check-a11y`); `portability` builds `tests/portability/app` once clean and once per flaw (needs root, writes outside its paths,
 fixed port, host-bound health, a baked `.env`, trusts any proxy, file logs, file sessions, no SIGTERM handler) and
 passes only when the clean build passes and each flaw fails the check it targets (`tests/check-portability`, run in
@@ -992,7 +1001,7 @@ carries one unused `const`, against the clean case in `tests/eslint-clean` (`tes
 `sbom` runs Composer and the CycloneDX plugin on `tests/sbom-fails`, whose `composer.lock` is not valid JSON,
 against the clean case in `tests/sbom-clean`, whose SBOM lists `psr/log` and not the dev-only `psr/container`
 (`tests/check-sbom-fails`, run in CI by `must-fail-sbom`).
-Still missing: a malware-flagged version fixture for `composer-audit` (see 4.6 and 4.11); `package-publish`'s
+Still missing: `package-publish`'s
 offline guards are covered by `tests/check-package-publish-fails.sh` (run in CI by `must-fail-package-publish`),
 while its moved-version path needs a live registry and stays untested; `renovate` is a config, not a job, so it
 has nothing to fail.
@@ -1031,7 +1040,8 @@ fixture, not an app's own checks.
 Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
 
 1. 6.1: Make the `proctor` default command work (bundled policy), then add it to PROCTOR's and CREED's pipelines.
-2. 7.2: Add failing fixtures for each component and replace the stub `bin/proctor` with the real tool.
+2. 7.2: Add a failing fixture for `package-publish`'s moved-version path (it needs a live registry). The other
+   components have theirs, and Preflight's pipeline runs the real PROCTOR.
 3. 3.3: Add a check or Rollcall report for apps that skip, unpin or weaken Preflight.
 4. Done: 4.1: Image digests stay pinned, and the pins that matter most move through review: the shared preset
    `renovate/default.json` turns off automerge (and platform automerge) for updates inside the templates, the
@@ -1077,8 +1087,9 @@ Added in the second pass (2026-10-27):
     default list has already dropped 8.2.
 27. 4.9 and 4.6 (updated): Pin Composer to a named release with a reviewed bump path, and require 2.9.6 or later (2.10.3 is
     current), because of the April to August 2026 Composer security fixes.
-28. 4.6 and 7.2 (updated): Add fixtures for an advisory, an abandoned package and a malware-flagged version, and record
-    the real audit exit codes. Settle the conflict on abandoned packages.
+28. Done: 4.6 and 7.2 (updated): fixtures for an advisory, an abandoned package and a malware-flagged version run in
+    `must-fail-composer-audit` (`tests/check-composer-audit-fails`), and 4.6 records the real exit codes; the conflict
+    on abandoned packages is settled (they fail by default).
 29. Done: 1.7: The reviewed bump process is in place: Renovate runs from the private runner project, and the shared
     preset routes digest changes inside the templates, the contract and this repository's own pipeline, plus
     component include version bumps, to a `needs-review` label that never auto-merges. The `gitlabci` manager

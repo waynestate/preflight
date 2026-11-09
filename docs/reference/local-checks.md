@@ -138,6 +138,16 @@ pwsh -File tests/check-secret-detection-fails.ps1
 pwsh -File tests/check-sbom-fails.ps1
 ```
 
+`tests/check-composer-audit-fails.sh` (and its `.ps1` twin) does the same for `composer-audit`. It asserts the job has no `allow_failure`, no `--ignore-unreachable` and no swallowed exit code, renders the template's own script lines with each case's inputs, and runs them on copies of `tests/fixture-app` (must pass) and the locks in `tests/audit-fixtures`: `advisory` (laravel/framework v9.0.0, must fail naming CVE-2024-52301) and `malware` (aikido/endpoint-test 0.0.1, Aikido's harmless test package, must fail naming it on the malware list) in every `abandoned` mode, and `abandoned`, which must fail only in `fail` mode. composer audit asks Packagist for advisories and filter lists, so it needs the network; offline, the clean case fails, so it never passes by accident. The `must-fail-composer-audit` job runs it in CI. `tests/check-abandoned-input.sh` keeps the offline half (the input's default, regex and flag in the template and the contract) and runs in the contract job.
+
+```sh tab="linux"
+docker run --rm -v "$(pwd):/app:ro" -w /app composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48 sh tests/check-composer-audit-fails.sh
+```
+
+```powershell tab="windows"
+pwsh -File tests/check-composer-audit-fails.ps1
+```
+
 ## The Squire kit checks
 
 `tests/check-renovate-squire-kit.sh` (and `.ps1`) checks the preset's Squire rule: the exact two post-upgrade commands, the kit-files rule, and the `squire_kit_tasks` allow-list the renovate component writes. It compiles the commands for sample upgrades and checks that each one matches an allowed pattern, and that 22 hostile variants (shell operators, `..` paths, another package or tool, an extra flag) match none. `tests/check-squire-kit.sh` (and `.ps1`) checks the `squire-kit` template: the version it reads, the install flags, `squire init --check` and its exit codes. The contract job runs both `.sh` files; the job itself runs on `tests/squire-kit-fixture` in Preflight's own pipeline.

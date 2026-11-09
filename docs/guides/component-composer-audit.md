@@ -39,6 +39,24 @@ The `composer:2` image already ships Composer, so no install step is needed. The
 > [!WARNING]
 > The component carries no `allow_failure` input on purpose: a known advisory must fail the pipeline.
 
+## What fails the job
+
+`composer audit --locked` reads only the lock file (it installs nothing) and fails the job on any of three findings:
+
+- **A security advisory** on a locked version. This fails in every mode.
+- **A malware-flagged version.** Composer 2.10 also reads the filter lists a repository publishes; Packagist publishes
+  one, `malware`, fed by Aikido. The job log names the package, the list, the source and a `PKFE-` ID. This fails in
+  every mode too: the `abandoned` input does not touch it.
+- **An abandoned package**, while `abandoned` is `fail` (see below).
+
+Composer asks Packagist for advisories and filter lists on every run, so the job needs outbound HTTPS to packagist.org.
+When Packagist cannot be reached the job fails rather than passes: the component never adds `--ignore-unreachable`.
+
+Preflight's own pipeline keeps these promises with the `must-fail-composer-audit` job: it runs this template's own
+lines on a clean app (must pass) and on three fixed locks, laravel/framework v9.0.0 (CVE-2024-52301), aikido/endpoint-test
+0.0.1 (Aikido's harmless package, flagged on purpose so scanners can be tested) and an abandoned package, which must
+fail (the abandoned one only in `fail` mode). A flight check that has never seen a red light is just a light.
+
 ## Abandoned packages
 
 An abandoned package is one its author no longer maintains; Composer marks it in the lock file. By default an abandoned package in the lock fails the job, and the component keeps that default: `fail` is what the `abandoned` input holds when you set nothing.

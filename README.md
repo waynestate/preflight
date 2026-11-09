@@ -147,6 +147,11 @@ include:
 | `working_dir` | string | `.` | Directory to run composer audit in, relative to the project root. |
 | `abandoned` | string | `fail` | How composer audit treats abandoned packages: fail (default), report (list them, do not fail) or ignore. |
 
+The job fails on three findings: a security advisory, a version on Packagist's malware list (Composer 2.10 reads it,
+fed by Aikido) and, while `abandoned` is `fail`, an abandoned package. The `abandoned` input relaxes only the last one.
+Composer asks Packagist on every run, so the job needs outbound HTTPS to packagist.org, and an unreachable Packagist
+fails the job instead of passing it. Preflight's own `must-fail-composer-audit` job proves all of this on fixed locks.
+
 #### Run it on a schedule
 
 New advisories are published after code is merged, so a green pipeline today
@@ -868,6 +873,18 @@ docker run --rm -v "$(pwd):/app" -v stack-composer-cache:/tmp/cache -w /app comp
 pwsh -File tests/check-php-test-fails.ps1
 pwsh -File tests/check-phpstan-fails.ps1
 pwsh -File tests/check-pint-fails.ps1
+```
+
+`tests/check-composer-audit-fails.sh` does the same for `composer-audit`: the fixture app must pass, and a lock with a
+known advisory, one with a malware-flagged version and one with an abandoned package must fail (the last only while
+`abandoned` is `fail`). It asks Packagist, so it needs the network. The `must-fail-composer-audit` job runs it in CI.
+
+```sh
+docker run --rm -v "$(pwd):/app:ro" -w /app composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48 sh tests/check-composer-audit-fails.sh
+```
+
+```powershell
+pwsh -File tests/check-composer-audit-fails.ps1
 ```
 
 <details>

@@ -93,6 +93,7 @@ contract:
     - sh tests/check-renovate-squire-kit.sh
     - sh tests/check-squire-kit.sh
     - sh tests/check-composer-floor.sh
+    - sh tests/check-abandoned-input.sh
 
 # The must-fail fixture for the php-test component: the check proves the
 # template keeps the job line that lets the tool's exit code be the job
@@ -141,6 +142,23 @@ must-fail-package-publish:
   image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48
   script:
     - sh tests/check-package-publish-fails.sh
+
+# The must-fail fixtures for the composer-audit component: the check proves
+# the template keeps the job honest (no allow_failure, no
+# --ignore-unreachable, no swallowed exit code), then runs the template's
+# own script lines on four locks: the clean fixture app passes, and a known
+# advisory (laravel/framework v9.0.0, CVE-2024-52301) and a malware-flagged
+# version (aikido/endpoint-test 0.0.1, Aikido's harmless test package) fail
+# in every abandoned mode, while an abandoned package fails only in fail
+# mode. composer audit asks Packagist for advisories and filter lists, so
+# this job needs outbound HTTPS, like the component; it downloads no
+# packages, so it keeps no cache. Runs in the template's own image, pinned
+# by digest.
+must-fail-composer-audit:
+  stage: test
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48
+  script:
+    - sh tests/check-composer-audit-fails.sh
 
 # The must-fail fixture for the secret-detection component: the check proves
 # the template keeps the gitleaks dir line that lets Gitleaks' exit code be
