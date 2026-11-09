@@ -137,6 +137,11 @@ include:
 | `working_dir` | string | `.` | Directory to run composer audit in, relative to the project root. |
 | `abandoned` | string | `fail` | How composer audit treats abandoned packages: fail (default), report (list them, do not fail) or ignore. |
 
+The job fails on three findings: a security advisory, a version on Packagist's malware list (Composer 2.10 reads it,
+fed by Aikido) and, while `abandoned` is `fail`, an abandoned package. The `abandoned` input relaxes only the last one.
+Composer asks Packagist on every run, so the job needs outbound HTTPS to packagist.org, and an unreachable Packagist
+fails the job instead of passing it. Preflight's own `must-fail-composer-audit` job proves all of this on fixed locks.
+
 ##### Run it on a schedule
 
 New advisories are published after code is merged, so a green pipeline today
@@ -859,6 +864,18 @@ pwsh -File tests/check-phpstan-fails.ps1
 pwsh -File tests/check-pint-fails.ps1
 ```
 
+`tests/check-composer-audit-fails.sh` does the same for `composer-audit`: the fixture app must pass, and a lock with a
+known advisory, one with a malware-flagged version and one with an abandoned package must fail (the last only while
+`abandoned` is `fail`). It asks Packagist, so it needs the network. The `must-fail-composer-audit` job runs it in CI.
+
+```sh
+docker run --rm -v "$(pwd):/app:ro" -w /app composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48 sh tests/check-composer-audit-fails.sh
+```
+
+```powershell
+pwsh -File tests/check-composer-audit-fails.ps1
+```
+
 ### The cast
 
 ---
@@ -1399,6 +1416,7 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ### Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Added: a must-fail check for composer-audit (`tests/check-composer-audit-fails.sh`, its .ps1 twin, the `must-fail-composer-audit` job and a malware fixture in `tests/audit-fixtures/malware`): Preflight's pipeline now runs the template's own lines and proves a known advisory and a malware-flagged version fail in every `abandoned` mode, an abandoned package fails only in `fail` mode, and a clean app passes. `tests/check-abandoned-input` keeps only its offline half and joins the contract job.
 - Changed: every template default and doc pins composer 2.10.3 by one digest (sha256:2cf27542...), the same build the rest of the stack uses; composer-audit's default names 2.10.3 instead of the floating 2 tag.
 - Added: a must-fail check for package-publish (`tests/check-package-publish-fails.sh`, its .ps1 twin and the `must-fail-package-publish` job): a non-semver tag and a missing composer.json still stop the release before any registry contact.
 - Docs: README, the guides, the docs pages and the examples pin the 0.4.0 tag commit, and the upgrading page has a 0.4.0 section.
@@ -1754,6 +1772,18 @@ The `composer:2` image already ships Composer, so no install step is needed. The
 Warning
 
 The component carries no `allow_failure` input on purpose: a known advisory must fail the pipeline.
+
+### What fails the job[#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#what-fails-the-job)
+
+`composer audit --locked` reads only the lock file (it installs nothing) and fails the job on any of three findings:
+
+- **A security advisory** on a locked version. This fails in every mode.
+- **A malware-flagged version.** Composer 2.10 also reads the filter lists a repository publishes; Packagist publishes one, `malware`, fed by Aikido. The job log names the package, the list, the source and a `PKFE-` ID. This fails in every mode too: the `abandoned` input does not touch it.
+- **An abandoned package**, while `abandoned` is `fail` (see below).
+
+Composer asks Packagist for advisories and filter lists on every run, so the job needs outbound HTTPS to packagist.org. When Packagist cannot be reached the job fails rather than passes: the component never adds `--ignore-unreachable`.
+
+Preflight's own pipeline keeps these promises with the `must-fail-composer-audit` job: it runs this template's own lines on a clean app (must pass) and on three fixed locks, laravel/framework v9.0.0 (CVE-2024-52301), aikido/endpoint-test 0.0.1 (Aikido's harmless package, flagged on purpose so scanners can be tested) and an abandoned package, which must fail (the abandoned one only in `fail` mode). A flight check that has never seen a red light is just a light.
 
 ### Abandoned packages[#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#abandoned-packages)
 
@@ -3989,6 +4019,20 @@ pwsh -File tests/check-pint-fails.ps1
 pwsh -File tests/check-eslint-fails.ps1
 pwsh -File tests/check-secret-detection-fails.ps1
 pwsh -File tests/check-sbom-fails.ps1
+```
+
+`tests/check-composer-audit-fails.sh` (and its `.ps1` twin) does the same for `composer-audit`. It asserts the job has no `allow_failure`, no `--ignore-unreachable` and no swallowed exit code, renders the template's own script lines with each case's inputs, and runs them on copies of `tests/fixture-app` (must pass) and the locks in `tests/audit-fixtures`: `advisory` (laravel/framework v9.0.0, must fail naming CVE-2024-52301) and `malware` (aikido/endpoint-test 0.0.1, Aikido's harmless test package, must fail naming it on the malware list) in every `abandoned` mode, and `abandoned`, which must fail only in `fail` mode. composer audit asks Packagist for advisories and filter lists, so it needs the network; offline, the clean case fails, so it never passes by accident. The `must-fail-composer-audit` job runs it in CI. `tests/check-abandoned-input.sh` keeps the offline half (the input's default, regex and flag in the template and the contract) and runs in the contract job.
+
+linux
+
+```sh
+docker run --rm -v "$(pwd):/app:ro" -w /app composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48 sh tests/check-composer-audit-fails.sh
+```
+
+windows
+
+```powershell
+pwsh -File tests/check-composer-audit-fails.ps1
 ```
 
 ### The Squire kit checks[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#the-squire-kit-checks)

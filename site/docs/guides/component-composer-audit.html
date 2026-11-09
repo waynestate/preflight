@@ -102,6 +102,21 @@
 <h2 id="what-the-job-does">What the job does<a class="docs-heading-link" aria-label="Link to this section" href="#what-the-job-does">#</a></h2>
 <p>The <code>composer:2</code> image already ships Composer, so no install step is needed. The job is <code>interruptible: true</code> with a <code>timeout: 30 minutes</code>. Its script changes into <code>working_dir</code> and runs <code>composer audit --locked</code> with <code>--abandoned</code> set to the <code>abandoned</code> input (see Abandoned packages below). The command exits non-zero when it finds advisories, which fails the job.</p>
 <aside class="docs-callout docs-callout--warning" role="note"><p class="docs-callout__label">Warning</p><p>The component carries no <code>allow_failure</code> input on purpose: a known advisory must fail the pipeline.</p></aside>
+<h2 id="what-fails-the-job">What fails the job<a class="docs-heading-link" aria-label="Link to this section" href="#what-fails-the-job">#</a></h2>
+<p><code>composer audit --locked</code> reads only the lock file (it installs nothing) and fails the job on any of three findings:</p>
+<ul>
+<li><strong>A security advisory</strong> on a locked version. This fails in every mode.</li>
+<li><strong>A malware-flagged version.</strong> Composer 2.10 also reads the filter lists a repository publishes; Packagist publishes
+one, <code>malware</code>, fed by Aikido. The job log names the package, the list, the source and a <code>PKFE-</code> ID. This fails in
+every mode too: the <code>abandoned</code> input does not touch it.</li>
+<li><strong>An abandoned package</strong>, while <code>abandoned</code> is <code>fail</code> (see below).</li>
+</ul>
+<p>Composer asks Packagist for advisories and filter lists on every run, so the job needs outbound HTTPS to packagist.org.
+When Packagist cannot be reached the job fails rather than passes: the component never adds <code>--ignore-unreachable</code>.</p>
+<p>Preflight's own pipeline keeps these promises with the <code>must-fail-composer-audit</code> job: it runs this template's own
+lines on a clean app (must pass) and on three fixed locks, laravel/framework v9.0.0 (CVE-2024-52301), aikido/endpoint-test
+0.0.1 (Aikido's harmless package, flagged on purpose so scanners can be tested) and an abandoned package, which must
+fail (the abandoned one only in <code>fail</code> mode). A flight check that has never seen a red light is just a light.</p>
 <h2 id="abandoned-packages">Abandoned packages<a class="docs-heading-link" aria-label="Link to this section" href="#abandoned-packages">#</a></h2>
 <p>An abandoned package is one its author no longer maintains; Composer marks it in the lock file. By default an abandoned package in the lock fails the job, and the component keeps that default: <code>fail</code> is what the <code>abandoned</code> input holds when you set nothing.</p>
 <p>The three modes:</p>
@@ -122,7 +137,7 @@
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../../docs/guides/component-php-test.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">The php-test component</span></a><a class="docs-pager__link docs-pager__link--next" href="../../docs/guides/component-sbom.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">The sbom component</span></a></nav>
   </div>
-  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#include-the-component">Include the component</a></li><li class="docs-toc__item"><a href="#inputs">Inputs</a></li><li class="docs-toc__item"><a href="#what-the-job-does">What the job does</a></li><li class="docs-toc__item"><a href="#abandoned-packages">Abandoned packages</a></li><li class="docs-toc__item"><a href="#run-it-on-a-schedule">Run it on a schedule</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#include-the-component">Include the component</a></li><li class="docs-toc__item"><a href="#inputs">Inputs</a></li><li class="docs-toc__item"><a href="#what-the-job-does">What the job does</a></li><li class="docs-toc__item"><a href="#what-fails-the-job">What fails the job</a></li><li class="docs-toc__item"><a href="#abandoned-packages">Abandoned packages</a></li><li class="docs-toc__item"><a href="#run-it-on-a-schedule">Run it on a schedule</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
   <span>Documents Preflight <span data-docs-version>0.4.0</span></span>

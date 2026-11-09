@@ -13,6 +13,7 @@ are Git tags.
 
 ## Unreleased
 
+- Added: a must-fail check for composer-audit (`tests/check-composer-audit-fails.sh`, its .ps1 twin, the `must-fail-composer-audit` job and a malware fixture in `tests/audit-fixtures/malware`): Preflight's pipeline now runs the template's own lines and proves a known advisory and a malware-flagged version fail in every `abandoned` mode, an abandoned package fails only in `fail` mode, and a clean app passes. `tests/check-abandoned-input` keeps only its offline half and joins the contract job.
 - Changed: every template default and doc pins composer 2.10.3 by one digest (sha256:2cf27542...), the same build the rest of the stack uses; composer-audit's default names 2.10.3 instead of the floating 2 tag.
 - Added: a must-fail check for package-publish (`tests/check-package-publish-fails.sh`, its .ps1 twin and the `must-fail-package-publish` job): a non-semver tag and a missing composer.json still stop the release before any registry contact.
 - Docs: README, the guides, the docs pages and the examples pin the 0.4.0 tag commit, and the upgrading page has a 0.4.0 section.
