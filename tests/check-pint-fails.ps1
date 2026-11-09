@@ -9,7 +9,7 @@
 # .sh in that image with Docker:
 #
 #   docker run --rm -v "<repo>:/app:ro" -w /app \
-#     composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc \
+#     composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48 \
 #     sh tests/check-pint-fails.sh
 #
 # One result line per case goes to stdout; a fixture's output is printed
@@ -20,7 +20,7 @@ $ErrorActionPreference = "Stop"
 
 $Root = Split-Path -Parent $PSScriptRoot
 
-$Image = "composer:2.10.3@sha256:b6dcd72ca98fa19d0e5b8476de179859704891fad06dd9e0b96833d4c430a5fc"
+$Image = "composer:2.10.3@sha256:2cf275428757e5435a667bfc0d038b14520ca02be2b1b70d44a05c8c19e2de48"
 $Template = Join-Path $Root "templates/pint/template.yml"
 
 $status = 0
