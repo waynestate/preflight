@@ -87,7 +87,7 @@ docker run --rm -v "$(pwd)/tests/fixture-app:/app" -w /app php:8.4-cli vendor/bi
 
 ## The portability fixtures[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#the-portability-fixtures)
 
-Run the portability fixtures with Docker. The check runs the component's own probe in the component's own Buildah image against `tests/portability/app`, once clean and once per flaw, and exits 0 only when the clean build passes every check and each flaw fails the check it targets. It takes about two minutes. `--security-opt seccomp=unconfined` lets Buildah open the user namespace that Docker's default seccomp profile refuses; it grants no capabilities and is not `--privileged`.
+Run the portability fixtures with Docker. The check runs the component's own probe in the component's own Buildah image against `tests/portability/app`, once clean and once per flaw, and exits 0 only when the clean build passes every check and each flaw fails the check it targets. Two regression builds, one that reopens `/proc/self/fd/2` and one that signals its process group on SIGTERM, must pass every check too. It takes about two minutes. `--security-opt seccomp=unconfined` lets Buildah open the user namespace that Docker's default seccomp profile refuses; it grants no capabilities and is not `--privileged`.
 
 linux
 

@@ -896,7 +896,8 @@ docker run --rm -v "$(pwd)/tests/fixture-app:/app" -w /app php:8.4-cli vendor/bi
 Run the portability fixtures with Docker. The check runs the component's own
 probe in its own Buildah image against `tests/portability/app`, once clean
 and once per flaw, and exits 0 only when the clean build passes and each flaw
-fails the check it targets. `seccomp=unconfined` lets Buildah open a user
+fails the check it targets (two regression builds, an Apache-style stderr
+reopen and group signal, must pass too). `seccomp=unconfined` lets Buildah open a user
 namespace; it is not `--privileged`:
 
 ```sh
@@ -1526,6 +1527,7 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ### Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Fixed: the portability probe starts each replica the way a container runtime would, so an Apache image (Squire's portable image, WELD) passes with an empty `start_command`. On its own, `buildah run` hands the app root-owned stdout and stderr, which Apache running as the uid cannot reopen (`could not open error log file /proc/self/fd/2`), and starts no session, so Apache's graceful stop signals `buildah-chroot-exec` too, which SIGKILLs the app and failed `sigterm`. Each replica now starts through a launcher that pipes stdout and stderr through `cat` on a pipe the uid owns and execs the app through `setsid`, keeping its pid; it runs the Buildah image's own `bash`, `setsid` and `cat` from its `/usr`, bind-mounted read-only at `/.preflight/usr` for the run, so the app image needs none of them. The checks are unchanged. Remove any `start_command` shim that calls `setsid` (WELD's `exec setsid bash -c '...'`): inside the launcher it forks the app away from the replica's main process and `health` fails. Proof: two new fixture builds in `tests/check-portability.sh`, `reopens-stderr` and `signals-group`, must pass every check and fail on the 0.4.0 probe; WELD's portable image, run locally with WELD's inputs and an empty `start_command`, passes all five of its checks. Docs: the portability page (What the job emulates) and a troubleshooting entry.
 - Added: the `npm-audit` component, the front-end half of `composer-audit` (CREED backlog 23, practice 41). It runs `npm audit --omit=dev --audit-level=<audit_level>` on the app's `package-lock.json` in the `eslint` component's Node image and fails at or above the level (default `high`), then prints a full report with dev dependencies that never fails. Inputs: `stage`, `job_name`, `image`, `image_prefix`, `working_dir`, `audit_level` (`low`, `moderate`, `high`, `critical`; CREED's `medium` runs as npm's `moderate`) and `omit_dev` (default `true`). No lock file passes with a "nothing to audit" line; an unreachable registry fails with a message; `--audit=true --offline=false` stop an `.npmrc` from faking a pass. It reads the app's npm cache (fixed key `npm`, `.cache/npm/`, pull only, D-072). Proof: `tests/check-npm-audit-fails.sh` (and its `.ps1` twin), the `tests/npm-audit-fails` lock (lodash 4.17.20, GHSA-35jh-r3h4-6jhm) and `tests/npm-audit-fixtures`, run by the new `must-fail-npm-audit` job; Preflight's pipeline also includes the component on the clean fixture. New docs page: The npm-audit component.
 - Added: the proctor job keeps PROCTOR's JSON report as `proctor.json` in its artifact (`paths: [proctor.json]`, `expire_in: 30 days`, still `when: always` next to the Code Quality report), the file Rollcall reads with `ROLLCALL_PROCTOR_SOURCE=gitlab`. A guard adds `--record "$CI_PROJECT_DIR/proctor.json"` only when `proctor_command` is a plain `proctor check` line (no quotes, `$` or shell operators, no `--record` of its own) and the app's PROCTOR lists `--record` in its help (0.11.0 and later); PROCTOR 0.10.0 and older run exactly as before and the runner only warns that `proctor.json` matched no files. The proctor line alone still decides the job. `tests/check-proctor-fails` (sh and ps1) now runs the template's own guard and command line on three fakes: no `--record` (`tests/fixture-app`), a clean one with it (new `tests/proctor-record`) and the must-fail one with it (`tests/proctor-fails`), plus a gate command and a quoted one that must not get the flag.
 - Changed: every component default, Preflight's own CI and the docs move from Composer 2.10.3 to 2.11.1 (`composer:2.11.1@sha256:8de2184c...`, the multi-arch list digest; php-test's and proctor's `composer_version` default is `2.11.1`). Composer 2.11.0 fixed GHSA-c968-33g3-wh7p (package names that could escape the vendor directory) and GHSA-fm2w-xgf2-f9fh (inline repository headers written into `composer.lock`), and 2.10.x is no longer maintained. 2.11 removed `source-fallback`; no component sets it, and no component sets `policy.cooldown`. An app that overrides the `image` input (or sets `composer_version`) keeps its own pin and is unaffected.
@@ -2442,7 +2444,7 @@ Note
 
 The one-job component on this page ships in 0.2.0. 0.1.4 carries an earlier two-job version (`portability-build` and `portability-run`, checked with goss); see [Upgrading](https://preflight.apps.wayne.edu/docs/upgrading.html). Pin the full commit SHA of the release tag you use.
 
-With no `start_command`, the job runs the image's own `ENTRYPOINT` and `CMD`, exactly as the platforms do. Put secrets such as `APP_KEY` in CI/CD variables and name them in `env`: `$NAME` and `${NAME}` in `env` and `build_args` values are replaced from the job's variables.
+With no `start_command`, the job runs the image's own `ENTRYPOINT` and `CMD`, exactly as the platforms do. An Apache image (Squire's portable image, a Sourdough or WELD app) needs no `start_command` shim for Buildah: the job gives each replica stdio its uid owns and a process group of its own, as a container runtime does (see [What the job emulates](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#what-the-job-emulates)). Put secrets such as `APP_KEY` in CI/CD variables and name them in `env`: `$NAME` and `${NAME}` in `env` and `build_args` values are replaced from the job's variables.
 
 Warning
 
@@ -2473,7 +2475,7 @@ The component is one job, named by `job_name` (default `portability`). It runs i
 
 1. Builds the image with `buildah bud`, from `dockerfile` in `context`, with `build_args`. Nothing is pushed: the image stays in the job's own storage.
 2. Reads the image's `ENTRYPOINT` and `CMD`, makes two copies of its filesystem (replicas A and B) and runs the static parts of `strict-boot` and `env-only` on them.
-3. Starts both replicas with `buildah run --user <uid>:0 --cap-drop=ALL` and the `env` input; B gets `port + 1` through `port_env`.
+3. Starts both replicas with `buildah run --user <uid>:0 --cap-drop=ALL` and the `env` input, each through a small launcher that gives it its own stdio and session; B gets `port + 1` through `port_env`.
 4. Waits up to `boot_timeout` seconds for each replica's health path, then runs `health`, `env-only`, `forwarded-headers`, `session-hop`, `logs` and `sigterm` with curl.
 5. Stops both replicas and compares what changed on disk against `writable_paths` and `runtime_paths`.
 
@@ -2491,6 +2493,11 @@ The checks run in an unprivileged job, so a few things are emulated rather than 
 - **PID 1.** `buildah run` starts no PID namespace, so the main process is not PID 1. The job checks that it handles SIGTERM, and fails it when it dies of the signal's default action, which PID 1 would ignore.
 - **No new privileges.** Every capability is dropped, but `buildah run` has no `no-new-privileges` flag. The uid has no passwd entry, so set-uid tools have little to grab.
 - **Networking.** Both replicas share the job's network namespace; the second one listens on `port + 1`.
+- **Stdio and process group.** On its own, `buildah run` differs from every container runtime twice. It hands the app stdout and stderr pipes owned by root, so an app running as the uid cannot reopen them (Apache fails with `could not open error log file /proc/self/fd/2`). And it starts no session, so the app shares a process group with `buildah-chroot-exec`, which runs as the same uid and SIGKILLs the app when the app signals its own group on SIGTERM (Apache's graceful stop does). runc and CRI-O do neither. So the job starts each replica through a launcher: it pipes stdout and stderr through `cat`, on a pipe the uid owns, then execs the app through `setsid`, keeping its pid, so the `sigterm` check still signals the app itself. The launcher uses the Buildah image's own `bash`, `setsid` and `cat` (its `/usr`, bind-mounted read-only at `/.preflight/usr` for the run only), so the app image needs none of them and nothing is written into it.
+
+Note
+
+Before 0.5.0 an Apache image needed a `start_command` shim such as `exec setsid bash -c 'exec > >(exec cat) 2>&1; exec <entrypoint>'`. Remove it when you upgrade: the job now does both itself, and a `setsid` inside the launcher's session forks the app away from the replica's main process, so `health` fails.
 
 ### Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#inputs)
 
@@ -2524,7 +2531,7 @@ The `image` default is an immutable tag (`-immutable`) pinned by digest, because
 
 ### Verify locally[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#verify-locally)
 
-`tests/check-portability.sh` (and its `.ps1` twin) run the same probe in the same Buildah image against `tests/portability/app`: once clean, where every check must pass, and once per flaw (needs root, writes outside its paths, fixed port, host-bound health, a baked `.env`, trusts any proxy, file logs, file sessions, no SIGTERM handler), where the targeted check must fail. Preflight's own pipeline runs the component on the clean fixture and this check as `must-fail-portability`. See [Local checks](https://preflight.apps.wayne.edu/docs/reference/local-checks.html) for the commands.
+`tests/check-portability.sh` (and its `.ps1` twin) run the same probe in the same Buildah image against `tests/portability/app`: once clean, where every check must pass, and once per flaw (needs root, writes outside its paths, fixed port, host-bound health, a baked `.env`, trusts any proxy, file logs, file sessions, no SIGTERM handler), where the targeted check must fail. Two more builds must pass every check: one reopens `/proc/self/fd/2` and one signals its whole process group on SIGTERM, as Apache does; they fail without the launcher. Preflight's own pipeline runs the component on the clean fixture and this check as `must-fail-portability`. See [Local checks](https://preflight.apps.wayne.edu/docs/reference/local-checks.html) for the commands.
 
 ### Related[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#related)
 
@@ -4277,7 +4284,7 @@ docker run --rm -v "$(pwd)/tests/fixture-app:/app" -w /app php:8.4-cli vendor/bi
 
 ### The portability fixtures[#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#the-portability-fixtures)
 
-Run the portability fixtures with Docker. The check runs the component's own probe in the component's own Buildah image against `tests/portability/app`, once clean and once per flaw, and exits 0 only when the clean build passes every check and each flaw fails the check it targets. It takes about two minutes. `--security-opt seccomp=unconfined` lets Buildah open the user namespace that Docker's default seccomp profile refuses; it grants no capabilities and is not `--privileged`.
+Run the portability fixtures with Docker. The check runs the component's own probe in the component's own Buildah image against `tests/portability/app`, once clean and once per flaw, and exits 0 only when the clean build passes every check and each flaw fails the check it targets. Two regression builds, one that reopens `/proc/self/fd/2` and one that signals its process group on SIGTERM, must pass every check too. It takes about two minutes. `--security-opt seccomp=unconfined` lets Buildah open the user namespace that Docker's default seccomp profile refuses; it grants no capabilities and is not `--privileged`.
 
 linux
 
@@ -4702,6 +4709,14 @@ The main process must handle SIGTERM and exit by itself within `stop_timeout`, b
 - **Cause:** the image `exec`s a server that has no SIGTERM handler (for example `php -S`), or a shell script starts the server without passing the signal on.
 - **Fix:** start the app under an init that forwards signals (`tini`, `dumb-init`) or a server that handles SIGTERM itself (php-fpm, FrankenPHP); in a shell entrypoint, trap TERM and stop the child.
 - **Check:** `portability: sigterm: pass` with `handled SIGTERM and exited by itself`.
+
+#### portability: an Apache image fails after the upgrade to 0.5.0[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#portability-an-apache-image-fails-after-the-upgrade-to-0-5-0)
+
+Since 0.5.0 the job gives each replica stdio its uid owns and a session of its own, so the `start_command` shim older releases needed is in the way.
+
+- **Cause:** `start_command` still runs `setsid` (for example `exec setsid bash -c 'exec > >(exec cat) 2>&1; exec squire-entrypoint'`). Inside the job's launcher the shell already leads its own session, so `setsid` forks the app away from the replica's main process, and the replica never answers: `health` fails with `last answer: 000`.
+- **Fix:** delete the `start_command` input, so the job runs the image's own `ENTRYPOINT` and `CMD`.
+- **Check:** `portability: health: pass` and `portability: sigterm: pass`.
 
 #### portability: session-hop: FAIL with "set session_login_path"[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#portability-session-hop-fail-with-set-session-login-path)
 
