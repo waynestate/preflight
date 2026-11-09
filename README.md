@@ -45,7 +45,7 @@ the same GitLab instance that hosts this project.
 ## Components
 
 <div align="center">
-  <img src="docs/readme/checklist.svg" width="100%" alt="Preflight's before-takeoff checklist card. 1 PROCTOR, checked; 2 PHP tests, 8.3, 8.4 and 8.5 pass; 3 Composer audit, no advisories; 4 SBOM, validated; 5 Pint, clean; 6 PHPStan, no errors; 7 ESLint and Prettier, clean; 8 a11y with axe-core, no violations; 9 clearance, cleared for takeoff. Beside it the annunciator panel lights a green lamp per check, the contract lamp with the clearance and freshness marked coming soon, and lists all thirteen components, every one in the 0.4.0 tag.">
+  <img src="docs/readme/checklist.svg" width="100%" alt="Preflight's before-takeoff checklist card. 1 PROCTOR, checked; 2 PHP tests, 8.3, 8.4 and 8.5 pass; 3 Composer audit, no advisories; 4 SBOM, validated; 5 Pint, clean; 6 PHPStan, no errors; 7 ESLint and Prettier, clean; 8 a11y with axe-core, no violations; 9 clearance, cleared for takeoff. Beside it the annunciator panel lights a green lamp per check, the contract lamp with the clearance and freshness marked coming soon, and lists all fourteen components, every one in the 0.5.0 tag.">
 </div>
 
 <div align="center"><sub>The checklist, item by item, with each item's job and timeout read from <code>templates/</code>.</sub></div>
@@ -62,7 +62,7 @@ only in a release whose [Upgrading](docs/upgrading.md) section lists it under Br
 and before 1.0 that is a new minor, never a patch. Before you move a pin, see what moved:
 
 ```
-git diff 0.3.1 0.4.0 -- contract/inputs.json
+git diff 0.4.0 0.5.0 -- contract/inputs.json
 ```
 
 [The inputs contract](docs/guides/inputs-contract.md) explains what counts as breaking

@@ -269,7 +269,7 @@ uses: waynestate/preflight/.github/workflows/php-package.yml@60314791565a264e97c
 
 ### Deferred items
 
-On the list, not yet on board. Nothing to include until it lands, and the next tag has no date yet. The accessibility suite and the Squire kit check left this list in 0.2.0; the contract suite left it after 0.4.0 and lights the CONTRACT lamp now (see [The inputs contract](https://preflight.apps.wayne.edu/#contract)).
+On the list, not yet on board. Nothing to include until it lands, and the next tag has no date yet. The accessibility suite and the Squire kit check left this list in 0.2.0; the contract suite left it in 0.5.0 and lights the CONTRACT lamp now (see [The inputs contract](https://preflight.apps.wayne.edu/#contract)).
 
 - Coming soonSite freshnessPlanned. Not in this repo yet.
 
@@ -283,7 +283,7 @@ Type certificate data sheet
 
 `php-test`
 
-**php-test inputs in contract/inputs.json. Rows marked revised changed from 0.3.1 to 0.4.0.**
+**php-test inputs in contract/inputs.json. Rows marked revised changed from 0.4.0 to 0.5.0.**
 
 | Input | Type | Default |
 | --- | --- | --- |
@@ -291,12 +291,17 @@ Type certificate data sheet
 | `job_name` | string | `php-test` |
 | `image_prefix` | string | the Dependency Proxy |
 | `php_versions` | array | `8.3` `8.4` `8.5` |
-| `php_advisory_version` New: adds a `php-test-advisory` job | string | `""` (off) |
-| `composer_version` Revised: floor of 2.9.6 | string | `2.11.1` |
+| `php_advisory_version` | string | `""` (off) |
+| `composer_version` Revised: default 2.11.1, was 2.10.3 | string | `2.11.1` |
 | `test_command` | string | `vendor/bin/phpunit` |
 | `working_dir` | string | `.` |
 
-One of fourteen entries on main, abridged. A bar in the margin marks a line revised from 0.3.1 to 0.4.0, which also gave `proctor` a `git_depth` input.
+Log of amendments
+
+1. **0.4.0** Added `php_advisory_version`, which runs one more PHP in a `php-test-advisory` job that may fail. `composer_version` gets a floor of 2.9.6.
+2. **0.5.0** The `composer_version` default moves from 2.10.3 to 2.11.1, which carries two Composer security fixes. Nothing renamed, nothing removed.
+
+One of fourteen entries on main, abridged. A bar in the margin marks a line revised from 0.4.0 to 0.5.0. The same amendment adds the fourteenth entry, `npm-audit`, and moves every Composer image default to 2.11.1.
 
 1. **Renames are announced.** An input or job is renamed or removed only in a release whose Upgrading notes list it under Breaking. Before 1.0 that is a new minor, never a patch.
 2. **Tighter counts too.** A pattern that stops a value you used to pass is breaking, and gets the same notice.
@@ -305,7 +310,7 @@ One of fourteen entries on main, abridged. A bar in the margin marks a line revi
 Before you move a pin, read the diff:
 
 ```
-$ git diff 0.3.1 0.4.0 -- contract/inputs.json
+$ git diff 0.4.0 0.5.0 -- contract/inputs.json
 ```
 
 [The inputs contract, in full](https://preflight.apps.wayne.edu/docs/guides/inputs-contract.html) [Upgrading](https://preflight.apps.wayne.edu/docs/upgrading.html)

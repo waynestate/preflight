@@ -67,12 +67,16 @@ so the change shows up in review as a diff of `contract/inputs.json`, not as a s
 From a clone of Preflight, diff the contract between the tag you pin and the one you are moving to:
 
 ```
-git diff 0.3.1 0.4.0 -- contract/inputs.json
+git diff 0.4.0 0.5.0 -- contract/inputs.json
 ```
 
-From 0.3.1 to 0.4.0 that shows proctor's new `git_depth` input, php-test's `php_advisory_version` input and its
-`php-test-advisory` job, and the Composer floor (`regex`) on both components' `composer_version`. Every line of that
-diff should have a matching line in the version's Upgrading section; if one does not, open an issue.
+From 0.4.0 to 0.5.0 that shows the new `npm-audit` entry, the `composer_version` default on php-test and proctor
+moving from 2.10.3 to 2.11.1, and every Composer `image` default moving to `composer:2.11.1`: one new component and
+defaults that moved in the open, nothing renamed or removed. It also shows the renovate `dry_run` pattern, which the
+template already enforced in 0.4.0 and the contract now records. From 0.3.1 to 0.4.0 the same command shows
+proctor's new `git_depth` input, php-test's `php_advisory_version` input and its `php-test-advisory` job, and the
+Composer floor (`regex`) on both components' `composer_version`. Every line of that diff should have a matching line
+in the version's Upgrading section; if one does not, open an issue.
 
 ## Related
 

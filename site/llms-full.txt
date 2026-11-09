@@ -52,7 +52,7 @@ only in a release whose [Upgrading](https://github.com/waynestate/preflight/blob
 and before 1.0 that is a new minor, never a patch. Before you move a pin, see what moved:
 
 ```
-git diff 0.3.1 0.4.0 -- contract/inputs.json
+git diff 0.4.0 0.5.0 -- contract/inputs.json
 ```
 
 [The inputs contract](https://github.com/waynestate/preflight/blob/HEAD/docs/guides/inputs-contract.md) explains what counts as breaking
@@ -1220,7 +1220,7 @@ uses: waynestate/preflight/.github/workflows/php-package.yml@60314791565a264e97c
 
 #### Deferred items
 
-On the list, not yet on board. Nothing to include until it lands, and the next tag has no date yet. The accessibility suite and the Squire kit check left this list in 0.2.0; the contract suite left it after 0.4.0 and lights the CONTRACT lamp now (see [The inputs contract](https://preflight.apps.wayne.edu/#contract)).
+On the list, not yet on board. Nothing to include until it lands, and the next tag has no date yet. The accessibility suite and the Squire kit check left this list in 0.2.0; the contract suite left it in 0.5.0 and lights the CONTRACT lamp now (see [The inputs contract](https://preflight.apps.wayne.edu/#contract)).
 
 - Coming soonSite freshnessPlanned. Not in this repo yet.
 
@@ -1234,7 +1234,7 @@ Type certificate data sheet
 
 `php-test`
 
-**php-test inputs in contract/inputs.json. Rows marked revised changed from 0.3.1 to 0.4.0.**
+**php-test inputs in contract/inputs.json. Rows marked revised changed from 0.4.0 to 0.5.0.**
 
 | Input | Type | Default |
 | --- | --- | --- |
@@ -1242,12 +1242,17 @@ Type certificate data sheet
 | `job_name` | string | `php-test` |
 | `image_prefix` | string | the Dependency Proxy |
 | `php_versions` | array | `8.3` `8.4` `8.5` |
-| `php_advisory_version` New: adds a `php-test-advisory` job | string | `""` (off) |
-| `composer_version` Revised: floor of 2.9.6 | string | `2.11.1` |
+| `php_advisory_version` | string | `""` (off) |
+| `composer_version` Revised: default 2.11.1, was 2.10.3 | string | `2.11.1` |
 | `test_command` | string | `vendor/bin/phpunit` |
 | `working_dir` | string | `.` |
 
-One of fourteen entries on main, abridged. A bar in the margin marks a line revised from 0.3.1 to 0.4.0, which also gave `proctor` a `git_depth` input.
+Log of amendments
+
+1. **0.4.0** Added `php_advisory_version`, which runs one more PHP in a `php-test-advisory` job that may fail. `composer_version` gets a floor of 2.9.6.
+2. **0.5.0** The `composer_version` default moves from 2.10.3 to 2.11.1, which carries two Composer security fixes. Nothing renamed, nothing removed.
+
+One of fourteen entries on main, abridged. A bar in the margin marks a line revised from 0.4.0 to 0.5.0. The same amendment adds the fourteenth entry, `npm-audit`, and moves every Composer image default to 2.11.1.
 
 1. **Renames are announced.** An input or job is renamed or removed only in a release whose Upgrading notes list it under Breaking. Before 1.0 that is a new minor, never a patch.
 2. **Tighter counts too.** A pattern that stops a value you used to pass is breaking, and gets the same notice.
@@ -1256,7 +1261,7 @@ One of fourteen entries on main, abridged. A bar in the margin marks a line revi
 Before you move a pin, read the diff:
 
 ```
-$ git diff 0.3.1 0.4.0 -- contract/inputs.json
+$ git diff 0.4.0 0.5.0 -- contract/inputs.json
 ```
 
 [The inputs contract, in full](https://preflight.apps.wayne.edu/docs/guides/inputs-contract.html) [Upgrading](https://preflight.apps.wayne.edu/docs/upgrading.html)
@@ -1528,6 +1533,7 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 ### Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
 - Docs: README, the guides, the docs pages, the examples and the front page pin the 0.5.0 tag commit; the Upgrading page and the npm-audit examples name it in place of the full commit SHA placeholder, and the front page placards say "in 0.5.0" and count npm-audit among the components that ship in the tag.
+- Docs: the front page's type certificate data sheet is amended to 0.5.0 (the AMDT 0.5.0 stamp, a change bar on php-test's `composer_version` default, now 2.11.1, and a new log of amendments that says in a line what 0.4.0 and 0.5.0 changed), its diff example and those in the README, the components reference, the inputs contract guide and Upgrading read `git diff 0.4.0 0.5.0`, the guide says what that diff shows, the 0.5.0 Upgrading section notes the renovate `dry_run` pattern now on record, the deferred-items note says the contract suite shipped in 0.5.0, and the README checklist art lists all fourteen components in 0.5.0 with npm-audit's row (its components badge reads 14; the art kit closes the list up to 18 units a row so it fits).
 
 ### 0.5.0 (2026-11-09)[#](https://preflight.apps.wayne.edu/docs/changelog.html#0-5-0-2026-11-09)
 
@@ -3293,10 +3299,10 @@ When a change to the surface is made on purpose, the same commit rewrites the fi
 From a clone of Preflight, diff the contract between the tag you pin and the one you are moving to:
 
 ```
-git diff 0.3.1 0.4.0 -- contract/inputs.json
+git diff 0.4.0 0.5.0 -- contract/inputs.json
 ```
 
-From 0.3.1 to 0.4.0 that shows proctor's new `git_depth` input, php-test's `php_advisory_version` input and its `php-test-advisory` job, and the Composer floor (`regex`) on both components' `composer_version`. Every line of that diff should have a matching line in the version's Upgrading section; if one does not, open an issue.
+From 0.4.0 to 0.5.0 that shows the new `npm-audit` entry, the `composer_version` default on php-test and proctor moving from 2.10.3 to 2.11.1, and every Composer `image` default moving to `composer:2.11.1`: one new component and defaults that moved in the open, nothing renamed or removed. It also shows the renovate `dry_run` pattern, which the template already enforced in 0.4.0 and the contract now records. From 0.3.1 to 0.4.0 the same command shows proctor's new `git_depth` input, php-test's `php_advisory_version` input and its `php-test-advisory` job, and the Composer floor (`regex`) on both components' `composer_version`. Every line of that diff should have a matching line in the version's Upgrading section; if one does not, open an issue.
 
 ### Related[#](https://preflight.apps.wayne.edu/docs/guides/inputs-contract.html#related)
 
@@ -3729,7 +3735,7 @@ Note
 
 Components are GA on the Free tier since GitLab 17.0. They work only within the same GitLab instance that hosts this project.
 
-![Preflight's before-takeoff checklist card. 1 PROCTOR, checked; 2 PHP tests, 8.3, 8.4 and 8.5 pass; 3 Composer audit, no advisories; 4 SBOM, validated; 5 Pint, clean; 6 PHPStan, no errors; 7 ESLint and Prettier, clean; 8 a11y with axe-core, no violations; 9 clearance, cleared for takeoff. Beside it the annunciator panel lights a green lamp per check, the contract lamp with the clearance and freshness marked coming soon, and lists all thirteen components, every one in the 0.4.0 tag.](https://preflight.apps.wayne.edu/docs/readme/checklist.svg)
+![Preflight's before-takeoff checklist card. 1 PROCTOR, checked; 2 PHP tests, 8.3, 8.4 and 8.5 pass; 3 Composer audit, no advisories; 4 SBOM, validated; 5 Pint, clean; 6 PHPStan, no errors; 7 ESLint and Prettier, clean; 8 a11y with axe-core, no violations; 9 clearance, cleared for takeoff. Beside it the annunciator panel lights a green lamp per check, the contract lamp with the clearance and freshness marked coming soon, and lists all fourteen components, every one in the 0.5.0 tag.](https://preflight.apps.wayne.edu/docs/readme/checklist.svg)
 
 The checklist, item by item, with each item's job and timeout read from `templates/`:
 
@@ -3764,7 +3770,7 @@ Every job the templates define is `interruptible: true`. Every component takes a
 The inputs and job names on this page are a promise, written down in `contract/inputs.json`: every input's name, type, default and allowed pattern, and every job each component adds. Preflight's own build fails when a template drifts from it (`tests/ComponentsContractTest.php` in `composer ci`, and the `contract` job), so a change reaches a tag only on purpose, with the file rewritten by `composer contract:update` in the same commit. An input or job is renamed or removed only in a release whose [Upgrading](https://preflight.apps.wayne.edu/docs/upgrading.html) section lists it under Breaking; before 1.0 that is a new minor, never a patch. To see exactly what moved between your pin and the next tag:
 
 ```
-git diff 0.3.1 0.4.0 -- contract/inputs.json
+git diff 0.4.0 0.5.0 -- contract/inputs.json
 ```
 
 [The inputs contract](https://preflight.apps.wayne.edu/docs/guides/inputs-contract.html) has the whole story: what counts as breaking, why defaults still move, and how to read the diff.
@@ -4848,7 +4854,7 @@ Source: https://preflight.apps.wayne.edu/docs/upgrading.html
 
 This page is the checklist for moving an app from one Preflight pin to the next, one released version at a time, newest first; every section follows `CHANGELOG.md`. Read the section for the version you are moving to, apply its steps, and verify on the next pipeline. Like a real preflight, the walk takes a few minutes and earns its keep: move the pin only after you have read the version notes.
 
-Every input and job name a component offers is recorded in `contract/inputs.json`, and Preflight's build fails when a template drifts from it, so the file is the exact list of what moved. Before you move a pin, diff it between your tag and the next one (for example `git diff 0.3.1 0.4.0 -- contract/inputs.json` in a clone of Preflight) and check each line against that version's Breaking and Steps below. [The inputs contract](https://preflight.apps.wayne.edu/docs/guides/inputs-contract.html) explains what each kind of change means for your include.
+Every input and job name a component offers is recorded in `contract/inputs.json`, and Preflight's build fails when a template drifts from it, so the file is the exact list of what moved. Before you move a pin, diff it between your tag and the next one (for example `git diff 0.4.0 0.5.0 -- contract/inputs.json` in a clone of Preflight) and check each line against that version's Breaking and Steps below. [The inputs contract](https://preflight.apps.wayne.edu/docs/guides/inputs-contract.html) explains what each kind of change means for your include.
 
 ### 0.5.0[#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-5-0)
 
@@ -4866,6 +4872,7 @@ Nothing was deprecated in 0.5.0.
 
 - **Composer 2.11.1.** Every Composer default moves from 2.10.3 to 2.11.1: the `composer-audit`, `sbom`, `pint`, `phpstan`, `package-publish` and `squire-kit` images are `composer:2.11.1@sha256:8de2184c...` (the multi-arch list digest), and php-test's and proctor's `composer_version` default is `2.11.1`. 2.11.0 fixed GHSA-c968-33g3-wh7p and GHSA-fm2w-xgf2-f9fh, and 2.10 is no longer maintained. 2.11 drops the `source-fallback` setting; no component sets it. An include that sets `image` or `composer_version` keeps its own pin.
 - **proctor keeps `proctor.json`.** The proctor job's artifact now keeps PROCTOR's JSON report as `proctor.json` for 30 days, next to the Code Quality report, whether the job passed or failed. That is the file Rollcall reads with `ROLLCALL_PROCTOR_SOURCE=gitlab`. The job adds `--record "$CI_PROJECT_DIR/proctor.json"` itself, and only when `proctor_command` is a plain `proctor check` line and the app's PROCTOR is 0.11.0 or later. On PROCTOR 0.10.0 or older the job runs exactly as before and the runner warns that `proctor.json` matched no files. The proctor line's exit code still decides the job.
+- **renovate's `dry_run` pattern is on record.** `contract/inputs.json` now lists the `^(null|lookup|full)$` pattern the renovate template already enforced in 0.4.0, so the contract diff shows that line changed. No value that passed on 0.4.0 stops passing.
 
 #### New: npm-audit[#](https://preflight.apps.wayne.edu/docs/upgrading.html#new-npm-audit)
 

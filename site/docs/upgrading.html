@@ -42,7 +42,7 @@
     <main id="main">
       <article class="docs-article"><h1 id="upgrading">Upgrading<a class="docs-heading-link" aria-label="Link to this section" href="#upgrading">#</a></h1>
 <p>This page is the checklist for moving an app from one Preflight pin to the next, one released version at a time, newest first; every section follows <code>CHANGELOG.md</code>. Read the section for the version you are moving to, apply its steps, and verify on the next pipeline. Like a real preflight, the walk takes a few minutes and earns its keep: move the pin only after you have read the version notes.</p>
-<p>Every input and job name a component offers is recorded in <code>contract/inputs.json</code>, and Preflight's build fails when a template drifts from it, so the file is the exact list of what moved. Before you move a pin, diff it between your tag and the next one (for example <code>git diff 0.3.1 0.4.0 -- contract/inputs.json</code> in a clone of Preflight) and check each line against that version's Breaking and Steps below. <a href="guides/inputs-contract.html">The inputs contract</a> explains what each kind of change means for your include.</p>
+<p>Every input and job name a component offers is recorded in <code>contract/inputs.json</code>, and Preflight's build fails when a template drifts from it, so the file is the exact list of what moved. Before you move a pin, diff it between your tag and the next one (for example <code>git diff 0.4.0 0.5.0 -- contract/inputs.json</code> in a clone of Preflight) and check each line against that version's Breaking and Steps below. <a href="guides/inputs-contract.html">The inputs contract</a> explains what each kind of change means for your include.</p>
 <h2 id="0-5-0">0.5.0<a class="docs-heading-link" aria-label="Link to this section" href="#0-5-0">#</a></h2>
 <p>Released 2026-11-09. A new component, <code>npm-audit</code>, the front-end half of <code>composer-audit</code>; a portability probe that
 starts each replica the way a container runtime does, so an Apache image needs no <code>start_command</code> shim; a proctor job
@@ -71,6 +71,9 @@ it. An include that sets <code>image</code> or <code>composer_version</code> kee
 <code>proctor_command</code> is a plain <code>proctor check</code> line and the app's PROCTOR is 0.11.0 or later. On PROCTOR 0.10.0 or
 older the job runs exactly as before and the runner warns that <code>proctor.json</code> matched no files. The proctor line's
 exit code still decides the job.</li>
+<li><strong>renovate's <code>dry_run</code> pattern is on record.</strong> <code>contract/inputs.json</code> now lists the <code>^(null|lookup|full)$</code> pattern
+the renovate template already enforced in 0.4.0, so the contract diff shows that line changed. No value that passed
+on 0.4.0 stops passing.</li>
 </ul>
 <h3 id="new-npm-audit">New: npm-audit<a class="docs-heading-link" aria-label="Link to this section" href="#new-npm-audit">#</a></h3>
 <p>The <code>npm-audit</code> component runs <code>npm audit</code> on the app's <code>package-lock.json</code> in the <code>eslint</code> component's Node image and

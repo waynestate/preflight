@@ -93,11 +93,15 @@ that is not there (an internal helper, a hidden <code>.key</code>) is not covere
 </ul>
 <h2 id="see-what-moved-between-two-tags">See what moved between two tags<a class="docs-heading-link" aria-label="Link to this section" href="#see-what-moved-between-two-tags">#</a></h2>
 <p>From a clone of Preflight, diff the contract between the tag you pin and the one you are moving to:</p>
-<pre tabindex="0"><code>git diff 0.3.1 0.4.0 -- contract/inputs.json
+<pre tabindex="0"><code>git diff 0.4.0 0.5.0 -- contract/inputs.json
 </code></pre>
-<p>From 0.3.1 to 0.4.0 that shows proctor's new <code>git_depth</code> input, php-test's <code>php_advisory_version</code> input and its
-<code>php-test-advisory</code> job, and the Composer floor (<code>regex</code>) on both components' <code>composer_version</code>. Every line of that
-diff should have a matching line in the version's Upgrading section; if one does not, open an issue.</p>
+<p>From 0.4.0 to 0.5.0 that shows the new <code>npm-audit</code> entry, the <code>composer_version</code> default on php-test and proctor
+moving from 2.10.3 to 2.11.1, and every Composer <code>image</code> default moving to <code>composer:2.11.1</code>: one new component and
+defaults that moved in the open, nothing renamed or removed. It also shows the renovate <code>dry_run</code> pattern, which the
+template already enforced in 0.4.0 and the contract now records. From 0.3.1 to 0.4.0 the same command shows
+proctor's new <code>git_depth</code> input, php-test's <code>php_advisory_version</code> input and its <code>php-test-advisory</code> job, and the
+Composer floor (<code>regex</code>) on both components' <code>composer_version</code>. Every line of that diff should have a matching line
+in the version's Upgrading section; if one does not, open an issue.</p>
 <h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
 <ul>
 <li><a href="../upgrading.html">Upgrading</a>: what each release changed, and the steps to move a pin.</li>

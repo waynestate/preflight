@@ -24,11 +24,14 @@ fonts over `file://`).
   backlighting, and the PAPI lights settle from all red to two white, two red: on the glidepath.
 - coming soon: site freshness sits on the panel as a dim, hatched lamp and in "Deferred items"; it has no command,
   because it does not exist yet. The accessibility suite shipped in 0.2.0, so A11Y is a live lamp, lit by the card's
-  eighth check: the aircraft waits past STYLE at the runway edge for it. The inputs contract shipped in 0.4.0, so
-  CONTRACT lights with the clearance: the inputs you pinned are the ones the contract promises.
+  eighth check: the aircraft waits past STYLE at the runway edge for it. The inputs contract suite shipped in 0.5.0,
+  so CONTRACT lights with the clearance: the inputs you pinned are the ones the contract promises.
 - type certificate: "The inputs contract" section is a data sheet for `php-test`, read from `contract/inputs.json`.
-  Lines revised in 0.4.0 carry a blue change bar in the margin, the way a flight manual marks an amendment; with
-  motion on, the bars draw down the margin and the AMDT 0.4.0 stamp lands. Keep its rows in step with the contract.
+  Lines revised in 0.5.0 carry a blue change bar in the margin, the way a flight manual marks an amendment, and the
+  log of amendments under the table says in a line what each release changed (0.4.0 and 0.5.0 so far). With motion
+  on, the bars draw down the margin, the AMDT 0.5.0 stamp lands and the 0.5.0 line is entered in the log. At each
+  release, move the bars to the lines that release revised, add its log line and keep the rows in step with the
+  contract.
 - marks: `brand/` is Preflight's (generated with ChatGPT, never redrawn). `assets/marks/` holds the other stack parts'
   marks, copied from the sibling sites; WayneUI uses its own reversed mark on green.
 - reduced motion: the page is the finished flight, every word present at first paint: every box ticked, every lamp

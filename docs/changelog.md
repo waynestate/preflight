@@ -14,6 +14,7 @@ are Git tags.
 ## Unreleased
 
 - Docs: README, the guides, the docs pages, the examples and the front page pin the 0.5.0 tag commit; the Upgrading page and the npm-audit examples name it in place of the full commit SHA placeholder, and the front page placards say "in 0.5.0" and count npm-audit among the components that ship in the tag.
+- Docs: the front page's type certificate data sheet is amended to 0.5.0 (the AMDT 0.5.0 stamp, a change bar on php-test's `composer_version` default, now 2.11.1, and a new log of amendments that says in a line what 0.4.0 and 0.5.0 changed), its diff example and those in the README, the components reference, the inputs contract guide and Upgrading read `git diff 0.4.0 0.5.0`, the guide says what that diff shows, the 0.5.0 Upgrading section notes the renovate `dry_run` pattern now on record, the deferred-items note says the contract suite shipped in 0.5.0, and the README checklist art lists all fourteen components in 0.5.0 with npm-audit's row (its components badge reads 14; the art kit closes the list up to 18 units a row so it fits).
 
 ## 0.5.0 (2026-11-09)
 

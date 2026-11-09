@@ -479,7 +479,7 @@
 
       <div class="deferred">
         <h3 class="deferred__title">Deferred items</h3>
-        <p class="deferred__note">On the list, not yet on board. Nothing to include until it lands, and the next tag has no date yet. The accessibility suite and the Squire kit check left this list in 0.2.0; the contract suite left it after 0.4.0 and lights the CONTRACT lamp now (see <a href="#contract">The inputs contract</a>).</p>
+        <p class="deferred__note">On the list, not yet on board. Nothing to include until it lands, and the next tag has no date yet. The accessibility suite and the Squire kit check left this list in 0.2.0; the contract suite left it in 0.5.0 and lights the CONTRACT lamp now (see <a href="#contract">The inputs contract</a>).</p>
         <ul class="deferred__list">
           <li class="inop"><span class="inop__sticker">Coming soon</span><span class="inop__name">Site freshness</span><span class="inop__line">Planned. Not in this repo yet.</span></li>
         </ul>
@@ -504,10 +504,10 @@
           <div class="sheet__head">
             <p class="sheet__kicker">Type certificate data sheet</p>
             <p class="sheet__title"><code>php-test</code></p>
-            <p class="sheet__rev" aria-hidden="true">Amdt<br><b>0.4.0</b></p>
+            <p class="sheet__rev" aria-hidden="true">Amdt<br><b>0.5.0</b></p>
           </div>
           <table class="sheet__table">
-            <caption class="wsu-sr-only">php-test inputs in contract/inputs.json. Rows marked revised changed from 0.3.1 to 0.4.0.</caption>
+            <caption class="wsu-sr-only">php-test inputs in contract/inputs.json. Rows marked revised changed from 0.4.0 to 0.5.0.</caption>
             <thead>
               <tr><th scope="col">Input</th><th scope="col">Type</th><th scope="col">Default</th></tr>
             </thead>
@@ -516,13 +516,20 @@
               <tr><th scope="row"><code>job_name</code></th><td>string</td><td><code>php-test</code></td></tr>
               <tr><th scope="row"><code>image_prefix</code></th><td>string</td><td>the Dependency Proxy</td></tr>
               <tr><th scope="row"><code>php_versions</code></th><td>array</td><td><code>8.3</code> <code>8.4</code> <code>8.5</code></td></tr>
-              <tr class="is-amended" style="--bar: 0"><th scope="row"><code>php_advisory_version</code><span class="sheet__note">New: adds a <code>php-test-advisory</code> job</span></th><td>string</td><td><code>""</code> (off)</td></tr>
-              <tr class="is-amended" style="--bar: 1"><th scope="row"><code>composer_version</code><span class="sheet__note">Revised: floor of 2.9.6</span></th><td>string</td><td><code>2.11.1</code></td></tr>
+              <tr><th scope="row"><code>php_advisory_version</code></th><td>string</td><td><code>""</code> (off)</td></tr>
+              <tr class="is-amended" style="--bar: 0"><th scope="row"><code>composer_version</code><span class="sheet__note">Revised: default 2.11.1, was 2.10.3</span></th><td>string</td><td><code>2.11.1</code></td></tr>
               <tr><th scope="row"><code>test_command</code></th><td>string</td><td><code>vendor/bin/phpunit</code></td></tr>
               <tr><th scope="row"><code>working_dir</code></th><td>string</td><td><code>.</code></td></tr>
             </tbody>
           </table>
-          <figcaption class="sheet__foot" id="sheet-cap">One of fourteen entries on main, abridged. A bar in the margin marks a line revised from 0.3.1 to 0.4.0, which also gave <code>proctor</code> a <code>git_depth</code> input.</figcaption>
+          <div class="sheet__log">
+            <p class="sheet__log-title">Log of amendments</p>
+            <ol>
+              <li><b>0.4.0</b> <span>Added <code>php_advisory_version</code>, which runs one more PHP in a <code>php-test-advisory</code> job that may fail. <code>composer_version</code> gets a floor of 2.9.6.</span></li>
+              <li class="is-latest"><b>0.5.0</b> <span>The <code>composer_version</code> default moves from 2.10.3 to 2.11.1, which carries two Composer security fixes. Nothing renamed, nothing removed.</span></li>
+            </ol>
+          </div>
+          <figcaption class="sheet__foot" id="sheet-cap">One of fourteen entries on main, abridged. A bar in the margin marks a line revised from 0.4.0 to 0.5.0. The same amendment adds the fourteenth entry, <code>npm-audit</code>, and moves every Composer image default to 2.11.1.</figcaption>
         </figure>
 
         <div class="contract__terms">
@@ -532,7 +539,7 @@
             <li><b>Defaults move in the open.</b> Image digests are defaults, and Renovate moves them. Leave an input unset and you get the new default when you move the pin.</li>
           </ol>
           <p class="contract__lede">Before you move a pin, read the diff:</p>
-<pre class="term"><code><span class="t-dim">$</span> git diff 0.3.1 0.4.0 -- contract/inputs.json</code></pre>
+<pre class="term"><code><span class="t-dim">$</span> git diff 0.4.0 0.5.0 -- contract/inputs.json</code></pre>
           <p class="contract__more"><a href="docs/guides/inputs-contract.html">The inputs contract, in full</a> <span aria-hidden="true">·</span> <a href="docs/upgrading.html">Upgrading</a></p>
         </div>
       </div>
