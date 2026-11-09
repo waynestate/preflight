@@ -106,7 +106,7 @@ Runs PROCTOR's checks and publishes them as a Code Quality report.
 
 - **stage**: `test`
 - **image**: `php:8.4-cli-trixie@sha256:…`
-- **composer_version**: `2.10.3`
+- **composer_version**: `2.11.1`
 - **allow_failure**: `false`
 - **proctor_command**: `vendor/bin/proctor check --format=codequality`
 - **working_dir**: `.`
@@ -128,7 +128,7 @@ The test command on each supported PHP version, one job per version.
 - **stage**: `test`
 - **image**: `php:${PHP_VERSION}-cli-trixie`
 - **php_versions**: `["8.3", "8.4", "8.5"]`
-- **composer_version**: `2.10.3`
+- **composer_version**: `2.11.1`
 - **test_command**: `vendor/bin/phpunit`
 - **working_dir**: `.`
 
@@ -165,7 +165,7 @@ A validated CycloneDX SBOM, published as an artifact. The plugin installs global
 **4 inputs**
 
 - **stage**: `test`
-- **image**: `composer:2.10.3@sha256:…`
+- **image**: `composer:2.11.1@sha256:…`
 - **omit_dev**: `true`
 - **output**: `sbom.cdx.json`
 
@@ -184,7 +184,7 @@ The app's own Laravel Pint in test mode. The app requires `laravel/pint` and shi
 **4 inputs**
 
 - **stage**: `test`
-- **image**: `composer:2.10.3@sha256:…`
+- **image**: `composer:2.11.1@sha256:…`
 - **config**: `pint.json`
 - **working_dir**: `.`
 
@@ -203,7 +203,7 @@ The app's own PHPStan, with a Code Quality report. The app requires `phpstan/php
 **5 inputs**
 
 - **stage**: `test`
-- **image**: `composer:2.10.3@sha256:…`
+- **image**: `composer:2.11.1@sha256:…`
 - **config**: `phpstan.neon`
 - **memory_limit**: `1G`
 - **working_dir**: `.`
@@ -292,7 +292,7 @@ Type certificate data sheet
 | `image_prefix` | string | the Dependency Proxy |
 | `php_versions` | array | `8.3` `8.4` `8.5` |
 | `php_advisory_version` New: adds a `php-test-advisory` job | string | `""` (off) |
-| `composer_version` Revised: floor of 2.9.6 | string | `2.10.3` |
+| `composer_version` Revised: floor of 2.9.6 | string | `2.11.1` |
 | `test_command` | string | `vendor/bin/phpunit` |
 | `working_dir` | string | `.` |
 

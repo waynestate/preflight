@@ -17,7 +17,7 @@ Each component whose image comes from Docker Hub (`proctor`, `php-test`, `compos
 | Input | Default |
 | --- | --- |
 | `image_prefix` | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` |
-| `image` | the component's image, for example `composer:2.10.3@sha256:...` |
+| `image` | the component's image, for example `composer:2.11.1@sha256:...` |
 
 `CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX` is the top-level group's [Dependency Proxy](https://docs.gitlab.com/user/packages/dependency_proxy/). The runner signs in to it on its own, the proxy asks Docker Hub once, and every later pull of the same digest is served from GitLab. Digest pins still hold: the proxy serves the exact image the digest names.
 
@@ -73,7 +73,7 @@ variables:
   COMPOSER_CACHE_DIR: "$CI_PROJECT_DIR/.cache/composer"
 
 composer-ci:
-  image: ${IMAGE_PREFIX}/composer:2.10.3
+  image: ${IMAGE_PREFIX}/composer:2.11.1
   cache:
     key: composer
     paths: [.cache/composer/]

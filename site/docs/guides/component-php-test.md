@@ -31,7 +31,7 @@ include:
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `php_versions` | array | `["8.3", "8.4", "8.5"]` | PHP versions to test against. |
 | `php_advisory_version` | string | `""` | One more PHP version tested in a separate `<job_name>-advisory` job that may fail (`allow_failure: true`), for a release candidate. Empty: no advisory job. Never add a release candidate to `php_versions`. |
-| `composer_version` | string | `2.10.3` | Composer version to install, 2.9.6 or later. |
+| `composer_version` | string | `2.11.1` | Composer version to install, 2.9.6 or later. |
 | `test_command` | string | `vendor/bin/phpunit` | The test command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
 

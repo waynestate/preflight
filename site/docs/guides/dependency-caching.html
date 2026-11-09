@@ -68,7 +68,7 @@ The job pulls <code>image_prefix/image</code>:</p>
 </tr>
 <tr>
 <td><code>image</code></td>
-<td>the component's image, for example <code>composer:2.10.3@sha256:...</code></td>
+<td>the component's image, for example <code>composer:2.11.1@sha256:...</code></td>
 </tr>
 </tbody>
 </table></div>
@@ -156,7 +156,7 @@ build. Sourdough's app templates ship it:</p>
   COMPOSER_CACHE_DIR: &quot;$CI_PROJECT_DIR/.cache/composer&quot;
 
 composer-ci:
-  image: ${IMAGE_PREFIX}/composer:2.10.3
+  image: ${IMAGE_PREFIX}/composer:2.11.1
   cache:
     key: composer
     paths: [.cache/composer/]

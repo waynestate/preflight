@@ -35,7 +35,7 @@ The install skips plugins and scripts on purpose: the job only inspects the app,
 | `job_name` | string | `proctor` | Name of the job. Set it when you include this component more than once. |
 | `image` | string | `php:8.4-cli-trixie@sha256:9cf851bc2c1b37c3e59dfd677a3c3e56d485af5a47c93f629424bb039eafcb69` | Docker image for the job. |
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
-| `composer_version` | string | `2.10.3` | Composer version to install, 2.9.6 or later. |
+| `composer_version` | string | `2.11.1` | Composer version to install, 2.9.6 or later. |
 | `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline. |
 | `proctor_command` | string | `vendor/bin/proctor check --format=codequality` | The proctor command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
