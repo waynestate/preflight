@@ -1066,7 +1066,7 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
 
 1. Done: 6.1: The `proctor` default command works without `--policy` since PROCTOR 0.2.1 (`PROCTOR_POLICY`, then the
    app's installed CREED policy, then the copy bundled with PROCTOR), and both PROCTOR's and CREED's pipelines include
-   `preflight/proctor@0.4.0`. 6.1 stays `Documented`, because no test in this repo runs the component.
+   `preflight/proctor@0.5.0`. 6.1 stays `Documented`, because no test in this repo runs the component.
 2. 7.2: Add a failing fixture for `package-publish`'s moved-version path (it needs a live registry). The other
    components have theirs, and Preflight's pipeline runs the real PROCTOR.
 3. Done: 3.3: PROCTOR's `preflight-pinned` and `preflight-gates` checks flag apps that skip, unpin or weaken

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fe175f2bfb1d1f56fcd3b9e5c6100f1d",
+    "content-hash": "204cb91c98d989eb7f8c63814304db1d",
     "packages": [
         {
             "name": "composer/semver",
@@ -1879,16 +1879,16 @@
         },
         {
             "name": "waynestate/helmet",
-            "version": "1.2.0",
+            "version": "1.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/waynestate/helmet.git",
-                "reference": "40a0c1300627d05374a33d8b1781e6c39b063f58"
+                "reference": "f98151035c3853ab33541eeed036541c4ab5a5b7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/waynestate/helmet/zipball/40a0c1300627d05374a33d8b1781e6c39b063f58",
-                "reference": "40a0c1300627d05374a33d8b1781e6c39b063f58",
+                "url": "https://api.github.com/repos/waynestate/helmet/zipball/f98151035c3853ab33541eeed036541c4ab5a5b7",
+                "reference": "f98151035c3853ab33541eeed036541c4ab5a5b7",
                 "shasum": ""
             },
             "require": {
@@ -1951,8 +1951,8 @@
                 "issues": "https://git.wayne.edu/enterprise-apps/helmet/-/issues",
                 "source": "https://github.com/waynestate/helmet"
             },
-            "time": "2026-11-09T14:09:23+00:00",
-            "published-time": "2026-11-09T14:19:21+00:00"
+            "time": "2026-11-09T14:44:33+00:00",
+            "published-time": "2026-11-09T14:55:44+00:00"
         },
         {
             "name": "waynestate/proctor",
