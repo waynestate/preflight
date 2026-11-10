@@ -3,11 +3,11 @@
 #
 # A secret committed to the repo stays in its history, so the repo's own
 # pipeline should scan for one before it ships. GitLab's secret detection
-# template reports its findings in a job named secret_detection; until it has
-# a week of green pipelines the job is advisory (allow_failure: true), so it
-# warns without blocking. This script checks the include line and the job
-# override with plain string matching, so it needs no modules, no yq and no
-# Docker.
+# template reports its findings in a job named secret_detection; the job
+# blocked after a week of green runs (2026-11-02 to 2026-11-10), and this
+# check keeps anyone from quietly making it advisory again. This script
+# checks the include line and that the job blocks with plain string matching,
+# so it needs no modules, no yq and no Docker.
 
 $ErrorActionPreference = "Stop"
 
@@ -32,8 +32,9 @@ if (-not ($lines | Where-Object { $_ -match 'Jobs/Secret-Detection\.gitlab-ci\.y
   Fail ".gitlab-ci.yml does not include Jobs/Secret-Detection.gitlab-ci.yml"
 }
 
-# The override job must carry allow_failure: true within three lines after
-# the top-level secret_detection: key.
+# The job must block: fail when a top-level secret_detection: key is followed
+# within three lines by allow_failure: true. No key at all is fine: the
+# included template's job blocks by default.
 $keyIndex = -1
 for ($i = 0; $i -lt $lines.Count; $i++) {
   if ($lines[$i] -match '^secret_detection:') {
@@ -51,8 +52,8 @@ if ($keyIndex -ge 0) {
     }
   }
 }
-if (-not $advisoryFound) {
-  Fail "secret_detection: is not followed within 3 lines by allow_failure: true"
+if ($advisoryFound) {
+  Fail "secret_detection is advisory (allow_failure: true within 3 lines after secret_detection:); the job must block"
 }
 
 if ($status -eq 0) {
