@@ -7,7 +7,7 @@
 <div align="center">
   <img src="docs/readme/badges/php.svg" alt="php ^8.3">
   <img src="docs/readme/badges/license.svg" alt="license MIT">
-  <img src="docs/readme/badges/components.svg" alt="gitlab ci components: 13">
+  <img src="docs/readme/badges/components.svg" alt="gitlab ci components: 14">
 </div>
 
 **Every push is cleared for takeoff.**
