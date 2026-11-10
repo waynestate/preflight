@@ -1072,8 +1072,10 @@ CI by `must-fail-sbom`); `squire-kit` runs the template's own script against the
 naming the file, and a copy with no `.squire.json`, which must stop with exit 2 (`tests/check-squire-kit-fails`, run
 in CI by `must-fail-squire-kit`); and `package-publish`'s offline guards stop a non-semantic-version tag and a missing
 `composer.json` before any registry contact (`tests/check-package-publish-fails.sh`, run in CI by
-`must-fail-package-publish`). Still missing: `package-publish`'s moved-version path needs a live registry and stays untested; `renovate` is
-a config, not a job, so it has nothing to fail.
+`must-fail-package-publish`), and the same check runs the template's whole script against a fake registry serving
+GitLab's documented Composer shapes: a version published from another commit fails with no publish request, the
+same commit exits 0, and a new version is published once. Its first run showed the job had read the wrong keys and
+would have overwritten a moved version on GitLab. `renovate` is a config, not a job, so it has nothing to fail.
 
 ### 7.3 Use the stack's own projects as the first users
 Each stack repo includes Preflight, pinned.
@@ -1112,8 +1114,8 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
    app's installed CREED policy, then the copy bundled with PROCTOR), and both PROCTOR's and CREED's pipelines include
    `preflight/proctor@0.5.0`. 6.1 is `Checked`: this repository's pipeline runs the component on `tests/fixture-app`,
    and the `contract` job runs `tests/check-proctor-fails`.
-2. 7.2: Add a failing fixture for `package-publish`'s moved-version path (it needs a live registry). The other
-   components have theirs, and Preflight's pipeline runs the real PROCTOR.
+2. Done: 7.2: `package-publish`'s moved-version path has its failing fixture: a fake registry in
+   `tests/check-package-publish-fails.sh` (no live registry needed). Every component that runs as a job now has one.
 3. Done: 3.3: PROCTOR's `preflight-pinned` and `preflight-gates` checks flag apps that skip, unpin or weaken
    Preflight. A Rollcall fleet report of the same is still a plan.
 4. Done: 4.1: Image digests stay pinned, and the pins that matter most move through review: the shared preset

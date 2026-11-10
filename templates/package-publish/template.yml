@@ -100,37 +100,67 @@ spec:
       fi
       case "$http_code" in
         200)
+          # The index names the per-package file in metadata-url (Composer 2's
+          # repository format, "packages": [] on GitLab), as a template with
+          # %package% in it, often relative to the server. Without one, use
+          # GitLab's documented p2 path.
           p2_link=$(php -r '
             $d = json_decode(file_get_contents($argv[1]), true);
-            $entries = (is_array($d) && isset($d["packages"][$argv[2]])) ? $d["packages"][$argv[2]] : [];
-            foreach ($entries as $e) {
-              if (is_array($e) && isset($e["link"]) && is_string($e["link"])) {
-                fwrite(STDOUT, $e["link"]);
-                break;
-              }
+            $tpl = (is_array($d) && isset($d["metadata-url"]) && is_string($d["metadata-url"])) ? $d["metadata-url"] : "";
+            if ($tpl === "" || strpos($tpl, "%package%") === false) {
+              fwrite(STDOUT, $argv[3] . "/group/" . $argv[4] . "/-/packages/composer/p2/" . $argv[2] . ".json");
+              exit(0);
             }
-          ' "$tmp/packages.json" "$name")
-          if [ -n "$p2_link" ]; then
-            curl_rc=0
-            http_code=$(curl --silent --show-error --header "Deploy-Token: $read_token" -o "$tmp/p2.json" -w '%{http_code}' "$p2_link") || curl_rc=$?
-            if [ "$curl_rc" -ne 0 ] || [ "$http_code" != "200" ]; then
+            $url = str_replace("%package%", $argv[2], $tpl);
+            if (strpos($url, "://") === false) {
+              $u = parse_url($argv[3]);
+              $origin = $u["scheme"] . "://" . $u["host"] . (isset($u["port"]) ? ":" . $u["port"] : "");
+              $url = $origin . "/" . ltrim($url, "/");
+            }
+            fwrite(STDOUT, $url);
+          ' "$tmp/packages.json" "$name" "$api" "$group_id")
+          curl_rc=0
+          http_code=$(curl --silent --show-error --header "Deploy-Token: $read_token" -o "$tmp/p2.json" -w '%{http_code}' "$p2_link") || curl_rc=$?
+          if [ "$curl_rc" -ne 0 ]; then
+            echo "Could not read the package metadata for $name at $p2_link." >&2
+            exit 1
+          fi
+          case "$http_code" in
+            200)
+              # packages -> name -> versions: keyed by version on GitLab, a
+              # list of version objects in Composer 2's plain form. The
+              # reference is the commit the version was published from.
+              existing_ref=$(php -r '
+                $d = json_decode(file_get_contents($argv[1]), true);
+                $wanted = ltrim($argv[3], "v");
+                $versions = (is_array($d) && isset($d["packages"][$argv[2]]) && is_array($d["packages"][$argv[2]])) ? $d["packages"][$argv[2]] : [];
+                foreach ($versions as $key => $entry) {
+                  if (!is_array($entry)) {
+                    continue;
+                  }
+                  $v = (isset($entry["version"]) && is_string($entry["version"])) ? $entry["version"] : (string) $key;
+                  if (ltrim($v, "v") !== $wanted) {
+                    continue;
+                  }
+                  foreach (["source", "dist"] as $from) {
+                    if (isset($entry[$from]["reference"]) && is_string($entry[$from]["reference"]) && $entry[$from]["reference"] !== "") {
+                      fwrite(STDOUT, $entry[$from]["reference"]);
+                      exit(0);
+                    }
+                  }
+                  fwrite(STDOUT, "unknown");
+                  exit(0);
+                }
+              ' "$tmp/p2.json" "$name" "$version")
+              ;;
+            404)
+              echo "$name has no published versions yet."
+              ;;
+            *)
               echo "Could not read the package metadata for $name (HTTP $http_code)." >&2
               exit 1
-            fi
-            existing_ref=$(php -r '
-              $d = json_decode(file_get_contents($argv[1]), true);
-              $wanted = ltrim($argv[2], "v");
-              $versions = (is_array($d) && isset($d["versions"])) ? $d["versions"] : [];
-              foreach ($versions as $key => $entry) {
-                if (ltrim((string) $key, "v") === $wanted) {
-                  if (is_array($entry) && isset($entry["source"]["reference"]) && is_string($entry["source"]["reference"])) {
-                    fwrite(STDOUT, $entry["source"]["reference"]);
-                  }
-                  break;
-                }
-              }
-            ' "$tmp/p2.json" "$version")
-          fi
+              ;;
+          esac
           ;;
         404)
           echo "Group $group_id has no published Composer packages yet."

@@ -5,7 +5,8 @@
 # a container: it runs inside the template's image (composer:2.11.1, pinned
 # by digest in templates/package-publish/template.yml) and performs the
 # template's own first two script blocks (the tag guard and the
-# composer.json guard) on copies of the fixtures in a temp dir. This wrapper
+# composer.json guard) on copies of the fixtures in a temp dir, then the
+# whole script against a fake registry for the moved-version path. This wrapper
 # checks the template lines natively, then runs the .sh in that image with
 # Docker:
 #

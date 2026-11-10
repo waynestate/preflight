@@ -28,12 +28,18 @@ The job, in order:
    pre-release; any other tag fails the job.
 3. Reads the package name from the `name` field of `composer.json` in the
    project root, the file the registry serves.
-4. Reads the registry index with the read token. A `404` means the group has
-   no published Composer packages yet, and the job goes straight to
-   publishing.
-5. Compares the commit recorded for the version, if any, with
+4. Reads the group's registry index (`packages.json`) with the read token. A
+   `404` means the group has no published Composer packages yet, and the job
+   goes straight to publishing. Otherwise it follows the index's
+   `metadata-url` (on GitLab, `/api/v4/group/<id>/-/packages/composer/p2/%package%.json`)
+   to the package's own file; a `404` there means this package has no
+   published versions yet.
+5. Finds the version in that file (keyed by version on GitLab, or a list of
+   versions in Composer 2's plain form) and compares the commit it was
+   published from (`source.reference`, else `dist.reference`) with
    `$CI_COMMIT_SHA`: the same commit exits quietly, a different commit fails
-   the job instead of overwriting the version.
+   the job instead of overwriting the version. A version with no recorded
+   commit fails too, since the job cannot prove it is the same one.
 6. Publishes the tag to the group's registry with the job token
    (`CI_JOB_TOKEN`) and reports the version as published.
 
@@ -80,6 +86,17 @@ version tag. Expected: the `package-publish` job runs in the `deploy` stage,
 reads the registry, and ends with `Version <version> published.` Pushing the
 same tag from the same commit again exits quietly; the same version from a
 different commit fails the job.
+
+Preflight proves both without a registry of its own. `tests/check-package-publish-fails.sh`
+(run in CI by `must-fail-package-publish`, and by its `.ps1` twin on Windows)
+runs the template's own script against a fake registry that answers with the
+shapes GitLab's Composer API documents, and expects: a version published from
+another commit fails with no publish request (in GitLab's keyed form and in
+Composer 2's list form), the same commit exits 0 with none, a new version and
+a package with no versions yet are each published once, and an index that
+answers 500 fails. Through 0.7.0 the job looked for the version in the wrong
+places, so on GitLab it never saw a published version and would have
+overwritten a moved one; this check is how that was caught.
 
 ## Related
 

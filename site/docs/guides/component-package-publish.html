@@ -60,12 +60,18 @@ on the manifest, it stays on the manifest: no go-arounds.</p>
 pre-release; any other tag fails the job.</li>
 <li>Reads the package name from the <code>name</code> field of <code>composer.json</code> in the
 project root, the file the registry serves.</li>
-<li>Reads the registry index with the read token. A <code>404</code> means the group has
-no published Composer packages yet, and the job goes straight to
-publishing.</li>
-<li>Compares the commit recorded for the version, if any, with
+<li>Reads the group's registry index (<code>packages.json</code>) with the read token. A
+<code>404</code> means the group has no published Composer packages yet, and the job
+goes straight to publishing. Otherwise it follows the index's
+<code>metadata-url</code> (on GitLab, <code>/api/v4/group/&lt;id&gt;/-/packages/composer/p2/%package%.json</code>)
+to the package's own file; a <code>404</code> there means this package has no
+published versions yet.</li>
+<li>Finds the version in that file (keyed by version on GitLab, or a list of
+versions in Composer 2's plain form) and compares the commit it was
+published from (<code>source.reference</code>, else <code>dist.reference</code>) with
 <code>$CI_COMMIT_SHA</code>: the same commit exits quietly, a different commit fails
-the job instead of overwriting the version.</li>
+the job instead of overwriting the version. A version with no recorded
+commit fails too, since the job cannot prove it is the same one.</li>
 <li>Publishes the tag to the group's registry with the job token
 (<code>CI_JOB_TOKEN</code>) and reports the version as published.</li>
 </ol>
@@ -140,6 +146,16 @@ version tag. Expected: the <code>package-publish</code> job runs in the <code>de
 reads the registry, and ends with <code>Version &lt;version&gt; published.</code> Pushing the
 same tag from the same commit again exits quietly; the same version from a
 different commit fails the job.</p>
+<p>Preflight proves both without a registry of its own. <code>tests/check-package-publish-fails.sh</code>
+(run in CI by <code>must-fail-package-publish</code>, and by its <code>.ps1</code> twin on Windows)
+runs the template's own script against a fake registry that answers with the
+shapes GitLab's Composer API documents, and expects: a version published from
+another commit fails with no publish request (in GitLab's keyed form and in
+Composer 2's list form), the same commit exits 0 with none, a new version and
+a package with no versions yet are each published once, and an index that
+answers 500 fails. Through 0.7.0 the job looked for the version in the wrong
+places, so on GitLab it never saw a published version and would have
+overwritten a moved one; this check is how that was caught.</p>
 <h2 id="related"><span class="docs-heading-tail"><span>Related</span><a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></span></h2>
 <ul>
 <li><a href="quick-start.html">Quick start</a>: wire one component into an app and watch the pipeline run it.</li>

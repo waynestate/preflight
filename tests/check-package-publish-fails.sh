@@ -23,9 +23,11 @@
 #
 # It runs inside the template's image (composer:2.11.1, pinned by digest in
 # templates/package-publish/template.yml), which ships the php the name
-# guard needs. The moved-version path talks to the registry and stays
-# untested here. One result line per case goes to stdout; a fixture's
-# output is printed only for a case that went wrong.
+# guard needs, plus curl. Then it runs the template's whole script, with
+# its two inputs filled in, against a fake registry (php -S on 127.0.0.1)
+# for the moved-version path: see (c) below for the six cases. Nothing
+# leaves the container. One result line per case goes to stdout; a
+# fixture's output is printed only for a case that went wrong.
 # Run it with
 #
 #   docker run --rm -v "$(pwd):/app" -w /app \
@@ -141,6 +143,154 @@ if [ "$ok" -eq 1 ]; then
 else
   sed 's/^/  | /' "$tmp/clean.log" >&2
 fi
+
+# (c) the registry path, against a fake registry. GitLab overwrites a
+# Composer version quietly when the same tag is published again from another
+# commit, so the job reads the registry first and refuses a moved version.
+# The whole jobs script (every `|` block, the version echo line left out)
+# runs here with its two inputs filled in, against `php -S` serving the
+# shapes GitLab's Composer API documents: the group index with
+# "packages": [] and a metadata-url template, and the p2 file keyed by
+# version, each version carrying source.reference (the commit). A POST to
+# the publish endpoint is logged, never forwarded anywhere.
+#
+#   moved     1.2.3 is published from another commit: exit 1, no POST
+#   moved-v2  the same, in Composer 2's plain list form: exit 1, no POST
+#   same      1.2.3 is published from this commit: exit 0, no POST
+#   new       only 1.2.2 is published: exit 0, one POST
+#   unborn    the package has no p2 file yet (404): exit 0, one POST
+#   down      the index answers 500: exit 1, no POST
+all_blocks=$(awk -v n="$sep" '
+  NR > n && /^    - \|$/ { inblock = 1; next }
+  NR > n && /^    - / { inblock = 0; next }
+  NR > n && inblock {
+    if ($0 ~ /^  [A-Za-z"]/) exit
+    line = $0
+    sub(/^      /, "", line)
+    print line
+  }
+' "$TPL")
+printf '%s\n' "$all_blocks" | grep -Fq -- 'refusing to overwrite it.' \
+  || { fail "the template dropped the moved-version refusal"; exit 1; }
+printf '%s\n' "$all_blocks" \
+  | sed -e 's/\$\[\[ inputs\.read_token_variable \]\]/PREFLIGHT_FAKE_READ_TOKEN/' \
+        -e 's/\$\[\[ inputs\.group_id \]\]/42/' > "$tmp/job.sh"
+if grep -Fq -- '$[[' "$tmp/job.sh"; then
+  fail "the jobs script holds an input interpolation this check does not fill in"
+  exit 1
+fi
+
+mkdir -p "$tmp/registry"
+cat > "$tmp/registry/router.php" <<'PHP'
+<?php
+// A fake GitLab Composer registry for one scenario at a time.
+$dir = __DIR__;
+$scenario = trim((string) @file_get_contents($dir . '/scenario'));
+$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$method = $_SERVER['REQUEST_METHOD'];
+$moved = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+$here = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb';
+$send = function (int $code, $body = null): void {
+    http_response_code($code);
+    header('Content-Type: application/json');
+    if ($body !== null) {
+        echo json_encode($body, JSON_UNESCAPED_SLASHES);
+    }
+};
+if ($method === 'POST' && $path === '/api/v4/projects/7/packages/composer') {
+    file_put_contents($dir . '/posts.log', file_get_contents('php://input') . "\n", FILE_APPEND);
+    $send(201, ['message' => '201 Created']);
+    return true;
+}
+if ($method === 'GET' && $path === '/api/v4/group/42/-/packages/composer/packages.json') {
+    if ($scenario === 'down') {
+        $send(500, ['message' => '500 Internal Server Error']);
+        return true;
+    }
+    $send(200, ['packages' => [], 'metadata-url' => '/api/v4/group/42/-/packages/composer/p2/%package%.json']);
+    return true;
+}
+if ($method === 'GET' && $path === '/api/v4/group/42/-/packages/composer/p2/acme/demo.json') {
+    $version = fn (string $v, string $ref): array => ['name' => 'acme/demo', 'version' => $v, 'source' => ['type' => 'git', 'url' => 'https://example.invalid/acme/demo.git', 'reference' => $ref], 'dist' => ['type' => 'zip', 'url' => 'https://example.invalid/acme/demo.zip', 'reference' => $ref]];
+    switch ($scenario) {
+        case 'moved':
+            $send(200, ['packages' => ['acme/demo' => ['1.2.2' => $version('1.2.2', $moved), '1.2.3' => $version('1.2.3', $moved)]]]);
+            break;
+        case 'moved-v2':
+            $send(200, ['packages' => ['acme/demo' => [$version('v1.2.3', $moved), $version('1.2.2', $moved)]]]);
+            break;
+        case 'same':
+            $send(200, ['packages' => ['acme/demo' => ['1.2.3' => $version('1.2.3', $here)]]]);
+            break;
+        case 'new':
+            $send(200, ['packages' => ['acme/demo' => ['1.2.2' => $version('1.2.2', $moved)]]]);
+            break;
+        default:
+            $send(404, ['message' => '404 Not Found']);
+    }
+    return true;
+}
+$send(404, ['message' => '404 Not Found']);
+return true;
+PHP
+
+port=18573
+php -S "127.0.0.1:$port" "$tmp/registry/router.php" > "$tmp/registry/server.log" 2>&1 &
+server=$!
+trap 'kill "$server" 2>/dev/null; rm -rf "$tmp"' EXIT
+i=0
+until curl --silent --output /dev/null "http://127.0.0.1:$port/"; do
+  i=$((i + 1))
+  if [ "$i" -gt 50 ]; then
+    fail "the fake registry did not start"
+    exit 1
+  fi
+  sleep 0.1
+done
+
+# registry <scenario> <expected exit: 0 or 1> <expected POSTs> <text the output must name>
+registry() {
+  scenario=$1
+  want_code=$2
+  want_posts=$3
+  want_text=$4
+  printf '%s\n' "$scenario" > "$tmp/registry/scenario"
+  : > "$tmp/registry/posts.log"
+  work="$tmp/reg-$scenario"
+  cp -R "$ROOT/tests/package-publish-badtag" "$work"
+  (
+    cd "$work" &&
+      CI_COMMIT_TAG=v1.2.3 \
+      CI_COMMIT_SHA=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb \
+      CI_API_V4_URL="http://127.0.0.1:$port/api/v4" \
+      CI_PROJECT_ID=7 \
+      CI_JOB_TOKEN=fake-job-token \
+      PREFLIGHT_FAKE_READ_TOKEN=fake-read-token \
+      sh "$tmp/job.sh"
+  ) > "$tmp/reg-$scenario.log" 2>&1
+  code=$?
+  posts=$(grep -c . "$tmp/registry/posts.log")
+  ok=1
+  if [ "$want_code" -eq 0 ]; then
+    [ "$code" -eq 0 ] || { fail "package-publish $scenario: exit $code, expected 0"; ok=0; }
+  else
+    [ "$code" -ne 0 ] || { fail "package-publish $scenario: exit 0, expected non-zero"; ok=0; }
+  fi
+  [ "$posts" -eq "$want_posts" ] || { fail "package-publish $scenario: $posts publish requests, expected $want_posts"; ok=0; }
+  grep -Fq -- "$want_text" "$tmp/reg-$scenario.log" || { fail "package-publish $scenario: the output does not say \"$want_text\""; ok=0; }
+  if [ "$ok" -eq 1 ]; then
+    echo "package-publish $scenario: exit $code, $posts publish requests (expected)"
+  else
+    sed 's/^/  | /' "$tmp/reg-$scenario.log" >&2
+  fi
+}
+
+registry moved 1 0 "already published at a different commit (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa); refusing to overwrite it."
+registry moved-v2 1 0 "already published at a different commit (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa); refusing to overwrite it."
+registry same 0 0 "already published at this commit"
+registry new 0 1 "Version 1.2.3 published."
+registry unborn 0 1 "acme/demo has no published versions yet."
+registry down 1 0 "Reading the Composer registry failed with HTTP 500."
 
 if [ "$status" -eq 0 ]; then
   echo "check-package-publish-fails: ok"
