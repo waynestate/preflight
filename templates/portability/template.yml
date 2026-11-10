@@ -20,6 +20,10 @@
 #
 # The runner must allow user namespaces (Buildah's chroot isolation uses one);
 # ordinary unprivileged Docker-executor runners do.
+#
+# The services input starts shared backing services (for example a database
+# for session-hop); both replicas reach them by their GitLab service alias,
+# exactly as the job script does.
 
 spec:
   component: [name, version, sha, reference]
@@ -85,6 +89,10 @@ spec:
       description: Environment for both replicas, as NAME=value (or NAME to pass the job's variable through). $NAME and ${NAME} in a value are replaced from the job's variables; keep secrets in CI/CD variables.
       type: array
       default: []
+    services:
+      description: Service containers for the job, as GitLab's `services:` keyword takes them (an image string, or a map with `name`, `alias` and `variables`). Use it for a database or cache the replicas share, so `session-hop` can pass for an app that keeps sessions there. Pin each image by digest.
+      type: array
+      default: []
     boot_timeout:
       description: Seconds each replica has to answer the health path.
       type: number
@@ -125,6 +133,7 @@ spec:
 "$[[ inputs.job_name ]]":
   stage: $[[ inputs.stage ]]
   image: $[[ inputs.image ]]
+  services: $[[ inputs.services ]]
   interruptible: true
   timeout: 30 minutes
   variables:

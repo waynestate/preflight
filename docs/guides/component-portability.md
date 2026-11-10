@@ -62,6 +62,25 @@ if (env('PORTABILITY_PROBE') === 'yes') {
 
 Add `"PORTABILITY_PROBE=yes"` to `env`. An app with no sign-in leaves `session-hop` out of `checks` on purpose; the other checks still run.
 
+### A shared database for session-hop
+
+An app that keeps its sessions in a database (WELD does) needs both replicas to reach the same store. The `services` input starts one as a GitLab service container, which the replicas reach by its alias exactly as the job script does:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@60314791565a264e97cb210813ef4f3e76512402 # 0.5.0
+    inputs:
+      services: [{ name: "mysql:8.4.7@sha256:<digest>", alias: db, variables: { MYSQL_ROOT_PASSWORD: "portability", MYSQL_DATABASE: "app" } }]
+      env: ["APP_KEY=${PORTABILITY_APP_KEY}", "DB_HOST=db", "SESSION_DRIVER=mysql", "LOG_CHANNEL=stderr"]
+      session_login_path: /_portability/login
+      session_check_path: /_portability/me
+```
+
+Replace `<digest>` with the digest of the image you actually pull; never copy a placeholder pin into a pipeline. Two things to know about the service:
+
+- The database has to accept connections before the replicas boot. The probe's `boot_timeout` covers that wait, or a `start_command` can run migrations first.
+- The runner is arm64, so the service image must be multi-arch. `mysql:8.4` is; `mysql:5.6` is not.
+
 ## How the job works
 
 The component is one job, named by `job_name` (default `portability`). It runs in the Buildah image, pinned by digest, with `STORAGE_DRIVER=vfs` and `BUILDAH_ISOLATION=chroot`, `interruptible: true` and `timeout: 30 minutes`. In order, it:
@@ -110,6 +129,7 @@ The checks run in an unprivileged job, so a few things are emulated rather than 
 | `uid` | number | `100123` | Numeric uid the app runs as, with no `/etc/passwd` entry. The gid is always 0. |
 | `start_command` | string | `""` | Command that starts the app, run with `sh -c`. Empty runs the image's own `ENTRYPOINT` and `CMD`. |
 | `env` | array | `[]` | Environment for both replicas, as `NAME=value` (or `NAME` to pass the job's variable through). Keep secrets in CI/CD variables. |
+| `services` | array | `[]` | Service containers for the job, as GitLab's `services:` keyword takes them (an image string, or a map with `name`, `alias` and `variables`). A database or cache the replicas share lets `session-hop` pass for an app that keeps sessions there. Pin each image by digest. |
 | `boot_timeout` | number | `60` | Seconds each replica has to answer the health path. |
 | `stop_timeout` | number | `10` | Seconds the main process has to exit after SIGTERM. |
 | `probe_path` | string | `/` | Page probed with and without forged forwarded headers; one that redirects or builds absolute URLs shows the most. |
