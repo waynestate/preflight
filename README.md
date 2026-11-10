@@ -62,7 +62,7 @@ only in a release whose [Upgrading](docs/upgrading.md) section lists it under Br
 and before 1.0 that is a new minor, never a patch. Before you move a pin, see what moved:
 
 ```
-git diff 0.5.0 0.6.0 -- contract/inputs.json
+git diff 0.6.0 0.7.0 -- contract/inputs.json
 ```
 
 [The inputs contract](docs/guides/inputs-contract.md) explains what counts as breaking
@@ -78,7 +78,7 @@ older PHP or needing an extension the image lacks still gets its report.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
     inputs:
       proctor_command: vendor/bin/proctor check --format=codequality
 ```
@@ -115,7 +115,7 @@ Runs the test command on each supported PHP version through `parallel:matrix`.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
     inputs:
       test_command: vendor/bin/phpunit
 ```
@@ -165,7 +165,7 @@ Runs `composer audit --locked` and fails on advisories.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
     inputs:
       working_dir: .
 ```
@@ -202,7 +202,7 @@ New in 0.5.0; 0.4.0 does not include it.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
     inputs:
       audit_level: high
 ```
@@ -229,7 +229,7 @@ Generates a CycloneDX SBOM with `cyclonedx/cyclonedx-php-composer`, validates it
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
     inputs:
       output: sbom.cdx.json
 ```
@@ -251,7 +251,7 @@ Runs the app's own [Laravel Pint](https://laravel.com/docs/12.x/pint) in test mo
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
     inputs:
       config: pint.json
 ```
@@ -273,7 +273,7 @@ Runs the app's own [PHPStan](https://phpstan.org/) and fails the pipeline on sta
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
     inputs:
       config: phpstan.neon
       memory_limit: 1G
@@ -297,7 +297,7 @@ Runs the app's own [ESLint](https://eslint.org/) (and [Prettier](https://prettie
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
     inputs:
       eslint_args: .
 ```
@@ -320,7 +320,7 @@ Runs [Gitleaks](https://github.com/gitleaks/gitleaks) over the checked-out tree 
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/secret-detection@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/secret-detection@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
 ```
 
 | Input | Type | Default | What it does |
@@ -345,7 +345,7 @@ curl and PHP, which the job uses for the registry round trip.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
     inputs:
       group_id: "<your group id>"
 ```
@@ -372,7 +372,7 @@ auto-merges and what waits.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
     inputs:
       git_author: "Preflight Bot <preflight-bot@example.com>"
 ```
@@ -410,7 +410,7 @@ No takeoff without a clean pre-flight.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
     inputs:
       env: ["APP_KEY=${PORTABILITY_APP_KEY}", "APP_URL=https://myapp.example.edu"]
       session_login_path: /_portability/login
@@ -466,7 +466,7 @@ person to review. Every page gets a walk-round, in daylight and at night.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
     inputs:
       pages: ["index.html", "docs/**/*.html"]
       wcag_tags: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]
@@ -507,7 +507,7 @@ recorded version, so a new Squire never turns main red by itself: Renovate's Squ
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
     inputs:
       working_dir: deploy
 ```
@@ -558,7 +558,7 @@ on:
 
 jobs:
   ci:
-    uses: waynestate/preflight/.github/workflows/php-package.yml@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
+    uses: waynestate/preflight/.github/workflows/php-package.yml@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
 ```
 
 This workflow ships in the `0.1.1` tag, so pin the full commit SHA of the
@@ -715,13 +715,13 @@ workflow:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
 ```
 
 The `workflow:rules` block must live in the app's own file. A component

@@ -24,7 +24,7 @@ commit SHA, and the same checklist flies on every push.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
     inputs:
       test_command: vendor/bin/phpunit
 ```
@@ -35,6 +35,6 @@ include:
 - [Install](install.md): the requirements, the include snippet, and how to verify the pipeline picked the component up.
 - [Reference](reference/components.md): every component, with its include example, inputs and defaults.
 
-Preflight 0.6.0; GitLab components are GA on the Free tier since GitLab 17.0; MIT licensed.
+Preflight 0.7.0; GitLab components are GA on the Free tier since GitLab 17.0; MIT licensed.
 
 Agents: fetch [https://preflight.apps.wayne.edu/llms.txt](https://preflight.apps.wayne.edu/llms.txt) for a machine-readable index of this manual.

@@ -17,7 +17,7 @@ include to your app's `.gitlab-ci.yml`:
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
     inputs:
       working_dir: .
 ```

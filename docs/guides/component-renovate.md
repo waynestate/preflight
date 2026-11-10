@@ -56,7 +56,7 @@ commit SHA with the tag in a trailing comment, and set `git_author`:
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
     inputs:
       git_author: "Preflight Bot <preflight-bot@example.com>"
 ```

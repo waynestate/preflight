@@ -44,7 +44,7 @@ Add the include to the app's `.gitlab-ci.yml`, pinned to a full commit SHA with 
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
 ```
 
 With no inputs, the job serves the `site/` folder on a local port and checks every `.html` file in it at WCAG 2.1 AA.
@@ -57,7 +57,7 @@ To hold the stack's floor, WCAG 2.2 AA, and to name the pages:
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
     inputs:
       site_dir: site
       pages: ["index.html", "docs/**/*.html"]
@@ -123,7 +123,7 @@ blocking:
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
     inputs:
       allow_failure: true
 ```
@@ -139,7 +139,7 @@ or a pre-production deploy, and list the paths:
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
     inputs:
       base_url: $CI_ENVIRONMENT_URL
       pages: ["/", "about", "apply"]
