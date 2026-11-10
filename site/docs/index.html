@@ -55,7 +55,7 @@ same checks: PROCTOR, PHP tests on each supported version, Composer audit,
 an SBOM, Pint, PHPStan and ESLint. One include per component, pinned to a
 commit SHA, and the same checklist flies on every push.</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
     inputs:
       test_command: vendor/bin/phpunit
 </code></pre>
@@ -65,7 +65,7 @@ commit SHA, and the same checklist flies on every push.</p>
 <li><a href="install.html">Install</a>: the requirements, the include snippet, and how to verify the pipeline picked the component up.</li>
 <li><a href="reference/components.html">Reference</a>: every component, with its include example, inputs and defaults.</li>
 </ul>
-<p>Preflight 0.6.0; GitLab components are GA on the Free tier since GitLab 17.0; MIT licensed.</p>
+<p>Preflight 0.7.0; GitLab components are GA on the Free tier since GitLab 17.0; MIT licensed.</p>
 <p>Agents: fetch <a rel="noopener" href="https://preflight.apps.wayne.edu/llms.txt">https://preflight.apps.wayne.edu/llms.txt</a> for a machine-readable index of this manual.</p>
 </article>
     </main>

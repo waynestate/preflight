@@ -32,7 +32,7 @@ on:
 
 jobs:
   ci:
-    uses: waynestate/preflight/.github/workflows/php-package.yml@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
+    uses: waynestate/preflight/.github/workflows/php-package.yml@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
 ```
 
 ## Pin the include to a commit SHA [#](https://preflight.apps.wayne.edu/docs/guides/github-mirrors.html#pin-the-include-to-a-commit-sha)
