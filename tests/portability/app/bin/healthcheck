@@ -1,0 +1,34 @@
+#!/bin/sh
+# healthcheck: the fixture's own HEALTHCHECK command (WELD practice W12).
+#
+# The portability probe runs it inside a replica, as the app's uid, with the
+# app's environment. It exits 1 when FIXTURE_FLAW is bad-healthcheck (the
+# must-fail case for the healthcheck check); otherwise it fetches the health
+# path from the app on 127.0.0.1:$PORT and exits 0 on a 200, like a real
+# container health command does. PHP's built-in client is all the image has.
+set -eu
+
+if [ "${FIXTURE_FLAW:-none}" = bad-healthcheck ]; then
+  echo "fixture: healthcheck failing on purpose (bad-healthcheck)" >&2
+  exit 1
+fi
+
+port=${PORT:-8080}
+status=$(php -r '
+  $ctx = stream_context_create(["http" => ["timeout" => 3]]);
+  $body = @file_get_contents("http://127.0.0.1:$argv[1]/up", false, $ctx);
+  foreach ($http_response_header as $h) {
+    if (preg_match("#^HTTP/\S+\s+(\d+)#", $h, $m)) {
+      echo $m[1];
+      exit(0);
+    }
+  }
+  echo "000";
+' "$port")
+
+if [ "$status" = 200 ]; then
+  echo "fixture: healthcheck ok (got 200 from 127.0.0.1:$port/up)"
+else
+  echo "fixture: healthcheck failed (got $status from 127.0.0.1:$port/up)" >&2
+  exit 1
+fi

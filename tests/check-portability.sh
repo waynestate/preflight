@@ -16,6 +16,7 @@
 #   file-logs        logs fails (a log file under storage/logs)
 #   file-sessions    session-hop fails (sessions on one replica's disk)
 #   no-term-handler  sigterm fails (no SIGTERM handler in the main process)
+#   bad-healthcheck  healthcheck fails (the image's HEALTHCHECK exits 1)
 #   reopens-stderr   every check passes (the app reopens /proc/self/fd/2)
 #   signals-group    every check passes (the app signals its process group
 #                    on SIGTERM)
@@ -57,7 +58,7 @@ fi
 export STORAGE_DRIVER="${STORAGE_DRIVER:-vfs}"
 export BUILDAH_ISOLATION="${BUILDAH_ISOLATION:-chroot}"
 
-CASES="none:pass needs-root:strict-boot writes-root:strict-boot fixed-port:strict-boot host-bound:health dotenv:env-only trusts-proxy:forwarded-headers file-logs:logs file-sessions:session-hop no-term-handler:sigterm reopens-stderr:pass signals-group:pass"
+CASES="none:pass needs-root:strict-boot writes-root:strict-boot fixed-port:strict-boot host-bound:health dotenv:env-only trusts-proxy:forwarded-headers file-logs:logs file-sessions:session-hop no-term-handler:sigterm bad-healthcheck:healthcheck reopens-stderr:pass signals-group:pass"
 
 # In GitLab, pull the fixture's base image through the Dependency Proxy. The
 # probe replaces ${NAME} from the job's variables.
@@ -103,7 +104,8 @@ identity_header=X-Forwarded-User
 session_login_path=/login
 session_check_path=/me
 logs_path=storage/logs
-checks=["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm"]
+require_healthcheck=false
+checks=["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm", "healthcheck"]
 EOF
 
   sh "$PROBE" "$inputs" > "$tmp/$flaw.log" 2>&1

@@ -22,6 +22,7 @@
 #   session-hop        a sign-in on replica A is still signed in on replica B
 #   sigterm            the main process handles SIGTERM and exits by itself
 #                      within the stop timeout, as PID 1 must
+#   healthcheck        the image's own HEALTHCHECK command, if it declares one, exits 0 inside replica A
 #
 # No Docker daemon, no privileged runner: Buildah builds with the vfs driver
 # and chroot isolation, and `buildah run` starts each replica in the job's own
@@ -48,7 +49,7 @@ set -u
 
 CONFIG=${1:?usage: probe.sh <inputs file>}
 WORK=$(mktemp -d)
-ALL_CHECKS="strict-boot health env-only forwarded-headers logs session-hop sigterm"
+ALL_CHECKS="strict-boot health env-only forwarded-headers logs session-hop sigterm healthcheck"
 TEST_HOST=10.1.2.3
 FORGED_HOST=forged-host.invalid
 FORGED_USER=forged-user-preflight
@@ -103,6 +104,8 @@ IDENTITY_HEADER=$(cfg identity_header); IDENTITY_HEADER=${IDENTITY_HEADER:-X-For
 LOGIN_PATH=$(cfg session_login_path)
 CHECK_PATH=$(cfg session_check_path)
 LOGS_PATH=$(cfg logs_path); LOGS_PATH=${LOGS_PATH:-storage/logs}; LOGS_PATH=${LOGS_PATH%/}
+REQUIRE_HEALTHCHECK=$(cfg require_healthcheck); REQUIRE_HEALTHCHECK=${REQUIRE_HEALTHCHECK:-false}
+case "$REQUIRE_HEALTHCHECK" in true|false) ;; *) say "input error: require_healthcheck must be true or false"; exit 2 ;; esac
 PORT_B=$((PORT + 1))
 
 items "$(cfg writable_paths)" > "$WORK/writable.list"
@@ -119,7 +122,7 @@ items "$(cfg env)" | while IFS= read -r e; do
 done > "$WORK/env.list"
 
 if [ ! -s "$WORK/checks.list" ]; then
-  printf '%s\n' health env-only forwarded-headers logs session-hop sigterm > "$WORK/checks.list"
+  printf '%s\n' health env-only forwarded-headers logs session-hop sigterm healthcheck > "$WORK/checks.list"
 fi
 while IFS= read -r c; do
   case " $ALL_CHECKS " in
@@ -192,7 +195,7 @@ cleanup() {
     kill -KILL "$bpid" 2>/dev/null
     wait "$bpid" 2>/dev/null
   done
-  for r in a b; do
+  for r in a b hc; do
     [ -f "$WORK/$r.ctr" ] && buildah rm "$(cat "$WORK/$r.ctr")" >/dev/null 2>&1
   done
   rm -rf "$WORK"
@@ -206,7 +209,8 @@ if [ -n "${CI_DEPENDENCY_PROXY_SERVER:-}" ] && [ -n "${CI_DEPENDENCY_PROXY_USER:
     || say "note: the Dependency Proxy login failed; base images pull without it"
 fi
 
-set -- --isolation chroot -f "$CONTEXT/$DOCKERFILE" -t localhost/portability-app
+# --format docker: Buildah's default OCI format drops HEALTHCHECK; the docker format keeps it.
+set -- --isolation chroot --format docker -f "$CONTEXT/$DOCKERFILE" -t localhost/portability-app
 while IFS= read -r a; do set -- "$@" --build-arg "$a"; done < "$WORK/build-args.list"
 say "building $CONTEXT/$DOCKERFILE with Buildah (vfs, chroot isolation)"
 if ! buildah bud "$@" "$CONTEXT"; then
@@ -220,6 +224,28 @@ buildah inspect --type image --format '{{range .OCIv1.Config.Entrypoint}}{{print
 if [ -z "$START_COMMAND" ] && [ ! -s "$WORK/argv.list" ]; then
   say "input error: the image has no ENTRYPOINT or CMD; set start_command"
   exit 2
+fi
+
+# The image's own HEALTHCHECK test, one array element per line, unless it
+# declares none (then the file is empty). The first element says the form:
+# CMD runs the rest as argv, CMD-SHELL runs the second element with sh -c.
+buildah inspect --type image --format '{{if .Docker.Config.Healthcheck}}{{range .Docker.Config.Healthcheck.Test}}{{println .}}{{end}}{{end}}' localhost/portability-app > "$WORK/healthcheck.list"
+HC_FORM=""
+HC_CMD=""
+if [ -s "$WORK/healthcheck.list" ]; then
+  HC_FORM=$(head -n 1 "$WORK/healthcheck.list")
+  case "$HC_FORM" in
+    CMD)
+      HC_CMD=$(tail -n +2 "$WORK/healthcheck.list" | tr '\n' ' ')
+      HC_CMD=${HC_CMD% }
+      ;;
+    CMD-SHELL)
+      HC_CMD=$(sed -n '2p' "$WORK/healthcheck.list")
+      ;;
+    NONE)
+      HC_FORM=""
+      ;;
+  esac
 fi
 
 # ---------------------------------------------------------------- replicas
@@ -385,6 +411,21 @@ wait_health() {
   return 1
 }
 
+# run_healthcheck COMMAND: run COMMAND in a fresh container of replica A's
+# image, as the same uid with gid 0 and the same environment replica A got
+# (including its port variable), the way start_replica runs commands in a
+# replica. It cannot run in replica A's own container: Buildah locks a
+# container while a process runs in it, and replica A is running. The fresh
+# container shares the job's network namespace, so the command reaches
+# replica A on 127.0.0.1. 0 when the command exits 0.
+run_healthcheck() {
+  hc_cmd=$1
+  set -- --user "$UID_NUM:0" --cap-drop=ALL --env "$PORT_ENV=$PORT"
+  while IFS= read -r e; do set -- "$@" --env "$e"; done < "$WORK/env.list"
+  set -- "$@" "$(cat "$WORK/hc.ctr")" -- sh -c "$hc_cmd"
+  buildah run "$@" > "$WORK/hc.out" 2>&1
+}
+
 say "starting replica A on $PORT_ENV=$PORT and replica B on $PORT_ENV=$PORT_B as uid $UID_NUM gid 0, probing $POD_IP"
 start_replica a "$PORT"
 start_replica b "$PORT_B"
@@ -513,6 +554,45 @@ if [ "$BOOTED" = yes ] && wanted logs; then
     flag logs "the app wrote under $APP_ROOT/$LOGS_PATH: $(printf '%s' "$written" | tr '\n' ' ')(log to stderr instead)"
   else
     ok logs "nothing was written under $APP_ROOT/$LOGS_PATH"
+  fi
+fi
+
+# ---------------------------------------------------------------- healthcheck
+
+# Docker and Coolify use the image's HEALTHCHECK to decide whether a container
+# is healthy, so an image whose own health command fails is not portable
+# (WELD practice W12 waits on this). OpenShift and Kubernetes use their own
+# probes, so a missing HEALTHCHECK is a problem only when require_healthcheck
+# says so. Replica A must still be up when this runs, which is why it comes
+# before the sigterm check stops it.
+if [ "$BOOTED" = yes ] && wanted healthcheck; then
+  if [ -z "$HC_FORM" ]; then
+    if [ "$REQUIRE_HEALTHCHECK" = true ]; then
+      flag healthcheck "the image declares no HEALTHCHECK and require_healthcheck is true"
+    else
+      say "healthcheck: note: the image declares no HEALTHCHECK (OpenShift and Kubernetes use their own probes)"
+      ok healthcheck "the image declares no HEALTHCHECK (OpenShift and Kubernetes use their own probes)"
+    fi
+  elif ! buildah from --pull=never --name portability-hc localhost/portability-app > "$WORK/hc.ctr"; then
+    flag healthcheck "could not make a replica of the image to run its HEALTHCHECK"
+  else
+    hc_code=0
+    try=1
+    while [ "$try" -le 3 ]; do
+      run_healthcheck "$HC_CMD"
+      hc_code=$?
+      [ "$hc_code" -eq 0 ] && break
+      [ "$try" -lt 3 ] && sleep 2
+      try=$((try + 1))
+    done
+    buildah rm "$(cat "$WORK/hc.ctr")" >/dev/null 2>&1
+    if [ "$hc_code" -eq 0 ]; then
+      ok healthcheck "the image's HEALTHCHECK ($HC_CMD) exited 0 in replica A"
+    else
+      flag healthcheck "the image's HEALTHCHECK ($HC_CMD) exited $hc_code in replica A"
+      say "healthcheck output (last 20 lines):"
+      tail -n 20 "$WORK/hc.out" | sed 's/^/  | /'
+    fi
   fi
 fi
 

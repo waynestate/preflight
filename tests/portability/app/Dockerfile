@@ -14,6 +14,7 @@
 #   file-logs        logs go to storage/logs, not stderr (logs)
 #   file-sessions    sessions live on the replica's own disk (session-hop)
 #   no-term-handler  the main process has no SIGTERM handler (sigterm)
+#   bad-healthcheck  the image's own HEALTHCHECK command exits 1 (healthcheck)
 #
 # Two more values are not flaws but things every container runtime allows,
 # which Buildah alone refuses unless the probe's launcher evens them out.
@@ -44,6 +45,11 @@ COPY . /app/
 RUN sh /app/bin/prepare "$FLAW"
 
 EXPOSE 8080
+
+# The image's own health command (WELD practice W12): Docker and Coolify use
+# it to decide whether the container is healthy, and the probe's healthcheck
+# check runs it inside a replica.
+HEALTHCHECK --interval=30s --timeout=5s CMD ["sh", "/app/bin/healthcheck"]
 
 # The runtime half (bin/serve) warms the writable path, then serves.
 CMD ["sh", "/app/bin/serve"]
