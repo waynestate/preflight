@@ -6,7 +6,15 @@ are Git tags.
 
 ## Unreleased
 
+## 0.7.0 (2026-11-10)
+
+One new portability input. `setup_command` runs a command once, in its own container of the built image, before
+either replica starts, so an app can migrate the `services` database before `session-hop` runs. No input or job was
+renamed or removed, and nothing changes for an include that leaves it empty.
+
+- Docs: the Upgrading page has a 0.7.0 section.
 - Added: the portability component takes a `setup_command` input (default empty): a command run once, in its own container of the built image, before either replica starts, so an app can migrate the database in `services` before `session-hop` runs (WELD W15). A non-zero exit fails the job; must-fail case `setup-fails`.
+- Changed: the deploy layer requires PROCTOR ^0.15 (locked 0.15.0, was ^0.12): 0.13 checks the release cooldown against the CREED policy, 0.14 adds `script-pair` and 0.15 adds `mysql56-ci`; all only warn, nothing breaks.
 
 ## 0.6.0 (2026-11-10)
 
@@ -21,7 +29,6 @@ sessions there. No input or job was renamed or removed.
 - Added: the portability component runs the image's own HEALTHCHECK inside a replica (`healthcheck` check, new `require_healthcheck` input, default false), and builds with `--format docker` so the HEALTHCHECK survives; must-fail fixture `bad-healthcheck`.
 - Added: `mysql56-migrate` component: runs the app's migrations against MySQL 5.6.51 (Citadel's shared server) on the runner tagged `amd64`, on the default branch and tags, manual on merge requests; must-fail fixtures for a JSON column and a too-long utf8mb4 index; installs Composer 2.11.1 when the image has none (D-078).
 - Changed: `scripts/a11y-container.sh` carries the `# proctor-ignore script-pair:` marker: it runs only inside the container its two OS twins start, so PROCTOR's `script-pair` reports it as an info note, not a missing twin.
-- Changed: the deploy layer requires PROCTOR ^0.15 (locked 0.15.0, was ^0.12): 0.13 checks the release cooldown against the CREED policy, 0.14 adds `script-pair` and 0.15 adds `mysql56-ci`; all only warn, nothing breaks.
 - Added: `must-fail-a11y` runs `tests/check-a11y.sh` in CI, in the a11y component's own Playwright image, so the a11y check's bad fixture is proven to fail on every pipeline like the other components'. `scripts/a11y.sh` gains an in-image mode (`A11Y_IN_IMAGE=1`) for that job.
 - Changed: the deploy layer requires PROCTOR ^0.12 (locked 0.12.0, was ^0.11): two new warning-only checks, nothing breaks.
 - Added: `must-fail-proctor-lock` and `must-warn-preflight-gates` jobs run the real PROCTOR on fixture-app copies: PROCTOR fails a copy whose lock is gone (removed after the install, since Composer writes one during it; BEST_PRACTICES 4.5 records that gap), and a pipeline without Preflight, with `allow_failure` on the proctor gate or pinned to `@main` warns without failing.

@@ -9,6 +9,45 @@ This page is the checklist for moving an app from one Preflight pin to the next,
 
 Every input and job name a component offers is recorded in `contract/inputs.json`, and Preflight's build fails when a template drifts from it, so the file is the exact list of what moved. Before you move a pin, diff it between your tag and the next one (for example `git diff 0.4.0 0.5.0 -- contract/inputs.json` in a clone of Preflight) and check each line against that version's Breaking and Steps below. [The inputs contract](guides/inputs-contract.md) explains what each kind of change means for your include.
 
+## 0.7.0
+
+Released 2026-11-10. One new input on the portability component, `setup_command`, for the step a platform runs before
+it scales an app out: migrating the database. No input or job was renamed or removed. A short hop: same aircraft, one
+more item on the checklist.
+
+### Breaking
+
+- None. `setup_command` defaults to empty, and an empty value runs nothing.
+
+### New: setup_command
+
+The probe runs `setup_command` once, in a container of the built image named `portability-setup`, after any
+`services` are up and before replica A or B starts. A non-zero exit fails the job with `setup: FAIL` and the last 40
+lines of its output. A pass shows as `setup` in the job's summary. The must-fail case `setup-fails` proves it.
+
+Use it with `services` and `session-hop`: a database both replicas share is empty until the app migrates it, so the
+replicas' first session write fails without it. For a Laravel app:
+
+```yaml
+      services: [{ name: "mysql:8.4.7@sha256:<digest>", alias: db, variables: { MYSQL_ROOT_PASSWORD: "portability", MYSQL_DATABASE: "app" } }]
+      setup_command: php artisan migrate --force
+      checks: ["health", "env-only", "forwarded-headers", "logs", "sigterm", "healthcheck", "session-hop"]
+```
+
+Pin the service image by digest, as every Preflight default is, and point the app's `DB_HOST` at the alias. See
+[the portability guide](guides/component-portability.md).
+
+### Steps
+
+1. Move every Preflight include to the 0.7.0 tag's full commit SHA, with `# 0.7.0` in a trailing comment.
+2. An app that runs `session-hop` against a `services` database adds `setup_command` with its migration command.
+3. Nothing else changes.
+
+### How to verify
+
+- The portability job's summary lists `setup` as passed when `setup_command` is set, and has no `setup` line when it is
+  empty.
+
 ## 0.6.0
 
 Released 2026-11-10. This release adds one component, `mysql56-migrate`, which proves an app's migrations on the MySQL
