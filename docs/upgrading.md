@@ -9,6 +9,43 @@ This page is the checklist for moving an app from one Preflight pin to the next,
 
 Every input and job name a component offers is recorded in `contract/inputs.json`, and Preflight's build fails when a template drifts from it, so the file is the exact list of what moved. Before you move a pin, diff it between your tag and the next one (for example `git diff 0.4.0 0.5.0 -- contract/inputs.json` in a clone of Preflight) and check each line against that version's Breaking and Steps below. [The inputs contract](guides/inputs-contract.md) explains what each kind of change means for your include.
 
+## 0.8.0
+
+Released 2026-11-10. One new input on the portability component, `session_header`, for an app whose probe sign-in
+route must not open for just anyone, plus a fix that makes `package-publish` refuse a moved version on GitLab's real
+registry. No input or job was renamed or removed. The boarding pass now gets checked against the passport.
+
+### Breaking
+
+- None. `session_header` defaults to empty, and an empty value sends no extra header.
+- `package-publish` now fails a release whose version is already published on GitLab from a different commit. That is
+  the job doing what it always promised; a pipeline that passed by overwriting a version will now stop.
+
+### New: session_header
+
+Give it one header name and one CI variable, written `Name: $VARIABLE`:
+
+```yaml
+      session_header: "X-Portability-Token: $PORTABILITY_PROBE_TOKEN"
+```
+
+The probe reads the variable at run time with `printenv` (never `eval`) and sends the header on the login, `same`,
+`hop` and `anon` requests of `session-hop`. It never prints the value; any message names only the header and the
+variable. A value that does not match `Name: $VARIABLE` stops the job with an input error, and a variable that is not
+set in the job flags `session-hop` and sends no header. Set the variable as a masked CI variable. See
+[the portability guide](guides/component-portability.md).
+
+### Steps
+
+1. Move every Preflight include to the 0.8.0 tag's full commit SHA, with `# 0.8.0` in a trailing comment.
+2. An app whose probe sign-in route needs a secret adds `session_header` and a masked CI variable of the same name.
+3. Nothing else changes.
+
+### How to verify
+
+- With `session_header` set, `session-hop` passes and the job log shows the header name, never its value.
+- Without it, the job behaves exactly as on 0.7.0.
+
 ## 0.7.0
 
 Released 2026-11-10. One new input on the portability component, `setup_command`, for the step a platform runs before

@@ -6,6 +6,13 @@ are Git tags.
 
 ## Unreleased
 
+## 0.8.0 (2026-11-10)
+
+One new portability input. `session_header` sends one `Name: $VARIABLE` header on every session-hop request, so a
+probe sign-in route can require a per-job secret, and `package-publish` now really refuses a moved version on
+GitLab. No input or job was renamed or removed, and nothing changes for an include that leaves `session_header` empty.
+
+- Docs: the Upgrading page has a 0.8.0 section.
 - Added: the portability component's `session_header` input sends one `Name: $VARIABLE` header on every session-hop request, read from the job's environment and never printed, so a probe sign-in route can require a per-job secret.
 
 - Docs: a new guide, Which hosts the jobs reach (`docs/guides/network-egress.md`), lists every host a Preflight job downloads from, by component, keeps the runner's image pulls apart from the job's own requests, and ends with the deduplicated list a firewall or proxy needs (BEST_PRACTICES 5.4; agreeing and enforcing it stays with ops). `tests/DocsEgressTest.php` (in `composer ci`) fails when a component has no row, a template fetches from an `https://` host the page does not name, or a default image comes from a registry it does not name. The README links it next to Dependency caching.
