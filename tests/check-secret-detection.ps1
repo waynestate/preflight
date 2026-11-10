@@ -3,11 +3,11 @@
 #
 # A secret committed to the repo stays in its history, so the repo's own
 # pipeline should scan for one before it ships. GitLab's secret detection
-# template reports its findings in a job named secret_detection; the job
-# blocked after a week of green runs (2026-11-02 to 2026-11-10), and this
-# check keeps anyone from quietly making it advisory again. This script
-# checks the include line and that the job blocks with plain string matching,
-# so it needs no modules, no yq and no Docker.
+# template reports its findings in a job named secret_detection, and the
+# template sets allow_failure: true on it, so the repo must override that
+# or the job is only advisory. This script checks the include line and the
+# override with plain string matching, so it needs no modules, no yq and no
+# Docker.
 
 $ErrorActionPreference = "Stop"
 
@@ -32,9 +32,10 @@ if (-not ($lines | Where-Object { $_ -match 'Jobs/Secret-Detection\.gitlab-ci\.y
   Fail ".gitlab-ci.yml does not include Jobs/Secret-Detection.gitlab-ci.yml"
 }
 
-# The job must block: fail when a top-level secret_detection: key is followed
-# within three lines by allow_failure: true. No key at all is fine: the
-# included template's job blocks by default.
+# The job must block: GitLab's template sets allow_failure: true, so the
+# repo must override it. Fail when there is no top-level secret_detection:
+# key, when allow_failure: true appears within three lines after it, or
+# when allow_failure: false does not appear within three lines after it.
 $keyIndex = -1
 for ($i = 0; $i -lt $lines.Count; $i++) {
   if ($lines[$i] -match '^secret_detection:') {
@@ -42,18 +43,26 @@ for ($i = 0; $i -lt $lines.Count; $i++) {
   }
 }
 
-$advisoryFound = $false
-if ($keyIndex -ge 0) {
+if ($keyIndex -lt 0) {
+  Fail "secret_detection has no override; GitLab's template makes it advisory, so .gitlab-ci.yml must set allow_failure: false"
+} else {
+  $advisoryFound = $false
+  $blockingFound = $false
   $last = [Math]::Min($keyIndex + 3, $lines.Count - 1)
   for ($j = $keyIndex + 1; $j -le $last; $j++) {
     if ($lines[$j] -match 'allow_failure:\s*true') {
       $advisoryFound = $true
       break
     }
+    if ($lines[$j] -match 'allow_failure:\s*false') {
+      $blockingFound = $true
+    }
   }
-}
-if ($advisoryFound) {
-  Fail "secret_detection is advisory (allow_failure: true within 3 lines after secret_detection:); the job must block"
+  if ($advisoryFound) {
+    Fail "secret_detection is advisory (allow_failure: true within 3 lines after secret_detection:); the job must block"
+  } elseif (-not $blockingFound) {
+    Fail "secret_detection does not set allow_failure: false within 3 lines; the job must block"
+  }
 }
 
 if ($status -eq 0) {

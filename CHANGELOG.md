@@ -6,6 +6,7 @@ are Git tags.
 
 ## Unreleased
 
+- Fixed: secret detection really blocks now. GitLab's template marks the job allow_failure: true, so dropping the old override left it advisory (pipeline 5392). `.gitlab-ci.yml` sets allow_failure: false on secret_detection, and both check scripts now require it.
 - Added: a must-fail fixture for squire-kit. `must-fail-squire-kit` proves the component fails on a kit with a drifted file and on a folder with no .squire.json. Every component that runs as a job now has a must-fail fixture; only `a11y`'s still runs by hand, with no CI job yet.
 - Docs: BEST_PRACTICES matches the code before 1.0. The component version line (2.11) is `Enforced` by the contract job, the proctor default command (6.1) is `Checked` on every pipeline, and the counts are real again: ten components in Preflight's own pipeline, eight `working_dir` inputs, ten tags through 0.5.0, four components that take `allow_failure`. The must-fail list names npm-audit and package-publish and says squire-kit still has none, and thirteen finished backlog items are marked Done with the file that proves each. A preflight checklist that finally matches the airplane.
 - Site: `assets/stack-env.js` knows Parity, so a pre-production page links Parity's pre-production site and a dev page links its local `site/` folder. Until now Parity, of all parts, was the one link that ignored its environment.

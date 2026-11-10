@@ -66,6 +66,12 @@ stages:
   - audit
   - release
 
+# GitLab's secret detection template marks its job allow_failure: true.
+# Preflight's own pipeline overrides that, so a committed secret fails the
+# run. tests/check-secret-detection checks this block is here.
+secret_detection:
+  allow_failure: false
+
 # The inputs contract: templates must keep the inputs and job names they
 # promised in contract/inputs.json (BEST_PRACTICES.md 1.4). Runs on the
 # mikefarah/yq image, pinned by digest.
