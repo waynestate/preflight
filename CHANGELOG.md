@@ -6,6 +6,7 @@ are Git tags.
 
 ## Unreleased
 
+- Docs: BEST_PRACTICES matches the code before 1.0. The component version line (2.11) is `Enforced` by the contract job, the proctor default command (6.1) is `Checked` on every pipeline, and the counts are real again: ten components in Preflight's own pipeline, eight `working_dir` inputs, ten tags through 0.5.0, four components that take `allow_failure`. The must-fail list names npm-audit and package-publish and says squire-kit still has none, and thirteen finished backlog items are marked Done with the file that proves each. A preflight checklist that finally matches the airplane.
 - Site: `assets/stack-env.js` knows Parity, so a pre-production page links Parity's pre-production site and a dev page links its local `site/` folder. Until now Parity, of all parts, was the one link that ignored its environment.
 - Site: Parity is out; the party list links its site.
 - Deploy kit refreshed to Squire 0.10.5.
