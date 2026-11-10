@@ -10,6 +10,8 @@
 # The official MySQL 5.6 images are amd64 only, so the job defaults to
 # tags: ["amd64"]. On a GitLab without an amd64-tagged runner, set
 # tags: [] on an amd64 or emulating runner.
+#
+# When the image has no Composer, the job installs Composer 2.11.1 (checked by SHA-256), with git and unzip on Debian images.
 spec:
   component: [name, version, sha, reference]
   description: "Run the app's migrations against MySQL 5.6.51, the version of the shared server on Citadel."
@@ -111,12 +113,22 @@ spec:
         fi
       done
       if [ -f composer.json ]; then
+        # The official PHP images ship without Composer, git or unzip, so the
+        # job installs Composer first; the version is pinned by checksum.
+        if ! command -v composer >/dev/null; then
+          if command -v apt-get >/dev/null; then
+            apt-get update -qq && apt-get install -y -qq --no-install-recommends git unzip >/dev/null
+          fi
+          php -r 'copy("https://getcomposer.org/download/2.11.1/composer.phar", "/usr/local/bin/composer");'
+          echo "6f1b891e1d4927d62740276c540fb490e47689e19e102c49e8da849794882f8c  /usr/local/bin/composer" | sha256sum -c -
+          chmod +x /usr/local/bin/composer
+        fi
         composer install --no-interaction --no-progress
       fi
       ready=0
       i=0
       while [ "$i" -lt 60 ]; do
-        if php -r '@new PDO("mysql:host=" . getenv("DB_HOST") . ";port=" . getenv("DB_PORT"), getenv("DB_USERNAME"), getenv("DB_PASSWORD"));'; then
+        if php -r 'try { new PDO("mysql:host=" . getenv("DB_HOST") . ";port=" . getenv("DB_PORT"), getenv("DB_USERNAME"), getenv("DB_PASSWORD")); } catch (Throwable $e) { exit(1); }'; then
           ready=1
           break
         fi
