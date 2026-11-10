@@ -47,6 +47,7 @@
 are Git tags.</p>
 <h2 id="unreleased"><span class="docs-heading-tail"><span>Unreleased</span><a class="docs-heading-link" aria-label="Link to this section" href="#unreleased">#</a></span></h2>
 <ul>
+<li>Changed: <code>scripts/a11y-container.sh</code> carries the <code># proctor-ignore script-pair:</code> marker: it runs only inside the container its two OS twins start, so PROCTOR's <code>script-pair</code> reports it as an info note, not a missing twin.</li>
 <li>Added: <code>must-fail-a11y</code> runs <code>tests/check-a11y.sh</code> in CI, in the a11y component's own Playwright image, so the a11y check's bad fixture is proven to fail on every pipeline like the other components'. <code>scripts/a11y.sh</code> gains an in-image mode (<code>A11Y_IN_IMAGE=1</code>) for that job.</li>
 <li>Changed: the deploy layer requires PROCTOR ^0.12 (locked 0.12.0, was ^0.11): two new warning-only checks, nothing breaks.</li>
 <li>Added: <code>must-fail-proctor-lock</code> and <code>must-warn-preflight-gates</code> jobs run the real PROCTOR on fixture-app copies: PROCTOR fails a copy whose lock is gone (removed after the install, since Composer writes one during it; BEST_PRACTICES 4.5 records that gap), and a pipeline without Preflight, with <code>allow_failure</code> on the proctor gate or pinned to <code>@main</code> warns without failing.</li>

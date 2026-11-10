@@ -12,6 +12,7 @@ All notable changes to Preflight are recorded here. Entries follow
 are Git tags.
 
 ## Unreleased
+- Changed: `scripts/a11y-container.sh` carries the `# proctor-ignore script-pair:` marker: it runs only inside the container its two OS twins start, so PROCTOR's `script-pair` reports it as an info note, not a missing twin.
 - Added: `must-fail-a11y` runs `tests/check-a11y.sh` in CI, in the a11y component's own Playwright image, so the a11y check's bad fixture is proven to fail on every pipeline like the other components'. `scripts/a11y.sh` gains an in-image mode (`A11Y_IN_IMAGE=1`) for that job.
 - Changed: the deploy layer requires PROCTOR ^0.12 (locked 0.12.0, was ^0.11): two new warning-only checks, nothing breaks.
 - Added: `must-fail-proctor-lock` and `must-warn-preflight-gates` jobs run the real PROCTOR on fixture-app copies: PROCTOR fails a copy whose lock is gone (removed after the install, since Composer writes one during it; BEST_PRACTICES 4.5 records that gap), and a pipeline without Preflight, with `allow_failure` on the proctor gate or pinned to `@main` warns without failing.
