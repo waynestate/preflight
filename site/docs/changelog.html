@@ -46,6 +46,9 @@
 <a rel="noopener" href="https://keepachangelog.com/en/1.1.0/">Keep a Changelog</a>; released versions
 are Git tags.</p>
 <h2 id="unreleased"><span class="docs-heading-tail"><span>Unreleased</span><a class="docs-heading-link" aria-label="Link to this section" href="#unreleased">#</a></span></h2>
+<ul>
+<li>Added: the portability component takes a <code>setup_command</code> input (default empty): a command run once, in its own container of the built image, before either replica starts, so an app can migrate the database in <code>services</code> before <code>session-hop</code> runs (WELD W15). A non-zero exit fails the job; must-fail case <code>setup-fails</code>.</li>
+</ul>
 <h2 id="0-6-0-2026-11-10">0.6.0 <span class="docs-heading-tail"><span>(2026-11-10)</span><a class="docs-heading-link" aria-label="Link to this section" href="#0-6-0-2026-11-10">#</a></span></h2>
 <p>A new component and a portability probe that checks more of what a platform checks. <code>mysql56-migrate</code> runs an app's
 migrations against MySQL 5.6.51, the version of Citadel's shared server, on the runner tagged <code>amd64</code>. The portability

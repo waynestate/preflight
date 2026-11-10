@@ -128,12 +128,14 @@
     inputs:
       services: [{ name: &quot;mysql:8.4.7@sha256:&lt;digest&gt;&quot;, alias: db, variables: { MYSQL_ROOT_PASSWORD: &quot;portability&quot;, MYSQL_DATABASE: &quot;app&quot; } }]
       env: [&quot;APP_KEY=${PORTABILITY_APP_KEY}&quot;, &quot;DB_CONNECTION=mysql&quot;, &quot;DB_HOST=db&quot;, &quot;DB_DATABASE=app&quot;, &quot;DB_USERNAME=root&quot;, &quot;DB_PASSWORD=portability&quot;, &quot;SESSION_DRIVER=database&quot;, &quot;LOG_CHANNEL=stderr&quot;]
+      setup_command: &quot;php artisan migrate --force&quot;
       session_login_path: /_portability/login
       session_check_path: /_portability/me
 </code></pre>
 <p>Replace <code>&lt;digest&gt;</code> with the digest of the image you actually pull; never copy a placeholder pin into a pipeline. Two things to know about the service:</p>
 <ul>
-<li>The database has to accept connections before the replicas boot. The probe's <code>boot_timeout</code> covers that wait, or a <code>start_command</code> can run migrations first. A Laravel app needs its <code>sessions</code> table, so its <code>start_command</code> runs <code>php artisan migrate --force</code> before it serves.</li>
+<li>A Laravel app needs its <code>sessions</code> table before it serves. <code>setup_command</code> runs <code>php artisan migrate --force</code> once, in its own container, before either replica starts, the way a release migrates once before the web pods start. Use it instead of <code>start_command</code>, which runs in both replicas at once and replaces the image's own entrypoint.</li>
+<li>The service may take a few seconds to accept connections. If the first migrate fails with a connection error, wrap it in a short retry, for example <code>for i in 1 2 3 4 5 6 7 8 9 10; do php artisan migrate --force &amp;&amp; exit 0; sleep 3; done; exit 1</code>.</li>
 <li>The runner is arm64, so the service image must be multi-arch. <code>mysql:8.4</code> is; <code>mysql:5.6</code> is not.</li>
 </ul>
 <h2 id="how-the-job-works">How the job <span class="docs-heading-tail"><span>works</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-the-job-works">#</a></span></h2>
@@ -141,6 +143,7 @@
 <ol>
 <li>Builds the image with <code>buildah bud</code>, from <code>dockerfile</code> in <code>context</code>, with <code>build_args</code>. It builds with <code>--format docker</code>, because Buildah's default OCI format drops the image's HEALTHCHECK and the docker format keeps it. Nothing is pushed: the image stays in the job's own storage.</li>
 <li>Reads the image's <code>ENTRYPOINT</code> and <code>CMD</code>, makes two copies of its filesystem (replicas A and B) and runs the static parts of <code>strict-boot</code> and <code>env-only</code> on them.</li>
+<li>Runs <code>setup_command</code> once, in a fresh container of the built image, as the same uid with the same env as replica A will get, when it is set. A non-zero exit stops the job before any replica starts.</li>
 <li>Starts both replicas with <code>buildah run --user &lt;uid&gt;:0 --cap-drop=ALL</code> and the <code>env</code> input, each through a small launcher that gives it its own stdio and session; B gets <code>port + 1</code> through <code>port_env</code>.</li>
 <li>Waits up to <code>boot_timeout</code> seconds for each replica's health path, then runs <code>health</code>, <code>env-only</code>, <code>forwarded-headers</code>, <code>session-hop</code>, <code>logs</code> and <code>sigterm</code> with curl.</li>
 <li>Stops both replicas and compares what changed on disk against <code>writable_paths</code> and <code>runtime_paths</code>.</li>
@@ -252,6 +255,12 @@
 <td>string</td>
 <td><code>&quot;&quot;</code></td>
 <td>Command that starts the app, run with <code>sh -c</code>. Empty runs the image's own <code>ENTRYPOINT</code> and <code>CMD</code>.</td>
+</tr>
+<tr>
+<td><code>setup_command</code></td>
+<td>string</td>
+<td><code>&quot;&quot;</code></td>
+<td>Command run once with <code>sh -c</code> before either replica starts, in a fresh container of the built image, as the same uid (gid 0) with the same env as replica A. Use it for one-time work a release does, such as <code>php artisan migrate --force</code> against a database in <code>services</code>. Empty runs nothing. A non-zero exit fails the job and no replica starts.</td>
 </tr>
 <tr>
 <td><code>env</code></td>

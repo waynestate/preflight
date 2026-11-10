@@ -12,6 +12,8 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ## Unreleased [#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Added: the portability component takes a `setup_command` input (default empty): a command run once, in its own container of the built image, before either replica starts, so an app can migrate the database in `services` before `session-hop` runs (WELD W15). A non-zero exit fails the job; must-fail case `setup-fails`.
+
 ## 0.6.0 (2026-11-10) [#](https://preflight.apps.wayne.edu/docs/changelog.html#0-6-0-2026-11-10)
 
 A new component and a portability probe that checks more of what a platform checks. `mysql56-migrate` runs an app's migrations against MySQL 5.6.51, the version of Citadel's shared server, on the runner tagged `amd64`. The portability job runs the image's own `HEALTHCHECK` inside a replica (a new `healthcheck` check, in the default `checks`), and its new `services` input starts a database or cache both replicas share, so `session-hop` can pass for an app that keeps sessions there. No input or job was renamed or removed.
