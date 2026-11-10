@@ -2,7 +2,7 @@
 
 Status: draft, checked against sources on 2026-10-27, with a second research pass the same day (see "Second pass
 (2026-10-27)" near the end). Applies to the Preflight components at the state of the repo today: the latest tag is
-0.5.0, and the six components added after 0.1.0 shipped in 0.1.1.
+0.5.0, and CHANGELOG.md names the release that added each component.
 
 ## What this covers
 
@@ -1032,7 +1032,8 @@ Why: a component that never fails looks the same as one that works.
 Sources: [GitLab: components, testing](https://docs.gitlab.com/ci/components/).
 
 **How the stack holds it: Partly.** Eleven components carry a must-fail fixture that a `must-fail-` job in `.gitlab-ci.yml`
-runs, and `proctor`'s runs in the `contract` job: `proctor` runs the template's own `--record` guard and command line
+runs, and `proctor`'s main fixture runs in the `contract` job (its lock fixture, `tests/check-proctor-lock-fails`, runs in
+`must-fail-proctor-lock`): `proctor` runs the template's own `--record` guard and command line
 on `tests/proctor-fails`, a fake proctor that prints one blocker finding and exits 1, against the clean stubs in
 `tests/fixture-app` (no `--record`, like PROCTOR 0.10.0) and `tests/proctor-record` (with it), and proves `proctor.json`
 is kept only when PROCTOR can write it (`tests/check-proctor-fails`, run in CI by the `contract` job); `composer-audit`
