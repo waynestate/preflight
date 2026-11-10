@@ -1,7 +1,7 @@
 # check-php-test-cache.ps1: does the php-test Composer cache stay correct?
 #
 # The php-test component caches Composer downloads so repeat runs do not
-# re-download every package. The key is fixed per PHP version (D-072):
+# re-download every package. The key is fixed per PHP version:
 # Composer's cache is additive, so a lock change downloads only the packages
 # that changed, and each PHP version keeps its own cache. This check fails if
 # either guarantee is broken:
@@ -67,17 +67,17 @@ if ($cacheCount -ne 1) {
   $status = 1
 }
 
-# The key must be fixed, not a lock-file hash (D-072): no files: line.
+# The key must be fixed, not a lock-file hash: no files: line.
 $hasFiles = @($block | Where-Object { $_ -match '^[ \t]*files:' }).Count -gt 0
 if ($hasFiles) {
-  [Console]::Error.WriteLine("check-php-test-cache: php-test cache key is a lock-file hash; use a fixed key (D-072)")
+  [Console]::Error.WriteLine("check-php-test-cache: php-test cache key is a lock-file hash; use a fixed key")
   $status = 1
 }
 
 # No prefix: line either: the whole key is the fixed name.
 $hasPrefix = @($block | Where-Object { $_ -match '^[ \t]*prefix:' }).Count -gt 0
 if ($hasPrefix) {
-  [Console]::Error.WriteLine("check-php-test-cache: php-test cache key has a prefix; use a fixed key (D-072)")
+  [Console]::Error.WriteLine("check-php-test-cache: php-test cache key has a prefix; use a fixed key")
   $status = 1
 }
 

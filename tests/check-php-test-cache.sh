@@ -2,7 +2,7 @@
 # check-php-test-cache.sh: does the php-test Composer cache stay correct?
 #
 # The php-test component caches Composer downloads so repeat runs do not
-# re-download every package. The key is fixed per PHP version (D-072):
+# re-download every package. The key is fixed per PHP version:
 # Composer's cache is additive, so a lock change downloads only the packages
 # that changed, and each PHP version keeps its own cache. This check fails if
 # either guarantee is broken:
@@ -54,14 +54,14 @@ if [ "$cache_count" -ne 1 ]; then
   fail "expected exactly one job with a cache: block, found $cache_count"
 fi
 
-# The key must be fixed, not a lock-file hash (D-072): no files: line.
+# The key must be fixed, not a lock-file hash: no files: line.
 if printf '%s\n' "$block" | grep -qE '^[[:blank:]]*files:'; then
-  fail "php-test cache key is a lock-file hash; use a fixed key (D-072)"
+  fail "php-test cache key is a lock-file hash; use a fixed key"
 fi
 
 # No prefix: line either: the whole key is the fixed name.
 if printf '%s\n' "$block" | grep -qE '^[[:blank:]]*prefix:'; then
-  fail "php-test cache key has a prefix; use a fixed key (D-072)"
+  fail "php-test cache key has a prefix; use a fixed key"
 fi
 
 # The key must include the PHP version, so 8.4 and 8.5 jobs do not share a

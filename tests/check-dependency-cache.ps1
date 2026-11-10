@@ -15,7 +15,7 @@
 #     the tool at it (COMPOSER_CACHE_DIR; NPM_CONFIG_CACHE, npm_config_cache
 #     or --cache).
 #   * Every cache: block in a component template has when: always, so a
-#     failed job still saves the packages that finished downloading (D-072).
+#     failed job still saves the packages that finished downloading.
 #   * In .gitlab-ci.yml, every Docker Hub job image starts with
 #     ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/, and no component include
 #     passes an image that already carries the proxy (the component adds it,
@@ -142,7 +142,7 @@ Get-ChildItem -Path (Join-Path $Root "templates") -Directory | ForEach-Object {
       if ($inCacheBlock -and $line -match '^    when: always') { $hasWhenAlways = $true }
     }
     if (-not $hasWhenAlways) {
-      Fail "${name}: cache: block without when: always (D-072)"
+      Fail "${name}: cache: block without when: always"
     }
   }
 }

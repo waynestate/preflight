@@ -134,7 +134,7 @@ must-fail-eslint:
     key: preflight-must-fail-eslint
     paths:
       - .npm-cache/
-    when: always  # a failed job still keeps every package that finished downloading (D-072)
+    when: always  # a failed job still keeps every package that finished downloading
   script:
     - sh tests/check-eslint-fails.sh
 
@@ -211,7 +211,7 @@ must-fail-sbom:
     key: preflight-must-fail-sbom
     paths:
       - .composer-cache/
-    when: always  # a failed job still keeps every package that finished downloading (D-072)
+    when: always  # a failed job still keeps every package that finished downloading
   script:
     - sh tests/check-sbom-fails.sh
 

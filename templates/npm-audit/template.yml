@@ -48,7 +48,7 @@ spec:
   interruptible: true
   timeout: 10 minutes
   # npm audit installs nothing, but it fetches package metadata, and the
-  # app's own npm jobs keep a cache. The key is fixed (D-072) and is npm,
+  # app's own npm jobs keep a cache. The key is fixed and is npm,
   # with the path Sourdough's generated pipelines use, so this job reads the
   # app's cache. It only pulls: an audit running next to the install job
   # never overwrites the packages that job just downloaded.
@@ -57,7 +57,7 @@ spec:
     paths:
       - .cache/npm/
     policy: pull
-    when: always  # D-072; with policy: pull nothing is uploaded
+    when: always  # keep the cache when a job fails; with policy: pull nothing is uploaded
   variables:
     npm_config_cache: "$CI_PROJECT_DIR/.cache/npm"
     NPM_CONFIG_UPDATE_NOTIFIER: "false"

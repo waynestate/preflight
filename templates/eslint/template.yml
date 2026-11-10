@@ -48,13 +48,13 @@ spec:
   image: $[[ inputs.image_prefix ]]/$[[ inputs.image ]]
   interruptible: true
   timeout: 15m
-  # The key is fixed, not a package-lock.json hash (D-072): npm's cache is
+  # The key is fixed, not a package-lock.json hash: npm's cache is
   # additive, so a lock change downloads only the packages that changed.
   cache:
     key: preflight-eslint
     paths:
       - .npm-cache/
-    when: always  # a failed job still keeps every package that finished downloading (D-072)
+    when: always  # a failed job still keeps every package that finished downloading
   script:
     - echo "Preflight component $[[ component.name ]] $[[ component.version ]] (ref $[[ component.reference ]], sha $[[ component.sha ]])"
     - cd "$[[ inputs.working_dir ]]"

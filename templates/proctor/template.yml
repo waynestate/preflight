@@ -56,14 +56,14 @@ spec:
   timeout: 30 minutes
   # The cache is always on. COMPOSER_CACHE_DIR points Composer at a path
   # inside the project so GitLab can cache it. The key is fixed, not a
-  # composer.lock hash (D-072): Composer's cache is additive, so a lock
+  # composer.lock hash: Composer's cache is additive, so a lock
   # change downloads only the packages that changed instead of everything.
   cache:
     key: preflight-proctor
     paths:
       - .composer-cache/
     policy: pull-push
-    when: always  # a failed job still keeps every package that finished downloading (D-072)
+    when: always  # a failed job still keeps every package that finished downloading
   variables:
     COMPOSER_CACHE_DIR: "$CI_PROJECT_DIR/.composer-cache"
     # Full history by default: override-approver reads git blame (0 means no depth limit).
