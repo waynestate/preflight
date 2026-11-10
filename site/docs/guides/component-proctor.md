@@ -6,11 +6,11 @@ llms: https://preflight.apps.wayne.edu/llms.txt
 generator: Squire agent-ready
 ---
 
-# The proctor component[#](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html#the-proctor-component)
+# The proctor component [#](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html#the-proctor-component)
 
 A proctor keeps an eye on the exam hall; this one keeps an eye on your app. This page shows how to add the `proctor` component to your app's `.gitlab-ci.yml` and what the job does once it runs. Next, add the [php-test component](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html) so the test suite runs on every supported PHP version.
 
-## Include the component[#](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html#include-the-component)
+## Include the component [#](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html#include-the-component)
 
 Goal: your app's pipeline runs PROCTOR and publishes the result as a GitLab Code Quality report. Add the include to your app's `.gitlab-ci.yml`:
 
@@ -27,7 +27,7 @@ Note
 
 The install skips plugins and scripts on purpose: the job only inspects the app, so nothing in the app runs with the job's access.
 
-## Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html#inputs)
+## Inputs [#](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html#inputs)
 
 | Input | Type | Default | What it does |
 | --- | --- | --- | --- |
@@ -45,7 +45,7 @@ Note
 
 The template adds regexes to four inputs: `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`, `composer_version` must match `^2\.(9\.([6-9]|[1-9][0-9]+)|[1-9][0-9]+\.[0-9]+)$`, `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$`, and `git_depth` must match `^[0-9]+$`.
 
-## What the job does[#](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html#what-the-job-does)
+## What the job does [#](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html#what-the-job-does)
 
 The job is `interruptible: true` with a `timeout: 30 minutes`. Its script:
 
@@ -60,7 +60,7 @@ The job keeps Composer downloads in a cache under `.composer-cache/` with the fi
 
 The job publishes the report with `artifacts: when: always` as a GitLab Code Quality report (`reports: codequality: gl-code-quality-report.json`), and keeps `proctor.json` in the same artifact (`paths: [proctor.json]`, `expire_in: 30 days`).
 
-## Keep the JSON report for Rollcall[#](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html#keep-the-json-report-for-rollcall)
+## Keep the JSON report for Rollcall [#](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html#keep-the-json-report-for-rollcall)
 
 Goal: Rollcall, the fleet census, shows your app's latest PROCTOR result without anyone copying reports around. With `ROLLCALL_PROCTOR_SOURCE=gitlab`, Rollcall reads `proctor.json` from the artifact of the newest finished `proctor` job on your default branch, passed or failed. That file is PROCTOR's JSON report, the same document `--format=json` prints, written by `proctor check --record` next to the Code Quality output.
 
@@ -84,7 +84,7 @@ Tip
 
 Set `allow_failure: true` if the job may fail without failing the pipeline; the default is `false`.
 
-## Related[#](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html#related)
+## Related [#](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html#related)
 
 - [The php-test component](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html)
 - [The composer-audit component](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html)

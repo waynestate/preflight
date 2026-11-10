@@ -6,11 +6,11 @@ llms: https://preflight.apps.wayne.edu/llms.txt
 generator: Squire agent-ready
 ---
 
-# The npm-audit component[#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#the-npm-audit-component)
+# The npm-audit component [#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#the-npm-audit-component)
 
 The front-end half of [composer-audit](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html): this component runs `npm audit` on the app's `package-lock.json` and fails the pipeline on an advisory at or above `audit_level` (`high` by default) in a runtime dependency. Then it prints a full report, dev dependencies included, that never fails. This page shows how to add it, what each input does, and how CREED's severity words map to npm's.
 
-## Include the component[#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#include-the-component)
+## Include the component [#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#include-the-component)
 
 Goal: your app's pipeline fails whenever a locked runtime npm package has a known high or critical advisory. Add the include to your app's `.gitlab-ci.yml`:
 
@@ -23,7 +23,7 @@ include:
 
 npm-audit ships in Preflight 0.5.0; 0.4.0 does not include it. Pin that tag's full commit SHA, with the tag in a trailing comment, or the full commit SHA of a commit at or after it. The [Upgrading](https://preflight.apps.wayne.edu/docs/upgrading.html) page has the 0.5.0 checklist.
 
-## Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#inputs)
+## Inputs [#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#inputs)
 
 | Input | Type | Default | What it does |
 | --- | --- | --- | --- |
@@ -39,7 +39,7 @@ Note
 
 The template adds regexes to three inputs: `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`, `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$` and `audit_level` must match `^(low|moderate|medium|high|critical)$`.
 
-## What the job does[#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#what-the-job-does)
+## What the job does [#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#what-the-job-does)
 
 The job is `interruptible: true` with a `timeout: 10 minutes`. Its script changes into `working_dir`, then:
 
@@ -57,11 +57,11 @@ The component carries no `allow_failure` input on purpose: an advisory at or abo
 
 An app's own `.npmrc` can carry `audit=false` or `offline=true`. Either one makes `npm audit` skip the request, print `found 0 vulnerabilities` and exit 0: a pass that audited nothing. The two flags override the file, so the job always asks the registry.
 
-### When the registry cannot be reached[#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#when-the-registry-cannot-be-reached)
+### When the registry cannot be reached [#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#when-the-registry-cannot-be-reached)
 
 `npm audit` posts the lock's package tree to the registry's audit endpoint, so the job needs outbound HTTPS to the registry (`registry.npmjs.org` unless the app's `.npmrc` names another). When the endpoint cannot be reached, or the registry does not offer one, npm exits non-zero with `audit endpoint returned an error`, and the job adds `npm-audit: the registry's audit endpoint could not be reached or refused the request, so nothing was audited.` It fails rather than passes unchecked. A private registry that proxies npm must also serve npm's audit endpoints (`/-/npm/v1/security/advisories/bulk`, with `/-/npm/v1/security/audits/quick` as npm's fallback), or the job fails on every run.
 
-## Severity words[#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#severity-words)
+## Severity words [#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#severity-words)
 
 CREED's policy (`rules.audit_severity_threshold` in `policy.json`, read by PROCTOR) and Composer use `low`, `medium`, `high` and `critical`. npm uses `low`, `moderate`, `high` and `critical` (plus `info` and `none`, which this component does not accept: `none` would never fail and `info` fails on notes). The map:
 
@@ -74,19 +74,19 @@ CREED's policy (`rules.audit_severity_threshold` in `policy.json`, read by PROCT
 
 So `audit_level` takes the policy's value as it is: `audit_level: medium` runs `npm audit --audit-level=moderate`, and the log says `failing on moderate or higher`. The default, `high`, matches the stack policy's `audit_severity_threshold`.
 
-## Caching[#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#caching)
+## Caching [#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#caching)
 
 The job installs nothing, but npm fetches package metadata while it reports. It reads the app's own npm cache: the fixed key `npm` and the path `.cache/npm/` (`npm_config_cache` points there), the ones Sourdough's generated pipelines use, with `policy: pull`. The audit never uploads, so an audit running next to the app's install job cannot overwrite the packages that job just downloaded. In an app with no npm cache of its own the job simply starts cold.
 
-## Proof[#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#proof)
+## Proof [#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#proof)
 
 Preflight's own pipeline keeps these promises with the `must-fail-npm-audit` job. It runs this template's own script on fixed locks: lodash 4.17.20 (GHSA-35jh-r3h4-6jhm, high) fails at `high` and `medium` and passes at `critical`, an `.npmrc` that turns the audit off still fails, the same lodash as a dev dependency fails only with `omit_dev: false`, a clean lock and an app with no lock pass, and an unreachable registry fails a clean lock. The pipeline also includes the component on the clean fixture, where it must pass. A smoke detector is only worth the batteries if someone pressed the test button.
 
-## Run it on a schedule[#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#run-it-on-a-schedule)
+## Run it on a schedule [#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#run-it-on-a-schedule)
 
 New advisories are published after code is merged. The weekly pipeline schedule from [composer-audit](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#run-it-on-a-schedule) covers this job too: it carries no `rules:` block, so it runs in scheduled pipelines like any other.
 
-## Related[#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#related)
+## Related [#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#related)
 
 - [The composer-audit component](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html)
 - [The eslint component](https://preflight.apps.wayne.edu/docs/guides/component-eslint.html)

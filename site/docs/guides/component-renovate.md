@@ -6,11 +6,11 @@ llms: https://preflight.apps.wayne.edu/llms.txt
 generator: Squire agent-ready
 ---
 
-# The renovate component[#](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html#the-renovate-component)
+# The renovate component [#](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html#the-renovate-component)
 
 This page covers the `renovate` component: what the job does, how to include it, and every input it takes. Goal: one scheduled job keeps image digests, GitHub action SHAs and package versions current across the group's repositories, and merges the updates whose pipeline is green. The component flies on autopilot; majors keep a human in the seat.
 
-## What the job does[#](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html#what-the-job-does)
+## What the job does [#](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html#what-the-job-does)
 
 The component runs [Renovate](https://docs.renovatebot.com/) as a scheduled or manual job that bumps image digests, GitHub action SHAs and package versions across the group's repositories, and merges the green ones itself. Bumps of `component:` include pins are covered by the preset and wait for review. Majors open a merge request and wait for a person. See [Renovate](https://preflight.apps.wayne.edu/docs/guides/renovate.html) for what auto-merges and what waits.
 
@@ -28,7 +28,7 @@ Warning
 
 `RENOVATE_TOKEN` and `GITHUB_COM_TOKEN` are not set in the job's `variables:` on purpose. A self-reference such as `RENOVATE_TOKEN: $RENOVATE_TOKEN` arrives as literal text on GitLab 19.5 and shadows the masked project CI/CD variable, so the component leaves both tokens to the project and the masked values reach the job unchanged.
 
-## Include the component[#](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html#include-the-component)
+## Include the component [#](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html#include-the-component)
 
 Add the include to the runner project's `.gitlab-ci.yml`, pinned to a full commit SHA with the tag in a trailing comment, and set `git_author`:
 
@@ -39,7 +39,7 @@ include:
       git_author: "Preflight Bot <preflight-bot@example.com>"
 ```
 
-## Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html#inputs)
+## Inputs [#](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html#inputs)
 
 | Input | Type | Default | What it does |
 | --- | --- | --- | --- |
@@ -51,11 +51,11 @@ include:
 | `git_author` | string | none | Author of the commits and merge requests Renovate creates, in the form `Name <email>`. Required. |
 | `squire_kit_tasks` | boolean | `false` | Allow the Squire kit commands of Preflight's preset (install the new `waynestate/squire` from Packagist, then `squire update` on the kit folder), so a Squire kit merge request arrives with its files refreshed. Off, the merge request bumps the version only and shows an artifact error. |
 
-## Verify[#](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html#verify)
+## Verify [#](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html#verify)
 
 Start the job manually from the web, or wait for the schedule. Expected: the job bumps the versions it finds and merges the ones whose pipeline is green. To try it without changes, set `dry_run` to `lookup` or `full`; `null` (disabled) is the default.
 
-## Related[#](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html#related)
+## Related [#](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html#related)
 
 - [Renovate](https://preflight.apps.wayne.edu/docs/guides/renovate.html): the shared preset, and what auto-merges, what waits and what waits for review.
 - [The squire-kit component](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html): the pipeline check that a kit matches the Squire release it records.

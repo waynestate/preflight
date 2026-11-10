@@ -6,15 +6,15 @@ llms: https://preflight.apps.wayne.edu/llms.txt
 generator: Squire agent-ready
 ---
 
-# Template lint[#](https://preflight.apps.wayne.edu/docs/guides/template-lint.html#template-lint)
+# Template lint [#](https://preflight.apps.wayne.edu/docs/guides/template-lint.html#template-lint)
 
 This page lists the unsafe CI patterns the template lint catches and how to allowlist a known warning. Run `composer ci` to see the lint, which runs before the fixture tests.
 
-## What it runs[#](https://preflight.apps.wayne.edu/docs/guides/template-lint.html#what-it-runs)
+## What it runs [#](https://preflight.apps.wayne.edu/docs/guides/template-lint.html#what-it-runs)
 
 `composer ci` runs `bin/lint-templates` before the fixture tests. The lint scans `templates/**/*.yml` and `.github/workflows/*.yml` for unsafe CI patterns.
 
-## Rules[#](https://preflight.apps.wayne.edu/docs/guides/template-lint.html#rules)
+## Rules [#](https://preflight.apps.wayne.edu/docs/guides/template-lint.html#rules)
 
 | Rule | Catches |
 | --- | --- |
@@ -29,11 +29,11 @@ This page lists the unsafe CI patterns the template lint catches and how to allo
 
 The container-build rules (`privileged`, `dind-service`, `docker-sock` and `kaniko-image`) are explained in BEST_PRACTICES.md 4.17.
 
-## Allowlist a known warning[#](https://preflight.apps.wayne.edu/docs/guides/template-lint.html#allowlist-a-known-warning)
+## Allowlist a known warning [#](https://preflight.apps.wayne.edu/docs/guides/template-lint.html#allowlist-a-known-warning)
 
 Known warnings can be allowlisted in `lint-allow.yml`. Each entry needs `file`, `rule` and `reason`; the reason is required so an allowlist entry is a reviewed decision, not a silence. The preflight checklist checks the checklist.
 
-## Related[#](https://preflight.apps.wayne.edu/docs/guides/template-lint.html#related)
+## Related [#](https://preflight.apps.wayne.edu/docs/guides/template-lint.html#related)
 
 - [Updating image pins](https://preflight.apps.wayne.edu/docs/guides/image-pins.html): why component images are digest-pinned and how to change a pin.
 - [Shared conventions](https://preflight.apps.wayne.edu/docs/reference/conventions.html): Composer vendor, license, PHP floor and JavaScript installs.

@@ -6,11 +6,11 @@ llms: https://preflight.apps.wayne.edu/llms.txt
 generator: Squire agent-ready
 ---
 
-# The php-test component[#](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html#the-php-test-component)
+# The php-test component [#](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html#the-php-test-component)
 
 Every engine gets its own check: this component runs your test command once per supported PHP version. This page shows how to add the `php-test` component to your app's `.gitlab-ci.yml`, how the matrix and the cache work, and how to trial the next PHP release. Next, add the [composer-audit component](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html).
 
-## Include the component[#](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html#include-the-component)
+## Include the component [#](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html#include-the-component)
 
 Goal: your app's test suite runs on each supported PHP version. The component runs the test command on each supported PHP version through `parallel:matrix`. Add the include to your app's `.gitlab-ci.yml`:
 
@@ -21,7 +21,7 @@ include:
       test_command: vendor/bin/phpunit
 ```
 
-## Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html#inputs)
+## Inputs [#](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html#inputs)
 
 | Input | Type | Default | What it does |
 | --- | --- | --- | --- |
@@ -39,7 +39,7 @@ Note
 
 The template adds regexes to three inputs: `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`, `composer_version` must match `^2\.(9\.([6-9]|[1-9][0-9]+)|[1-9][0-9]+\.[0-9]+)$`, and `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$`.
 
-## What the jobs do[#](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html#what-the-jobs-do)
+## What the jobs do [#](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html#what-the-jobs-do)
 
 The array input feeds `parallel:matrix` directly, so one job is created per PHP version. `PHP_VERSION` becomes a CI/CD variable in each job, which the `image` input's default expands at job time. The default image is deliberately tag-pinned, so each job runs the newest patch release of its PHP version. Each job is `interruptible: true` with a `timeout: 30 minutes`, and its script:
 
@@ -49,7 +49,7 @@ The array input feeds `parallel:matrix` directly, so one job is created per PHP 
 4. Changes into `working_dir` and runs `composer install --no-interaction --no-progress`.
 5. Runs `test_command`.
 
-## Caching[#](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html#caching)
+## Caching [#](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html#caching)
 
 The jobs always cache Composer downloads in `.composer-cache/` so repeat runs do not re-download every package. The cache key is fixed per PHP version, not a `composer.lock` hash, so a lock change downloads only the packages that changed and each PHP version gets its own cache:
 
@@ -65,7 +65,7 @@ variables:
 
 `COMPOSER_CACHE_DIR` points Composer at a path inside the project so GitLab can cache it.
 
-## Try the next PHP release without breaking the pipeline[#](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html#try-the-next-php-release-without-breaking-the-pipeline)
+## Try the next PHP release without breaking the pipeline [#](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html#try-the-next-php-release-without-breaking-the-pipeline)
 
 Include `php-test` a second time for the release that is not supported yet, name that job, and let it fail. The name is what lets your own `.gitlab-ci.yml` loosen only that job:
 
@@ -84,7 +84,7 @@ php-test-next:
 
 A red `php-test-next` job is an early warning, not a stop. Drop the `allow_failure` and move the version into the main `php_versions` list once the release is supported (the supported versions follow `policy.json`).
 
-## Testing the next PHP release[#](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html#testing-the-next-php-release)
+## Testing the next PHP release [#](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html#testing-the-next-php-release)
 
 Set `php_advisory_version` to a release candidate tag and the component adds a `<job_name>-advisory` job that runs your tests on that version:
 
@@ -98,7 +98,7 @@ include:
 
 The job warns, it never blocks; move the version into `php_versions` only once it is a final, supported release.
 
-## Related[#](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html#related)
+## Related [#](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html#related)
 
 - [The proctor component](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html)
 - [The composer-audit component](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html)

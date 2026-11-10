@@ -6,7 +6,7 @@ llms: https://preflight.apps.wayne.edu/llms.txt
 generator: Squire agent-ready
 ---
 
-# Quick start[#](https://preflight.apps.wayne.edu/docs/guides/quick-start.html#quick-start)
+# Quick start [#](https://preflight.apps.wayne.edu/docs/guides/quick-start.html#quick-start)
 
 This quick start adds the `php-test` component to an app, the same way the front page shows it. Every other component installs the same way: one include, pinned to a commit SHA.
 
@@ -26,11 +26,11 @@ This quick start adds the `php-test` component to an app, the same way the front
    Expected: the next pipeline runs the `php-test` jobs, one per entry of `php_versions`, `8.3`, `8.4` and `8.5` by default, each in the `test` stage.
 4. **Read the result.** Each job installs the app's dependencies, caches Composer downloads in `.composer-cache/`, and runs the test command. Expected: a green matrix, meaning the app passes on every supported PHP version.
 
-## What you built[#](https://preflight.apps.wayne.edu/docs/guides/quick-start.html#what-you-built)
+## What you built [#](https://preflight.apps.wayne.edu/docs/guides/quick-start.html#what-you-built)
 
 Your app now runs the same PHP tests on each supported PHP version that every WSU app runs, from one pinned include. Add the remaining components the same way, one include each.
 
-## Next steps[#](https://preflight.apps.wayne.edu/docs/guides/quick-start.html#next-steps)
+## Next steps [#](https://preflight.apps.wayne.edu/docs/guides/quick-start.html#next-steps)
 
 - [Install](https://preflight.apps.wayne.edu/docs/install.html): requirements, the full include, and how to verify.
 - [When the components run](https://preflight.apps.wayne.edu/docs/guides/when-components-run.html): the `workflow:rules` block that keeps the checks on merge requests and the default branch.

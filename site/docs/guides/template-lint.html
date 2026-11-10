@@ -40,15 +40,15 @@
   <nav class="docs-nav docs-nav--sidebar" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../../docs/index.html">Overview</a></li><li><a href="../../docs/install.html">Install</a></li><li><a href="../../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../../docs/guides/component-npm-audit.html">The npm-audit component</a></li><li><a href="../../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../../docs/guides/component-pint.html">The pint component</a></li><li><a href="../../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../../docs/guides/component-secret-detection.html">The secret-detection component</a></li><li><a href="../../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../../docs/guides/component-portability.html">The portability component</a></li><li><a href="../../docs/guides/component-a11y.html">The a11y component</a></li><li><a href="../../docs/guides/component-squire-kit.html">The squire-kit component</a></li><li><a href="../../docs/guides/inputs-contract.html">The inputs contract</a></li><li><a href="../../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../../docs/guides/renovate.html">Renovate</a></li><li><a href="../../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../../docs/guides/dependency-caching.html">Dependency caching</a></li><li><a href="../../docs/guides/template-lint.html" aria-current="page">Template lint</a></li><li><a href="../../docs/guides/deprecation.html">Deprecating a component</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../../docs/reference/components.html">Components</a></li><li><a href="../../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../../docs/reference/local-checks.html">Local checks</a></li><li><a href="../../docs/reference/proof.html">Proof</a></li></ul></li><li><a href="../../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../../docs/upgrading.html">Upgrading</a></li><li><a href="../../docs/changelog.html">Changelog</a></li></ul></nav>
   <div class="docs-content">
     <main id="main">
-      <article class="docs-article"><h1 id="template-lint">Template lint<a class="docs-heading-link" aria-label="Link to this section" href="#template-lint">#</a></h1>
+      <article class="docs-article"><h1 id="template-lint">Template <span class="docs-heading-tail"><span>lint</span><a class="docs-heading-link" aria-label="Link to this section" href="#template-lint">#</a></span></h1>
 <p>This page lists the unsafe CI patterns the template lint catches and how to
 allowlist a known warning. Run <code>composer ci</code> to see the lint, which runs
 before the fixture tests.</p>
-<h2 id="what-it-runs">What it runs<a class="docs-heading-link" aria-label="Link to this section" href="#what-it-runs">#</a></h2>
+<h2 id="what-it-runs">What it <span class="docs-heading-tail"><span>runs</span><a class="docs-heading-link" aria-label="Link to this section" href="#what-it-runs">#</a></span></h2>
 <p><code>composer ci</code> runs <code>bin/lint-templates</code> before the fixture tests. The lint
 scans <code>templates/**/*.yml</code> and <code>.github/workflows/*.yml</code> for unsafe CI
 patterns.</p>
-<h2 id="rules">Rules<a class="docs-heading-link" aria-label="Link to this section" href="#rules">#</a></h2>
+<h2 id="rules"><span class="docs-heading-tail"><span>Rules</span><a class="docs-heading-link" aria-label="Link to this section" href="#rules">#</a></span></h2>
 <div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
 <thead>
 <tr>
@@ -93,12 +93,12 @@ patterns.</p>
 </table></div>
 <p>The container-build rules (<code>privileged</code>, <code>dind-service</code>, <code>docker-sock</code> and
 <code>kaniko-image</code>) are explained in BEST_PRACTICES.md 4.17.</p>
-<h2 id="allowlist-a-known-warning">Allowlist a known warning<a class="docs-heading-link" aria-label="Link to this section" href="#allowlist-a-known-warning">#</a></h2>
+<h2 id="allowlist-a-known-warning">Allowlist a known <span class="docs-heading-tail"><span>warning</span><a class="docs-heading-link" aria-label="Link to this section" href="#allowlist-a-known-warning">#</a></span></h2>
 <p>Known warnings can be allowlisted in <code>lint-allow.yml</code>. Each entry needs
 <code>file</code>, <code>rule</code> and <code>reason</code>; the reason is required so an allowlist entry is
 a reviewed decision, not a silence. The preflight checklist checks the
 checklist.</p>
-<h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
+<h2 id="related"><span class="docs-heading-tail"><span>Related</span><a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></span></h2>
 <ul>
 <li><a href="image-pins.html">Updating image pins</a>: why component images are digest-pinned and how to change a pin.</li>
 <li><a href="../reference/conventions.html">Shared conventions</a>: Composer vendor, license, PHP floor and JavaScript installs.</li>

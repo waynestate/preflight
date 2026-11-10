@@ -6,11 +6,11 @@ llms: https://preflight.apps.wayne.edu/llms.txt
 generator: Squire agent-ready
 ---
 
-# The portability component[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#the-portability-component)
+# The portability component [#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#the-portability-component)
 
 The portability component proves your app image runs anywhere a container platform runs it: OpenShift, Coolify, plain Docker, and Citadel too. It builds the image, boots it twice side by side as a stranger (an arbitrary uid with no name, in group 0, with no capabilities), and runs the six checks from ADR-0010. Like the real pre-flight, it is a list you finish on the ground: if one light is red, nobody taxis.
 
-## What it checks[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#what-it-checks)
+## What it checks [#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#what-it-checks)
 
 The strict boot comes first, because every other check stands on it. Then the six checks, each reported on its own line.
 
@@ -26,7 +26,7 @@ The strict boot comes first, because every other check stands on it. Then the si
 
 The job prints one `portability: <check>: problem: ...` line per problem as it finds it, then a summary with `pass`, `FAIL` or `skipped` for every check, and passes only when every check that ran passed.
 
-## Add the include[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#add-the-include)
+## Add the include [#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#add-the-include)
 
 ```yaml
 include:
@@ -47,7 +47,7 @@ Warning
 
 The runner must allow user namespaces, which Buildah's chroot isolation uses. Ordinary unprivileged Docker-executor runners do; no privileged mode, Docker-in-Docker or registry is needed.
 
-### A sign-in route for session-hop[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#a-sign-in-route-for-session-hop)
+### A sign-in route for session-hop [#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#a-sign-in-route-for-session-hop)
 
 `session-hop` needs a GET route that signs in a test user and one that answers 200 only when signed in. Enable them with an environment variable that only this job sets, so they never exist in production. In Laravel (and a Sourdough or WELD app):
 
@@ -66,7 +66,7 @@ if (env('PORTABILITY_PROBE') === 'yes') {
 
 Add `"PORTABILITY_PROBE=yes"` to `env`. An app with no sign-in leaves `session-hop` out of `checks` on purpose; the other checks still run.
 
-## How the job works[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#how-the-job-works)
+## How the job works [#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#how-the-job-works)
 
 The component is one job, named by `job_name` (default `portability`). It runs in the Buildah image, pinned by digest, with `STORAGE_DRIVER=vfs` and `BUILDAH_ISOLATION=chroot`, `interruptible: true` and `timeout: 30 minutes`. In order, it:
 
@@ -78,11 +78,11 @@ The component is one job, named by `job_name` (default `portability`). It runs i
 
 The probe is `templates/portability/probe.sh`, inlined in the template byte for byte, because a component ships only its `template.yml`. The inputs reach it through a quoted heredoc as data; nothing in them is run except `start_command`.
 
-### Why Buildah[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#why-buildah)
+### Why Buildah [#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#why-buildah)
 
 The old runner allowed no Docker-in-Docker, and a privileged runner is a key to the building. Buildah is maintained by Red Hat, builds from a Dockerfile with no daemon, and can also run the image it built, as any uid, with no capabilities, inside an ordinary job. kaniko builds but cannot run a container, and Google archived it in 2025. A GitLab `services:` entry runs an image but cannot set its uid or drop its capabilities, and needs the image pushed to a registry first. Buildah needs neither a push nor a second job.
 
-### What the job emulates[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#what-the-job-emulates)
+### What the job emulates [#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#what-the-job-emulates)
 
 The checks run in an unprivileged job, so a few things are emulated rather than enforced by a kernel. Each one fails the same apps the real thing would.
 
@@ -96,7 +96,7 @@ Note
 
 Before 0.5.0 an Apache image needed a `start_command` shim such as `exec setsid bash -c 'exec > >(exec cat) 2>&1; exec <entrypoint>'`. Remove it when you upgrade: the job now does both itself, and a `setsid` inside the launcher's session forks the app away from the replica's main process, so `health` fails.
 
-## Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#inputs)
+## Inputs [#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#inputs)
 
 | Input | Type | Default | What it does |
 | --- | --- | --- | --- |
@@ -126,11 +126,11 @@ Before 0.5.0 an Apache image needed a `start_command` shim such as `exec setsid 
 
 The `image` default is an immutable tag (`-immutable`) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.
 
-## Verify locally[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#verify-locally)
+## Verify locally [#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#verify-locally)
 
 `tests/check-portability.sh` (and its `.ps1` twin) run the same probe in the same Buildah image against `tests/portability/app`: once clean, where every check must pass, and once per flaw (needs root, writes outside its paths, fixed port, host-bound health, a baked `.env`, trusts any proxy, file logs, file sessions, no SIGTERM handler), where the targeted check must fail. Two more builds must pass every check: one reopens `/proc/self/fd/2` and one signals its whole process group on SIGTERM, as Apache does; they fail without the launcher. Preflight's own pipeline runs the component on the clean fixture and this check as `must-fail-portability`. See [Local checks](https://preflight.apps.wayne.edu/docs/reference/local-checks.html) for the commands.
 
-## Related[#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#related)
+## Related [#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#related)
 
 - [Include a component twice](https://preflight.apps.wayne.edu/docs/guides/include-twice.html): the `job_name` input.
 - [Same instance only](https://preflight.apps.wayne.edu/docs/guides/same-instance-only.html): components run only inside the GitLab instance that hosts this project.

@@ -6,11 +6,11 @@ llms: https://preflight.apps.wayne.edu/llms.txt
 generator: Squire agent-ready
 ---
 
-# The sbom component[#](https://preflight.apps.wayne.edu/docs/guides/component-sbom.html#the-sbom-component)
+# The sbom component [#](https://preflight.apps.wayne.edu/docs/guides/component-sbom.html#the-sbom-component)
 
 This page shows how to add the `sbom` component to an app's `.gitlab-ci.yml`: it generates a CycloneDX SBOM with `cyclonedx/cyclonedx-php-composer`, validates it, and publishes it as an artifact. The SBOM is the aircraft's parts manifest (nothing flies that is not on the list); start with the include, then read what the job does and which inputs it takes.
 
-## Include the component[#](https://preflight.apps.wayne.edu/docs/guides/component-sbom.html#include-the-component)
+## Include the component [#](https://preflight.apps.wayne.edu/docs/guides/component-sbom.html#include-the-component)
 
 Add the include to the app's `.gitlab-ci.yml`, pinned to a commit SHA with the tag in a trailing comment:
 
@@ -23,7 +23,7 @@ include:
 
 A tag or branch can move; a SHA cannot.
 
-## What the job does[#](https://preflight.apps.wayne.edu/docs/guides/component-sbom.html#what-the-job-does)
+## What the job does [#](https://preflight.apps.wayne.edu/docs/guides/component-sbom.html#what-the-job-does)
 
 The job lands in the `test` stage by default, is `interruptible: true`, and has a `timeout: 30 minutes`. It runs four steps:
 
@@ -52,7 +52,7 @@ The job lands in the `test` stage by default, is `interruptible: true`, and has 
    ```
    `--omit=dev` is present only when `omit_dev` is `true`; `--output-file` takes the `output` input (default `sbom.cdx.json`).
 
-## Artifacts[#](https://preflight.apps.wayne.edu/docs/guides/component-sbom.html#artifacts)
+## Artifacts [#](https://preflight.apps.wayne.edu/docs/guides/component-sbom.html#artifacts)
 
 The job publishes the SBOM file as an artifact:
 
@@ -65,7 +65,7 @@ artifacts:
 
 The path is the `output` input, and the artifact expires in 30 days.
 
-## Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-sbom.html#inputs)
+## Inputs [#](https://preflight.apps.wayne.edu/docs/guides/component-sbom.html#inputs)
 
 | Input | Type | Default | What it does |
 | --- | --- | --- | --- |
@@ -82,11 +82,11 @@ Note
 
 `output` must be a relative path. The input carries a `regex`, so GitLab refuses the pipeline at creation when a value does not match.
 
-## Verify[#](https://preflight.apps.wayne.edu/docs/guides/component-sbom.html#verify)
+## Verify [#](https://preflight.apps.wayne.edu/docs/guides/component-sbom.html#verify)
 
 Push the change. The components are ordinary jobs, so the `sbom` job runs whenever the app's pipeline runs, in the `test` stage by default. A green job means the SBOM was generated, validated, and published.
 
-## Related[#](https://preflight.apps.wayne.edu/docs/guides/component-sbom.html#related)
+## Related [#](https://preflight.apps.wayne.edu/docs/guides/component-sbom.html#related)
 
 - [The composer-audit component](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html): the companion dependency check.
 - [Include a component twice](https://preflight.apps.wayne.edu/docs/guides/include-twice.html): the `job_name` input when one project includes the same component more than once.

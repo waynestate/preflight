@@ -6,13 +6,13 @@ llms: https://preflight.apps.wayne.edu/llms.txt
 generator: Squire agent-ready
 ---
 
-# The squire-kit component[#](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html#the-squire-kit-component)
+# The squire-kit component [#](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html#the-squire-kit-component)
 
 This page covers the `squire-kit` component: what the job checks, how to include it, every input it takes, and what to do when it goes red. Goal: a deploy kit that [Squire](https://github.com/waynestate/squire) wrote stays exactly what Squire wrote, so a fix to the kit reaches every app the day Squire ships it. A squire keeps the armor polished; this job is the inspection before the joust.
 
 Version 1 · Category: Testing/Validation · Tags: squire,deploy,drift
 
-## What the job checks[#](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html#what-the-job-checks)
+## What the job checks [#](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html#what-the-job-checks)
 
 Squire writes the deploy kit (`build.sh`, the release script, the health check, the local parity files) and records the Squire version it used and a SHA-256 of every file in `.squire.json`. The job:
 
@@ -31,7 +31,7 @@ It passes only when every kit file is that release's template, untouched. The ex
 
 The job checks the version the kit records, not the newest Squire, so a new Squire release never turns a green main red by itself. Renovate moves the version: the [Renovate](https://preflight.apps.wayne.edu/docs/guides/renovate.html) preset opens a merge request for each new Squire, and on a runner that allows it, that merge request already carries the refreshed kit.
 
-## Include the component[#](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html#include-the-component)
+## Include the component [#](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html#include-the-component)
 
 Add the include to the app's `.gitlab-ci.yml`, pinned to a full commit SHA with the tag in a trailing comment:
 
@@ -48,7 +48,7 @@ The squire-kit component ships in Preflight 0.2.0; 0.1.4 does not include it. Pi
 
 Run `vendor/bin/squire init --check --path=deploy` on your desk first. Include the component once it passes, or turn on `allow_failure` while you clean up (below).
 
-## Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html#inputs)
+## Inputs [#](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html#inputs)
 
 | Input | Type | Default | What it does |
 | --- | --- | --- | --- |
@@ -62,7 +62,7 @@ Run `vendor/bin/squire init --check --path=deploy` on your desk first. Include t
 
 `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`, `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$`, and `squire_version` must be empty or match `^[0-9]+\.[0-9]+\.[0-9]+$`. GitLab refuses the pipeline at creation when a value does not match.
 
-## When the job is red[#](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html#when-the-job-is-red)
+## When the job is red [#](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html#when-the-job-is-red)
 
 The log lists every kit file with its state; the last lines name what to do.
 
@@ -72,7 +72,7 @@ The log lists every kit file with its state; the last lines name what to do.
 
 > \[!CAUTION\] Renovate's digest and tag bumps were what made the stack's kits drift: a bump to a base image inside `.squire/` or to `docker-compose.squire.yml` is an edit to a file Squire owns. Preflight's preset now leaves those files alone; update the image in Squire's templates and let the next Squire release carry it.
 
-## Adopt it with findings[#](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html#adopt-it-with-findings)
+## Adopt it with findings [#](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html#adopt-it-with-findings)
 
 To include the component before the kit is clean, let the job fail without failing the pipeline:
 
@@ -86,7 +86,7 @@ include:
 
 While `allow_failure` is `true`, a red job shows as a warning. Remove the input once the job is green, and leave a date in a comment so the warning does not become the new normal.
 
-## Verify[#](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html#verify)
+## Verify [#](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html#verify)
 
 Push the change. The `squire-kit` job lands in the `test` stage by default and its last line reads `RESULT: pass (0 of N files need attention)` when the kit matches. Preflight's own pipeline runs it on `tests/squire-kit-fixture`, a kit written by `squire init --target=raw`.
 
@@ -94,7 +94,7 @@ Note
 
 The job needs Packagist (to install the recorded Squire release). It needs no token and no Docker socket.
 
-## Related[#](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html#related)
+## Related [#](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html#related)
 
 - [Renovate](https://preflight.apps.wayne.edu/docs/guides/renovate.html): the preset's Squire rule, which opens the merge request that moves the kit to a new release.
 - [The renovate component](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html): the `squire_kit_tasks` input, which lets that merge request carry the refreshed kit.

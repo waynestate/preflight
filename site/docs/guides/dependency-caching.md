@@ -6,11 +6,11 @@ llms: https://preflight.apps.wayne.edu/llms.txt
 generator: Squire agent-ready
 ---
 
-# Dependency caching[#](https://preflight.apps.wayne.edu/docs/guides/dependency-caching.html#dependency-caching)
+# Dependency caching [#](https://preflight.apps.wayne.edu/docs/guides/dependency-caching.html#dependency-caching)
 
 Every image and package a pipeline downloads is a request to someone else's server. Docker Hub limits anonymous pulls per address, and a runner that starts fifty jobs on a busy afternoon can hit that limit, or worse, look like abuse. This page covers how the components keep those downloads cached: images through GitLab's Dependency Proxy, Composer and npm packages in the GitLab cache. Read how the image prefix works, what to set on a GitLab without the proxy, and how the check keeps it that way. A preflight check is cheapest when it finds nothing; a cache is cheapest when nobody notices it.
 
-## Images: the image_prefix input[#](https://preflight.apps.wayne.edu/docs/guides/dependency-caching.html#images-the-image-prefix-input)
+## Images: the image_prefix input [#](https://preflight.apps.wayne.edu/docs/guides/dependency-caching.html#images-the-image-prefix-input)
 
 Each component whose image comes from Docker Hub (`proctor`, `php-test`, `composer-audit`, `sbom`, `pint`, `phpstan`, `eslint`, `secret-detection`, `package-publish`, `renovate` and `squire-kit`) has an `image_prefix` input. The job pulls `image_prefix/image`:
 
@@ -30,7 +30,7 @@ include:
       image: php:8.5-cli-trixie@sha256:<digest>
 ```
 
-### On a GitLab or group without the proxy[#](https://preflight.apps.wayne.edu/docs/guides/dependency-caching.html#on-a-gitlab-or-group-without-the-proxy)
+### On a GitLab or group without the proxy [#](https://preflight.apps.wayne.edu/docs/guides/dependency-caching.html#on-a-gitlab-or-group-without-the-proxy)
 
 Set `image_prefix` to Docker Hub itself:
 
@@ -41,15 +41,15 @@ Set `image_prefix` to Docker Hub itself:
 
 `docker.io` works for every Docker Hub image. `docker.io/library` also works for the official images (`php`, `composer`, `node`) but not for `renovate/renovate` or `zricethezav/gitleaks`. For another registry, put its host and path in `image_prefix` and the rest in `image`, for example `image_prefix: registry.example.com/mirror` with `image: php:8.4-cli-trixie@sha256:<digest>`. The prefix has no trailing slash; the input's pattern refuses one.
 
-### Upgrading from a version without image_prefix[#](https://preflight.apps.wayne.edu/docs/guides/dependency-caching.html#upgrading-from-a-version-without-image-prefix)
+### Upgrading from a version without image_prefix [#](https://preflight.apps.wayne.edu/docs/guides/dependency-caching.html#upgrading-from-a-version-without-image-prefix)
 
 Apps that passed `image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/...` only to reach the proxy drop that input when they move to this version: the default now does it, and keeping it would put the prefix in twice.
 
-### Images the proxy cannot serve[#](https://preflight.apps.wayne.edu/docs/guides/dependency-caching.html#images-the-proxy-cannot-serve)
+### Images the proxy cannot serve [#](https://preflight.apps.wayne.edu/docs/guides/dependency-caching.html#images-the-proxy-cannot-serve)
 
 The Dependency Proxy serves Docker Hub only. The `a11y` component's Playwright image (`mcr.microsoft.com`) and the `portability` component's Buildah image (`quay.io`) are pulled from their own registries and have no `image_prefix`; the runner's own image cache is what saves those pulls.
 
-## Packages: the cache blocks[#](https://preflight.apps.wayne.edu/docs/guides/dependency-caching.html#packages-the-cache-blocks)
+## Packages: the cache blocks [#](https://preflight.apps.wayne.edu/docs/guides/dependency-caching.html#packages-the-cache-blocks)
 
 Each job that installs packages keeps them in the GitLab cache, inside the project so GitLab can save and restore them:
 
@@ -65,7 +65,7 @@ Each job that installs packages keeps them in the GitLab cache, inside the proje
 
 `COMPOSER_CACHE_DIR` and `NPM_CONFIG_CACHE` point the tools at those paths. The keys are fixed and installs still resolve from the lock, so a cached run never installs a stale package: Composer and npm only skip the download. Every component cache also saves with `when: always`, so a retry after a dropped download fetches only what is missing.
 
-## Your own jobs[#](https://preflight.apps.wayne.edu/docs/guides/dependency-caching.html#your-own-jobs)
+## Your own jobs [#](https://preflight.apps.wayne.edu/docs/guides/dependency-caching.html#your-own-jobs)
 
 The same pattern fits an app's own jobs, such as `composer-ci` or a front-end build. Sourdough's app templates ship it:
 
@@ -85,7 +85,7 @@ composer-ci:
     - composer ci
 ```
 
-## How it stays that way[#](https://preflight.apps.wayne.edu/docs/guides/dependency-caching.html#how-it-stays-that-way)
+## How it stays that way [#](https://preflight.apps.wayne.edu/docs/guides/dependency-caching.html#how-it-stays-that-way)
 
 `tests/check-dependency-cache.sh` (and its `.ps1` twin) runs in Preflight's `contract` job and fails when:
 
@@ -93,7 +93,7 @@ composer-ci:
 - a component runs `composer install`, `update`, `require` or `create-project`, or `npm ci` or `install`, without a `cache:` block and a cache directory;
 - Preflight's own `.gitlab-ci.yml` pulls a Docker Hub image without the proxy prefix, or passes a component an image that already carries it.
 
-## Related[#](https://preflight.apps.wayne.edu/docs/guides/dependency-caching.html#related)
+## Related [#](https://preflight.apps.wayne.edu/docs/guides/dependency-caching.html#related)
 
 - [Updating image pins](https://preflight.apps.wayne.edu/docs/guides/image-pins.html): how the digests behind `image` are chosen and changed.
 - [The php-test component](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html): the matrix and its per-version cache.

@@ -40,13 +40,13 @@
   <nav class="docs-nav docs-nav--sidebar" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../../docs/index.html">Overview</a></li><li><a href="../../docs/install.html">Install</a></li><li><a href="../../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../../docs/guides/component-npm-audit.html">The npm-audit component</a></li><li><a href="../../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../../docs/guides/component-pint.html">The pint component</a></li><li><a href="../../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../../docs/guides/component-secret-detection.html">The secret-detection component</a></li><li><a href="../../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../../docs/guides/component-portability.html">The portability component</a></li><li><a href="../../docs/guides/component-a11y.html">The a11y component</a></li><li><a href="../../docs/guides/component-squire-kit.html" aria-current="page">The squire-kit component</a></li><li><a href="../../docs/guides/inputs-contract.html">The inputs contract</a></li><li><a href="../../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../../docs/guides/renovate.html">Renovate</a></li><li><a href="../../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../../docs/guides/dependency-caching.html">Dependency caching</a></li><li><a href="../../docs/guides/template-lint.html">Template lint</a></li><li><a href="../../docs/guides/deprecation.html">Deprecating a component</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../../docs/reference/components.html">Components</a></li><li><a href="../../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../../docs/reference/local-checks.html">Local checks</a></li><li><a href="../../docs/reference/proof.html">Proof</a></li></ul></li><li><a href="../../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../../docs/upgrading.html">Upgrading</a></li><li><a href="../../docs/changelog.html">Changelog</a></li></ul></nav>
   <div class="docs-content">
     <main id="main">
-      <article class="docs-article"><h1 id="the-squire-kit-component">The squire-kit component<a class="docs-heading-link" aria-label="Link to this section" href="#the-squire-kit-component">#</a></h1>
+      <article class="docs-article"><h1 id="the-squire-kit-component">The squire-kit <span class="docs-heading-tail"><span>component</span><a class="docs-heading-link" aria-label="Link to this section" href="#the-squire-kit-component">#</a></span></h1>
 <p>This page covers the <code>squire-kit</code> component: what the job checks, how to include it, every input it takes, and what to
 do when it goes red. Goal: a deploy kit that <a rel="noopener" href="https://github.com/waynestate/squire">Squire</a> wrote stays exactly what
 Squire wrote, so a fix to the kit reaches every app the day Squire ships it. A squire keeps the armor polished; this job
 is the inspection before the joust.</p>
 <p>Version 1 · Category: Testing/Validation · Tags: squire,deploy,drift</p>
-<h2 id="what-the-job-checks">What the job checks<a class="docs-heading-link" aria-label="Link to this section" href="#what-the-job-checks">#</a></h2>
+<h2 id="what-the-job-checks">What the job <span class="docs-heading-tail"><span>checks</span><a class="docs-heading-link" aria-label="Link to this section" href="#what-the-job-checks">#</a></span></h2>
 <p>Squire writes the deploy kit (<code>build.sh</code>, the release script, the health check, the local parity files) and records
 the Squire version it used and a SHA-256 of every file in <code>.squire.json</code>. The job:</p>
 <ol>
@@ -82,7 +82,7 @@ the Squire version it used and a SHA-256 of every file in <code>.squire.json</co
 <p>The job checks the version the kit records, not the newest Squire, so a new Squire release never turns a green main red
 by itself. Renovate moves the version: the <a href="renovate.html">Renovate</a> preset opens a merge request for each new Squire, and
 on a runner that allows it, that merge request already carries the refreshed kit.</p>
-<h2 id="include-the-component">Include the component<a class="docs-heading-link" aria-label="Link to this section" href="#include-the-component">#</a></h2>
+<h2 id="include-the-component">Include the <span class="docs-heading-tail"><span>component</span><a class="docs-heading-link" aria-label="Link to this section" href="#include-the-component">#</a></span></h2>
 <p>Add the include to the app's <code>.gitlab-ci.yml</code>, pinned to a full commit SHA with the tag in a trailing comment:</p>
 <pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@60314791565a264e97cb210813ef4f3e76512402 # 0.5.0
@@ -93,7 +93,7 @@ on a runner that allows it, that merge request already carries the refreshed kit
 full commit SHA of a commit at or after it.</p></aside>
 <p>Run <code>vendor/bin/squire init --check --path=deploy</code> on your desk first. Include the component once it passes, or turn on
 <code>allow_failure</code> while you clean up (below).</p>
-<h2 id="inputs">Inputs<a class="docs-heading-link" aria-label="Link to this section" href="#inputs">#</a></h2>
+<h2 id="inputs"><span class="docs-heading-tail"><span>Inputs</span><a class="docs-heading-link" aria-label="Link to this section" href="#inputs">#</a></span></h2>
 <div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
 <thead>
 <tr>
@@ -151,7 +151,7 @@ full commit SHA of a commit at or after it.</p></aside>
 <p><code>job_name</code> must match <code>^[A-Za-z0-9_][A-Za-z0-9_.-]*$</code>, <code>working_dir</code> must match <code>^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$</code>,
 and <code>squire_version</code> must be empty or match <code>^[0-9]+\.[0-9]+\.[0-9]+$</code>. GitLab refuses the pipeline at creation when a
 value does not match.</p>
-<h2 id="when-the-job-is-red">When the job is red<a class="docs-heading-link" aria-label="Link to this section" href="#when-the-job-is-red">#</a></h2>
+<h2 id="when-the-job-is-red">When the job is <span class="docs-heading-tail"><span>red</span><a class="docs-heading-link" aria-label="Link to this section" href="#when-the-job-is-red">#</a></span></h2>
 <p>The log lists every kit file with its state; the last lines name what to do.</p>
 <ul>
 <li><strong><code>outdated</code> or <code>missing</code>.</strong> The kit records a version whose templates it does not carry. Run
@@ -168,7 +168,7 @@ Renovate's digest and tag bumps were what made the stack's kits drift: a bump to
 <code>docker-compose.squire.yml</code> is an edit to a file Squire owns. Preflight's preset now leaves those files alone; update
 the image in Squire's templates and let the next Squire release carry it.</p>
 </blockquote>
-<h2 id="adopt-it-with-findings">Adopt it with findings<a class="docs-heading-link" aria-label="Link to this section" href="#adopt-it-with-findings">#</a></h2>
+<h2 id="adopt-it-with-findings">Adopt it with <span class="docs-heading-tail"><span>findings</span><a class="docs-heading-link" aria-label="Link to this section" href="#adopt-it-with-findings">#</a></span></h2>
 <p>To include the component before the kit is clean, let the job fail without failing the pipeline:</p>
 <pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@60314791565a264e97cb210813ef4f3e76512402 # 0.5.0
@@ -178,12 +178,12 @@ the image in Squire's templates and let the next Squire release carry it.</p>
 </code></pre>
 <p>While <code>allow_failure</code> is <code>true</code>, a red job shows as a warning. Remove the input once the job is green, and leave a date
 in a comment so the warning does not become the new normal.</p>
-<h2 id="verify">Verify<a class="docs-heading-link" aria-label="Link to this section" href="#verify">#</a></h2>
+<h2 id="verify"><span class="docs-heading-tail"><span>Verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#verify">#</a></span></h2>
 <p>Push the change. The <code>squire-kit</code> job lands in the <code>test</code> stage by default and its last line reads
 <code>RESULT: pass (0 of N files need attention)</code> when the kit matches. Preflight's own pipeline runs it on
 <code>tests/squire-kit-fixture</code>, a kit written by <code>squire init --target=raw</code>.</p>
 <aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>The job needs Packagist (to install the recorded Squire release). It needs no token and no Docker socket.</p></aside>
-<h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
+<h2 id="related"><span class="docs-heading-tail"><span>Related</span><a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></span></h2>
 <ul>
 <li><a href="renovate.html">Renovate</a>: the preset's Squire rule, which opens the merge request that moves the kit to a new release.</li>
 <li><a href="component-renovate.html">The renovate component</a>: the <code>squire_kit_tasks</code> input, which lets that merge request carry

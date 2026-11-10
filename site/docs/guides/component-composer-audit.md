@@ -6,11 +6,11 @@ llms: https://preflight.apps.wayne.edu/llms.txt
 generator: Squire agent-ready
 ---
 
-# The composer-audit component[#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#the-composer-audit-component)
+# The composer-audit component [#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#the-composer-audit-component)
 
 Fresh eyes on the manifest: this component runs `composer audit --locked` and fails the pipeline on advisories. This page shows how to add the `composer-audit` component to your app's `.gitlab-ci.yml`, then how to run it on a weekly schedule so the check keeps running after code is merged.
 
-## Include the component[#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#include-the-component)
+## Include the component [#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#include-the-component)
 
 Goal: your app's pipeline fails whenever a locked dependency has a known advisory. Add the include to your app's `.gitlab-ci.yml`:
 
@@ -21,7 +21,7 @@ include:
       working_dir: .
 ```
 
-## Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#inputs)
+## Inputs [#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#inputs)
 
 | Input | Type | Default | What it does |
 | --- | --- | --- | --- |
@@ -36,7 +36,7 @@ Note
 
 The template adds regexes to three inputs: `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`, `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$` and `abandoned` must match `^(fail|report|ignore)$`.
 
-## What the job does[#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#what-the-job-does)
+## What the job does [#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#what-the-job-does)
 
 The Composer image (`composer:2.11.1`, pinned by digest) already ships Composer, so no install step is needed. The job is `interruptible: true` with a `timeout: 30 minutes`. Its script changes into `working_dir` and runs `composer audit --locked` with `--abandoned` set to the `abandoned` input (see Abandoned packages below). The command exits non-zero when it finds advisories, which fails the job.
 
@@ -44,7 +44,7 @@ Warning
 
 The component carries no `allow_failure` input on purpose: a known advisory must fail the pipeline.
 
-## What fails the job[#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#what-fails-the-job)
+## What fails the job [#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#what-fails-the-job)
 
 `composer audit --locked` reads only the lock file (it installs nothing) and fails the job on any of three findings:
 
@@ -56,7 +56,7 @@ Composer asks Packagist for advisories and filter lists on every run, so the job
 
 Preflight's own pipeline keeps these promises with the `must-fail-composer-audit` job: it runs this template's own lines on a clean app (must pass) and on three fixed locks, laravel/framework v9.0.0 (CVE-2024-52301), aikido/endpoint-test 0.0.1 (Aikido's harmless package, flagged on purpose so scanners can be tested) and an abandoned package, which must fail (the abandoned one only in `fail` mode). A flight check that has never seen a red light is just a light.
 
-## Abandoned packages[#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#abandoned-packages)
+## Abandoned packages [#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#abandoned-packages)
 
 An abandoned package is one its author no longer maintains; Composer marks it in the lock file. By default an abandoned package in the lock fails the job, and the component keeps that default: `fail` is what the `abandoned` input holds when you set nothing.
 
@@ -68,11 +68,11 @@ The three modes:
 
 `report` is the right choice for an old app that carries abandoned transitive packages it cannot upgrade yet: the pipeline stays green while the job log names every abandoned package, so the debt is visible instead of hidden. Advisories still fail the job in every mode: `abandoned` relaxes only the abandoned check, never the advisory check.
 
-## Run it on a schedule[#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#run-it-on-a-schedule)
+## Run it on a schedule [#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#run-it-on-a-schedule)
 
 New advisories are published after code is merged, so a green pipeline today can be stale tomorrow. Create a weekly pipeline schedule on the default branch: project settings, Build, Pipeline schedules. The component needs nothing extra; it carries no `rules:` block, so it runs in scheduled pipelines like any other. Creating the schedule is a project setting, not a file in the app's repo, and someone with Maintainer rights on the app must do it. It is the one Preflight check that books its own flight time.
 
-## Related[#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#related)
+## Related [#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#related)
 
 - [The proctor component](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html)
 - [The php-test component](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html)

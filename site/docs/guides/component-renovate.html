@@ -40,13 +40,13 @@
   <nav class="docs-nav docs-nav--sidebar" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../../docs/index.html">Overview</a></li><li><a href="../../docs/install.html">Install</a></li><li><a href="../../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../../docs/guides/component-npm-audit.html">The npm-audit component</a></li><li><a href="../../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../../docs/guides/component-pint.html">The pint component</a></li><li><a href="../../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../../docs/guides/component-secret-detection.html">The secret-detection component</a></li><li><a href="../../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../../docs/guides/component-renovate.html" aria-current="page">The renovate component</a></li><li><a href="../../docs/guides/component-portability.html">The portability component</a></li><li><a href="../../docs/guides/component-a11y.html">The a11y component</a></li><li><a href="../../docs/guides/component-squire-kit.html">The squire-kit component</a></li><li><a href="../../docs/guides/inputs-contract.html">The inputs contract</a></li><li><a href="../../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../../docs/guides/renovate.html">Renovate</a></li><li><a href="../../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../../docs/guides/dependency-caching.html">Dependency caching</a></li><li><a href="../../docs/guides/template-lint.html">Template lint</a></li><li><a href="../../docs/guides/deprecation.html">Deprecating a component</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../../docs/reference/components.html">Components</a></li><li><a href="../../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../../docs/reference/local-checks.html">Local checks</a></li><li><a href="../../docs/reference/proof.html">Proof</a></li></ul></li><li><a href="../../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../../docs/upgrading.html">Upgrading</a></li><li><a href="../../docs/changelog.html">Changelog</a></li></ul></nav>
   <div class="docs-content">
     <main id="main">
-      <article class="docs-article"><h1 id="the-renovate-component">The renovate component<a class="docs-heading-link" aria-label="Link to this section" href="#the-renovate-component">#</a></h1>
+      <article class="docs-article"><h1 id="the-renovate-component">The renovate <span class="docs-heading-tail"><span>component</span><a class="docs-heading-link" aria-label="Link to this section" href="#the-renovate-component">#</a></span></h1>
 <p>This page covers the <code>renovate</code> component: what the job does, how to include
 it, and every input it takes. Goal: one scheduled job keeps image digests,
 GitHub action SHAs and package versions current across the group's
 repositories, and merges the updates whose pipeline is green. The component
 flies on autopilot; majors keep a human in the seat.</p>
-<h2 id="what-the-job-does">What the job does<a class="docs-heading-link" aria-label="Link to this section" href="#what-the-job-does">#</a></h2>
+<h2 id="what-the-job-does">What the job <span class="docs-heading-tail"><span>does</span><a class="docs-heading-link" aria-label="Link to this section" href="#what-the-job-does">#</a></span></h2>
 <p>The component runs <a rel="noopener" href="https://docs.renovatebot.com/">Renovate</a> as a scheduled
 or manual job that bumps image digests, GitHub action SHAs and package
 versions across the group's repositories, and merges the green ones itself.
@@ -79,7 +79,7 @@ as <code>RENOVATE_DRY_RUN</code>.</li>
 <code>variables:</code> on purpose. A self-reference such as <code>RENOVATE_TOKEN: $RENOVATE_TOKEN</code> arrives as literal text on GitLab 19.5 and shadows the
 masked project CI/CD variable, so the component leaves both tokens to the
 project and the masked values reach the job unchanged.</p></aside>
-<h2 id="include-the-component">Include the component<a class="docs-heading-link" aria-label="Link to this section" href="#include-the-component">#</a></h2>
+<h2 id="include-the-component">Include the <span class="docs-heading-tail"><span>component</span><a class="docs-heading-link" aria-label="Link to this section" href="#include-the-component">#</a></span></h2>
 <p>Add the include to the runner project's <code>.gitlab-ci.yml</code>, pinned to a full
 commit SHA with the tag in a trailing comment, and set <code>git_author</code>:</p>
 <pre tabindex="0"><code class="language-yaml">include:
@@ -87,7 +87,7 @@ commit SHA with the tag in a trailing comment, and set <code>git_author</code>:<
     inputs:
       git_author: &quot;Preflight Bot &lt;preflight-bot@example.com&gt;&quot;
 </code></pre>
-<h2 id="inputs">Inputs<a class="docs-heading-link" aria-label="Link to this section" href="#inputs">#</a></h2>
+<h2 id="inputs"><span class="docs-heading-tail"><span>Inputs</span><a class="docs-heading-link" aria-label="Link to this section" href="#inputs">#</a></span></h2>
 <div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
 <thead>
 <tr>
@@ -142,12 +142,12 @@ commit SHA with the tag in a trailing comment, and set <code>git_author</code>:<
 </tr>
 </tbody>
 </table></div>
-<h2 id="verify">Verify<a class="docs-heading-link" aria-label="Link to this section" href="#verify">#</a></h2>
+<h2 id="verify"><span class="docs-heading-tail"><span>Verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#verify">#</a></span></h2>
 <p>Start the job manually from the web, or wait for the schedule. Expected: the
 job bumps the versions it finds and merges the ones whose pipeline is green.
 To try it without changes, set <code>dry_run</code> to <code>lookup</code> or <code>full</code>; <code>null</code>
 (disabled) is the default.</p>
-<h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
+<h2 id="related"><span class="docs-heading-tail"><span>Related</span><a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></span></h2>
 <ul>
 <li><a href="renovate.html">Renovate</a>: the shared preset, and what auto-merges, what waits and what waits for review.</li>
 <li><a href="component-squire-kit.html">The squire-kit component</a>: the pipeline check that a kit matches the Squire release it records.</li>

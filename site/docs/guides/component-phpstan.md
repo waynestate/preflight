@@ -6,20 +6,20 @@ llms: https://preflight.apps.wayne.edu/llms.txt
 generator: Squire agent-ready
 ---
 
-# The phpstan component[#](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html#the-phpstan-component)
+# The phpstan component [#](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html#the-phpstan-component)
 
 This page shows how to add the `phpstan` component to an app's `.gitlab-ci.yml`: it runs the app's own [PHPStan](https://phpstan.org/) and fails the pipeline on static analysis errors, writing a GitLab Code Quality report. It finds the loose bolts before the flight does; check the requirements first, then add the include.
 
 Version 1, category Testing/Validation, tags `php`, `static-analysis`, `phpstan`.
 
-## Before you start[#](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html#before-you-start)
+## Before you start [#](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html#before-you-start)
 
 The component does not install PHPStan itself. The app must:
 
 - Require `phpstan/phpstan` as a dev dependency.
 - Ship a `phpstan.neon`, or point the `config` input at its own file.
 
-## Include the component[#](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html#include-the-component)
+## Include the component [#](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html#include-the-component)
 
 Add the include to the app's `.gitlab-ci.yml`, pinned to a commit SHA with the tag in a trailing comment:
 
@@ -33,7 +33,7 @@ include:
 
 A tag or branch can move; a SHA cannot.
 
-## What the job does[#](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html#what-the-job-does)
+## What the job does [#](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html#what-the-job-does)
 
 The job lands in the `test` stage by default, is `interruptible: true`, and has a `timeout: 10m`. It runs three steps:
 
@@ -50,7 +50,7 @@ The job lands in the `test` stage by default, is `interruptible: true`, and has 
    - `-c` takes the `config` input (default `phpstan.neon`).
    - `--error-format=gitlab` writes the findings as a GitLab Code Quality report to `$CI_PROJECT_DIR/phpstan-report.json`.
 
-## Report[#](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html#report)
+## Report [#](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html#report)
 
 The job publishes the report as a Code Quality report:
 
@@ -61,7 +61,7 @@ artifacts:
     codequality: phpstan-report.json
 ```
 
-## Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html#inputs)
+## Inputs [#](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html#inputs)
 
 | Input | Type | Default | What it does |
 | --- | --- | --- | --- |
@@ -79,11 +79,11 @@ Note
 
 `config` must be a relative path, and `memory_limit` takes a PHP size such as `1G`, `512M` or `-1`. Each carries an input `regex`, so GitLab refuses the pipeline at creation when a value does not match.
 
-## Verify[#](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html#verify)
+## Verify [#](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html#verify)
 
 Push the change. The components are ordinary jobs, so the `phpstan` job runs whenever the app's pipeline runs, in the `test` stage by default. A green job means no static analysis errors, and the Code Quality report carries the findings.
 
-## Related[#](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html#related)
+## Related [#](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html#related)
 
 - [The pint component](https://preflight.apps.wayne.edu/docs/guides/component-pint.html): the style check that pairs with it.
 - [The proctor component](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html): another check that publishes a Code Quality report.

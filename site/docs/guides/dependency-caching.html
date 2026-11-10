@@ -40,7 +40,7 @@
   <nav class="docs-nav docs-nav--sidebar" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../../docs/index.html">Overview</a></li><li><a href="../../docs/install.html">Install</a></li><li><a href="../../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../../docs/guides/component-npm-audit.html">The npm-audit component</a></li><li><a href="../../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../../docs/guides/component-pint.html">The pint component</a></li><li><a href="../../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../../docs/guides/component-secret-detection.html">The secret-detection component</a></li><li><a href="../../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../../docs/guides/component-portability.html">The portability component</a></li><li><a href="../../docs/guides/component-a11y.html">The a11y component</a></li><li><a href="../../docs/guides/component-squire-kit.html">The squire-kit component</a></li><li><a href="../../docs/guides/inputs-contract.html">The inputs contract</a></li><li><a href="../../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../../docs/guides/renovate.html">Renovate</a></li><li><a href="../../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../../docs/guides/dependency-caching.html" aria-current="page">Dependency caching</a></li><li><a href="../../docs/guides/template-lint.html">Template lint</a></li><li><a href="../../docs/guides/deprecation.html">Deprecating a component</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../../docs/reference/components.html">Components</a></li><li><a href="../../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../../docs/reference/local-checks.html">Local checks</a></li><li><a href="../../docs/reference/proof.html">Proof</a></li></ul></li><li><a href="../../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../../docs/upgrading.html">Upgrading</a></li><li><a href="../../docs/changelog.html">Changelog</a></li></ul></nav>
   <div class="docs-content">
     <main id="main">
-      <article class="docs-article"><h1 id="dependency-caching">Dependency caching<a class="docs-heading-link" aria-label="Link to this section" href="#dependency-caching">#</a></h1>
+      <article class="docs-article"><h1 id="dependency-caching">Dependency <span class="docs-heading-tail"><span>caching</span><a class="docs-heading-link" aria-label="Link to this section" href="#dependency-caching">#</a></span></h1>
 <p>Every image and package a pipeline downloads is a request to someone else's
 server. Docker Hub limits anonymous pulls per address, and a runner that
 starts fifty jobs on a busy afternoon can hit that limit, or worse, look like
@@ -49,7 +49,7 @@ images through GitLab's Dependency Proxy, Composer and npm packages in the
 GitLab cache. Read how the image prefix works, what to set on a GitLab without
 the proxy, and how the check keeps it that way. A preflight check is cheapest
 when it finds nothing; a cache is cheapest when nobody notices it.</p>
-<h2 id="images-the-image-prefix-input">Images: the image_prefix input<a class="docs-heading-link" aria-label="Link to this section" href="#images-the-image-prefix-input">#</a></h2>
+<h2 id="images-the-image-prefix-input">Images: the image_prefix <span class="docs-heading-tail"><span>input</span><a class="docs-heading-link" aria-label="Link to this section" href="#images-the-image-prefix-input">#</a></span></h2>
 <p>Each component whose image comes from Docker Hub (<code>proctor</code>, <code>php-test</code>,
 <code>composer-audit</code>, <code>sbom</code>, <code>pint</code>, <code>phpstan</code>, <code>eslint</code>, <code>secret-detection</code>,
 <code>package-publish</code>, <code>renovate</code> and <code>squire-kit</code>) has an <code>image_prefix</code> input.
@@ -84,7 +84,7 @@ registry:</p>
     inputs:
       image: php:8.5-cli-trixie@sha256:&lt;digest&gt;
 </code></pre>
-<h3 id="on-a-gitlab-or-group-without-the-proxy">On a GitLab or group without the proxy<a class="docs-heading-link" aria-label="Link to this section" href="#on-a-gitlab-or-group-without-the-proxy">#</a></h3>
+<h3 id="on-a-gitlab-or-group-without-the-proxy">On a GitLab or group without the <span class="docs-heading-tail"><span>proxy</span><a class="docs-heading-link" aria-label="Link to this section" href="#on-a-gitlab-or-group-without-the-proxy">#</a></span></h3>
 <p>Set <code>image_prefix</code> to Docker Hub itself:</p>
 <pre tabindex="0"><code class="language-yaml">    inputs:
       image_prefix: docker.io
@@ -95,16 +95,16 @@ for the official images (<code>php</code>, <code>composer</code>, <code>node</co
 host and path in <code>image_prefix</code> and the rest in <code>image</code>, for example
 <code>image_prefix: registry.example.com/mirror</code> with <code>image: php:8.4-cli-trixie@sha256:&lt;digest&gt;</code>.
 The prefix has no trailing slash; the input's pattern refuses one.</p>
-<h3 id="upgrading-from-a-version-without-image-prefix">Upgrading from a version without image_prefix<a class="docs-heading-link" aria-label="Link to this section" href="#upgrading-from-a-version-without-image-prefix">#</a></h3>
+<h3 id="upgrading-from-a-version-without-image-prefix">Upgrading from a version without <span class="docs-heading-tail"><span>image_prefix</span><a class="docs-heading-link" aria-label="Link to this section" href="#upgrading-from-a-version-without-image-prefix">#</a></span></h3>
 <p>Apps that passed <code>image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/...</code> only
 to reach the proxy drop that input when they move to this version: the
 default now does it, and keeping it would put the prefix in twice.</p>
-<h3 id="images-the-proxy-cannot-serve">Images the proxy cannot serve<a class="docs-heading-link" aria-label="Link to this section" href="#images-the-proxy-cannot-serve">#</a></h3>
+<h3 id="images-the-proxy-cannot-serve">Images the proxy cannot <span class="docs-heading-tail"><span>serve</span><a class="docs-heading-link" aria-label="Link to this section" href="#images-the-proxy-cannot-serve">#</a></span></h3>
 <p>The Dependency Proxy serves Docker Hub only. The <code>a11y</code> component's Playwright
 image (<code>mcr.microsoft.com</code>) and the <code>portability</code> component's Buildah image
 (<code>quay.io</code>) are pulled from their own registries and have no <code>image_prefix</code>;
 the runner's own image cache is what saves those pulls.</p>
-<h2 id="packages-the-cache-blocks">Packages: the cache blocks<a class="docs-heading-link" aria-label="Link to this section" href="#packages-the-cache-blocks">#</a></h2>
+<h2 id="packages-the-cache-blocks">Packages: the cache <span class="docs-heading-tail"><span>blocks</span><a class="docs-heading-link" aria-label="Link to this section" href="#packages-the-cache-blocks">#</a></span></h2>
 <p>Each job that installs packages keeps them in the GitLab cache, inside the
 project so GitLab can save and restore them:</p>
 <div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
@@ -152,7 +152,7 @@ keys are fixed and installs still resolve from the lock, so a cached
 run never installs a stale package: Composer and npm only skip the download.
 Every component cache also saves with <code>when: always</code>, so a retry after a
 dropped download fetches only what is missing.</p>
-<h2 id="your-own-jobs">Your own jobs<a class="docs-heading-link" aria-label="Link to this section" href="#your-own-jobs">#</a></h2>
+<h2 id="your-own-jobs">Your own <span class="docs-heading-tail"><span>jobs</span><a class="docs-heading-link" aria-label="Link to this section" href="#your-own-jobs">#</a></span></h2>
 <p>The same pattern fits an app's own jobs, such as <code>composer-ci</code> or a front-end
 build. Sourdough's app templates ship it:</p>
 <pre tabindex="0"><code class="language-yaml">variables:
@@ -169,7 +169,7 @@ composer-ci:
     - composer install --no-interaction --no-progress --prefer-dist
     - composer ci
 </code></pre>
-<h2 id="how-it-stays-that-way">How it stays that way<a class="docs-heading-link" aria-label="Link to this section" href="#how-it-stays-that-way">#</a></h2>
+<h2 id="how-it-stays-that-way">How it stays that <span class="docs-heading-tail"><span>way</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-it-stays-that-way">#</a></span></h2>
 <p><code>tests/check-dependency-cache.sh</code> (and its <code>.ps1</code> twin) runs in Preflight's
 <code>contract</code> job and fails when:</p>
 <ul>
@@ -181,7 +181,7 @@ cache directory;</li>
 <li>Preflight's own <code>.gitlab-ci.yml</code> pulls a Docker Hub image without the proxy
 prefix, or passes a component an image that already carries it.</li>
 </ul>
-<h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
+<h2 id="related"><span class="docs-heading-tail"><span>Related</span><a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></span></h2>
 <ul>
 <li><a href="image-pins.html">Updating image pins</a>: how the digests behind <code>image</code> are chosen and changed.</li>
 <li><a href="component-php-test.html">The php-test component</a>: the matrix and its per-version cache.</li>

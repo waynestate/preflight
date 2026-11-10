@@ -40,18 +40,18 @@
   <nav class="docs-nav docs-nav--sidebar" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../docs/index.html">Overview</a></li><li><a href="../docs/install.html">Install</a></li><li><a href="../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../docs/guides/component-npm-audit.html">The npm-audit component</a></li><li><a href="../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../docs/guides/component-pint.html">The pint component</a></li><li><a href="../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../docs/guides/component-secret-detection.html">The secret-detection component</a></li><li><a href="../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../docs/guides/component-portability.html">The portability component</a></li><li><a href="../docs/guides/component-a11y.html">The a11y component</a></li><li><a href="../docs/guides/component-squire-kit.html">The squire-kit component</a></li><li><a href="../docs/guides/inputs-contract.html">The inputs contract</a></li><li><a href="../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../docs/guides/renovate.html">Renovate</a></li><li><a href="../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../docs/guides/dependency-caching.html">Dependency caching</a></li><li><a href="../docs/guides/template-lint.html">Template lint</a></li><li><a href="../docs/guides/deprecation.html">Deprecating a component</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../docs/reference/components.html">Components</a></li><li><a href="../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../docs/reference/local-checks.html">Local checks</a></li><li><a href="../docs/reference/proof.html">Proof</a></li></ul></li><li><a href="../docs/troubleshooting.html" aria-current="page">Troubleshooting</a></li><li><a href="../docs/upgrading.html">Upgrading</a></li><li><a href="../docs/changelog.html">Changelog</a></li></ul></nav>
   <div class="docs-content">
     <main id="main">
-      <article class="docs-article"><h1 id="troubleshooting">Troubleshooting<a class="docs-heading-link" aria-label="Link to this section" href="#troubleshooting">#</a></h1>
+      <article class="docs-article"><h1 id="troubleshooting"><span class="docs-heading-tail"><span>Troubleshooting</span><a class="docs-heading-link" aria-label="Link to this section" href="#troubleshooting">#</a></span></h1>
 <p>What to do when a Preflight job fails or a gate behaves unexpectedly. Each entry names the cause, the fix, and how to check it. Most failures are a pin that moved or a setting that is missing. The checklist catches the rest.</p>
 <aside class="docs-callout docs-callout--tip" role="note"><p class="docs-callout__label">Tip</p><p>Start with the job log. The message usually names the input that is wrong, and every input is listed on the <a href="reference/components.html">Components</a> page.</p></aside>
-<h2 id="the-pipeline">The pipeline<a class="docs-heading-link" aria-label="Link to this section" href="#the-pipeline">#</a></h2>
-<h3 id="the-include-fails-on-another-gitlab-instance">The include fails on another GitLab instance<a class="docs-heading-link" aria-label="Link to this section" href="#the-include-fails-on-another-gitlab-instance">#</a></h3>
+<h2 id="the-pipeline">The <span class="docs-heading-tail"><span>pipeline</span><a class="docs-heading-link" aria-label="Link to this section" href="#the-pipeline">#</a></span></h2>
+<h3 id="the-include-fails-on-another-gitlab-instance">The include fails on another GitLab <span class="docs-heading-tail"><span>instance</span><a class="docs-heading-link" aria-label="Link to this section" href="#the-include-fails-on-another-gitlab-instance">#</a></span></h3>
 <p>Components work only inside the GitLab instance that hosts this project, and they cannot be used across instances except by mirroring.</p>
 <ul>
 <li><strong>Cause:</strong> the app lives on a different instance than the one that hosts Preflight.</li>
 <li><strong>Fix:</strong> host the app on the same instance. For a package that is also mirrored to GitHub, use the reusable workflow at <code>.github/workflows/php-package.yml</code> in this repo instead of the components.</li>
 <li><strong>Check:</strong> the include path starts with <code>$CI_SERVER_FQDN/enterprise-apps/preflight/</code>, and the app's project is on that same instance.</li>
 </ul>
-<h3 id="the-components-do-not-run-on-merge-requests">The components do not run on merge requests<a class="docs-heading-link" aria-label="Link to this section" href="#the-components-do-not-run-on-merge-requests">#</a></h3>
+<h3 id="the-components-do-not-run-on-merge-requests">The components do not run on merge <span class="docs-heading-tail"><span>requests</span><a class="docs-heading-link" aria-label="Link to this section" href="#the-components-do-not-run-on-merge-requests">#</a></span></h3>
 <p>The components are ordinary jobs, so they run whenever the app's pipeline runs. Whether the pipeline runs on a merge request is decided by a <code>workflow:rules</code> block, and a component cannot set it for the project that includes it.</p>
 <ul>
 <li><strong>Cause:</strong> the app's own <code>.gitlab-ci.yml</code> has no <code>workflow:rules</code> block with a <code>merge_request_event</code> rule.</li>
@@ -65,161 +65,161 @@
 <ul>
 <li><strong>Check:</strong> a merge request pipeline runs, and so does a push to the default branch.</li>
 </ul>
-<h3 id="a-gate-was-skipped-or-weakened">A gate was skipped or weakened<a class="docs-heading-link" aria-label="Link to this section" href="#a-gate-was-skipped-or-weakened">#</a></h3>
+<h3 id="a-gate-was-skipped-or-weakened">A gate was skipped or <span class="docs-heading-tail"><span>weakened</span><a class="docs-heading-link" aria-label="Link to this section" href="#a-gate-was-skipped-or-weakened">#</a></span></h3>
 <p>An included component is a set of ordinary jobs. The app's own <code>.gitlab-ci.yml</code> is merged over them, so an app can override a job's keys, skip it with <code>rules</code>, or delete the <code>include:</code> line. Preflight makes the safe pipeline the easy one. It does not lock it.</p>
 <ul>
 <li><strong>Cause:</strong> a change in the app's own <code>.gitlab-ci.yml</code> overrides, skips or removes a component job.</li>
 <li><strong>Fix:</strong> review the diff of the app's <code>.gitlab-ci.yml</code> against the last known-good pipeline, and restore the job or the <code>include:</code> line.</li>
 <li><strong>Check:</strong> Rollcall is where skipped or weakened gates show up.</li>
 </ul>
-<h3 id="two-includes-of-the-same-component-became-one-job">Two includes of the same component became one job<a class="docs-heading-link" aria-label="Link to this section" href="#two-includes-of-the-same-component-became-one-job">#</a></h3>
+<h3 id="two-includes-of-the-same-component-became-one-job">Two includes of the same component became one <span class="docs-heading-tail"><span>job</span><a class="docs-heading-link" aria-label="Link to this section" href="#two-includes-of-the-same-component-became-one-job">#</a></span></h3>
 <p>Every component takes a <code>job_name</code> input, whose default is the job's usual name. Without it, two includes of the same component share a job name and merge into one.</p>
 <ul>
 <li><strong>Cause:</strong> one project includes the same component more than once (for example in a monorepo with two apps) without setting <code>job_name</code>.</li>
 <li><strong>Fix:</strong> set <code>job_name</code> on each include, for example <code>pint-app</code> and <code>pint-admin</code>. <code>job_name</code> ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release.</li>
 <li><strong>Check:</strong> the pipeline lists one job per include, with the names you set.</li>
 </ul>
-<h3 id="pipeline-creation-fails-on-the-unknown-spec-component-key">Pipeline creation fails on the unknown <code>spec: component:</code> key<a class="docs-heading-link" aria-label="Link to this section" href="#pipeline-creation-fails-on-the-unknown-spec-component-key">#</a></h3>
+<h3 id="pipeline-creation-fails-on-the-unknown-spec-component-key">Pipeline creation fails on the unknown <code>spec: component:</code> <span class="docs-heading-tail"><span>key</span><a class="docs-heading-link" aria-label="Link to this section" href="#pipeline-creation-fails-on-the-unknown-spec-component-key">#</a></span></h3>
 <p>Every Preflight component declares <code>spec: component:</code>, and GitLab only accepts that key from 18.7 on. On an older instance the pipeline never starts: creation fails with &quot;header:spec config contains unknown keys&quot;.</p>
 <ul>
 <li><strong>Cause:</strong> the GitLab instance is older than 18.7.</li>
 <li><strong>Fix:</strong> upgrade GitLab to 18.7 or later, or pin an older Preflight tag that does not declare <code>spec: component:</code>.</li>
 <li><strong>Check:</strong> the instance banner shows 18.7 or later, and the pipeline creates and runs the component jobs.</li>
 </ul>
-<h3 id="a-fork-merge-request-ran-with-protected-variables">A fork merge request ran with protected variables<a class="docs-heading-link" aria-label="Link to this section" href="#a-fork-merge-request-ran-with-protected-variables">#</a></h3>
+<h3 id="a-fork-merge-request-ran-with-protected-variables">A fork merge request ran with protected <span class="docs-heading-tail"><span>variables</span><a class="docs-heading-link" aria-label="Link to this section" href="#a-fork-merge-request-ran-with-protected-variables">#</a></span></h3>
 <p>A fork's merge request pipeline runs the fork's configuration.</p>
 <ul>
 <li><strong>Cause:</strong> the project lets fork pipelines see protected variables.</li>
 <li><strong>Fix:</strong> review a fork's <code>.gitlab-ci.yml</code> before running its pipeline, and never give it protected variables.</li>
 <li><strong>Check:</strong> the fork pipeline's variable list does not include any protected variable.</li>
 </ul>
-<h2 id="job-failures">Job failures<a class="docs-heading-link" aria-label="Link to this section" href="#job-failures">#</a></h2>
-<h3 id="a-job-misbehaves-which-preflight-release-ran">A job misbehaves: which Preflight release ran?<a class="docs-heading-link" aria-label="Link to this section" href="#a-job-misbehaves-which-preflight-release-ran">#</a></h3>
+<h2 id="job-failures">Job <span class="docs-heading-tail"><span>failures</span><a class="docs-heading-link" aria-label="Link to this section" href="#job-failures">#</a></span></h2>
+<h3 id="a-job-misbehaves-which-preflight-release-ran">A job misbehaves: which Preflight release <span class="docs-heading-tail"><span>ran?</span><a class="docs-heading-link" aria-label="Link to this section" href="#a-job-misbehaves-which-preflight-release-ran">#</a></span></h3>
 <p>Every Preflight job prints a <code>Preflight component &lt;name&gt; &lt;version&gt; (ref &lt;reference&gt;, sha &lt;sha&gt;)</code> line before any other command. When a job fails or behaves unexpectedly, read that first line to see which Preflight release produced it: <code>&lt;name&gt;</code> is the component, <code>&lt;version&gt;</code> the pinned release tag, <code>&lt;reference&gt;</code> the ref the include points at, and <code>&lt;sha&gt;</code> the commit SHA of the template that ran. Compare it with the pin in the app's <code>.gitlab-ci.yml</code>; a mismatch means the include moved or the pipeline ran on an older pin.</p>
 <ul>
 <li><strong>Cause:</strong> the job log does not say which Preflight release ran, so the failure cannot be tied to a pin.</li>
 <li><strong>Fix:</strong> read the <code>Preflight component</code> line at the top of the job log. If the line is missing, the include is pinned to a Preflight release from before the line shipped; pin the current tag.</li>
 <li><strong>Check:</strong> the first line of the job log names the component, its version, reference and SHA, and they match the pin in the app's <code>.gitlab-ci.yml</code>.</li>
 </ul>
-<h3 id="proctor-s-preflight-pinned-check-warns">PROCTOR's preflight-pinned check warns<a class="docs-heading-link" aria-label="Link to this section" href="#proctor-s-preflight-pinned-check-warns">#</a></h3>
+<h3 id="proctor-s-preflight-pinned-check-warns">PROCTOR's preflight-pinned check <span class="docs-heading-tail"><span>warns</span><a class="docs-heading-link" aria-label="Link to this section" href="#proctor-s-preflight-pinned-check-warns">#</a></span></h3>
 <p>A tag or branch can move. A SHA cannot. PROCTOR's <code>preflight-pinned</code> check warns when an include is not pinned to a commit SHA.</p>
 <ul>
 <li><strong>Cause:</strong> the include is pinned to a tag or a branch instead of a full commit SHA.</li>
 <li><strong>Fix:</strong> pin the full commit SHA and keep the tag in a trailing comment, as in the examples on the <a href="reference/components.html">Components</a> page.</li>
 <li><strong>Check:</strong> PROCTOR's report no longer carries the <code>preflight-pinned</code> finding.</li>
 </ul>
-<h3 id="composer-audit-is-green-then-an-advisory-lands">composer-audit is green, then an advisory lands<a class="docs-heading-link" aria-label="Link to this section" href="#composer-audit-is-green-then-an-advisory-lands">#</a></h3>
+<h3 id="composer-audit-is-green-then-an-advisory-lands">composer-audit is green, then an advisory <span class="docs-heading-tail"><span>lands</span><a class="docs-heading-link" aria-label="Link to this section" href="#composer-audit-is-green-then-an-advisory-lands">#</a></span></h3>
 <p>New advisories are published after code is merged, so a green pipeline today can be stale tomorrow.</p>
 <ul>
 <li><strong>Cause:</strong> no pipeline has run since the advisory was published.</li>
 <li><strong>Fix:</strong> create a weekly pipeline schedule on the default branch: project settings, Build, Pipeline schedules. The component needs nothing extra. It carries no <code>rules:</code> block, so it runs in scheduled pipelines like any other. Someone with Maintainer rights on the app creates the schedule.</li>
 <li><strong>Check:</strong> the schedule appears under project settings, Build, Pipeline schedules, and its latest pipeline is green.</li>
 </ul>
-<h3 id="composer-audit-fails-on-an-abandoned-package">composer-audit fails on an abandoned package<a class="docs-heading-link" aria-label="Link to this section" href="#composer-audit-fails-on-an-abandoned-package">#</a></h3>
+<h3 id="composer-audit-fails-on-an-abandoned-package">composer-audit fails on an abandoned <span class="docs-heading-tail"><span>package</span><a class="docs-heading-link" aria-label="Link to this section" href="#composer-audit-fails-on-an-abandoned-package">#</a></span></h3>
 <p>The job log names an abandoned package in the lock. An abandoned package is one its author no longer maintains, and <code>composer audit</code> fails the job on one by default.</p>
 <ul>
 <li><strong>Cause:</strong> the lock holds a package marked abandoned, and the <code>abandoned</code> input is at its default, <code>fail</code>.</li>
 <li><strong>Fix:</strong> upgrade the package or move to its successor where the log names one. While that is not possible, set the <code>abandoned</code> input on the include: <code>report</code> lists the abandoned packages without failing the job (right for an old app with abandoned transitive packages), <code>ignore</code> does not look at them at all. Advisories still fail the job in every mode.</li>
 <li><strong>Check:</strong> with <code>report</code>, the job is green and its log lists the abandoned packages; with <code>fail</code>, the job fails until the lock no longer holds one.</li>
 </ul>
-<h3 id="npm-audit-fails-with-audit-endpoint-returned-an-error">npm-audit fails with &quot;audit endpoint returned an error&quot;<a class="docs-heading-link" aria-label="Link to this section" href="#npm-audit-fails-with-audit-endpoint-returned-an-error">#</a></h3>
+<h3 id="npm-audit-fails-with-audit-endpoint-returned-an-error">npm-audit fails with &quot;audit endpoint returned an <span class="docs-heading-tail"><span>error&quot;</span><a class="docs-heading-link" aria-label="Link to this section" href="#npm-audit-fails-with-audit-endpoint-returned-an-error">#</a></span></h3>
 <p>The job log ends with <code>npm-audit: the registry's audit endpoint could not be reached or refused the request, so nothing was audited.</code></p>
 <ul>
 <li><strong>Cause:</strong> the runner cannot reach the npm registry over HTTPS, or the app's <code>.npmrc</code> names a registry that does not serve npm's audit endpoints (<code>/-/npm/v1/security/advisories/bulk</code>).</li>
 <li><strong>Fix:</strong> let the runner reach the registry the log names, or point the audit at one that serves the endpoints. The job never passes without an answer.</li>
 <li><strong>Check:</strong> the job log shows npm's report (<code>found 0 vulnerabilities</code> or a list) instead of the error.</li>
 </ul>
-<h3 id="npm-audit-fails-on-a-dev-only-package">npm-audit fails on a dev-only package<a class="docs-heading-link" aria-label="Link to this section" href="#npm-audit-fails-on-a-dev-only-package">#</a></h3>
+<h3 id="npm-audit-fails-on-a-dev-only-package">npm-audit fails on a dev-only <span class="docs-heading-tail"><span>package</span><a class="docs-heading-link" aria-label="Link to this section" href="#npm-audit-fails-on-a-dev-only-package">#</a></span></h3>
 <ul>
 <li><strong>Cause:</strong> <code>omit_dev</code> is <code>false</code>, so the gate audits dev dependencies too.</li>
 <li><strong>Fix:</strong> upgrade the package, or leave <code>omit_dev</code> at its default, <code>true</code>: the gate then reads runtime dependencies only, and the full report after it still lists the dev finding without failing.</li>
 <li><strong>Check:</strong> the gate's lines say <code>failing on high or higher in runtime dependencies</code>.</li>
 </ul>
-<h3 id="composer-install-stops-the-lock-needs-another-php-or-an-extension">composer install stops: the lock needs another PHP or an extension<a class="docs-heading-link" aria-label="Link to this section" href="#composer-install-stops-the-lock-needs-another-php-or-an-extension">#</a></h3>
+<h3 id="composer-install-stops-the-lock-needs-another-php-or-an-extension">composer install stops: the lock needs another PHP or an <span class="docs-heading-tail"><span>extension</span><a class="docs-heading-link" aria-label="Link to this section" href="#composer-install-stops-the-lock-needs-another-php-or-an-extension">#</a></span></h3>
 <p>The job log stops at <code>composer install</code> with <code>your php version (8.4.x) does not satisfy that requirement</code>, or with <code>requires ext-gd * -&gt; it is missing from your system</code> (gd, oci8 and ldap are the usual ones). The <code>php-test</code>, <code>pint</code> and <code>phpstan</code> jobs install the app to run it, so they need what the app needs.</p>
 <ul>
 <li><strong>Cause:</strong> the lock was built for an older PHP, or the app needs a PHP extension that the default image does not have. The default <code>php:*-cli</code> and <code>composer</code> images carry only the extensions PHP builds in.</li>
 <li><strong>Fix:</strong> for an old PHP, upgrade the app: that red job is the finding, not a fault in Preflight. For an extension, set the job's <code>image</code> input to an image that has the same extensions as the app's Citadel image, for example one built <code>FROM php:8.4-cli-trixie</code> with <code>docker-php-ext-install gd</code>. The <code>proctor</code> and <code>sbom</code> jobs never run the app, so they install with <code>--ignore-platform-reqs</code> and need neither.</li>
 <li><strong>Check:</strong> the <code>composer install</code> step of the job passes, and the job fails, if at all, on its own check.</li>
 </ul>
-<h3 id="composer-install-cannot-clone-a-private-package">composer install cannot clone a private package<a class="docs-heading-link" aria-label="Link to this section" href="#composer-install-cannot-clone-a-private-package">#</a></h3>
+<h3 id="composer-install-cannot-clone-a-private-package">composer install cannot clone a private <span class="docs-heading-tail"><span>package</span><a class="docs-heading-link" aria-label="Link to this section" href="#composer-install-cannot-clone-a-private-package">#</a></span></h3>
 <p>The job log shows <code>Failed to execute git clone --mirror</code> for a repository on the app's own GitLab instance, or <code>Could not connect to server</code>.</p>
 <ul>
 <li><strong>Cause:</strong> the lock installs a package straight from a private Git repository, and the job has no credential for it. A local <code>auth.json</code> never reaches CI.</li>
 <li><strong>Fix:</strong> give Composer a credential in the pipeline, for example a masked CI/CD variable <code>COMPOSER_AUTH</code> holding an <code>http-basic</code> entry for the instance with a deploy token that can read the package's project. Prefer publishing the package to the GitLab package registry and listing only that project in the job token allowlist; see <a href="guides/job-token-allowlist.html">Keep the job token allowlist short</a>.</li>
 <li><strong>Check:</strong> the <code>composer install</code> step passes in a pipeline on a branch.</li>
 </ul>
-<h3 id="eslint-stops-at-npm-ci">eslint stops at npm ci<a class="docs-heading-link" aria-label="Link to this section" href="#eslint-stops-at-npm-ci">#</a></h3>
+<h3 id="eslint-stops-at-npm-ci">eslint stops at npm <span class="docs-heading-tail"><span>ci</span><a class="docs-heading-link" aria-label="Link to this section" href="#eslint-stops-at-npm-ci">#</a></span></h3>
 <p>The <code>eslint</code> job stops at <code>npm ci</code> with the usage text, before ESLint runs.</p>
 <ul>
 <li><strong>Cause:</strong> <code>npm ci</code> needs a <code>package-lock.json</code>, and the app keeps only a <code>yarn.lock</code> or a <code>pnpm-lock.yaml</code>.</li>
 <li><strong>Fix:</strong> commit a <code>package-lock.json</code> (run <code>npm install</code> once), or leave the <code>eslint</code> component out until the app moves to npm.</li>
 <li><strong>Check:</strong> <code>npm ci --ignore-scripts</code> passes locally from a clean checkout.</li>
 </ul>
-<h3 id="php-test-next-is-red">php-test-next is red<a class="docs-heading-link" aria-label="Link to this section" href="#php-test-next-is-red">#</a></h3>
+<h3 id="php-test-next-is-red">php-test-next is <span class="docs-heading-tail"><span>red</span><a class="docs-heading-link" aria-label="Link to this section" href="#php-test-next-is-red">#</a></span></h3>
 <p>A red <code>php-test-next</code> job is an early warning, not a stop. It is the second <code>php-test</code> include that tries the PHP release that is not supported yet, with <code>allow_failure: true</code> in the app's own file.</p>
 <ul>
 <li><strong>Cause:</strong> the next PHP release still fails the app's tests, or only has release candidate images.</li>
 <li><strong>Fix:</strong> leave <code>allow_failure: true</code> in place while the release is unsupported. Once the release is supported (the supported versions follow <code>policy.json</code>), drop the <code>allow_failure</code> and move the version into the main <code>php_versions</code> list.</li>
 <li><strong>Check:</strong> the main <code>php-test</code> matrix is green. Only the named <code>php-test-next</code> job is red.</li>
 </ul>
-<h3 id="package-publish-refuses-the-tag">package-publish refuses the tag<a class="docs-heading-link" aria-label="Link to this section" href="#package-publish-refuses-the-tag">#</a></h3>
+<h3 id="package-publish-refuses-the-tag">package-publish refuses the <span class="docs-heading-tail"><span>tag</span><a class="docs-heading-link" aria-label="Link to this section" href="#package-publish-refuses-the-tag">#</a></span></h3>
 <p>The job reads the registry before publishing. Republishing a version from the same commit is a no-op, and republishing it from a different commit fails instead of overwriting the version, because GitLab would otherwise overwrite it without a word.</p>
 <ul>
 <li><strong>Cause:</strong> the tag's version already exists in the group's Composer registry, published from a different commit.</li>
 <li><strong>Fix:</strong> publish a new version tag instead of moving the old one. Protect the release tags so only maintainers can create or move a tag.</li>
 <li><strong>Check:</strong> the job log shows the version already on the manifest and the commit it was published from.</li>
 </ul>
-<h3 id="portability-says-an-input-is-unknown">portability says an input is unknown<a class="docs-heading-link" aria-label="Link to this section" href="#portability-says-an-input-is-unknown">#</a></h3>
+<h3 id="portability-says-an-input-is-unknown">portability says an input is <span class="docs-heading-tail"><span>unknown</span><a class="docs-heading-link" aria-label="Link to this section" href="#portability-says-an-input-is-unknown">#</a></span></h3>
 <p>The one-job <code>portability</code> component has new inputs, and <code>buildah_image</code> is now <code>image</code> (the old app-image input is gone).</p>
 <ul>
 <li><strong>Cause:</strong> the include is pinned to 0.1.4, which carries the two-job form (<code>portability-build</code>, <code>portability-run</code>, goss), or the include still sets <code>buildah_image</code>.</li>
 <li><strong>Fix:</strong> pin a SHA at or after the one-job form and follow <a href="upgrading.html">Upgrading</a>: <code>buildah_image</code> becomes <code>image</code>, and the old app <code>image</code> input is gone because nothing is pushed.</li>
 <li><strong>Check:</strong> the pipeline lists one job, <code>portability</code>.</li>
 </ul>
-<h3 id="portability-fails-before-the-build-on-the-runner">portability fails before the build on the runner<a class="docs-heading-link" aria-label="Link to this section" href="#portability-fails-before-the-build-on-the-runner">#</a></h3>
+<h3 id="portability-fails-before-the-build-on-the-runner">portability fails before the build on the <span class="docs-heading-tail"><span>runner</span><a class="docs-heading-link" aria-label="Link to this section" href="#portability-fails-before-the-build-on-the-runner">#</a></span></h3>
 <p>Buildah's chroot isolation opens a user namespace.</p>
 <ul>
 <li><strong>Cause:</strong> the runner (or Docker's seccomp profile on a laptop) refuses user namespaces; the log shows <code>unshare(CLONE_NEWUSER): Operation not permitted</code>.</li>
 <li><strong>Fix:</strong> run the job on a runner that permits user namespaces, which ordinary unprivileged Docker-executor runners do. Do not make the runner privileged for it. Locally, add <code>--security-opt seccomp=unconfined</code> to <code>docker run</code>.</li>
 <li><strong>Check:</strong> the log reaches <code>buildah bud</code> and prints the build steps.</li>
 </ul>
-<h3 id="portability-health-fail-on-a-laravel-app">portability: health: FAIL on a Laravel app<a class="docs-heading-link" aria-label="Link to this section" href="#portability-health-fail-on-a-laravel-app">#</a></h3>
+<h3 id="portability-health-fail-on-a-laravel-app">portability: health: FAIL on a Laravel <span class="docs-heading-tail"><span>app</span><a class="docs-heading-link" aria-label="Link to this section" href="#portability-health-fail-on-a-laravel-app">#</a></span></h3>
 <p>The probe asks for the health path with a bare IP address in <code>Host</code> (<code>Host: &lt;ip&gt;:&lt;port&gt;</code>), the way a platform's probe does.</p>
 <ul>
 <li><strong>Cause:</strong> the trusted-hosts middleware, an HTTPS redirect, a session or an auth check runs before the health route.</li>
 <li><strong>Fix:</strong> answer the health route before those, for example Laravel's <code>health: '/up'</code> route in <code>bootstrap/app.php</code>, and exempt it from trusted hosts and HTTPS redirects.</li>
 <li><strong>Check:</strong> <code>portability: health: pass</code>.</li>
 </ul>
-<h3 id="portability-sigterm-fail">portability: sigterm: FAIL<a class="docs-heading-link" aria-label="Link to this section" href="#portability-sigterm-fail">#</a></h3>
+<h3 id="portability-sigterm-fail">portability: sigterm: <span class="docs-heading-tail"><span>FAIL</span><a class="docs-heading-link" aria-label="Link to this section" href="#portability-sigterm-fail">#</a></span></h3>
 <p>The main process must handle SIGTERM and exit by itself within <code>stop_timeout</code>, because PID 1 ignores a signal it has no handler for.</p>
 <ul>
 <li><strong>Cause:</strong> the image <code>exec</code>s a server that has no SIGTERM handler (for example <code>php -S</code>), or a shell script starts the server without passing the signal on.</li>
 <li><strong>Fix:</strong> start the app under an init that forwards signals (<code>tini</code>, <code>dumb-init</code>) or a server that handles SIGTERM itself (php-fpm, FrankenPHP); in a shell entrypoint, trap TERM and stop the child.</li>
 <li><strong>Check:</strong> <code>portability: sigterm: pass</code> with <code>handled SIGTERM and exited by itself</code>.</li>
 </ul>
-<h3 id="portability-an-apache-image-fails-after-the-upgrade-to-0-5-0">portability: an Apache image fails after the upgrade to 0.5.0<a class="docs-heading-link" aria-label="Link to this section" href="#portability-an-apache-image-fails-after-the-upgrade-to-0-5-0">#</a></h3>
+<h3 id="portability-an-apache-image-fails-after-the-upgrade-to-0-5-0">portability: an Apache image fails after the upgrade to <span class="docs-heading-tail"><span>0.5.0</span><a class="docs-heading-link" aria-label="Link to this section" href="#portability-an-apache-image-fails-after-the-upgrade-to-0-5-0">#</a></span></h3>
 <p>Since 0.5.0 the job gives each replica stdio its uid owns and a session of its own, so the <code>start_command</code> shim older releases needed is in the way.</p>
 <ul>
 <li><strong>Cause:</strong> <code>start_command</code> still runs <code>setsid</code> (for example <code>exec setsid bash -c 'exec &gt; &gt;(exec cat) 2&gt;&amp;1; exec squire-entrypoint'</code>). Inside the job's launcher the shell already leads its own session, so <code>setsid</code> forks the app away from the replica's main process, and the replica never answers: <code>health</code> fails with <code>last answer: 000</code>.</li>
 <li><strong>Fix:</strong> delete the <code>start_command</code> input, so the job runs the image's own <code>ENTRYPOINT</code> and <code>CMD</code>.</li>
 <li><strong>Check:</strong> <code>portability: health: pass</code> and <code>portability: sigterm: pass</code>.</li>
 </ul>
-<h3 id="portability-session-hop-fail-with-set-session-login-path">portability: session-hop: FAIL with &quot;set session_login_path&quot;<a class="docs-heading-link" aria-label="Link to this section" href="#portability-session-hop-fail-with-set-session-login-path">#</a></h3>
+<h3 id="portability-session-hop-fail-with-set-session-login-path">portability: session-hop: FAIL with &quot;set <span class="docs-heading-tail"><span>session_login_path&quot;</span><a class="docs-heading-link" aria-label="Link to this section" href="#portability-session-hop-fail-with-set-session-login-path">#</a></span></h3>
 <p><code>session-hop</code> needs a route that signs in a test user and one that answers 200 only for a signed-in user.</p>
 <ul>
 <li><strong>Cause:</strong> <code>session_login_path</code> and <code>session_check_path</code> are empty, but <code>session-hop</code> is in <code>checks</code>.</li>
 <li><strong>Fix:</strong> add the two routes behind an environment variable only the job sets (see <a href="guides/component-portability.html#a-sign-in-route-for-session-hop">The portability component</a>), or, for an app with no sign-in, leave <code>session-hop</code> out of <code>checks</code>.</li>
 <li><strong>Check:</strong> <code>portability: session-hop: pass</code>, or <code>skipped</code> when left out on purpose.</li>
 </ul>
-<h3 id="a11y-fails-on-a-page-that-looked-fine">a11y fails on a page that looked fine<a class="docs-heading-link" aria-label="Link to this section" href="#a11y-fails-on-a-page-that-looked-fine">#</a></h3>
+<h3 id="a11y-fails-on-a-page-that-looked-fine">a11y fails on a page that looked <span class="docs-heading-tail"><span>fine</span><a class="docs-heading-link" aria-label="Link to this section" href="#a11y-fails-on-a-page-that-looked-fine">#</a></span></h3>
 <p>The job checks each page in light and dark mode at 320 px and 1280 px, with reduced motion, so it sees layouts and palettes a quick look in one browser misses.</p>
 <ul>
 <li><strong>Cause:</strong> a fault that shows in one mode only, and the failing test case names that mode, for example <code>docs/index.html dark 320px</code>: a dark palette with weak contrast, a label hidden at phone width, or a fixed-width element that makes the page scroll sideways at 320 px (<code>preflight-reflow</code>, which names the element where the overflow starts).</li>
 <li><strong>Fix:</strong> open the page in that mode (dark color scheme, a 320 px window) and fix the element the report names; each axe-core rule links its help page. While a site works through its first findings, set <code>allow_failure: true</code> on the include and remove it once the job is green.</li>
 <li><strong>Check:</strong> the job's last line reads <code>a11y: clean</code>, and the merge request's test summary shows every case passing.</li>
 </ul>
-<h3 id="a11y-stops-with-a-configuration-error-exit-2">a11y stops with a configuration error (exit 2)<a class="docs-heading-link" aria-label="Link to this section" href="#a11y-stops-with-a-configuration-error-exit-2">#</a></h3>
+<h3 id="a11y-stops-with-a-configuration-error-exit-2">a11y stops with a configuration error (exit <span class="docs-heading-tail"><span>2)</span><a class="docs-heading-link" aria-label="Link to this section" href="#a11y-stops-with-a-configuration-error-exit-2">#</a></span></h3>
 <p>Exit 2 means the job never judged a page: an input or a tool is wrong.</p>
 <ul>
 <li><strong>Cause:</strong> one of the messages below.
@@ -234,7 +234,7 @@
 <li><strong>Fix:</strong> correct the input the message names: fix the glob or <code>site_dir</code>, set <code>playwright_version</code> to the Playwright release in the image, or move <code>axe_core_version</code> and <code>axe_playwright_version</code> together (Renovate bumps them as one group).</li>
 <li><strong>Check:</strong> the job log's second line names the site or URL and the Playwright version, and the summary line names the axe-core version that ran.</li>
 </ul>
-<h3 id="squire-kit-fails-the-kit-drifted-exit-1">squire-kit fails: the kit drifted (exit 1)<a class="docs-heading-link" aria-label="Link to this section" href="#squire-kit-fails-the-kit-drifted-exit-1">#</a></h3>
+<h3 id="squire-kit-fails-the-kit-drifted-exit-1">squire-kit fails: the kit drifted (exit <span class="docs-heading-tail"><span>1)</span><a class="docs-heading-link" aria-label="Link to this section" href="#squire-kit-fails-the-kit-drifted-exit-1">#</a></span></h3>
 <p>The job installs the Squire release the kit records and runs <code>squire init --check</code>; the log lists every kit file with its state.</p>
 <ul>
 <li><strong>Cause:</strong> one of the states below.
@@ -248,7 +248,7 @@
 <li><strong>Fix:</strong> for <code>outdated</code> and <code>missing</code>, run <code>vendor/bin/squire update --path=deploy</code>, then <code>vendor/bin/squire init --path=deploy</code>, review the diff and commit it. For <code>modified</code>, put Squire's file back with <code>vendor/bin/squire init --force --path=deploy</code> and send the change to Squire instead, so every kit gets it. While a repository works through its first findings, set <code>allow_failure: true</code> on the include and remove it once the job is green.</li>
 <li><strong>Check:</strong> <code>vendor/bin/squire init --check --path=deploy</code> prints <code>RESULT: pass</code>, and so does the job's last line.</li>
 </ul>
-<h3 id="squire-kit-stops-before-checking-exit-2">squire-kit stops before checking (exit 2)<a class="docs-heading-link" aria-label="Link to this section" href="#squire-kit-stops-before-checking-exit-2">#</a></h3>
+<h3 id="squire-kit-stops-before-checking-exit-2">squire-kit stops before checking (exit <span class="docs-heading-tail"><span>2)</span><a class="docs-heading-link" aria-label="Link to this section" href="#squire-kit-stops-before-checking-exit-2">#</a></span></h3>
 <p>Exit 2 means the job never compared a file.</p>
 <ul>
 <li><strong>Cause:</strong> one of the messages below.
@@ -261,44 +261,44 @@
 <li><strong>Fix:</strong> set <code>working_dir</code> to the folder holding <code>.squire.json</code>, set <code>squire_version</code> to the release the kit was written with, or let the job reach Packagist.</li>
 <li><strong>Check:</strong> the job log prints <code>Checking the kit in ... against Squire X</code> before the file list.</li>
 </ul>
-<h2 id="renovate">Renovate<a class="docs-heading-link" aria-label="Link to this section" href="#renovate">#</a></h2>
-<h3 id="renovate-sees-literal-text-instead-of-a-token">Renovate sees literal text instead of a token<a class="docs-heading-link" aria-label="Link to this section" href="#renovate-sees-literal-text-instead-of-a-token">#</a></h3>
+<h2 id="renovate"><span class="docs-heading-tail"><span>Renovate</span><a class="docs-heading-link" aria-label="Link to this section" href="#renovate">#</a></span></h2>
+<h3 id="renovate-sees-literal-text-instead-of-a-token">Renovate sees literal text instead of a <span class="docs-heading-tail"><span>token</span><a class="docs-heading-link" aria-label="Link to this section" href="#renovate-sees-literal-text-instead-of-a-token">#</a></span></h3>
 <p>On GitLab 19.5 a self-reference such as <code>RENOVATE_TOKEN: $RENOVATE_TOKEN</code> in the job <code>variables:</code> arrives as literal text and shadows the masked project CI/CD variables. The component does not map either token on purpose. The job reads both straight from the project.</p>
 <ul>
 <li><strong>Cause:</strong> the runner project, or the app's file, adds <code>RENOVATE_TOKEN: $RENOVATE_TOKEN</code> or <code>GITHUB_COM_TOKEN: $GITHUB_COM_TOKEN</code> to <code>variables:</code>.</li>
 <li><strong>Fix:</strong> delete the self-reference. Keep <code>RENOVATE_TOKEN</code> (and optionally <code>GITHUB_COM_TOKEN</code>) as masked CI variables in the private runner project.</li>
 <li><strong>Check:</strong> the job log no longer shows the literal text <code>$RENOVATE_TOKEN</code>, and Renovate authenticates.</li>
 </ul>
-<h3 id="renovate-auto-merged-a-component-pin-bump">Renovate auto-merged a component pin bump<a class="docs-heading-link" aria-label="Link to this section" href="#renovate-auto-merged-a-component-pin-bump">#</a></h3>
+<h3 id="renovate-auto-merged-a-component-pin-bump">Renovate auto-merged a component pin <span class="docs-heading-tail"><span>bump</span><a class="docs-heading-link" aria-label="Link to this section" href="#renovate-auto-merged-a-component-pin-bump">#</a></span></h3>
 <p>In refs before 0.1.4 the component-rule manager name in <code>renovate/default.json</code> did not match repository deps, so a bump of a <code>component:</code> include version auto-merged instead of waiting for review.</p>
 <ul>
 <li><strong>Cause:</strong> the shared preset comes from a ref before the 0.1.4 fix.</li>
 <li><strong>Fix:</strong> point the repositories' <code>renovate.json</code> at the shared preset from 0.1.4 or later. Component version bumps now carry the <code>needs-review</code> label and never auto-merge.</li>
 <li><strong>Check:</strong> the merge request carries the <code>needs-review</code> label.</li>
 </ul>
-<h3 id="a-squire-kit-merge-request-shows-an-artifact-error">A Squire kit merge request shows an artifact error<a class="docs-heading-link" aria-label="Link to this section" href="#a-squire-kit-merge-request-shows-an-artifact-error">#</a></h3>
+<h3 id="a-squire-kit-merge-request-shows-an-artifact-error">A Squire kit merge request shows an artifact <span class="docs-heading-tail"><span>error</span><a class="docs-heading-link" aria-label="Link to this section" href="#a-squire-kit-merge-request-shows-an-artifact-error">#</a></span></h3>
 <p>The preset's Squire rule runs two commands after it bumps <code>.squire.json</code>: it installs the new Squire into <code>/tmp</code> and runs <code>squire update</code> on the kit folder. The merge request reports an artifact error when it could not.</p>
 <ul>
 <li><strong>Cause:</strong> the runner does not allow the commands (the message says the command <code>has not been added to the allowed list in allowedCommands</code>; the renovate component's <code>squire_kit_tasks</code> input is off), or <code>squire update</code> refused a kit file someone edited (the message names the file), or the release needs PHP or a network the runner lacks.</li>
 <li><strong>Fix:</strong> check out the branch, run <code>vendor/bin/squire update --path=deploy</code> (and <code>vendor/bin/squire init --path=deploy</code> for a release that adds a file), review the diff and commit it to the branch. For an edited file, restore it first with <code>vendor/bin/squire init --force --path=deploy</code>. To let the runner do this itself, set <code>squire_kit_tasks: true</code> on its renovate include.</li>
 <li><strong>Check:</strong> the <code>squire-kit</code> job on the merge request is green.</li>
 </ul>
-<h2 id="local-checks">Local checks<a class="docs-heading-link" aria-label="Link to this section" href="#local-checks">#</a></h2>
-<h3 id="the-portability-fixtures-fail-with-buildah-is-required">The portability fixtures fail with &quot;buildah is required&quot;<a class="docs-heading-link" aria-label="Link to this section" href="#the-portability-fixtures-fail-with-buildah-is-required">#</a></h3>
+<h2 id="local-checks">Local <span class="docs-heading-tail"><span>checks</span><a class="docs-heading-link" aria-label="Link to this section" href="#local-checks">#</a></span></h2>
+<h3 id="the-portability-fixtures-fail-with-buildah-is-required">The portability fixtures fail with &quot;buildah is <span class="docs-heading-tail"><span>required&quot;</span><a class="docs-heading-link" aria-label="Link to this section" href="#the-portability-fixtures-fail-with-buildah-is-required">#</a></span></h3>
 <p><code>tests/check-portability.sh</code> runs inside the component's Buildah image, not on the host.</p>
 <ul>
 <li><strong>Cause:</strong> the script was run with <code>sh</code> on the host.</li>
 <li><strong>Fix:</strong> run it through <code>docker run</code> in the Buildah image as <a href="reference/local-checks.html">Local checks</a> shows, or run <code>pwsh -File tests/check-portability.ps1</code> on Windows.</li>
 <li><strong>Check:</strong> one result line per case, and the script exits 0.</li>
 </ul>
-<h3 id="composer-ci-fails-on-a-stale-docs-site">composer ci fails on a stale docs site<a class="docs-heading-link" aria-label="Link to this section" href="#composer-ci-fails-on-a-stale-docs-site">#</a></h3>
+<h3 id="composer-ci-fails-on-a-stale-docs-site">composer ci fails on a stale docs <span class="docs-heading-tail"><span>site</span><a class="docs-heading-link" aria-label="Link to this section" href="#composer-ci-fails-on-a-stale-docs-site">#</a></span></h3>
 <p><code>composer ci</code> runs <code>docs:check</code>, which fails when the built docs site is stale or the generated command or environment reference has drifted from the CLI or source.</p>
 <ul>
 <li><strong>Cause:</strong> a page under <code>docs/</code> (or a generated reference) changed without rebuilding <code>site/docs/</code>.</li>
 <li><strong>Fix:</strong> run <code>composer docs</code> to rebuild <code>site/docs/</code> from <code>docs/</code>, and commit the rebuilt site with the page.</li>
 <li><strong>Check:</strong> <code>composer docs:check</code> passes.</li>
 </ul>
-<h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
+<h2 id="related"><span class="docs-heading-tail"><span>Related</span><a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></span></h2>
 <ul>
 <li><a href="reference/components.html">Components</a></li>
 <li><a href="reference/local-checks.html">Local checks</a></li>

@@ -6,13 +6,13 @@ llms: https://preflight.apps.wayne.edu/llms.txt
 generator: Squire agent-ready
 ---
 
-# The eslint component[#](https://preflight.apps.wayne.edu/docs/guides/component-eslint.html#the-eslint-component)
+# The eslint component [#](https://preflight.apps.wayne.edu/docs/guides/component-eslint.html#the-eslint-component)
 
 This page covers the `eslint` component: what the job does, how to include it, and every input it takes. Goal: the app's pipeline fails on any lint or format error, judged by the app's own config. Start with the include block, then check the inputs against your app. Preflight is named for the pre-flight check, and this component is the row that keeps the JavaScript airworthy.
 
 Version 1 · Category: Testing/Validation · Tags: javascript,style,eslint,prettier
 
-## What the job does[#](https://preflight.apps.wayne.edu/docs/guides/component-eslint.html#what-the-job-does)
+## What the job does [#](https://preflight.apps.wayne.edu/docs/guides/component-eslint.html#what-the-job-does)
 
 The component runs the app's own [ESLint](https://eslint.org/) (and [Prettier](https://prettier.io/)) and fails the pipeline on lint or format errors. It does not install ESLint or Prettier itself: the app must require `@waynestate/pinstripe`, `eslint` and `prettier` as dev dependencies and ship an `eslint.config.js` (or point `eslint_args` at its own files).
 
@@ -25,7 +25,7 @@ The job, in order:
 
 The job caches npm downloads in `.npm-cache/`, with the cache key based on `package-lock.json`. It is interruptible and times out after 15m.
 
-## Include the component[#](https://preflight.apps.wayne.edu/docs/guides/component-eslint.html#include-the-component)
+## Include the component [#](https://preflight.apps.wayne.edu/docs/guides/component-eslint.html#include-the-component)
 
 Add the include to the app's `.gitlab-ci.yml`, pinned to a full commit SHA with the tag in a trailing comment:
 
@@ -36,7 +36,7 @@ include:
       eslint_args: .
 ```
 
-## Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-eslint.html#inputs)
+## Inputs [#](https://preflight.apps.wayne.edu/docs/guides/component-eslint.html#inputs)
 
 | Input | Type | Default | What it does |
 | --- | --- | --- | --- |
@@ -48,7 +48,7 @@ include:
 | `eslint_args` | string | `.` | Arguments passed to eslint. |
 | `prettier` | boolean | `true` | Whether to also run `prettier --check`. |
 
-## Verify[#](https://preflight.apps.wayne.edu/docs/guides/component-eslint.html#verify)
+## Verify [#](https://preflight.apps.wayne.edu/docs/guides/component-eslint.html#verify)
 
 Push the change. The `eslint` job lands in the `test` stage by default, and a green job means ESLint and Prettier found nothing to fix.
 
@@ -56,7 +56,7 @@ Note
 
 The `eslint` job has no `allow_failure` input: a lint or format error fails the pipeline.
 
-## Related[#](https://preflight.apps.wayne.edu/docs/guides/component-eslint.html#related)
+## Related [#](https://preflight.apps.wayne.edu/docs/guides/component-eslint.html#related)
 
 - [Quick start](https://preflight.apps.wayne.edu/docs/guides/quick-start.html): wire one component into an app and watch the pipeline run it.
 - [Install](https://preflight.apps.wayne.edu/docs/install.html): the requirements, the include snippet, and how to verify.

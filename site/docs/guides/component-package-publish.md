@@ -6,13 +6,13 @@ llms: https://preflight.apps.wayne.edu/llms.txt
 generator: Squire agent-ready
 ---
 
-# The package-publish component[#](https://preflight.apps.wayne.edu/docs/guides/component-package-publish.html#the-package-publish-component)
+# The package-publish component [#](https://preflight.apps.wayne.edu/docs/guides/component-package-publish.html#the-package-publish-component)
 
 This page covers the `package-publish` component: what the job does, how to include it, and every input it takes. Goal: tagging a release publishes the package to the GitLab group's built-in Composer registry, and a version that is already published never gets overwritten.
 
 Version 1 · Category: Release/Publishing · Tags: composer,publish,release
 
-## What the job does[#](https://preflight.apps.wayne.edu/docs/guides/component-package-publish.html#what-the-job-does)
+## What the job does [#](https://preflight.apps.wayne.edu/docs/guides/component-package-publish.html#what-the-job-does)
 
 The job publishes a semantic version tag to the GitLab group's built-in Composer registry. It runs only on tags, reads the registry first, and refuses a moved version: a version already published from this commit passes quietly, and a version published from a different commit fails the pipeline, because GitLab would otherwise overwrite it without a word. Once a version is on the manifest, it stays on the manifest: no go-arounds.
 
@@ -35,7 +35,7 @@ Note
 
 The read token lives in a masked CI variable named by `read_token_variable` (default `PACKAGE_READ_TOKEN`) and needs the `read_package_registry` scope. Publishing itself uses the predefined `CI_JOB_TOKEN`.
 
-## Include the component[#](https://preflight.apps.wayne.edu/docs/guides/component-package-publish.html#include-the-component)
+## Include the component [#](https://preflight.apps.wayne.edu/docs/guides/component-package-publish.html#include-the-component)
 
 Add the include to the app's `.gitlab-ci.yml`, pinned to a full commit SHA with the tag in a trailing comment, and set `group_id` to the numeric id of the GitLab group whose built-in Composer registry hosts the package:
 
@@ -46,7 +46,7 @@ include:
       group_id: "<your group id>"
 ```
 
-## Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-package-publish.html#inputs)
+## Inputs [#](https://preflight.apps.wayne.edu/docs/guides/component-package-publish.html#inputs)
 
 | Input | Type | Default | What it does |
 | --- | --- | --- | --- |
@@ -57,11 +57,11 @@ include:
 | `group_id` | string | none | Numeric id of the GitLab group whose built-in Composer registry hosts the package. Required. |
 | `read_token_variable` | string | `PACKAGE_READ_TOKEN` | Name of the masked CI variable holding a token with the `read_package_registry` scope, used to read the registry before publishing. |
 
-## Verify[#](https://preflight.apps.wayne.edu/docs/guides/component-package-publish.html#verify)
+## Verify [#](https://preflight.apps.wayne.edu/docs/guides/component-package-publish.html#verify)
 
 Define the masked CI variable the component reads, then push a semantic version tag. Expected: the `package-publish` job runs in the `deploy` stage, reads the registry, and ends with `Version <version> published.` Pushing the same tag from the same commit again exits quietly; the same version from a different commit fails the job.
 
-## Related[#](https://preflight.apps.wayne.edu/docs/guides/component-package-publish.html#related)
+## Related [#](https://preflight.apps.wayne.edu/docs/guides/component-package-publish.html#related)
 
 - [Quick start](https://preflight.apps.wayne.edu/docs/guides/quick-start.html): wire one component into an app and watch the pipeline run it.
 - [Install](https://preflight.apps.wayne.edu/docs/install.html): the requirements, the include snippet, and how to verify.

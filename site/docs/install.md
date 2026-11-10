@@ -6,16 +6,16 @@ llms: https://preflight.apps.wayne.edu/llms.txt
 generator: Squire agent-ready
 ---
 
-# Install[#](https://preflight.apps.wayne.edu/docs/install.html#install)
+# Install [#](https://preflight.apps.wayne.edu/docs/install.html#install)
 
 Preflight installs as an `include:` in the app's own `.gitlab-ci.yml`, one line per component, pinned to a commit SHA with the tag in a trailing comment. A tag or branch can move; a SHA cannot.
 
-## Requirements[#](https://preflight.apps.wayne.edu/docs/install.html#requirements)
+## Requirements [#](https://preflight.apps.wayne.edu/docs/install.html#requirements)
 
 - GitLab 17.0 or newer. Components are GA on the Free tier since GitLab 17.0.
 - Same instance only. Components work only within the same GitLab instance that hosts this project; they cannot be used across instances except by mirroring.
 
-## Install[#](https://preflight.apps.wayne.edu/docs/install.html#install-1)
+## Install [#](https://preflight.apps.wayne.edu/docs/install.html#install-1)
 
 Add the include to the app's `.gitlab-ci.yml`:
 
@@ -41,11 +41,11 @@ include:
       test_command: vendor/bin/phpunit
 ```
 
-## Verify[#](https://preflight.apps.wayne.edu/docs/install.html#verify)
+## Verify [#](https://preflight.apps.wayne.edu/docs/install.html#verify)
 
 Push the change. The components are ordinary jobs, so they run whenever the app's pipeline runs, and each one lands in the `test` stage by default. Expected result: the pipeline shows the component's job, and for `php-test` that is one job per entry of `php_versions`, `8.3`, `8.4` and `8.5` by default. A green job means the check passed.
 
-## Next steps[#](https://preflight.apps.wayne.edu/docs/install.html#next-steps)
+## Next steps [#](https://preflight.apps.wayne.edu/docs/install.html#next-steps)
 
 - [Quick start](https://preflight.apps.wayne.edu/docs/guides/quick-start.html): the same install as numbered steps with expected results.
 - [When the components run](https://preflight.apps.wayne.edu/docs/guides/when-components-run.html): the `workflow:rules` block that belongs in the app's own file.

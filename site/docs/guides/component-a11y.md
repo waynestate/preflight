@@ -6,13 +6,13 @@ llms: https://preflight.apps.wayne.edu/llms.txt
 generator: Squire agent-ready
 ---
 
-# The a11y component[#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#the-a11y-component)
+# The a11y component [#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#the-a11y-component)
 
 This page covers the `a11y` component: what the job checks, how to include it, every input it takes, and how to roll it out on a site that already has findings. Goal: accessibility is a gate the pipeline runs, not a claim in a README. One include line gives any app or site the same check the stack's own sites run. A pilot walks round the aircraft before every flight; this job walks round every page, in daylight and at night.
 
 Version 1 · Category: Testing/Validation · Tags: accessibility,a11y,wcag,axe-core,playwright
 
-## What the job checks[#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#what-the-job-checks)
+## What the job checks [#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#what-the-job-checks)
 
 The job opens each page in a real Chromium browser with [Playwright](https://playwright.dev/) and runs [axe-core](https://github.com/dequelabs/axe-core) on it through [@axe-core/playwright](https://www.npmjs.com/package/@axe-core/playwright). Every rule it applies is axe-core's; Preflight adds no rules of its own except one, below.
 
@@ -26,7 +26,7 @@ Warning
 
 An automated check finds only some accessibility failures. A green job means axe-core found nothing it can test; it does not prove the page conforms. Keyboard use, focus order, screen reader output and plain language still need a person. The report counts the items axe-core could not decide ("to review by hand") so that review has a list.
 
-## Include the component[#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#include-the-component)
+## Include the component [#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#include-the-component)
 
 Add the include to the app's `.gitlab-ci.yml`, pinned to a full commit SHA with the tag in a trailing comment:
 
@@ -52,7 +52,7 @@ include:
       wcag_tags: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]
 ```
 
-## Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#inputs)
+## Inputs [#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#inputs)
 
 | Input | Type | Default | What it does |
 | --- | --- | --- | --- |
@@ -72,7 +72,7 @@ include:
 
 A page glob uses `**` for any number of folders and `*` inside one folder name. Folders that start with a dot, `node_modules` and `vendor` are skipped. A literal page that is not there fails its check (HTTP 404); a glob that matches nothing stops the job as a configuration error, so a moved docs folder cannot quietly shrink the gate.
 
-## How the job works[#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#how-the-job-works)
+## How the job works [#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#how-the-job-works)
 
 From `templates/a11y/template.yml`, the job (named by `job_name`) runs in the `test` stage by default, is `interruptible: true`, and has a timeout of 30 minutes. In order:
 
@@ -83,7 +83,7 @@ From `templates/a11y/template.yml`, the job (named by `job_name`) runs in the `t
 
 The job exits 0 when every check is clean, 1 when a page has a violation or did not load, and 2 on a tool or configuration error (an unknown color scheme, a glob that matches nothing, a different axe-core than the one pinned).
 
-## Reports[#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#reports)
+## Reports [#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#reports)
 
 Both reports are written to the project root and kept as artifacts for 30 days, whether the job passes or fails:
 
@@ -92,7 +92,7 @@ Both reports are written to the project root and kept as artifacts for 30 days, 
 
 The job log prints one line per page and mode, then the details of every violation. It prints selectors, never page text.
 
-## Roll it out on a site with findings[#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#roll-it-out-on-a-site-with-findings)
+## Roll it out on a site with findings [#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#roll-it-out-on-a-site-with-findings)
 
 A site that has never been checked usually has a few findings. Land the gate first, fix the findings, then make it blocking:
 
@@ -105,7 +105,7 @@ include:
 
 While `allow_failure` is `true`, a red job shows as a warning and the pipeline still passes; the reports are written either way. Remove the input (or set it to `false`) once the job is green. Leave a date in a comment so the warning does not become wallpaper.
 
-## Check a running site[#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#check-a-running-site)
+## Check a running site [#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#check-a-running-site)
 
 For pages a static folder cannot hold (a Laravel or raw-PHP app), point the job at a running copy, such as a review app or a pre-production deploy, and list the paths:
 
@@ -119,11 +119,11 @@ include:
 
 `base_url` goes into a job variable, so GitLab expands CI variables in it. Pages are paths under it. Globs still expand in `site_dir`, so with `base_url` and no local folder, list the pages by hand. The job must be able to reach the URL; put it in a stage after the deploy.
 
-## Run it on your desk[#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#run-it-on-your-desk)
+## Run it on your desk [#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#run-it-on-your-desk)
 
 Preflight's own repository runs this checker locally with `scripts/a11y.sh` (Linux and macOS) or `scripts/a11y.ps1` (Windows), in Docker, with the image and versions pinned in the template. See [Local checks](https://preflight.apps.wayne.edu/docs/reference/local-checks.html).
 
-## Verify[#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#verify)
+## Verify [#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#verify)
 
 Push the change. The `a11y` job lands in the `test` stage by default, and its last line reads `a11y: clean` when every page passes. Open the merge request's test summary to see each page and mode.
 
@@ -131,7 +131,7 @@ Note
 
 The job needs the npm registry (to install the pinned packages) and, for `base_url`, the site it checks. It needs no token and no Docker socket.
 
-## Related[#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#related)
+## Related [#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#related)
 
 - [Quick start](https://preflight.apps.wayne.edu/docs/guides/quick-start.html): wire one component into an app and watch the pipeline run it.
 - [Include a component twice](https://preflight.apps.wayne.edu/docs/guides/include-twice.html): check two sites in one project with `job_name`.

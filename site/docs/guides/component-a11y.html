@@ -40,13 +40,13 @@
   <nav class="docs-nav docs-nav--sidebar" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../../docs/index.html">Overview</a></li><li><a href="../../docs/install.html">Install</a></li><li><a href="../../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../../docs/guides/component-npm-audit.html">The npm-audit component</a></li><li><a href="../../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../../docs/guides/component-pint.html">The pint component</a></li><li><a href="../../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../../docs/guides/component-secret-detection.html">The secret-detection component</a></li><li><a href="../../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../../docs/guides/component-portability.html">The portability component</a></li><li><a href="../../docs/guides/component-a11y.html" aria-current="page">The a11y component</a></li><li><a href="../../docs/guides/component-squire-kit.html">The squire-kit component</a></li><li><a href="../../docs/guides/inputs-contract.html">The inputs contract</a></li><li><a href="../../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../../docs/guides/renovate.html">Renovate</a></li><li><a href="../../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../../docs/guides/dependency-caching.html">Dependency caching</a></li><li><a href="../../docs/guides/template-lint.html">Template lint</a></li><li><a href="../../docs/guides/deprecation.html">Deprecating a component</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../../docs/reference/components.html">Components</a></li><li><a href="../../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../../docs/reference/local-checks.html">Local checks</a></li><li><a href="../../docs/reference/proof.html">Proof</a></li></ul></li><li><a href="../../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../../docs/upgrading.html">Upgrading</a></li><li><a href="../../docs/changelog.html">Changelog</a></li></ul></nav>
   <div class="docs-content">
     <main id="main">
-      <article class="docs-article"><h1 id="the-a11y-component">The a11y component<a class="docs-heading-link" aria-label="Link to this section" href="#the-a11y-component">#</a></h1>
+      <article class="docs-article"><h1 id="the-a11y-component">The a11y <span class="docs-heading-tail"><span>component</span><a class="docs-heading-link" aria-label="Link to this section" href="#the-a11y-component">#</a></span></h1>
 <p>This page covers the <code>a11y</code> component: what the job checks, how to include it, every input it takes, and how to roll it
 out on a site that already has findings. Goal: accessibility is a gate the pipeline runs, not a claim in a README. One
 include line gives any app or site the same check the stack's own sites run. A pilot walks round the aircraft before
 every flight; this job walks round every page, in daylight and at night.</p>
 <p>Version 1 · Category: Testing/Validation · Tags: accessibility,a11y,wcag,axe-core,playwright</p>
-<h2 id="what-the-job-checks">What the job checks<a class="docs-heading-link" aria-label="Link to this section" href="#what-the-job-checks">#</a></h2>
+<h2 id="what-the-job-checks">What the job <span class="docs-heading-tail"><span>checks</span><a class="docs-heading-link" aria-label="Link to this section" href="#what-the-job-checks">#</a></span></h2>
 <p>The job opens each page in a real Chromium browser with <a rel="noopener" href="https://playwright.dev/">Playwright</a> and runs
 <a rel="noopener" href="https://github.com/dequelabs/axe-core">axe-core</a> on it through
 <a rel="noopener" href="https://www.npmjs.com/package/@axe-core/playwright">@axe-core/playwright</a>. Every rule it applies is axe-core's;
@@ -69,7 +69,7 @@ its check.</li>
 <aside class="docs-callout docs-callout--warning" role="note"><p class="docs-callout__label">Warning</p><p>An automated check finds only some accessibility failures. A green job means axe-core found nothing it can test; it
 does not prove the page conforms. Keyboard use, focus order, screen reader output and plain language still need a
 person. The report counts the items axe-core could not decide (&quot;to review by hand&quot;) so that review has a list.</p></aside>
-<h2 id="include-the-component">Include the component<a class="docs-heading-link" aria-label="Link to this section" href="#include-the-component">#</a></h2>
+<h2 id="include-the-component">Include the <span class="docs-heading-tail"><span>component</span><a class="docs-heading-link" aria-label="Link to this section" href="#include-the-component">#</a></span></h2>
 <p>Add the include to the app's <code>.gitlab-ci.yml</code>, pinned to a full commit SHA with the tag in a trailing comment:</p>
 <pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@60314791565a264e97cb210813ef4f3e76512402 # 0.5.0
@@ -85,7 +85,7 @@ commit SHA of a commit at or after it.</p></aside>
       pages: [&quot;index.html&quot;, &quot;docs/**/*.html&quot;]
       wcag_tags: [&quot;wcag2a&quot;, &quot;wcag2aa&quot;, &quot;wcag21a&quot;, &quot;wcag21aa&quot;, &quot;wcag22aa&quot;]
 </code></pre>
-<h2 id="inputs">Inputs<a class="docs-heading-link" aria-label="Link to this section" href="#inputs">#</a></h2>
+<h2 id="inputs"><span class="docs-heading-tail"><span>Inputs</span><a class="docs-heading-link" aria-label="Link to this section" href="#inputs">#</a></span></h2>
 <div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
 <thead>
 <tr>
@@ -179,7 +179,7 @@ commit SHA of a commit at or after it.</p></aside>
 <p>A page glob uses <code>**</code> for any number of folders and <code>*</code> inside one folder name. Folders that start with a dot,
 <code>node_modules</code> and <code>vendor</code> are skipped. A literal page that is not there fails its check (HTTP 404); a glob that matches
 nothing stops the job as a configuration error, so a moved docs folder cannot quietly shrink the gate.</p>
-<h2 id="how-the-job-works">How the job works<a class="docs-heading-link" aria-label="Link to this section" href="#how-the-job-works">#</a></h2>
+<h2 id="how-the-job-works">How the job <span class="docs-heading-tail"><span>works</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-the-job-works">#</a></span></h2>
 <p>From <code>templates/a11y/template.yml</code>, the job (named by <code>job_name</code>) runs in the <code>test</code> stage by default, is
 <code>interruptible: true</code>, and has a timeout of 30 minutes. In order:</p>
 <ol>
@@ -194,7 +194,7 @@ reports.</li>
 </ol>
 <p>The job exits 0 when every check is clean, 1 when a page has a violation or did not load, and 2 on a tool or
 configuration error (an unknown color scheme, a glob that matches nothing, a different axe-core than the one pinned).</p>
-<h2 id="reports">Reports<a class="docs-heading-link" aria-label="Link to this section" href="#reports">#</a></h2>
+<h2 id="reports"><span class="docs-heading-tail"><span>Reports</span><a class="docs-heading-link" aria-label="Link to this section" href="#reports">#</a></span></h2>
 <p>Both reports are written to the project root and kept as artifacts for 30 days, whether the job passes or fails:</p>
 <ul>
 <li><code>gl-a11y-junit.xml</code>, published as a JUnit report: the merge request's test summary lists one test case per page and
@@ -204,7 +204,7 @@ help link, WCAG tags, selectors and axe-core's failure summary) and its count of
 </ul>
 <p>The job log prints one line per page and mode, then the details of every violation. It prints selectors, never page
 text.</p>
-<h2 id="roll-it-out-on-a-site-with-findings">Roll it out on a site with findings<a class="docs-heading-link" aria-label="Link to this section" href="#roll-it-out-on-a-site-with-findings">#</a></h2>
+<h2 id="roll-it-out-on-a-site-with-findings">Roll it out on a site with <span class="docs-heading-tail"><span>findings</span><a class="docs-heading-link" aria-label="Link to this section" href="#roll-it-out-on-a-site-with-findings">#</a></span></h2>
 <p>A site that has never been checked usually has a few findings. Land the gate first, fix the findings, then make it
 blocking:</p>
 <pre tabindex="0"><code class="language-yaml">include:
@@ -215,7 +215,7 @@ blocking:</p>
 <p>While <code>allow_failure</code> is <code>true</code>, a red job shows as a warning and the pipeline still passes; the reports are written
 either way. Remove the input (or set it to <code>false</code>) once the job is green. Leave a date in a comment so the warning does
 not become wallpaper.</p>
-<h2 id="check-a-running-site">Check a running site<a class="docs-heading-link" aria-label="Link to this section" href="#check-a-running-site">#</a></h2>
+<h2 id="check-a-running-site">Check a running <span class="docs-heading-tail"><span>site</span><a class="docs-heading-link" aria-label="Link to this section" href="#check-a-running-site">#</a></span></h2>
 <p>For pages a static folder cannot hold (a Laravel or raw-PHP app), point the job at a running copy, such as a review app
 or a pre-production deploy, and list the paths:</p>
 <pre tabindex="0"><code class="language-yaml">include:
@@ -227,15 +227,15 @@ or a pre-production deploy, and list the paths:</p>
 <p><code>base_url</code> goes into a job variable, so GitLab expands CI variables in it. Pages are paths under it. Globs still expand
 in <code>site_dir</code>, so with <code>base_url</code> and no local folder, list the pages by hand. The job must be able to reach the URL;
 put it in a stage after the deploy.</p>
-<h2 id="run-it-on-your-desk">Run it on your desk<a class="docs-heading-link" aria-label="Link to this section" href="#run-it-on-your-desk">#</a></h2>
+<h2 id="run-it-on-your-desk">Run it on your <span class="docs-heading-tail"><span>desk</span><a class="docs-heading-link" aria-label="Link to this section" href="#run-it-on-your-desk">#</a></span></h2>
 <p>Preflight's own repository runs this checker locally with <code>scripts/a11y.sh</code> (Linux and macOS) or <code>scripts/a11y.ps1</code>
 (Windows), in Docker, with the image and versions pinned in the template. See <a href="../reference/local-checks.html">Local checks</a>.</p>
-<h2 id="verify">Verify<a class="docs-heading-link" aria-label="Link to this section" href="#verify">#</a></h2>
+<h2 id="verify"><span class="docs-heading-tail"><span>Verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#verify">#</a></span></h2>
 <p>Push the change. The <code>a11y</code> job lands in the <code>test</code> stage by default, and its last line reads <code>a11y: clean</code> when every
 page passes. Open the merge request's test summary to see each page and mode.</p>
 <aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>The job needs the npm registry (to install the pinned packages) and, for <code>base_url</code>, the site it checks. It needs no
 token and no Docker socket.</p></aside>
-<h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
+<h2 id="related"><span class="docs-heading-tail"><span>Related</span><a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></span></h2>
 <ul>
 <li><a href="quick-start.html">Quick start</a>: wire one component into an app and watch the pipeline run it.</li>
 <li><a href="include-twice.html">Include a component twice</a>: check two sites in one project with <code>job_name</code>.</li>

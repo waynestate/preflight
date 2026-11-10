@@ -40,15 +40,15 @@
   <nav class="docs-nav docs-nav--sidebar" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../docs/index.html">Overview</a></li><li><a href="../docs/install.html">Install</a></li><li><a href="../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../docs/guides/component-npm-audit.html">The npm-audit component</a></li><li><a href="../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../docs/guides/component-pint.html">The pint component</a></li><li><a href="../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../docs/guides/component-secret-detection.html">The secret-detection component</a></li><li><a href="../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../docs/guides/component-portability.html">The portability component</a></li><li><a href="../docs/guides/component-a11y.html">The a11y component</a></li><li><a href="../docs/guides/component-squire-kit.html">The squire-kit component</a></li><li><a href="../docs/guides/inputs-contract.html">The inputs contract</a></li><li><a href="../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../docs/guides/renovate.html">Renovate</a></li><li><a href="../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../docs/guides/dependency-caching.html">Dependency caching</a></li><li><a href="../docs/guides/template-lint.html">Template lint</a></li><li><a href="../docs/guides/deprecation.html">Deprecating a component</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../docs/reference/components.html">Components</a></li><li><a href="../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../docs/reference/local-checks.html">Local checks</a></li><li><a href="../docs/reference/proof.html">Proof</a></li></ul></li><li><a href="../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../docs/upgrading.html" aria-current="page">Upgrading</a></li><li><a href="../docs/changelog.html">Changelog</a></li></ul></nav>
   <div class="docs-content">
     <main id="main">
-      <article class="docs-article"><h1 id="upgrading">Upgrading<a class="docs-heading-link" aria-label="Link to this section" href="#upgrading">#</a></h1>
+      <article class="docs-article"><h1 id="upgrading"><span class="docs-heading-tail"><span>Upgrading</span><a class="docs-heading-link" aria-label="Link to this section" href="#upgrading">#</a></span></h1>
 <p>This page is the checklist for moving an app from one Preflight pin to the next, one released version at a time, newest first; every section follows <code>CHANGELOG.md</code>. Read the section for the version you are moving to, apply its steps, and verify on the next pipeline. Like a real preflight, the walk takes a few minutes and earns its keep: move the pin only after you have read the version notes.</p>
 <p>Every input and job name a component offers is recorded in <code>contract/inputs.json</code>, and Preflight's build fails when a template drifts from it, so the file is the exact list of what moved. Before you move a pin, diff it between your tag and the next one (for example <code>git diff 0.4.0 0.5.0 -- contract/inputs.json</code> in a clone of Preflight) and check each line against that version's Breaking and Steps below. <a href="guides/inputs-contract.html">The inputs contract</a> explains what each kind of change means for your include.</p>
-<h2 id="0-5-0">0.5.0<a class="docs-heading-link" aria-label="Link to this section" href="#0-5-0">#</a></h2>
+<h2 id="0-5-0"><span class="docs-heading-tail"><span>0.5.0</span><a class="docs-heading-link" aria-label="Link to this section" href="#0-5-0">#</a></span></h2>
 <p>Released 2026-11-09. A new component, <code>npm-audit</code>, the front-end half of <code>composer-audit</code>; a portability probe that
 starts each replica the way a container runtime does, so an Apache image needs no <code>start_command</code> shim; a proctor job
 that keeps PROCTOR's JSON report as <code>proctor.json</code> for Rollcall; and Composer 2.11.1 in every default. No input or job
 was renamed or removed.</p>
-<h3 id="breaking">Breaking<a class="docs-heading-link" aria-label="Link to this section" href="#breaking">#</a></h3>
+<h3 id="breaking"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking">#</a></span></h3>
 <p><strong>The portability launcher.</strong> The <code>portability</code> job now starts each replica through a launcher that gives it stdout
 and stderr its uid owns and a session of its own (<code>setsid</code>), as a container runtime does. An include that still
 carries a <code>start_command</code> shim calling <code>setsid</code> (WELD's was <code>exec setsid bash -c '...'</code>) breaks on 0.5.0: inside the
@@ -56,9 +56,9 @@ launcher the shim forks the app away from the replica's main process, and <code>
 change as the bump. With an empty <code>start_command</code> the job runs the image's own <code>ENTRYPOINT</code> and <code>CMD</code>, which is what
 an Apache image (Squire's portable image, a Sourdough or WELD app) needs. A <code>start_command</code> that only starts the app,
 with no <code>setsid</code> and no stdio redirect, keeps working.</p>
-<h3 id="deprecated">Deprecated<a class="docs-heading-link" aria-label="Link to this section" href="#deprecated">#</a></h3>
+<h3 id="deprecated"><span class="docs-heading-tail"><span>Deprecated</span><a class="docs-heading-link" aria-label="Link to this section" href="#deprecated">#</a></span></h3>
 <p>Nothing was deprecated in 0.5.0.</p>
-<h3 id="changed">Changed<a class="docs-heading-link" aria-label="Link to this section" href="#changed">#</a></h3>
+<h3 id="changed"><span class="docs-heading-tail"><span>Changed</span><a class="docs-heading-link" aria-label="Link to this section" href="#changed">#</a></span></h3>
 <ul>
 <li><strong>Composer 2.11.1.</strong> Every Composer default moves from 2.10.3 to 2.11.1: the <code>composer-audit</code>, <code>sbom</code>, <code>pint</code>,
 <code>phpstan</code>, <code>package-publish</code> and <code>squire-kit</code> images are <code>composer:2.11.1@sha256:8de2184c...</code> (the multi-arch list
@@ -75,7 +75,7 @@ exit code still decides the job.</li>
 the renovate template already enforced in 0.4.0, so the contract diff shows that line changed. No value that passed
 on 0.4.0 stops passing.</li>
 </ul>
-<h3 id="new-npm-audit">New: npm-audit<a class="docs-heading-link" aria-label="Link to this section" href="#new-npm-audit">#</a></h3>
+<h3 id="new-npm-audit">New: <span class="docs-heading-tail"><span>npm-audit</span><a class="docs-heading-link" aria-label="Link to this section" href="#new-npm-audit">#</a></span></h3>
 <p>The <code>npm-audit</code> component runs <code>npm audit</code> on the app's <code>package-lock.json</code> in the <code>eslint</code> component's Node image and
 fails on an advisory at or above <code>audit_level</code> in a runtime dependency, then prints a full report that never fails.
 It is opt-in. Its inputs and defaults:</p>
@@ -89,7 +89,7 @@ accepted too and maps to npm's <code>moderate</code>.</li>
 <p>An app with no lock file (no <code>package-lock.json</code> or <code>npm-shrinkwrap.json</code>) passes with a note,
 <code>npm-audit: no lock file ... nothing to audit.</code>, so a PHP-only app never goes red. An unreachable registry fails the
 job. See <a href="guides/component-npm-audit.html">The npm-audit component</a>.</p>
-<h3 id="steps">Steps<a class="docs-heading-link" aria-label="Link to this section" href="#steps">#</a></h3>
+<h3 id="steps"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps">#</a></span></h3>
 <ol>
 <li>If an include of <code>portability</code> sets a <code>start_command</code> shim that calls <code>setsid</code>, delete the shim (or the whole
 <code>start_command</code> line) in the same change as step 2.</li>
@@ -111,23 +111,23 @@ comment:</li>
 <li>Optional: to feed Rollcall, move the app to PROCTOR 0.11.0 or later
 (<code>composer require --dev waynestate/proctor:^0.11</code>).</li>
 </ol>
-<h3 id="how-to-verify">How to verify<a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify">#</a></h3>
+<h3 id="how-to-verify">How to <span class="docs-heading-tail"><span>verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify">#</a></span></h3>
 <p>The pipeline is green. The <code>portability</code> job passes all its checks with no shim, the composer-based jobs' <code>Pulling docker image</code> line names <code>composer:2.11.1</code>, and on PROCTOR 0.11.0 or later the proctor job's artifact holds
 <code>proctor.json</code>. With <code>npm-audit</code> included, its log ends with <code>npm audit</code>'s summary, or with the no-lock-file note.
 Checklist done, doors armed: cleared for takeoff.</p>
-<h2 id="0-4-0">0.4.0<a class="docs-heading-link" aria-label="Link to this section" href="#0-4-0">#</a></h2>
+<h2 id="0-4-0"><span class="docs-heading-tail"><span>0.4.0</span><a class="docs-heading-link" aria-label="Link to this section" href="#0-4-0">#</a></span></h2>
 <p>Released 2026-11-08. Two new inputs and a Composer floor. The proctor component's <code>git_depth</code> (default <code>&quot;0&quot;</code>) clones
 the full history, so PROCTOR's override-approver check can read git blame on every override line instead of reporting
 could-not-run past GitLab's 20-commit default. php-test's <code>php_advisory_version</code> runs one more PHP version, such as a
 release candidate, in a separate job that may fail. php-test and proctor refuse a <code>composer_version</code> older than 2.9.6,
 the floor with the 2026 security fixes.</p>
-<h3 id="breaking-1">Breaking<a class="docs-heading-link" aria-label="Link to this section" href="#breaking-1">#</a></h3>
+<h3 id="breaking-1"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-1">#</a></span></h3>
 <p>An include that sets <code>composer_version</code> on php-test or proctor to a version older than 2.9.6 no longer starts: GitLab
 rejects the input before the pipeline runs. The default (2.10.3) is unaffected, and no other input, default or job
 name changed.</p>
-<h3 id="deprecated-1">Deprecated<a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-1">#</a></h3>
+<h3 id="deprecated-1"><span class="docs-heading-tail"><span>Deprecated</span><a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-1">#</a></span></h3>
 <p>Nothing was deprecated in 0.4.0.</p>
-<h3 id="steps-1">Steps<a class="docs-heading-link" aria-label="Link to this section" href="#steps-1">#</a></h3>
+<h3 id="steps-1"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps-1">#</a></span></h3>
 <ol>
 <li>If an include sets <code>composer_version</code> below 2.9.6, remove the input (the default is 2.10.3) or set 2.9.6 or later.</li>
 <li>Point each component include at the <code>0.4.0</code> tag, pinned to the tag's full commit SHA with the tag in a trailing
@@ -141,27 +141,27 @@ comment:</li>
 lines older than that then report could-not-run. To hear about the next PHP early, set php-test's
 <code>php_advisory_version</code>, for example <code>8.6.0RC2</code>.</li>
 </ol>
-<h3 id="how-to-verify-1">How to verify<a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-1">#</a></h3>
+<h3 id="how-to-verify-1">How to <span class="docs-heading-tail"><span>verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-1">#</a></span></h3>
 <p>The pipeline is green, the proctor job log's fetch line no longer says <code>git depth set to 20</code> (unless you set
 <code>git_depth</code>), and with <code>php_advisory_version</code> set a <code>php-test-advisory</code> job runs and may fail without failing the
 pipeline.</p>
-<h2 id="0-3-1">0.3.1<a class="docs-heading-link" aria-label="Link to this section" href="#0-3-1">#</a></h2>
+<h2 id="0-3-1"><span class="docs-heading-tail"><span>0.3.1</span><a class="docs-heading-link" aria-label="Link to this section" href="#0-3-1">#</a></span></h2>
 <p>Released 2026-11-08. Every component that installs packages caches under a fixed key per component (such as <code>preflight-pint</code>, or <code>preflight-php-8.4</code> for one PHP version of <code>php-test</code>) instead of a lock-file hash, and saves its cache even when the job fails. A lock change, or a retry after a dropped download, fetches only what is missing.</p>
-<h3 id="breaking-2">Breaking<a class="docs-heading-link" aria-label="Link to this section" href="#breaking-2">#</a></h3>
+<h3 id="breaking-2"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-2">#</a></span></h3>
 <p>0.3.1 has no breaking changes: inputs, defaults and job names are the same as in 0.3.0.</p>
-<h3 id="deprecated-2">Deprecated<a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-2">#</a></h3>
+<h3 id="deprecated-2"><span class="docs-heading-tail"><span>Deprecated</span><a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-2">#</a></span></h3>
 <p>Nothing was deprecated in 0.3.1.</p>
-<h3 id="steps-2">Steps<a class="docs-heading-link" aria-label="Link to this section" href="#steps-2">#</a></h3>
+<h3 id="steps-2"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps-2">#</a></span></h3>
 <p>Point each component include at the <code>0.3.1</code> tag, pinned to the tag's full commit SHA with the tag in a trailing comment:</p>
 <pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@b90323b5823287a7840095d0d5f0682aaeedf327 # 0.3.1
 </code></pre>
 <p>The first pipeline on the new pin fills the new cache keys, so expect it to download everything once.</p>
-<h3 id="how-to-verify-2">How to verify<a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-2">#</a></h3>
+<h3 id="how-to-verify-2">How to <span class="docs-heading-tail"><span>verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-2">#</a></span></h3>
 <p>The pipeline is green, and a component's job log shows <code>Creating cache preflight-</code> followed by the component's key, and, after a failed job, <code>Saving cache for failed job</code>.</p>
-<h2 id="0-3-0">0.3.0<a class="docs-heading-link" aria-label="Link to this section" href="#0-3-0">#</a></h2>
+<h2 id="0-3-0"><span class="docs-heading-tail"><span>0.3.0</span><a class="docs-heading-link" aria-label="Link to this section" href="#0-3-0">#</a></span></h2>
 <p>Released 2026-11-08. Docker Hub images now come through the group's Dependency Proxy by default (a new <code>image_prefix</code> input), and more components cache their Composer and npm downloads.</p>
-<h3 id="breaking-3">Breaking<a class="docs-heading-link" aria-label="Link to this section" href="#breaking-3">#</a></h3>
+<h3 id="breaking-3"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-3">#</a></span></h3>
 <p>Every component whose image comes from Docker Hub (<code>proctor</code>, <code>php-test</code>, <code>composer-audit</code>, <code>sbom</code>, <code>pint</code>, <code>phpstan</code>, <code>eslint</code>, <code>secret-detection</code>, <code>package-publish</code>, <code>renovate</code>, <code>squire-kit</code>) now pulls <code>image_prefix/image</code>, and <code>image_prefix</code> defaults to your group's Dependency Proxy (<code>${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}</code>). <code>image</code> keeps its default and is the path after the prefix. Only an app that overrides <code>image</code>, or runs where the proxy is off, needs to act:</p>
 <ol>
 <li>If the override was <code>${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/&lt;image&gt;</code> only to reach the proxy, delete the <code>image:</code> input; the default does the same. Keeping it puts the prefix in twice, and the pull fails.</li>
@@ -170,9 +170,9 @@ pipeline.</p>
 <li>On a GitLab or group without the proxy, set <code>image_prefix: docker.io</code>.</li>
 </ol>
 <p><code>a11y</code> (mcr.microsoft.com) and <code>portability</code> (quay.io) have no <code>image_prefix</code> and are unchanged: the proxy serves Docker Hub only.</p>
-<h3 id="deprecated-3">Deprecated<a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-3">#</a></h3>
+<h3 id="deprecated-3"><span class="docs-heading-tail"><span>Deprecated</span><a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-3">#</a></span></h3>
 <p>Nothing was deprecated in 0.3.0.</p>
-<h3 id="steps-3">Steps<a class="docs-heading-link" aria-label="Link to this section" href="#steps-3">#</a></h3>
+<h3 id="steps-3"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps-3">#</a></span></h3>
 <ol>
 <li>
 <p>Move every Preflight include to the <code>0.3.0</code> tag in one change, pinned to the tag's full commit SHA with the tag in a trailing comment, and remove any proxied <code>image:</code> input in the same change (step 1 above):</p>
@@ -198,8 +198,8 @@ pipeline.</p>
 </li>
 </ol>
 <p>Verify: the job log's <code>Pulling docker image</code> line shows the prefix once, and each job's first line (<code>Preflight component &lt;name&gt; ...</code>) shows the new ref and sha. See <a href="guides/dependency-caching.html">Dependency caching</a>.</p>
-<h2 id="0-2-0">0.2.0<a class="docs-heading-link" aria-label="Link to this section" href="#0-2-0">#</a></h2>
-<h3 id="breaking-4">Breaking<a class="docs-heading-link" aria-label="Link to this section" href="#breaking-4">#</a></h3>
+<h2 id="0-2-0"><span class="docs-heading-tail"><span>0.2.0</span><a class="docs-heading-link" aria-label="Link to this section" href="#0-2-0">#</a></span></h2>
+<h3 id="breaking-4"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-4">#</a></span></h3>
 <p>The <code>portability</code> component is now one job, <code>portability</code> (named by a new <code>job_name</code> input), instead of <code>portability-build</code> and <code>portability-run</code>, and it checks what ADR-0010 asks for instead of the goss list. It builds the image with Buildah and runs it in the same job, so nothing is pushed to the container registry and no app image is pulled. Only an app that already includes <code>portability</code> from 0.1.4 needs to act:</p>
 <ul>
 <li><code>buildah_image</code> is renamed <code>image</code> (same default, the Buildah image pinned by digest); the old <code>image</code> input (the app image) is gone.</li>
@@ -209,20 +209,20 @@ pipeline.</p>
 <li>The app image needs no curl, sha256sum or tar any more; the probe runs outside it.</li>
 </ul>
 <p>See <a href="guides/component-portability.html">The portability component</a> for the six checks and how to fix each failure.</p>
-<h3 id="changed-1">Changed<a class="docs-heading-link" aria-label="Link to this section" href="#changed-1">#</a></h3>
+<h3 id="changed-1"><span class="docs-heading-tail"><span>Changed</span><a class="docs-heading-link" aria-label="Link to this section" href="#changed-1">#</a></span></h3>
 <p>The Buildah image default (now the <code>portability</code> component's <code>image</code> input) moved from the plain version tag to the immutable tag <code>quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb</code>: Red Hat re-pushed the plain version tag and garbage-collected the old digest, so a pipeline pinned to it broke. If your app overrides it, point it at an <code>-immutable</code> tag pinned by digest too.
 The <code>composer-audit</code> component gains an <code>abandoned</code> input (<code>fail</code>, <code>report</code> or <code>ignore</code>) for how <code>composer audit</code> treats abandoned packages. No action needed: the default is <code>fail</code>, which is what the component already did, so existing pipelines behave exactly as before.
 A new <code>a11y</code> component checks a site's pages with axe-core in Playwright (WCAG 2.1 AA by default; add <code>wcag22aa</code> for 2.2 AA). It is opt-in: add its include to start the gate, with <code>allow_failure: true</code> while the site fixes its first findings. See <a href="guides/component-a11y.html">The a11y component</a>. Preflight's own local gate (<code>scripts/a11y.sh</code>, <code>scripts/a11y.ps1</code>) now runs the component's checker, at 320 px instead of 360 px, with the reflow check; <code>tools/a11y/</code> is gone.
 A new <code>squire-kit</code> component fails the pipeline when a Squire deploy kit drifts from the Squire release its <code>.squire.json</code> records (<code>squire init --check</code>). It is opt-in: run <code>vendor/bin/squire init --check --path=deploy</code> first, clean up what it reports, then add the include with <code>working_dir: deploy</code>. See <a href="guides/component-squire-kit.html">The squire-kit component</a>.
 The Renovate preset no longer updates files inside a Squire kit (<code>docker-compose.squire.yml</code> and <code>.squire/**</code>, outside Squire's own <code>templates/</code>): those bumps made every kit drift. Its Squire rule now runs <code>squire update</code> on the kit in the merge request it opens for a new Squire. The runner must allow those commands: set <code>squire_kit_tasks: true</code> on the runner project's <code>renovate</code> include. Until it does, each Squire merge request shows an artifact error and needs <code>vendor/bin/squire update --path=deploy</code> run by hand, as before. See <a href="guides/renovate.html#squire-kits">Squire kits</a>.
 This release needs GitLab 18.7 or later: every component now declares <code>spec: component:</code> and prints a <code>Preflight component</code> line as its first command, and GitLab accepts that spec key only from 18.7 on. On an older instance, pipeline creation fails on the unknown key, so upgrade GitLab or pin an older Preflight tag.</p>
-<h2 id="0-1-4">0.1.4<a class="docs-heading-link" aria-label="Link to this section" href="#0-1-4">#</a></h2>
+<h2 id="0-1-4"><span class="docs-heading-tail"><span>0.1.4</span><a class="docs-heading-link" aria-label="Link to this section" href="#0-1-4">#</a></span></h2>
 <p>Released 2026-11-03. The new pieces are opt-in: the <code>portability</code> component, a <code>job_name</code> input on every component except <code>portability</code>, and a stricter Renovate preset.</p>
-<h3 id="breaking-5">Breaking<a class="docs-heading-link" aria-label="Link to this section" href="#breaking-5">#</a></h3>
+<h3 id="breaking-5"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-5">#</a></span></h3>
 <p>0.1.4 has no breaking changes: the version adds a component, an input and preset rules, and removes nothing.</p>
-<h3 id="deprecated-4">Deprecated<a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-4">#</a></h3>
+<h3 id="deprecated-4"><span class="docs-heading-tail"><span>Deprecated</span><a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-4">#</a></span></h3>
 <p>Nothing was deprecated in 0.1.4.</p>
-<h3 id="steps-4">Steps<a class="docs-heading-link" aria-label="Link to this section" href="#steps-4">#</a></h3>
+<h3 id="steps-4"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps-4">#</a></span></h3>
 <p>Point each component include at the <code>0.1.4</code> tag, pinned to the tag's full commit SHA with the tag in a trailing comment:</p>
 <pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
@@ -239,15 +239,15 @@ This release needs GitLab 18.7 or later: every component now declares <code>spec
 <li><strong>Renovate preset</strong>: component version bumps now really wait for review instead of auto-merging (the component-rule manager name is <code>gitlabci</code>, matching repository deps), and a bump of the recorded Squire kit version carries the <code>squire-kit</code> label and never auto-merges; a person runs <code>squire update</code> to refresh the kit files.</li>
 </ul>
 <aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>Pins change only through a reviewed merge request. A tag or branch can move; a SHA cannot.</p></aside>
-<h3 id="how-to-verify-3">How to verify<a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-3">#</a></h3>
+<h3 id="how-to-verify-3">How to <span class="docs-heading-tail"><span>verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-3">#</a></span></h3>
 <p>Push the change and run the app's pipeline. The components are ordinary jobs, so they run whenever the app's pipeline runs; expect the same jobs as before, green. PROCTOR's <code>preflight-pinned</code> check warns when an include is not pinned to a commit SHA. If you added <code>portability</code>, the <code>portability-run</code> job passes only when the image boots the strict way and the goss checks hold.</p>
-<h2 id="0-1-3">0.1.3<a class="docs-heading-link" aria-label="Link to this section" href="#0-1-3">#</a></h2>
+<h2 id="0-1-3"><span class="docs-heading-tail"><span>0.1.3</span><a class="docs-heading-link" aria-label="Link to this section" href="#0-1-3">#</a></span></h2>
 <p>Released 2026-11-03. Two consumer-facing changes: the <code>proctor</code> component installs the app with <code>--no-plugins --no-scripts</code>, and the shared Renovate preset stopped auto-merging the pins that every pipeline runs.</p>
-<h3 id="breaking-6">Breaking<a class="docs-heading-link" aria-label="Link to this section" href="#breaking-6">#</a></h3>
+<h3 id="breaking-6"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-6">#</a></span></h3>
 <p>0.1.3 has no breaking changes, but the <code>proctor</code> job now installs the app's dependencies with <code>composer install --no-plugins --no-scripts</code>, so the app's plugins and scripts never run inside the job.</p>
-<h3 id="deprecated-5">Deprecated<a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-5">#</a></h3>
+<h3 id="deprecated-5"><span class="docs-heading-tail"><span>Deprecated</span><a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-5">#</a></span></h3>
 <p>Nothing was deprecated in 0.1.3.</p>
-<h3 id="steps-5">Steps<a class="docs-heading-link" aria-label="Link to this section" href="#steps-5">#</a></h3>
+<h3 id="steps-5"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps-5">#</a></span></h3>
 <p>Bump each component include to the <code>0.1.3</code> tag's full commit SHA, with the tag in a trailing comment:</p>
 <pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@&lt;full commit SHA&gt; # 0.1.3
@@ -258,28 +258,28 @@ This release needs GitLab 18.7 or later: every component now declares <code>spec
 <li>The <code>renovate</code> component no longer sets <code>RENOVATE_TOKEN</code> and <code>GITHUB_COM_TOKEN</code> from themselves in the job <code>variables:</code>; on GitLab 19.5 that self-reference arrived as literal text and shadowed the masked project CI/CD variables, so the job now reads both tokens straight from the project.</li>
 </ul>
 <aside class="docs-callout docs-callout--warning" role="note"><p class="docs-callout__label">Warning</p><p>Do not add <code>RENOVATE_TOKEN: $RENOVATE_TOKEN</code> to your own <code>variables:</code>; that self-reference arrives as literal text.</p></aside>
-<h3 id="how-to-verify-4">How to verify<a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-4">#</a></h3>
+<h3 id="how-to-verify-4">How to <span class="docs-heading-tail"><span>verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-4">#</a></span></h3>
 <p>Run the pipeline and confirm the jobs run on the new pin. In the runner project, confirm the job reads <code>RENOVATE_TOKEN</code> straight from the project as a masked CI variable, and that a bump touching the templates, the contract or a component include pin opens a merge request labeled <code>needs-review</code> instead of auto-merging.</p>
-<h2 id="0-1-2">0.1.2<a class="docs-heading-link" aria-label="Link to this section" href="#0-1-2">#</a></h2>
+<h2 id="0-1-2"><span class="docs-heading-tail"><span>0.1.2</span><a class="docs-heading-link" aria-label="Link to this section" href="#0-1-2">#</a></span></h2>
 <p>Released 2026-10-29. The site gained the agent-ready kit (prompt blocks, Markdown twins, llms.txt) from Squire, and the proof page moved to a private site that needs a Wayne State sign-in.</p>
-<h3 id="breaking-7">Breaking<a class="docs-heading-link" aria-label="Link to this section" href="#breaking-7">#</a></h3>
+<h3 id="breaking-7"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-7">#</a></span></h3>
 <p>0.1.2 has no breaking changes: the version touches the site, the README and the proof page, not the components.</p>
-<h3 id="deprecated-6">Deprecated<a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-6">#</a></h3>
+<h3 id="deprecated-6"><span class="docs-heading-tail"><span>Deprecated</span><a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-6">#</a></span></h3>
 <p>Nothing was deprecated in 0.1.2.</p>
-<h3 id="steps-6">Steps<a class="docs-heading-link" aria-label="Link to this section" href="#steps-6">#</a></h3>
+<h3 id="steps-6"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps-6">#</a></span></h3>
 <p>Bump each component include to the <code>0.1.2</code> tag's full commit SHA, with the tag in a trailing comment:</p>
 <pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@&lt;full commit SHA&gt; # 0.1.2
 </code></pre>
-<h3 id="how-to-verify-5">How to verify<a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-5">#</a></h3>
+<h3 id="how-to-verify-5">How to <span class="docs-heading-tail"><span>verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-5">#</a></span></h3>
 <p>Run the pipeline and confirm the component jobs run on the new pin. PROCTOR's <code>preflight-pinned</code> check warns when an include is not pinned to a commit SHA.</p>
-<h2 id="0-1-1">0.1.1<a class="docs-heading-link" aria-label="Link to this section" href="#0-1-1">#</a></h2>
+<h2 id="0-1-1"><span class="docs-heading-tail"><span>0.1.1</span><a class="docs-heading-link" aria-label="Link to this section" href="#0-1-1">#</a></span></h2>
 <p>Released 2026-10-29. Two new components: <code>package-publish</code>, which publishes a semantic version tag to the GitLab group's built-in Composer registry, and <code>renovate</code>, with the shared preset <code>renovate/default.json</code>. The reusable GitHub Actions workflow for mirrors ships in this tag too.</p>
-<h3 id="breaking-8">Breaking<a class="docs-heading-link" aria-label="Link to this section" href="#breaking-8">#</a></h3>
+<h3 id="breaking-8"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-8">#</a></span></h3>
 <p>0.1.1 has no breaking changes: the version adds components and changes only the repository's own PHPStan config.</p>
-<h3 id="deprecated-7">Deprecated<a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-7">#</a></h3>
+<h3 id="deprecated-7"><span class="docs-heading-tail"><span>Deprecated</span><a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-7">#</a></span></h3>
 <p>Nothing was deprecated in 0.1.1.</p>
-<h3 id="steps-7">Steps<a class="docs-heading-link" aria-label="Link to this section" href="#steps-7">#</a></h3>
+<h3 id="steps-7"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps-7">#</a></span></h3>
 <p>Bump the existing includes to the <code>0.1.1</code> tag's full commit SHA, and add the new components where you want them:</p>
 <pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@&lt;full commit SHA&gt; # 0.1.1
@@ -300,22 +300,22 @@ jobs:
   ci:
     uses: waynestate/preflight/.github/workflows/php-package.yml@&lt;full commit SHA&gt; # 0.1.1
 </code></pre>
-<h3 id="how-to-verify-6">How to verify<a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-6">#</a></h3>
+<h3 id="how-to-verify-6">How to <span class="docs-heading-tail"><span>verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-6">#</a></span></h3>
 <p>Run the pipeline. For <code>package-publish</code>, the job runs only on tags and reads the registry first: a version already published from this commit passes quietly, and a version published from a different commit fails the pipeline. For a mirrored package, a release tag is not done until it is green on both sides.</p>
-<h2 id="0-1-0">0.1.0<a class="docs-heading-link" aria-label="Link to this section" href="#0-1-0">#</a></h2>
+<h2 id="0-1-0"><span class="docs-heading-tail"><span>0.1.0</span><a class="docs-heading-link" aria-label="Link to this section" href="#0-1-0">#</a></span></h2>
 <p>Released 2026-10-27. First tagged release.</p>
-<h3 id="breaking-9">Breaking<a class="docs-heading-link" aria-label="Link to this section" href="#breaking-9">#</a></h3>
+<h3 id="breaking-9"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-9">#</a></span></h3>
 <p>0.1.0 is the first tagged release, so there is nothing to break: it is the baseline every later pin moves from.</p>
-<h3 id="deprecated-8">Deprecated<a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-8">#</a></h3>
+<h3 id="deprecated-8"><span class="docs-heading-tail"><span>Deprecated</span><a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-8">#</a></span></h3>
 <p>Nothing was deprecated in 0.1.0.</p>
-<h3 id="steps-8">Steps<a class="docs-heading-link" aria-label="Link to this section" href="#steps-8">#</a></h3>
+<h3 id="steps-8"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps-8">#</a></span></h3>
 <p>Include the components pinned to the <code>0.1.0</code> tag's full commit SHA:</p>
 <pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@&lt;full commit SHA&gt; # 0.1.0
 </code></pre>
-<h3 id="how-to-verify-7">How to verify<a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-7">#</a></h3>
+<h3 id="how-to-verify-7">How to <span class="docs-heading-tail"><span>verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-7">#</a></span></h3>
 <p>Run the pipeline and confirm the component jobs run on the pin.</p>
-<h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
+<h2 id="related"><span class="docs-heading-tail"><span>Related</span><a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></span></h2>
 <ul>
 <li><a href="changelog.html">Changelog</a>: the raw entries this page is built from.</li>
 <li><a href="install.html">Install</a>: the requirements, the include snippet, and how to verify the pipeline picked the component up.</li>

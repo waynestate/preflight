@@ -40,11 +40,11 @@
   <nav class="docs-nav docs-nav--sidebar" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../../docs/index.html">Overview</a></li><li><a href="../../docs/install.html">Install</a></li><li><a href="../../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../../docs/guides/component-npm-audit.html">The npm-audit component</a></li><li><a href="../../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../../docs/guides/component-pint.html">The pint component</a></li><li><a href="../../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../../docs/guides/component-secret-detection.html">The secret-detection component</a></li><li><a href="../../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../../docs/guides/component-portability.html">The portability component</a></li><li><a href="../../docs/guides/component-a11y.html">The a11y component</a></li><li><a href="../../docs/guides/component-squire-kit.html">The squire-kit component</a></li><li><a href="../../docs/guides/inputs-contract.html">The inputs contract</a></li><li><a href="../../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../../docs/guides/renovate.html" aria-current="page">Renovate</a></li><li><a href="../../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../../docs/guides/dependency-caching.html">Dependency caching</a></li><li><a href="../../docs/guides/template-lint.html">Template lint</a></li><li><a href="../../docs/guides/deprecation.html">Deprecating a component</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../../docs/reference/components.html">Components</a></li><li><a href="../../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../../docs/reference/local-checks.html">Local checks</a></li><li><a href="../../docs/reference/proof.html">Proof</a></li></ul></li><li><a href="../../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../../docs/upgrading.html">Upgrading</a></li><li><a href="../../docs/changelog.html">Changelog</a></li></ul></nav>
   <div class="docs-content">
     <main id="main">
-      <article class="docs-article"><h1 id="renovate-what-merges-and-what-waits">Renovate: what merges and what waits<a class="docs-heading-link" aria-label="Link to this section" href="#renovate-what-merges-and-what-waits">#</a></h1>
+      <article class="docs-article"><h1 id="renovate-what-merges-and-what-waits">Renovate: what merges and what <span class="docs-heading-tail"><span>waits</span><a class="docs-heading-link" aria-label="Link to this section" href="#renovate-what-merges-and-what-waits">#</a></span></h1>
 <p>This page covers what Preflight's version automation auto-merges, what waits
 for a person, and how the private runner project is set up. For the
 component's inputs, go to <a href="./component-renovate.html">the <code>renovate</code> component</a>.</p>
-<h2 id="how-it-works">How it works<a class="docs-heading-link" aria-label="Link to this section" href="#how-it-works">#</a></h2>
+<h2 id="how-it-works">How it <span class="docs-heading-tail"><span>works</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-it-works">#</a></span></h2>
 <p>Preflight owns the stack's version automation (ADR-0015): the shared preset
 <code>renovate/default.json</code> and the
 <a href="./component-renovate.html"><code>renovate</code> component</a> that runs it. A private runner project
@@ -58,7 +58,7 @@ preset, so the rules change in one place:</p>
   &quot;extends&quot;: [&quot;local&gt;enterprise-apps/preflight//renovate/default&quot;]
 }
 </code></pre>
-<h2 id="what-auto-merges">What auto-merges<a class="docs-heading-link" aria-label="Link to this section" href="#what-auto-merges">#</a></h2>
+<h2 id="what-auto-merges">What <span class="docs-heading-tail"><span>auto-merges</span><a class="docs-heading-link" aria-label="Link to this section" href="#what-auto-merges">#</a></span></h2>
 <p>Digest updates, pin and pinDigest updates, and patch and minor version bumps
 auto-merge when the pipeline is green. Lock file maintenance runs weekly and
 auto-merges the same way. Every merge request carries the <code>auto-deps</code> label.</p>
@@ -66,10 +66,10 @@ auto-merges the same way. Every merge request carries the <code>auto-deps</code>
 the contract or this repository's own pipeline, a bump of a component include
 version, and a bump of the recorded Squire kit version, never auto-merge (see
 <a href="#what-waits-for-review">What waits for review</a>).</p>
-<h2 id="what-waits">What waits<a class="docs-heading-link" aria-label="Link to this section" href="#what-waits">#</a></h2>
+<h2 id="what-waits">What <span class="docs-heading-tail"><span>waits</span><a class="docs-heading-link" aria-label="Link to this section" href="#what-waits">#</a></span></h2>
 <p>Major version bumps never auto-merge. The merge request carries the <code>major</code>
 label and waits for a person.</p>
-<h2 id="what-waits-for-review">What waits for review<a class="docs-heading-link" aria-label="Link to this section" href="#what-waits-for-review">#</a></h2>
+<h2 id="what-waits-for-review">What waits for <span class="docs-heading-tail"><span>review</span><a class="docs-heading-link" aria-label="Link to this section" href="#what-waits-for-review">#</a></span></h2>
 <p>Updates that change an image digest inside the templates, the contract, or
 this repository's own pipeline, bumps of a Preflight component version in an
 app's <code>component:</code> include, and bumps of the recorded Squire kit version
@@ -78,7 +78,7 @@ They wait for a person because those pins are what every app pipeline runs:
 a changed digest here changes what every consuming pipeline executes, so it
 earns a human eye even when its own pipeline is green. The Squire kit version
 bump also changes the kit's files; see <a href="#squire-kits">Squire kits</a>.</p>
-<h2 id="squire-kits">Squire kits<a class="docs-heading-link" aria-label="Link to this section" href="#squire-kits">#</a></h2>
+<h2 id="squire-kits">Squire <span class="docs-heading-tail"><span>kits</span><a class="docs-heading-link" aria-label="Link to this section" href="#squire-kits">#</a></span></h2>
 <p>A Squire deploy kit (the <code>deploy</code> folder in the stack's repos) is files Squire
 wrote, recorded with their hashes in <code>deploy/.squire.json</code>. Two rules in the
 preset keep it equal to a Squire release:</p>
@@ -109,13 +109,13 @@ branch.</p>
 lists and does not write new ones. The
 <a href="./component-squire-kit.html"><code>squire-kit</code> component</a> catches both cases, and
 any hand edit, by running <code>squire init --check</code> in the pipeline.</p>
-<h2 id="why-mysql-and-ha-proxy-get-digests-only">Why MySQL and HA-Proxy get digests only<a class="docs-heading-link" aria-label="Link to this section" href="#why-mysql-and-ha-proxy-get-digests-only">#</a></h2>
+<h2 id="why-mysql-and-ha-proxy-get-digests-only">Why MySQL and HA-Proxy get digests <span class="docs-heading-tail"><span>only</span><a class="docs-heading-link" aria-label="Link to this section" href="#why-mysql-and-ha-proxy-get-digests-only">#</a></span></h2>
 <p>The <code>mysql</code> and <code>haproxy</code> images mirror the versions Citadel actually runs,
 not the newest releases in the world. Bumping their tags would drift the apps
 away from production, so only digest updates are enabled for them: the same
 tag, the exact image. <code>citadel/php-apache</code> is disabled entirely, because
 Squire's own data owns that image.</p>
-<h2 id="pinned-to-immutable-tags">Pinned to immutable tags<a class="docs-heading-link" aria-label="Link to this section" href="#pinned-to-immutable-tags">#</a></h2>
+<h2 id="pinned-to-immutable-tags">Pinned to immutable <span class="docs-heading-tail"><span>tags</span><a class="docs-heading-link" aria-label="Link to this section" href="#pinned-to-immutable-tags">#</a></span></h2>
 <p>The <code>quay.io/buildah/stable</code> image (the <code>image</code> default of the
 portability component) is matched to <code>-immutable</code> tags only. Red Hat re-pushed
 v1.43.5 under the mutable tag and garbage-collected the old digest, which broke
@@ -125,7 +125,7 @@ an image job, so Drawbridge and Squire now pin the immutable form,
 <code>vX.Y.Z-immutable</code> tags, so Renovate proposes updates within the immutable tags
 and never moves a pin back to a mutable one. Digests stay pinned as before
 (<code>docker:pinDigests</code>).</p>
-<h2 id="set-up-the-user-does-this">Set up (the user does this)<a class="docs-heading-link" aria-label="Link to this section" href="#set-up-the-user-does-this">#</a></h2>
+<h2 id="set-up-the-user-does-this">Set up (the user does <span class="docs-heading-tail"><span>this)</span><a class="docs-heading-link" aria-label="Link to this section" href="#set-up-the-user-does-this">#</a></span></h2>
 <p>This repository ships the preset and the component, and creates nothing else.
 A person must set up:</p>
 <ul>
@@ -139,7 +139,7 @@ Monday is a sensible default.</li>
 under the include's <code>inputs:</code>, on a Preflight version that has the input
 (see <a href="#squire-kits">Squire kits</a>).</li>
 </ul>
-<h2 id="the-runner-project">The runner project<a class="docs-heading-link" aria-label="Link to this section" href="#the-runner-project">#</a></h2>
+<h2 id="the-runner-project">The runner <span class="docs-heading-tail"><span>project</span><a class="docs-heading-link" aria-label="Link to this section" href="#the-runner-project">#</a></span></h2>
 <aside class="docs-callout docs-callout--warning" role="note"><p class="docs-callout__label">Warning</p><p>The runner project must stay private. It holds <code>RENOVATE_TOKEN</code>, a token
 that can open and merge merge requests across the group, and this
 repository is mirrored to public GitHub. Use a group bot account for the
@@ -171,7 +171,7 @@ self-reference arrives as literal text.</p></aside>
 <p>The component writes its <code>config.js</code> at job time, so the <code>registryAliases</code>
 entry for the GitLab instance comes from the predefined <code>CI_SERVER_FQDN</code>
 variable. No hostname is stored in this repository.</p>
-<h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
+<h2 id="related"><span class="docs-heading-tail"><span>Related</span><a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></span></h2>
 <ul>
 <li><a href="./component-renovate.html">The <code>renovate</code> component</a></li>
 <li><a href="./component-squire-kit.html">The <code>squire-kit</code> component</a></li>

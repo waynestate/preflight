@@ -40,9 +40,9 @@
   <nav class="docs-nav docs-nav--sidebar" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../../docs/index.html">Overview</a></li><li><a href="../../docs/install.html">Install</a></li><li><a href="../../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../../docs/guides/component-npm-audit.html">The npm-audit component</a></li><li><a href="../../docs/guides/component-sbom.html" aria-current="page">The sbom component</a></li><li><a href="../../docs/guides/component-pint.html">The pint component</a></li><li><a href="../../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../../docs/guides/component-secret-detection.html">The secret-detection component</a></li><li><a href="../../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../../docs/guides/component-portability.html">The portability component</a></li><li><a href="../../docs/guides/component-a11y.html">The a11y component</a></li><li><a href="../../docs/guides/component-squire-kit.html">The squire-kit component</a></li><li><a href="../../docs/guides/inputs-contract.html">The inputs contract</a></li><li><a href="../../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../../docs/guides/renovate.html">Renovate</a></li><li><a href="../../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../../docs/guides/dependency-caching.html">Dependency caching</a></li><li><a href="../../docs/guides/template-lint.html">Template lint</a></li><li><a href="../../docs/guides/deprecation.html">Deprecating a component</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../../docs/reference/components.html">Components</a></li><li><a href="../../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../../docs/reference/local-checks.html">Local checks</a></li><li><a href="../../docs/reference/proof.html">Proof</a></li></ul></li><li><a href="../../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../../docs/upgrading.html">Upgrading</a></li><li><a href="../../docs/changelog.html">Changelog</a></li></ul></nav>
   <div class="docs-content">
     <main id="main">
-      <article class="docs-article"><h1 id="the-sbom-component">The sbom component<a class="docs-heading-link" aria-label="Link to this section" href="#the-sbom-component">#</a></h1>
+      <article class="docs-article"><h1 id="the-sbom-component">The sbom <span class="docs-heading-tail"><span>component</span><a class="docs-heading-link" aria-label="Link to this section" href="#the-sbom-component">#</a></span></h1>
 <p>This page shows how to add the <code>sbom</code> component to an app's <code>.gitlab-ci.yml</code>: it generates a CycloneDX SBOM with <code>cyclonedx/cyclonedx-php-composer</code>, validates it, and publishes it as an artifact. The SBOM is the aircraft's parts manifest (nothing flies that is not on the list); start with the include, then read what the job does and which inputs it takes.</p>
-<h2 id="include-the-component">Include the component<a class="docs-heading-link" aria-label="Link to this section" href="#include-the-component">#</a></h2>
+<h2 id="include-the-component">Include the <span class="docs-heading-tail"><span>component</span><a class="docs-heading-link" aria-label="Link to this section" href="#include-the-component">#</a></span></h2>
 <p>Add the include to the app's <code>.gitlab-ci.yml</code>, pinned to a commit SHA with the tag in a trailing comment:</p>
 <pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@60314791565a264e97cb210813ef4f3e76512402 # 0.5.0
@@ -50,7 +50,7 @@
       output: sbom.cdx.json
 </code></pre>
 <p>A tag or branch can move; a SHA cannot.</p>
-<h2 id="what-the-job-does">What the job does<a class="docs-heading-link" aria-label="Link to this section" href="#what-the-job-does">#</a></h2>
+<h2 id="what-the-job-does">What the job <span class="docs-heading-tail"><span>does</span><a class="docs-heading-link" aria-label="Link to this section" href="#what-the-job-does">#</a></span></h2>
 <p>The job lands in the <code>test</code> stage by default, is <code>interruptible: true</code>, and has a <code>timeout: 30 minutes</code>. It runs four steps:</p>
 <ol>
 <li>
@@ -79,7 +79,7 @@
 <p><code>--omit=dev</code> is present only when <code>omit_dev</code> is <code>true</code>; <code>--output-file</code> takes the <code>output</code> input (default <code>sbom.cdx.json</code>).</p>
 </li>
 </ol>
-<h2 id="artifacts">Artifacts<a class="docs-heading-link" aria-label="Link to this section" href="#artifacts">#</a></h2>
+<h2 id="artifacts"><span class="docs-heading-tail"><span>Artifacts</span><a class="docs-heading-link" aria-label="Link to this section" href="#artifacts">#</a></span></h2>
 <p>The job publishes the SBOM file as an artifact:</p>
 <pre tabindex="0"><code class="language-yaml">artifacts:
   paths:
@@ -87,7 +87,7 @@
   expire_in: 30 days
 </code></pre>
 <p>The path is the <code>output</code> input, and the artifact expires in 30 days.</p>
-<h2 id="inputs">Inputs<a class="docs-heading-link" aria-label="Link to this section" href="#inputs">#</a></h2>
+<h2 id="inputs"><span class="docs-heading-tail"><span>Inputs</span><a class="docs-heading-link" aria-label="Link to this section" href="#inputs">#</a></span></h2>
 <div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
 <thead>
 <tr>
@@ -138,9 +138,9 @@
 </table></div>
 <p><code>job_name</code> must match <code>^[A-Za-z0-9_][A-Za-z0-9_.-]*$</code>.</p>
 <aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p><code>output</code> must be a relative path. The input carries a <code>regex</code>, so GitLab refuses the pipeline at creation when a value does not match.</p></aside>
-<h2 id="verify">Verify<a class="docs-heading-link" aria-label="Link to this section" href="#verify">#</a></h2>
+<h2 id="verify"><span class="docs-heading-tail"><span>Verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#verify">#</a></span></h2>
 <p>Push the change. The components are ordinary jobs, so the <code>sbom</code> job runs whenever the app's pipeline runs, in the <code>test</code> stage by default. A green job means the SBOM was generated, validated, and published.</p>
-<h2 id="related">Related<a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></h2>
+<h2 id="related"><span class="docs-heading-tail"><span>Related</span><a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></span></h2>
 <ul>
 <li><a href="component-composer-audit.html">The composer-audit component</a>: the companion dependency check.</li>
 <li><a href="include-twice.html">Include a component twice</a>: the <code>job_name</code> input when one project includes the same component more than once.</li>

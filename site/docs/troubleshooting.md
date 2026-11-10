@@ -6,7 +6,7 @@ llms: https://preflight.apps.wayne.edu/llms.txt
 generator: Squire agent-ready
 ---
 
-# Troubleshooting[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#troubleshooting)
+# Troubleshooting [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#troubleshooting)
 
 What to do when a Preflight job fails or a gate behaves unexpectedly. Each entry names the cause, the fix, and how to check it. Most failures are a pin that moved or a setting that is missing. The checklist catches the rest.
 
@@ -14,9 +14,9 @@ Tip
 
 Start with the job log. The message usually names the input that is wrong, and every input is listed on the [Components](https://preflight.apps.wayne.edu/docs/reference/components.html) page.
 
-## The pipeline[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#the-pipeline)
+## The pipeline [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#the-pipeline)
 
-### The include fails on another GitLab instance[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#the-include-fails-on-another-gitlab-instance)
+### The include fails on another GitLab instance [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#the-include-fails-on-another-gitlab-instance)
 
 Components work only inside the GitLab instance that hosts this project, and they cannot be used across instances except by mirroring.
 
@@ -24,7 +24,7 @@ Components work only inside the GitLab instance that hosts this project, and the
 - **Fix:** host the app on the same instance. For a package that is also mirrored to GitHub, use the reusable workflow at `.github/workflows/php-package.yml` in this repo instead of the components.
 - **Check:** the include path starts with `$CI_SERVER_FQDN/enterprise-apps/preflight/`, and the app's project is on that same instance.
 
-### The components do not run on merge requests[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#the-components-do-not-run-on-merge-requests)
+### The components do not run on merge requests [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#the-components-do-not-run-on-merge-requests)
 
 The components are ordinary jobs, so they run whenever the app's pipeline runs. Whether the pipeline runs on a merge request is decided by a `workflow:rules` block, and a component cannot set it for the project that includes it.
 
@@ -40,7 +40,7 @@ workflow:
 
 - **Check:** a merge request pipeline runs, and so does a push to the default branch.
 
-### A gate was skipped or weakened[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#a-gate-was-skipped-or-weakened)
+### A gate was skipped or weakened [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#a-gate-was-skipped-or-weakened)
 
 An included component is a set of ordinary jobs. The app's own `.gitlab-ci.yml` is merged over them, so an app can override a job's keys, skip it with `rules`, or delete the `include:` line. Preflight makes the safe pipeline the easy one. It does not lock it.
 
@@ -48,7 +48,7 @@ An included component is a set of ordinary jobs. The app's own `.gitlab-ci.yml` 
 - **Fix:** review the diff of the app's `.gitlab-ci.yml` against the last known-good pipeline, and restore the job or the `include:` line.
 - **Check:** Rollcall is where skipped or weakened gates show up.
 
-### Two includes of the same component became one job[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#two-includes-of-the-same-component-became-one-job)
+### Two includes of the same component became one job [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#two-includes-of-the-same-component-became-one-job)
 
 Every component takes a `job_name` input, whose default is the job's usual name. Without it, two includes of the same component share a job name and merge into one.
 
@@ -56,7 +56,7 @@ Every component takes a `job_name` input, whose default is the job's usual name.
 - **Fix:** set `job_name` on each include, for example `pint-app` and `pint-admin`. `job_name` ships in 0.1.4, so pin 0.1.4 or a SHA at or after that release.
 - **Check:** the pipeline lists one job per include, with the names you set.
 
-### Pipeline creation fails on the unknown `spec: component:` key[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#pipeline-creation-fails-on-the-unknown-spec-component-key)
+### Pipeline creation fails on the unknown `spec: component:` key [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#pipeline-creation-fails-on-the-unknown-spec-component-key)
 
 Every Preflight component declares `spec: component:`, and GitLab only accepts that key from 18.7 on. On an older instance the pipeline never starts: creation fails with "header:spec config contains unknown keys".
 
@@ -64,7 +64,7 @@ Every Preflight component declares `spec: component:`, and GitLab only accepts t
 - **Fix:** upgrade GitLab to 18.7 or later, or pin an older Preflight tag that does not declare `spec: component:`.
 - **Check:** the instance banner shows 18.7 or later, and the pipeline creates and runs the component jobs.
 
-### A fork merge request ran with protected variables[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#a-fork-merge-request-ran-with-protected-variables)
+### A fork merge request ran with protected variables [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#a-fork-merge-request-ran-with-protected-variables)
 
 A fork's merge request pipeline runs the fork's configuration.
 
@@ -72,9 +72,9 @@ A fork's merge request pipeline runs the fork's configuration.
 - **Fix:** review a fork's `.gitlab-ci.yml` before running its pipeline, and never give it protected variables.
 - **Check:** the fork pipeline's variable list does not include any protected variable.
 
-## Job failures[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#job-failures)
+## Job failures [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#job-failures)
 
-### A job misbehaves: which Preflight release ran?[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#a-job-misbehaves-which-preflight-release-ran)
+### A job misbehaves: which Preflight release ran? [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#a-job-misbehaves-which-preflight-release-ran)
 
 Every Preflight job prints a `Preflight component <name> <version> (ref <reference>, sha <sha>)` line before any other command. When a job fails or behaves unexpectedly, read that first line to see which Preflight release produced it: `<name>` is the component, `<version>` the pinned release tag, `<reference>` the ref the include points at, and `<sha>` the commit SHA of the template that ran. Compare it with the pin in the app's `.gitlab-ci.yml`; a mismatch means the include moved or the pipeline ran on an older pin.
 
@@ -82,7 +82,7 @@ Every Preflight job prints a `Preflight component <name> <version> (ref <referen
 - **Fix:** read the `Preflight component` line at the top of the job log. If the line is missing, the include is pinned to a Preflight release from before the line shipped; pin the current tag.
 - **Check:** the first line of the job log names the component, its version, reference and SHA, and they match the pin in the app's `.gitlab-ci.yml`.
 
-### PROCTOR's preflight-pinned check warns[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#proctor-s-preflight-pinned-check-warns)
+### PROCTOR's preflight-pinned check warns [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#proctor-s-preflight-pinned-check-warns)
 
 A tag or branch can move. A SHA cannot. PROCTOR's `preflight-pinned` check warns when an include is not pinned to a commit SHA.
 
@@ -90,7 +90,7 @@ A tag or branch can move. A SHA cannot. PROCTOR's `preflight-pinned` check warns
 - **Fix:** pin the full commit SHA and keep the tag in a trailing comment, as in the examples on the [Components](https://preflight.apps.wayne.edu/docs/reference/components.html) page.
 - **Check:** PROCTOR's report no longer carries the `preflight-pinned` finding.
 
-### composer-audit is green, then an advisory lands[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#composer-audit-is-green-then-an-advisory-lands)
+### composer-audit is green, then an advisory lands [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#composer-audit-is-green-then-an-advisory-lands)
 
 New advisories are published after code is merged, so a green pipeline today can be stale tomorrow.
 
@@ -98,7 +98,7 @@ New advisories are published after code is merged, so a green pipeline today can
 - **Fix:** create a weekly pipeline schedule on the default branch: project settings, Build, Pipeline schedules. The component needs nothing extra. It carries no `rules:` block, so it runs in scheduled pipelines like any other. Someone with Maintainer rights on the app creates the schedule.
 - **Check:** the schedule appears under project settings, Build, Pipeline schedules, and its latest pipeline is green.
 
-### composer-audit fails on an abandoned package[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#composer-audit-fails-on-an-abandoned-package)
+### composer-audit fails on an abandoned package [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#composer-audit-fails-on-an-abandoned-package)
 
 The job log names an abandoned package in the lock. An abandoned package is one its author no longer maintains, and `composer audit` fails the job on one by default.
 
@@ -106,7 +106,7 @@ The job log names an abandoned package in the lock. An abandoned package is one 
 - **Fix:** upgrade the package or move to its successor where the log names one. While that is not possible, set the `abandoned` input on the include: `report` lists the abandoned packages without failing the job (right for an old app with abandoned transitive packages), `ignore` does not look at them at all. Advisories still fail the job in every mode.
 - **Check:** with `report`, the job is green and its log lists the abandoned packages; with `fail`, the job fails until the lock no longer holds one.
 
-### npm-audit fails with "audit endpoint returned an error"[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#npm-audit-fails-with-audit-endpoint-returned-an-error)
+### npm-audit fails with "audit endpoint returned an error" [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#npm-audit-fails-with-audit-endpoint-returned-an-error)
 
 The job log ends with `npm-audit: the registry's audit endpoint could not be reached or refused the request, so nothing was audited.`
 
@@ -114,13 +114,13 @@ The job log ends with `npm-audit: the registry's audit endpoint could not be rea
 - **Fix:** let the runner reach the registry the log names, or point the audit at one that serves the endpoints. The job never passes without an answer.
 - **Check:** the job log shows npm's report (`found 0 vulnerabilities` or a list) instead of the error.
 
-### npm-audit fails on a dev-only package[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#npm-audit-fails-on-a-dev-only-package)
+### npm-audit fails on a dev-only package [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#npm-audit-fails-on-a-dev-only-package)
 
 - **Cause:** `omit_dev` is `false`, so the gate audits dev dependencies too.
 - **Fix:** upgrade the package, or leave `omit_dev` at its default, `true`: the gate then reads runtime dependencies only, and the full report after it still lists the dev finding without failing.
 - **Check:** the gate's lines say `failing on high or higher in runtime dependencies`.
 
-### composer install stops: the lock needs another PHP or an extension[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#composer-install-stops-the-lock-needs-another-php-or-an-extension)
+### composer install stops: the lock needs another PHP or an extension [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#composer-install-stops-the-lock-needs-another-php-or-an-extension)
 
 The job log stops at `composer install` with `your php version (8.4.x) does not satisfy that requirement`, or with `requires ext-gd * -> it is missing from your system` (gd, oci8 and ldap are the usual ones). The `php-test`, `pint` and `phpstan` jobs install the app to run it, so they need what the app needs.
 
@@ -128,7 +128,7 @@ The job log stops at `composer install` with `your php version (8.4.x) does not 
 - **Fix:** for an old PHP, upgrade the app: that red job is the finding, not a fault in Preflight. For an extension, set the job's `image` input to an image that has the same extensions as the app's Citadel image, for example one built `FROM php:8.4-cli-trixie` with `docker-php-ext-install gd`. The `proctor` and `sbom` jobs never run the app, so they install with `--ignore-platform-reqs` and need neither.
 - **Check:** the `composer install` step of the job passes, and the job fails, if at all, on its own check.
 
-### composer install cannot clone a private package[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#composer-install-cannot-clone-a-private-package)
+### composer install cannot clone a private package [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#composer-install-cannot-clone-a-private-package)
 
 The job log shows `Failed to execute git clone --mirror` for a repository on the app's own GitLab instance, or `Could not connect to server`.
 
@@ -136,7 +136,7 @@ The job log shows `Failed to execute git clone --mirror` for a repository on the
 - **Fix:** give Composer a credential in the pipeline, for example a masked CI/CD variable `COMPOSER_AUTH` holding an `http-basic` entry for the instance with a deploy token that can read the package's project. Prefer publishing the package to the GitLab package registry and listing only that project in the job token allowlist; see [Keep the job token allowlist short](https://preflight.apps.wayne.edu/docs/guides/job-token-allowlist.html).
 - **Check:** the `composer install` step passes in a pipeline on a branch.
 
-### eslint stops at npm ci[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#eslint-stops-at-npm-ci)
+### eslint stops at npm ci [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#eslint-stops-at-npm-ci)
 
 The `eslint` job stops at `npm ci` with the usage text, before ESLint runs.
 
@@ -144,7 +144,7 @@ The `eslint` job stops at `npm ci` with the usage text, before ESLint runs.
 - **Fix:** commit a `package-lock.json` (run `npm install` once), or leave the `eslint` component out until the app moves to npm.
 - **Check:** `npm ci --ignore-scripts` passes locally from a clean checkout.
 
-### php-test-next is red[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#php-test-next-is-red)
+### php-test-next is red [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#php-test-next-is-red)
 
 A red `php-test-next` job is an early warning, not a stop. It is the second `php-test` include that tries the PHP release that is not supported yet, with `allow_failure: true` in the app's own file.
 
@@ -152,7 +152,7 @@ A red `php-test-next` job is an early warning, not a stop. It is the second `php
 - **Fix:** leave `allow_failure: true` in place while the release is unsupported. Once the release is supported (the supported versions follow `policy.json`), drop the `allow_failure` and move the version into the main `php_versions` list.
 - **Check:** the main `php-test` matrix is green. Only the named `php-test-next` job is red.
 
-### package-publish refuses the tag[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#package-publish-refuses-the-tag)
+### package-publish refuses the tag [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#package-publish-refuses-the-tag)
 
 The job reads the registry before publishing. Republishing a version from the same commit is a no-op, and republishing it from a different commit fails instead of overwriting the version, because GitLab would otherwise overwrite it without a word.
 
@@ -160,7 +160,7 @@ The job reads the registry before publishing. Republishing a version from the sa
 - **Fix:** publish a new version tag instead of moving the old one. Protect the release tags so only maintainers can create or move a tag.
 - **Check:** the job log shows the version already on the manifest and the commit it was published from.
 
-### portability says an input is unknown[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#portability-says-an-input-is-unknown)
+### portability says an input is unknown [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#portability-says-an-input-is-unknown)
 
 The one-job `portability` component has new inputs, and `buildah_image` is now `image` (the old app-image input is gone).
 
@@ -168,7 +168,7 @@ The one-job `portability` component has new inputs, and `buildah_image` is now `
 - **Fix:** pin a SHA at or after the one-job form and follow [Upgrading](https://preflight.apps.wayne.edu/docs/upgrading.html): `buildah_image` becomes `image`, and the old app `image` input is gone because nothing is pushed.
 - **Check:** the pipeline lists one job, `portability`.
 
-### portability fails before the build on the runner[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#portability-fails-before-the-build-on-the-runner)
+### portability fails before the build on the runner [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#portability-fails-before-the-build-on-the-runner)
 
 Buildah's chroot isolation opens a user namespace.
 
@@ -176,7 +176,7 @@ Buildah's chroot isolation opens a user namespace.
 - **Fix:** run the job on a runner that permits user namespaces, which ordinary unprivileged Docker-executor runners do. Do not make the runner privileged for it. Locally, add `--security-opt seccomp=unconfined` to `docker run`.
 - **Check:** the log reaches `buildah bud` and prints the build steps.
 
-### portability: health: FAIL on a Laravel app[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#portability-health-fail-on-a-laravel-app)
+### portability: health: FAIL on a Laravel app [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#portability-health-fail-on-a-laravel-app)
 
 The probe asks for the health path with a bare IP address in `Host` (`Host: <ip>:<port>`), the way a platform's probe does.
 
@@ -184,7 +184,7 @@ The probe asks for the health path with a bare IP address in `Host` (`Host: <ip>
 - **Fix:** answer the health route before those, for example Laravel's `health: '/up'` route in `bootstrap/app.php`, and exempt it from trusted hosts and HTTPS redirects.
 - **Check:** `portability: health: pass`.
 
-### portability: sigterm: FAIL[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#portability-sigterm-fail)
+### portability: sigterm: FAIL [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#portability-sigterm-fail)
 
 The main process must handle SIGTERM and exit by itself within `stop_timeout`, because PID 1 ignores a signal it has no handler for.
 
@@ -192,7 +192,7 @@ The main process must handle SIGTERM and exit by itself within `stop_timeout`, b
 - **Fix:** start the app under an init that forwards signals (`tini`, `dumb-init`) or a server that handles SIGTERM itself (php-fpm, FrankenPHP); in a shell entrypoint, trap TERM and stop the child.
 - **Check:** `portability: sigterm: pass` with `handled SIGTERM and exited by itself`.
 
-### portability: an Apache image fails after the upgrade to 0.5.0[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#portability-an-apache-image-fails-after-the-upgrade-to-0-5-0)
+### portability: an Apache image fails after the upgrade to 0.5.0 [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#portability-an-apache-image-fails-after-the-upgrade-to-0-5-0)
 
 Since 0.5.0 the job gives each replica stdio its uid owns and a session of its own, so the `start_command` shim older releases needed is in the way.
 
@@ -200,7 +200,7 @@ Since 0.5.0 the job gives each replica stdio its uid owns and a session of its o
 - **Fix:** delete the `start_command` input, so the job runs the image's own `ENTRYPOINT` and `CMD`.
 - **Check:** `portability: health: pass` and `portability: sigterm: pass`.
 
-### portability: session-hop: FAIL with "set session_login_path"[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#portability-session-hop-fail-with-set-session-login-path)
+### portability: session-hop: FAIL with "set session_login_path" [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#portability-session-hop-fail-with-set-session-login-path)
 
 `session-hop` needs a route that signs in a test user and one that answers 200 only for a signed-in user.
 
@@ -208,7 +208,7 @@ Since 0.5.0 the job gives each replica stdio its uid owns and a session of its o
 - **Fix:** add the two routes behind an environment variable only the job sets (see [The portability component](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#a-sign-in-route-for-session-hop)), or, for an app with no sign-in, leave `session-hop` out of `checks`.
 - **Check:** `portability: session-hop: pass`, or `skipped` when left out on purpose.
 
-### a11y fails on a page that looked fine[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#a11y-fails-on-a-page-that-looked-fine)
+### a11y fails on a page that looked fine [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#a11y-fails-on-a-page-that-looked-fine)
 
 The job checks each page in light and dark mode at 320 px and 1280 px, with reduced motion, so it sees layouts and palettes a quick look in one browser misses.
 
@@ -216,7 +216,7 @@ The job checks each page in light and dark mode at 320 px and 1280 px, with redu
 - **Fix:** open the page in that mode (dark color scheme, a 320 px window) and fix the element the report names; each axe-core rule links its help page. While a site works through its first findings, set `allow_failure: true` on the include and remove it once the job is green.
 - **Check:** the job's last line reads `a11y: clean`, and the merge request's test summary shows every case passing.
 
-### a11y stops with a configuration error (exit 2)[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#a11y-stops-with-a-configuration-error-exit-2)
+### a11y stops with a configuration error (exit 2) [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#a11y-stops-with-a-configuration-error-exit-2)
 
 Exit 2 means the job never judged a page: an input or a tool is wrong.
 
@@ -229,7 +229,7 @@ Exit 2 means the job never judged a page: an input or a tool is wrong.
 - **Fix:** correct the input the message names: fix the glob or `site_dir`, set `playwright_version` to the Playwright release in the image, or move `axe_core_version` and `axe_playwright_version` together (Renovate bumps them as one group).
 - **Check:** the job log's second line names the site or URL and the Playwright version, and the summary line names the axe-core version that ran.
 
-### squire-kit fails: the kit drifted (exit 1)[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#squire-kit-fails-the-kit-drifted-exit-1)
+### squire-kit fails: the kit drifted (exit 1) [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#squire-kit-fails-the-kit-drifted-exit-1)
 
 The job installs the Squire release the kit records and runs `squire init --check`; the log lists every kit file with its state.
 
@@ -241,7 +241,7 @@ The job installs the Squire release the kit records and runs `squire init --chec
 - **Fix:** for `outdated` and `missing`, run `vendor/bin/squire update --path=deploy`, then `vendor/bin/squire init --path=deploy`, review the diff and commit it. For `modified`, put Squire's file back with `vendor/bin/squire init --force --path=deploy` and send the change to Squire instead, so every kit gets it. While a repository works through its first findings, set `allow_failure: true` on the include and remove it once the job is green.
 - **Check:** `vendor/bin/squire init --check --path=deploy` prints `RESULT: pass`, and so does the job's last line.
 
-### squire-kit stops before checking (exit 2)[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#squire-kit-stops-before-checking-exit-2)
+### squire-kit stops before checking (exit 2) [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#squire-kit-stops-before-checking-exit-2)
 
 Exit 2 means the job never compared a file.
 
@@ -252,9 +252,9 @@ Exit 2 means the job never compared a file.
 - **Fix:** set `working_dir` to the folder holding `.squire.json`, set `squire_version` to the release the kit was written with, or let the job reach Packagist.
 - **Check:** the job log prints `Checking the kit in ... against Squire X` before the file list.
 
-## Renovate[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#renovate)
+## Renovate [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#renovate)
 
-### Renovate sees literal text instead of a token[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#renovate-sees-literal-text-instead-of-a-token)
+### Renovate sees literal text instead of a token [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#renovate-sees-literal-text-instead-of-a-token)
 
 On GitLab 19.5 a self-reference such as `RENOVATE_TOKEN: $RENOVATE_TOKEN` in the job `variables:` arrives as literal text and shadows the masked project CI/CD variables. The component does not map either token on purpose. The job reads both straight from the project.
 
@@ -262,7 +262,7 @@ On GitLab 19.5 a self-reference such as `RENOVATE_TOKEN: $RENOVATE_TOKEN` in the
 - **Fix:** delete the self-reference. Keep `RENOVATE_TOKEN` (and optionally `GITHUB_COM_TOKEN`) as masked CI variables in the private runner project.
 - **Check:** the job log no longer shows the literal text `$RENOVATE_TOKEN`, and Renovate authenticates.
 
-### Renovate auto-merged a component pin bump[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#renovate-auto-merged-a-component-pin-bump)
+### Renovate auto-merged a component pin bump [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#renovate-auto-merged-a-component-pin-bump)
 
 In refs before 0.1.4 the component-rule manager name in `renovate/default.json` did not match repository deps, so a bump of a `component:` include version auto-merged instead of waiting for review.
 
@@ -270,7 +270,7 @@ In refs before 0.1.4 the component-rule manager name in `renovate/default.json` 
 - **Fix:** point the repositories' `renovate.json` at the shared preset from 0.1.4 or later. Component version bumps now carry the `needs-review` label and never auto-merge.
 - **Check:** the merge request carries the `needs-review` label.
 
-### A Squire kit merge request shows an artifact error[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#a-squire-kit-merge-request-shows-an-artifact-error)
+### A Squire kit merge request shows an artifact error [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#a-squire-kit-merge-request-shows-an-artifact-error)
 
 The preset's Squire rule runs two commands after it bumps `.squire.json`: it installs the new Squire into `/tmp` and runs `squire update` on the kit folder. The merge request reports an artifact error when it could not.
 
@@ -278,9 +278,9 @@ The preset's Squire rule runs two commands after it bumps `.squire.json`: it ins
 - **Fix:** check out the branch, run `vendor/bin/squire update --path=deploy` (and `vendor/bin/squire init --path=deploy` for a release that adds a file), review the diff and commit it to the branch. For an edited file, restore it first with `vendor/bin/squire init --force --path=deploy`. To let the runner do this itself, set `squire_kit_tasks: true` on its renovate include.
 - **Check:** the `squire-kit` job on the merge request is green.
 
-## Local checks[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#local-checks)
+## Local checks [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#local-checks)
 
-### The portability fixtures fail with "buildah is required"[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#the-portability-fixtures-fail-with-buildah-is-required)
+### The portability fixtures fail with "buildah is required" [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#the-portability-fixtures-fail-with-buildah-is-required)
 
 `tests/check-portability.sh` runs inside the component's Buildah image, not on the host.
 
@@ -288,7 +288,7 @@ The preset's Squire rule runs two commands after it bumps `.squire.json`: it ins
 - **Fix:** run it through `docker run` in the Buildah image as [Local checks](https://preflight.apps.wayne.edu/docs/reference/local-checks.html) shows, or run `pwsh -File tests/check-portability.ps1` on Windows.
 - **Check:** one result line per case, and the script exits 0.
 
-### composer ci fails on a stale docs site[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#composer-ci-fails-on-a-stale-docs-site)
+### composer ci fails on a stale docs site [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#composer-ci-fails-on-a-stale-docs-site)
 
 `composer ci` runs `docs:check`, which fails when the built docs site is stale or the generated command or environment reference has drifted from the CLI or source.
 
@@ -296,7 +296,7 @@ The preset's Squire rule runs two commands after it bumps `.squire.json`: it ins
 - **Fix:** run `composer docs` to rebuild `site/docs/` from `docs/`, and commit the rebuilt site with the page.
 - **Check:** `composer docs:check` passes.
 
-## Related[#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#related)
+## Related [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#related)
 
 - [Components](https://preflight.apps.wayne.edu/docs/reference/components.html)
 - [Local checks](https://preflight.apps.wayne.edu/docs/reference/local-checks.html)

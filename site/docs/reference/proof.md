@@ -6,13 +6,13 @@ llms: https://preflight.apps.wayne.edu/llms.txt
 generator: Squire agent-ready
 ---
 
-# Proof[#](https://preflight.apps.wayne.edu/docs/reference/proof.html#proof)
+# Proof [#](https://preflight.apps.wayne.edu/docs/reference/proof.html#proof)
 
 This page says how Preflight's components were proven on real Wayne State applications: what ran, what held, what the run caught in Preflight itself, and what it does not prove yet. Next, see [Components](https://preflight.apps.wayne.edu/docs/reference/components.html) for every input and [Troubleshooting](https://preflight.apps.wayne.edu/docs/troubleshooting.html) for the fixes the run added.
 
 A preflight check is only worth something on the aircraft you are about to fly. So on 2026-11-05 every component that can run without a registry or a token was flown against every PHP application in the stack's shared proof corpus, the same set PROCTOR and Squire are measured on.
 
-## What ran[#](https://preflight.apps.wayne.edu/docs/reference/proof.html#what-ran)
+## What ran [#](https://preflight.apps.wayne.edu/docs/reference/proof.html#what-ran)
 
 Preflight from `main` (0.1.4 plus the Unreleased changes), with the install-line change described below. The 82 applications are 64 raw PHP apps (33 with a `composer.json`, 31 without one), 17 Laravel apps from 5.8 to 13, and 1 Slim 2 app.
 
@@ -34,7 +34,7 @@ The proctor job ran the stack's PROCTOR in place of `vendor/bin/proctor`, becaus
 
 A job **passes** when it exits 0. It is **flagged** when it reached its own check and that check reported findings, or when the app's own `composer install` or `npm ci` stopped, with the reason in the log. A **tool error** is Preflight breaking: a step the component owns failing, a timeout, or a report that is not valid.
 
-## Results[#](https://preflight.apps.wayne.edu/docs/reference/proof.html#results)
+## Results [#](https://preflight.apps.wayne.edu/docs/reference/proof.html#results)
 
 | Component | Jobs | Pass | Flagged at its check | Stopped at the app's install | Tool error |
 | --- | --- | --- | --- | --- | --- |
@@ -54,7 +54,7 @@ A job **passes** when it exits 0. It is **flagged** when it reached its own chec
 - Where php-test reached the tests, the failures were the apps' own setups: a test suite that needs built front-end assets, and one that needs a database.
 - The median job took 1 to 7 seconds; most of that is installing.
 
-## What it caught in Preflight[#](https://preflight.apps.wayne.edu/docs/reference/proof.html#what-it-caught-in-preflight)
+## What it caught in Preflight [#](https://preflight.apps.wayne.edu/docs/reference/proof.html#what-it-caught-in-preflight)
 
 A run that only finds praise was not looking hard enough. This one found these, and every finding is about Preflight, not the apps:
 
@@ -65,14 +65,14 @@ A run that only finds praise was not looking hard enough. This one found these, 
 - **Open: Yarn.** The eslint component installs with `npm ci` only.
 - **Not Preflight:** the first pass failed `apt-get update` in two PHP images. The proof machine's local copies were stale; fresh pulls of the same tags worked, and the jobs were run again on them.
 
-## What this does not prove[#](https://preflight.apps.wayne.edu/docs/reference/proof.html#what-this-does-not-prove)
+## What this does not prove [#](https://preflight.apps.wayne.edu/docs/reference/proof.html#what-this-does-not-prove)
 
 - No GitLab pipeline ran, so include resolution, `spec:` inputs, `rules`, caches, artifacts and the Code Quality widget were not exercised. The scripts are the templates' own lines with default inputs.
 - No job had a credential, so the 35 apps that install a private package were measured only up to that point.
 - portability, renovate and package-publish did not run.
 - The per-app record names the applications and stays in the stack's internal notes.
 
-## Run it on your app[#](https://preflight.apps.wayne.edu/docs/reference/proof.html#run-it-on-your-app)
+## Run it on your app [#](https://preflight.apps.wayne.edu/docs/reference/proof.html#run-it-on-your-app)
 
 Include the components in your app's `.gitlab-ci.yml` as the [Quick start](https://preflight.apps.wayne.edu/docs/guides/quick-start.html) shows, push a branch, and read each job's log. To try the PROCTOR job's steps on your machine first, from the app's root (the first line adds PROCTOR to require-dev, which the proctor component expects):
 
@@ -94,7 +94,7 @@ docker run --rm -v "${PWD}:/app" -v stack-composer-cache:/tmp/cache -w /app comp
 
 The `stack-composer-cache` volume keeps Composer's downloads between runs; Docker creates it the first time.
 
-## Related[#](https://preflight.apps.wayne.edu/docs/reference/proof.html#related)
+## Related [#](https://preflight.apps.wayne.edu/docs/reference/proof.html#related)
 
 - [Components](https://preflight.apps.wayne.edu/docs/reference/components.html)
 - [Local checks](https://preflight.apps.wayne.edu/docs/reference/local-checks.html)

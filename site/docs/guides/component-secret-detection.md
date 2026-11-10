@@ -6,13 +6,13 @@ llms: https://preflight.apps.wayne.edu/llms.txt
 generator: Squire agent-ready
 ---
 
-# The secret-detection component[#](https://preflight.apps.wayne.edu/docs/guides/component-secret-detection.html#the-secret-detection-component)
+# The secret-detection component [#](https://preflight.apps.wayne.edu/docs/guides/component-secret-detection.html#the-secret-detection-component)
 
 This page covers the `secret-detection` component: what the job does, how to include it, and every input it takes. Goal: a committed secret fails the pipeline before it can ride along in a release. Preflight is named for the pre-flight check, and this component is the row that makes sure nothing classified boards the plane.
 
 Version 1 · Category: Security/Secrets · Tags: security,secrets,gitleaks
 
-## What the job does[#](https://preflight.apps.wayne.edu/docs/guides/component-secret-detection.html#what-the-job-does)
+## What the job does [#](https://preflight.apps.wayne.edu/docs/guides/component-secret-detection.html#what-the-job-does)
 
 The component runs [Gitleaks](https://github.com/gitleaks/gitleaks) over the checked-out tree and fails the pipeline when a rule matches. By default it runs Gitleaks' built-in rules plus a path allowlist for `vendor/` and `node_modules/`: Gitleaks scans whatever is checked out, and a CI cache can restore either tree, so their findings are not our code. Point `config_path` at your own `.gitleaks.toml` to replace the default, and add the same `vendor` and `node_modules` path allowlist to your file. Every match is redacted: the job log and the report carry the rule, the file and the line, never the value.
 
@@ -23,7 +23,7 @@ The job, in order:
 
 The report is published as an artifact even when the job fails, so a red pipeline still shows what was found (redacted). The job is interruptible and times out after 30 minutes.
 
-## Include the component[#](https://preflight.apps.wayne.edu/docs/guides/component-secret-detection.html#include-the-component)
+## Include the component [#](https://preflight.apps.wayne.edu/docs/guides/component-secret-detection.html#include-the-component)
 
 Add the include to the app's `.gitlab-ci.yml`, pinned to the full commit SHA of the release that first ships the component, with the tag in a trailing comment:
 
@@ -32,7 +32,7 @@ include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/secret-detection@60314791565a264e97cb210813ef4f3e76512402 # 0.5.0
 ```
 
-## Inputs[#](https://preflight.apps.wayne.edu/docs/guides/component-secret-detection.html#inputs)
+## Inputs [#](https://preflight.apps.wayne.edu/docs/guides/component-secret-detection.html#inputs)
 
 | Input | Type | Default | What it does |
 | --- | --- | --- | --- |
@@ -43,7 +43,7 @@ include:
 | `config_path` | string | (empty) | Path to a `.gitleaks.toml` config file, relative to the project root. Empty uses the built-in rules plus a path allowlist for `vendor/` and `node_modules/`. When set, your file replaces the default, so add the same `vendor` and `node_modules` path allowlist to it. |
 | `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline. |
 
-## Allowlist a false positive[#](https://preflight.apps.wayne.edu/docs/guides/component-secret-detection.html#allowlist-a-false-positive)
+## Allowlist a false positive [#](https://preflight.apps.wayne.edu/docs/guides/component-secret-detection.html#allowlist-a-false-positive)
 
 Two ways, both reviewed like code:
 
@@ -59,11 +59,11 @@ Note
 
 While the stack rolls the component out, `allow_failure: true` keeps the pipeline green while a team clears its backlog. The default is `false`: once the tree is clean, a new secret fails the pipeline.
 
-## Verify[#](https://preflight.apps.wayne.edu/docs/guides/component-secret-detection.html#verify)
+## Verify [#](https://preflight.apps.wayne.edu/docs/guides/component-secret-detection.html#verify)
 
 Push the change. The `secret-detection` job lands in the `test` stage by default, and a green job means Gitleaks found nothing in the tree.
 
-## Related[#](https://preflight.apps.wayne.edu/docs/guides/component-secret-detection.html#related)
+## Related [#](https://preflight.apps.wayne.edu/docs/guides/component-secret-detection.html#related)
 
 - [Quick start](https://preflight.apps.wayne.edu/docs/guides/quick-start.html): wire one component into an app and watch the pipeline run it.
 - [Install](https://preflight.apps.wayne.edu/docs/install.html): the requirements, the include snippet, and how to verify.
