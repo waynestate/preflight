@@ -6,6 +6,7 @@ are Git tags.
 
 ## Unreleased
 
+- Site: `assets/stack-env.js` knows Parity, so a pre-production page links Parity's pre-production site and a dev page links its local `site/` folder. Until now Parity, of all parts, was the one link that ignored its environment.
 - Site: Parity is out; the party list links its site.
 - Deploy kit refreshed to Squire 0.10.5.
 - Docs: Parity joins the party. The README cast ("Fifteen on the manifest") and the front page's Departures board carry Parity next to Squire, with its spirit-level mark: the stack's new tool that runs Citadel on your computer (its PHP image, its proxy and MySQL 5.6). 0.1.0 is coming and it has no site yet, so its row links nowhere. Every pilot logs simulator hours before the real runway; now apps can too.
