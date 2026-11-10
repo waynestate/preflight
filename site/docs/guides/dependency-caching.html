@@ -148,7 +148,7 @@ app's npm cache instead: key <code>npm</code>, path <code>.cache/npm/</code> (<c
 the ones Sourdough's generated pipelines use, with <code>policy: pull</code>, so an audit
 next to the app's install job never overwrites what that job downloaded.</p>
 <p><code>COMPOSER_CACHE_DIR</code> and <code>NPM_CONFIG_CACHE</code> point the tools at those paths. The
-keys are fixed (D-072) and installs still resolve from the lock, so a cached
+keys are fixed and installs still resolve from the lock, so a cached
 run never installs a stale package: Composer and npm only skip the download.
 Every component cache also saves with <code>when: always</code>, so a retry after a
 dropped download fetches only what is missing.</p>

@@ -96,7 +96,7 @@ The pipeline is green, the proctor job log's fetch line no longer says `git dept
 
 ## 0.3.1[#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-3-1)
 
-Released 2026-11-08. Every component that installs packages caches under a fixed key per component (such as `preflight-pint`, or `preflight-php-8.4` for one PHP version of `php-test`) instead of a lock-file hash, and saves its cache even when the job fails (D-072). A lock change, or a retry after a dropped download, fetches only what is missing.
+Released 2026-11-08. Every component that installs packages caches under a fixed key per component (such as `preflight-pint`, or `preflight-php-8.4` for one PHP version of `php-test`) instead of a lock-file hash, and saves its cache even when the job fails. A lock change, or a retry after a dropped download, fetches only what is missing.
 
 ### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-2)
 

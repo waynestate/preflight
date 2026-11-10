@@ -105,7 +105,7 @@ From `templates/php-test/template.yml`: one job is created per entry in `php_ver
 
 ### Caching[#](https://preflight.apps.wayne.edu/docs/reference/components.html#caching)
 
-The jobs always cache Composer downloads in `.composer-cache/` so repeat runs do not re-download every package. The cache key is fixed per PHP version, not a `composer.lock` hash (D-072), so a lock change downloads only the packages that changed and each PHP version gets its own cache. The template sets `COMPOSER_CACHE_DIR` to `$CI_PROJECT_DIR/.composer-cache`, uses the fixed key `preflight-php-${PHP_VERSION}`, caches the path `.composer-cache/`, and uses the policy `pull-push`.
+The jobs always cache Composer downloads in `.composer-cache/` so repeat runs do not re-download every package. The cache key is fixed per PHP version, not a `composer.lock` hash, so a lock change downloads only the packages that changed and each PHP version gets its own cache. The template sets `COMPOSER_CACHE_DIR` to `$CI_PROJECT_DIR/.composer-cache`, uses the fixed key `preflight-php-${PHP_VERSION}`, caches the path `.composer-cache/`, and uses the policy `pull-push`.
 
 ### Try the next PHP release without breaking the pipeline[#](https://preflight.apps.wayne.edu/docs/reference/components.html#try-the-next-php-release-without-breaking-the-pipeline)
 

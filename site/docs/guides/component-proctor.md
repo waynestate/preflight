@@ -56,7 +56,7 @@ The job is `interruptible: true` with a `timeout: 30 minutes`. Its script:
 5. Decides whether to add `--record` (see [Keep the JSON report for Rollcall](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html#keep-the-json-report-for-rollcall)): only for a plain `proctor check` command whose PROCTOR lists `--record` in `check --help`.
 6. Runs `proctor_command`, plus `--record "$CI_PROJECT_DIR/proctor.json"` when step 5 said so, and redirects the output to `"$CI_PROJECT_DIR/gl-code-quality-report.json"`. A plain redirect (not `tee`) keeps proctor's exit code as the job result, and the report is written at the project root so the artifact path is the same for every `working_dir`, including `.`.
 
-The job keeps Composer downloads in a cache under `.composer-cache/` with the fixed key `preflight-proctor` (D-072), so repeat runs skip downloads and a lock change fetches only what changed.
+The job keeps Composer downloads in a cache under `.composer-cache/` with the fixed key `preflight-proctor`, so repeat runs skip downloads and a lock change fetches only what changed.
 
 The job publishes the report with `artifacts: when: always` as a GitLab Code Quality report (`reports: codequality: gl-code-quality-report.json`), and keeps `proctor.json` in the same artifact (`paths: [proctor.json]`, `expire_in: 30 days`).
 

@@ -176,7 +176,7 @@ the log says <code>failing on moderate or higher</code>. The default, <code>high
 <p>The job installs nothing, but npm fetches package metadata while it reports. It reads the app's own npm cache: the fixed
 key <code>npm</code> and the path <code>.cache/npm/</code> (<code>npm_config_cache</code> points there), the ones Sourdough's generated pipelines use,
 with <code>policy: pull</code>. The audit never uploads, so an audit running next to the app's install job cannot overwrite the
-packages that job just downloaded (D-072). In an app with no npm cache of its own the job simply starts cold.</p>
+packages that job just downloaded. In an app with no npm cache of its own the job simply starts cold.</p>
 <h2 id="proof">Proof<a class="docs-heading-link" aria-label="Link to this section" href="#proof">#</a></h2>
 <p>Preflight's own pipeline keeps these promises with the <code>must-fail-npm-audit</code> job. It runs this template's own script on
 fixed locks: lodash 4.17.20 (GHSA-35jh-r3h4-6jhm, high) fails at <code>high</code> and <code>medium</code> and passes at <code>critical</code>, an

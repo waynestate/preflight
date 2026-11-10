@@ -146,7 +146,7 @@ lines older than that then report could-not-run. To hear about the next PHP earl
 <code>git_depth</code>), and with <code>php_advisory_version</code> set a <code>php-test-advisory</code> job runs and may fail without failing the
 pipeline.</p>
 <h2 id="0-3-1">0.3.1<a class="docs-heading-link" aria-label="Link to this section" href="#0-3-1">#</a></h2>
-<p>Released 2026-11-08. Every component that installs packages caches under a fixed key per component (such as <code>preflight-pint</code>, or <code>preflight-php-8.4</code> for one PHP version of <code>php-test</code>) instead of a lock-file hash, and saves its cache even when the job fails (D-072). A lock change, or a retry after a dropped download, fetches only what is missing.</p>
+<p>Released 2026-11-08. Every component that installs packages caches under a fixed key per component (such as <code>preflight-pint</code>, or <code>preflight-php-8.4</code> for one PHP version of <code>php-test</code>) instead of a lock-file hash, and saves its cache even when the job fails. A lock change, or a retry after a dropped download, fetches only what is missing.</p>
 <h3 id="breaking-2">Breaking<a class="docs-heading-link" aria-label="Link to this section" href="#breaking-2">#</a></h3>
 <p>0.3.1 has no breaking changes: inputs, defaults and job names are the same as in 0.3.0.</p>
 <h3 id="deprecated-2">Deprecated<a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-2">#</a></h3>

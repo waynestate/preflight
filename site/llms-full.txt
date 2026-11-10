@@ -125,7 +125,7 @@ include:
 
 The jobs always cache Composer downloads in `.composer-cache/` so repeat runs
 do not re-download every package. The cache key is fixed per PHP version, not
-a `composer.lock` hash (D-072), so a lock change downloads only the packages
+a `composer.lock` hash, so a lock change downloads only the packages
 that changed and each PHP version gets its own cache.
 
 ##### Try the next PHP release without breaking the pipeline
@@ -2084,7 +2084,7 @@ So `audit_level` takes the policy's value as it is: `audit_level: medium` runs `
 
 ### Caching[#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#caching)
 
-The job installs nothing, but npm fetches package metadata while it reports. It reads the app's own npm cache: the fixed key `npm` and the path `.cache/npm/` (`npm_config_cache` points there), the ones Sourdough's generated pipelines use, with `policy: pull`. The audit never uploads, so an audit running next to the app's install job cannot overwrite the packages that job just downloaded (D-072). In an app with no npm cache of its own the job simply starts cold.
+The job installs nothing, but npm fetches package metadata while it reports. It reads the app's own npm cache: the fixed key `npm` and the path `.cache/npm/` (`npm_config_cache` points there), the ones Sourdough's generated pipelines use, with `policy: pull`. The audit never uploads, so an audit running next to the app's install job cannot overwrite the packages that job just downloaded. In an app with no npm cache of its own the job simply starts cold.
 
 ### Proof[#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#proof)
 
@@ -2216,7 +2216,7 @@ The array input feeds `parallel:matrix` directly, so one job is created per PHP 
 
 ### Caching[#](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html#caching)
 
-The jobs always cache Composer downloads in `.composer-cache/` so repeat runs do not re-download every package. The cache key is fixed per PHP version, not a `composer.lock` hash (D-072), so a lock change downloads only the packages that changed and each PHP version gets its own cache:
+The jobs always cache Composer downloads in `.composer-cache/` so repeat runs do not re-download every package. The cache key is fixed per PHP version, not a `composer.lock` hash, so a lock change downloads only the packages that changed and each PHP version gets its own cache:
 
 ```yaml
 cache:
@@ -2618,7 +2618,7 @@ The job is `interruptible: true` with a `timeout: 30 minutes`. Its script:
 5. Decides whether to add `--record` (see [Keep the JSON report for Rollcall](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html#keep-the-json-report-for-rollcall)): only for a plain `proctor check` command whose PROCTOR lists `--record` in `check --help`.
 6. Runs `proctor_command`, plus `--record "$CI_PROJECT_DIR/proctor.json"` when step 5 said so, and redirects the output to `"$CI_PROJECT_DIR/gl-code-quality-report.json"`. A plain redirect (not `tee`) keeps proctor's exit code as the job result, and the report is written at the project root so the artifact path is the same for every `working_dir`, including `.`.
 
-The job keeps Composer downloads in a cache under `.composer-cache/` with the fixed key `preflight-proctor` (D-072), so repeat runs skip downloads and a lock change fetches only what changed.
+The job keeps Composer downloads in a cache under `.composer-cache/` with the fixed key `preflight-proctor`, so repeat runs skip downloads and a lock change fetches only what changed.
 
 The job publishes the report with `artifacts: when: always` as a GitLab Code Quality report (`reports: codequality: gl-code-quality-report.json`), and keeps `proctor.json` in the same artifact (`paths: [proctor.json]`, `expire_in: 30 days`).
 
@@ -3032,7 +3032,7 @@ Each job that installs packages keeps them in the GitLab cache, inside the proje
 
 `npm-audit` installs nothing, so it keeps no cache of its own. It reads the app's npm cache instead: key `npm`, path `.cache/npm/` (`npm_config_cache`), the ones Sourdough's generated pipelines use, with `policy: pull`, so an audit next to the app's install job never overwrites what that job downloaded.
 
-`COMPOSER_CACHE_DIR` and `NPM_CONFIG_CACHE` point the tools at those paths. The keys are fixed (D-072) and installs still resolve from the lock, so a cached run never installs a stale package: Composer and npm only skip the download. Every component cache also saves with `when: always`, so a retry after a dropped download fetches only what is missing.
+`COMPOSER_CACHE_DIR` and `NPM_CONFIG_CACHE` point the tools at those paths. The keys are fixed and installs still resolve from the lock, so a cached run never installs a stale package: Composer and npm only skip the download. Every component cache also saves with `when: always`, so a retry after a dropped download fetches only what is missing.
 
 ### Your own jobs[#](https://preflight.apps.wayne.edu/docs/guides/dependency-caching.html#your-own-jobs)
 
@@ -3831,7 +3831,7 @@ From `templates/php-test/template.yml`: one job is created per entry in `php_ver
 
 #### Caching[#](https://preflight.apps.wayne.edu/docs/reference/components.html#caching)
 
-The jobs always cache Composer downloads in `.composer-cache/` so repeat runs do not re-download every package. The cache key is fixed per PHP version, not a `composer.lock` hash (D-072), so a lock change downloads only the packages that changed and each PHP version gets its own cache. The template sets `COMPOSER_CACHE_DIR` to `$CI_PROJECT_DIR/.composer-cache`, uses the fixed key `preflight-php-${PHP_VERSION}`, caches the path `.composer-cache/`, and uses the policy `pull-push`.
+The jobs always cache Composer downloads in `.composer-cache/` so repeat runs do not re-download every package. The cache key is fixed per PHP version, not a `composer.lock` hash, so a lock change downloads only the packages that changed and each PHP version gets its own cache. The template sets `COMPOSER_CACHE_DIR` to `$CI_PROJECT_DIR/.composer-cache`, uses the fixed key `preflight-php-${PHP_VERSION}`, caches the path `.composer-cache/`, and uses the policy `pull-push`.
 
 #### Try the next PHP release without breaking the pipeline[#](https://preflight.apps.wayne.edu/docs/reference/components.html#try-the-next-php-release-without-breaking-the-pipeline)
 
@@ -4945,7 +4945,7 @@ The pipeline is green, the proctor job log's fetch line no longer says `git dept
 
 ### 0.3.1[#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-3-1)
 
-Released 2026-11-08. Every component that installs packages caches under a fixed key per component (such as `preflight-pint`, or `preflight-php-8.4` for one PHP version of `php-test`) instead of a lock-file hash, and saves its cache even when the job fails (D-072). A lock change, or a retry after a dropped download, fetches only what is missing.
+Released 2026-11-08. Every component that installs packages caches under a fixed key per component (such as `preflight-pint`, or `preflight-php-8.4` for one PHP version of `php-test`) instead of a lock-file hash, and saves its cache even when the job fails. A lock change, or a retry after a dropped download, fetches only what is missing.
 
 #### Breaking[#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-2)
 
