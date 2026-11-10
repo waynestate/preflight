@@ -79,6 +79,10 @@
           "path": "guides/component-squire-kit"
         },
         {
+          "title": "The mysql56-migrate component",
+          "path": "guides/component-mysql56-migrate"
+        },
+        {
           "title": "The inputs contract",
           "path": "guides/inputs-contract"
         },

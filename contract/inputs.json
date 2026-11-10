@@ -190,6 +190,22 @@
         { "name": "omit_dev", "type": "boolean", "default": true }
       ],
       "jobs": ["npm-audit"]
+    },
+    "mysql56-migrate": {
+      "inputs": [
+        { "name": "stage", "type": "string", "default": "test" },
+        { "name": "job_name", "type": "string", "default": "mysql56-migrate", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
+        { "name": "image", "type": "string", "default": "php:8.3-cli-trixie@sha256:628102249d93494233b54490b785f12db9cd60f4dc89416dfca15973f2125f10" },
+        { "name": "image_prefix", "type": "string", "default": "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}", "regex": "^[^/\\s](\\S*[^/\\s])?$" },
+        { "name": "service_image", "type": "string", "default": "mysql:5.6.51@sha256:20575ecebe6216036d25dab5903808211f1e9ba63dc7825ac20cb975e34cfcae" },
+        { "name": "db_name", "type": "string", "default": "app" },
+        { "name": "db_user", "type": "string", "default": "app" },
+        { "name": "db_password", "type": "string", "default": "preflight-mysql56-ci" },
+        { "name": "migrate_command", "type": "string", "default": "php artisan migrate --force --no-interaction" },
+        { "name": "tags", "type": "array", "default": ["amd64"] },
+        { "name": "php_extensions", "type": "array", "default": ["pdo_mysql"] }
+      ],
+      "jobs": ["mysql56-migrate"]
     }
   }
 }

@@ -59,6 +59,15 @@ include:
       env: ["APP_URL=http://portability.invalid", "APP_KEY=portability-fixture-key-not-a-secret"]
       session_login_path: /login
       session_check_path: /me
+  # The mysql56-migrate component at this commit, on the clean fixture: it
+  # must pass. must-fail-mysql56-migrate below proves a JSON column and a
+  # too-long utf8mb4 index still fail. Both jobs carry the amd64 tag because
+  # the official MySQL 5.6 images are amd64 only; the component's baked rules
+  # run it on the default branch and tags, make it manual on merge requests,
+  # and keep it off schedules.
+  - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/mysql56-migrate@$CI_COMMIT_SHA
+    inputs:
+      migrate_command: php tests/mysql56-migrate/migrate.php tests/mysql56-migrate/clean
   - template: Jobs/Secret-Detection.gitlab-ci.yml
 
 stages:
@@ -333,6 +342,47 @@ must-fail-portability:
     BUILDAH_ISOLATION: chroot
   script:
     - sh tests/check-portability.sh
+
+# The must-fail fixtures for the mysql56-migrate component: the check runs
+# the fixture migrator against the same MySQL 5.6.51 service and proves the
+# clean migration passes while a JSON column and a too-long utf8mb4 index
+# fail with the server errors 5.6 reports. It carries the amd64 tag for the
+# same reason as the component job: the official MySQL 5.6 images are amd64
+# only. Its rules match the component's baked gating, so the proof does not
+# add ungated load to the small shared amd64 host.
+must-fail-mysql56-migrate:
+  stage: test
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/php:8.3-cli-trixie@sha256:628102249d93494233b54490b785f12db9cd60f4dc89416dfca15973f2125f10
+  services:
+    - name: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/mysql:5.6.51@sha256:20575ecebe6216036d25dab5903808211f1e9ba63dc7825ac20cb975e34cfcae
+      alias: mysql
+  tags: [amd64]
+  interruptible: true
+  timeout: 30 minutes
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      when: never
+    - if: $CI_COMMIT_TAG
+      when: on_success
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: on_success
+    - if: $CI_MERGE_REQUEST_IID
+      when: manual
+      allow_failure: true
+    - when: never
+  variables:
+    DB_HOST: mysql
+    DB_PORT: "3306"
+    DB_DATABASE: app
+    DB_USERNAME: app
+    DB_PASSWORD: preflight-mysql56-ci
+    MYSQL_ROOT_PASSWORD: preflight-mysql56-ci
+    MYSQL_DATABASE: app
+    MYSQL_USER: app
+    MYSQL_PASSWORD: preflight-mysql56-ci
+  script:
+    - docker-php-ext-install pdo_mysql
+    - sh tests/check-mysql56-migrate.sh
 
 # Creates the GitLab Release for a pushed tag. It posts to the Releases API
 # with curl because the runner is arm64 and the official GitLab image

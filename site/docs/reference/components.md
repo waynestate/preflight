@@ -42,6 +42,12 @@ New in 0.5.0, and not on the card:
 | --- | --- | --- | --- |
 | 11 | npm audit, high or critical in runtime dependencies by default | `npm-audit` | 10 minutes |
 
+New in 0.6.0, and not on the card:
+
+| # | Item | Job | Timeout |
+| --- | --- | --- | --- |
+| 12 | Migrations run on MySQL 5.6.51, Citadel's shared server | `mysql56-migrate` | 30 minutes |
+
 Every job the templates define is `interruptible: true`. Every component takes a `job_name` input whose default is the job's usual name; set it when one project includes the same component more than once.
 
 ## The inputs contract [#](https://preflight.apps.wayne.edu/docs/reference/components.html#the-inputs-contract)
