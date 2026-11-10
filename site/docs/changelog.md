@@ -12,6 +12,7 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ## Unreleased [#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Added: the portability component takes a `services` input (default none), so `session-hop` can run against a database or cache both replicas share (WELD W15).
 - Added: the portability component runs the image's own HEALTHCHECK inside a replica (`healthcheck` check, new `require_healthcheck` input, default false), and builds with `--format docker` so the HEALTHCHECK survives; must-fail fixture `bad-healthcheck`.
 - Added: `mysql56-migrate` component: runs the app's migrations against MySQL 5.6.51 (Citadel's shared server) on the runner tagged `amd64`, on the default branch and tags, manual on merge requests; must-fail fixtures for a JSON column and a too-long utf8mb4 index (D-078).
 - Added: `mysql56-migrate` component: runs the app's migrations against MySQL 5.6.51 (Citadel's shared server) on the runner tagged `amd64`, on the default branch and tags, manual on merge requests; must-fail fixtures for a JSON column and a too-long utf8mb4 index; installs Composer 2.11.1 when the image has none (D-078).

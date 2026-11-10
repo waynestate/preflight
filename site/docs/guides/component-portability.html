@@ -121,6 +121,21 @@
 }
 </code></pre>
 <p>Add <code>&quot;PORTABILITY_PROBE=yes&quot;</code> to <code>env</code>. An app with no sign-in leaves <code>session-hop</code> out of <code>checks</code> on purpose; the other checks still run.</p>
+<h3 id="a-shared-database-for-session-hop">A shared database for <span class="docs-heading-tail"><span>session-hop</span><a class="docs-heading-link" aria-label="Link to this section" href="#a-shared-database-for-session-hop">#</a></span></h3>
+<p>An app that keeps its sessions in a database (WELD does) needs both replicas to reach the same store. The <code>services</code> input starts one as a GitLab service container, which the replicas reach by its alias exactly as the job script does:</p>
+<pre tabindex="0"><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@60314791565a264e97cb210813ef4f3e76512402 # 0.5.0
+    inputs:
+      services: [{ name: &quot;mysql:8.4.7@sha256:&lt;digest&gt;&quot;, alias: db, variables: { MYSQL_ROOT_PASSWORD: &quot;portability&quot;, MYSQL_DATABASE: &quot;app&quot; } }]
+      env: [&quot;APP_KEY=${PORTABILITY_APP_KEY}&quot;, &quot;DB_CONNECTION=mysql&quot;, &quot;DB_HOST=db&quot;, &quot;DB_DATABASE=app&quot;, &quot;DB_USERNAME=root&quot;, &quot;DB_PASSWORD=portability&quot;, &quot;SESSION_DRIVER=database&quot;, &quot;LOG_CHANNEL=stderr&quot;]
+      session_login_path: /_portability/login
+      session_check_path: /_portability/me
+</code></pre>
+<p>Replace <code>&lt;digest&gt;</code> with the digest of the image you actually pull; never copy a placeholder pin into a pipeline. Two things to know about the service:</p>
+<ul>
+<li>The database has to accept connections before the replicas boot. The probe's <code>boot_timeout</code> covers that wait, or a <code>start_command</code> can run migrations first. A Laravel app needs its <code>sessions</code> table, so its <code>start_command</code> runs <code>php artisan migrate --force</code> before it serves.</li>
+<li>The runner is arm64, so the service image must be multi-arch. <code>mysql:8.4</code> is; <code>mysql:5.6</code> is not.</li>
+</ul>
 <h2 id="how-the-job-works">How the job <span class="docs-heading-tail"><span>works</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-the-job-works">#</a></span></h2>
 <p>The component is one job, named by <code>job_name</code> (default <code>portability</code>). It runs in the Buildah image, pinned by digest, with <code>STORAGE_DRIVER=vfs</code> and <code>BUILDAH_ISOLATION=chroot</code>, <code>interruptible: true</code> and <code>timeout: 30 minutes</code>. In order, it:</p>
 <ol>
@@ -245,6 +260,12 @@
 <td>Environment for both replicas, as <code>NAME=value</code> (or <code>NAME</code> to pass the job's variable through). Keep secrets in CI/CD variables.</td>
 </tr>
 <tr>
+<td><code>services</code></td>
+<td>array</td>
+<td><code>[]</code></td>
+<td>Service containers for the job, as GitLab's <code>services:</code> keyword takes them (an image string, or a map with <code>name</code>, <code>alias</code> and <code>variables</code>). A database or cache the replicas share lets <code>session-hop</code> pass for an app that keeps sessions there. Pin each image by digest.</td>
+</tr>
+<tr>
 <td><code>boot_timeout</code></td>
 <td>number</td>
 <td><code>60</code></td>
@@ -314,7 +335,7 @@
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../../docs/guides/component-renovate.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">The renovate component</span></a><a class="docs-pager__link docs-pager__link--next" href="../../docs/guides/component-a11y.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">The a11y component</span></a></nav>
   </div>
-  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#what-it-checks">What it checks</a></li><li class="docs-toc__item"><a href="#add-the-include">Add the include</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#a-sign-in-route-for-session-hop">A sign-in route for session-hop</a></li><li class="docs-toc__item"><a href="#how-the-job-works">How the job works</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#why-buildah">Why Buildah</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#what-the-job-emulates">What the job emulates</a></li><li class="docs-toc__item"><a href="#inputs">Inputs</a></li><li class="docs-toc__item"><a href="#verify-locally">Verify locally</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#what-it-checks">What it checks</a></li><li class="docs-toc__item"><a href="#add-the-include">Add the include</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#a-sign-in-route-for-session-hop">A sign-in route for session-hop</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#a-shared-database-for-session-hop">A shared database for session-hop</a></li><li class="docs-toc__item"><a href="#how-the-job-works">How the job works</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#why-buildah">Why Buildah</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#what-the-job-emulates">What the job emulates</a></li><li class="docs-toc__item"><a href="#inputs">Inputs</a></li><li class="docs-toc__item"><a href="#verify-locally">Verify locally</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
   <span>Documents Preflight <span data-docs-version>0.5.0</span></span>
