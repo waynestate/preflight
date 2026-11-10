@@ -6,6 +6,7 @@ are Git tags.
 
 ## Unreleased
 
+- Site: Parity is out; the party list links its site.
 - Deploy kit refreshed to Squire 0.10.5.
 - Docs: Parity joins the party. The README cast ("Fifteen on the manifest") and the front page's Departures board carry Parity next to Squire, with its spirit-level mark: the stack's new tool that runs Citadel on your computer (its PHP image, its proxy and MySQL 5.6). 0.1.0 is coming and it has no site yet, so its row links nowhere. Every pilot logs simulator hours before the real runway; now apps can too.
 - Changed: refreshed version mentions. BEST_PRACTICES says PROCTOR's and CREED's pipelines include `preflight/proctor@0.5.0` (both pipelines fly 0.5.0; the checklist still read 0.4.0); the dev dependency Pinstripe moves to ^0.3 (locked 0.3.0, was ^0.1 at 0.1.4), and the front page deploy layer requires HELMET ^1.3 (locked 1.3.0, was ^1.2 at 1.2.0).

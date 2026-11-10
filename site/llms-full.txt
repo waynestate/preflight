@@ -1513,7 +1513,7 @@ Preflight is one stop on the way to Citadel. Here is everyone else on the board.
 - [PROCTOR](https://proctor.apps.wayne.edu/) One command that checks an app. First item on the checklist.
 - Preflight Shared CI on every push. **You are here.**
 - [Squire](https://squire.apps.wayne.edu/) Carries the cleared release to Citadel.
-- Parity Citadel on your computer: the flight simulator before the real runway. Site coming.
+- [Parity](https://parity.apps.wayne.edu/) Citadel on your computer: the flight simulator before the real runway.
 - [Rollcall](https://rollcall.apps.wayne.edu/) Every app answers "present". Skipped gates show up here.
 - [Booster](https://booster.apps.wayne.edu/) Keeps an app's PHP current, so it stays on the test matrix.
 - [HELMET](https://helmet.apps.wayne.edu/) Security headers and runtime hardening.
@@ -1533,6 +1533,7 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ### Unreleased[#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Site: Parity is out; the party list links its site.
 - Deploy kit refreshed to Squire 0.10.5.
 - Docs: Parity joins the party. The README cast ("Fifteen on the manifest") and the front page's Departures board carry Parity next to Squire, with its spirit-level mark: the stack's new tool that runs Citadel on your computer (its PHP image, its proxy and MySQL 5.6). 0.1.0 is coming and it has no site yet, so its row links nowhere. Every pilot logs simulator hours before the real runway; now apps can too.
 - Changed: refreshed version mentions. BEST_PRACTICES says PROCTOR's and CREED's pipelines include `preflight/proctor@0.5.0` (both pipelines fly 0.5.0; the checklist still read 0.4.0); the dev dependency Pinstripe moves to ^0.3 (locked 0.3.0, was ^0.1 at 0.1.4), and the front page deploy layer requires HELMET ^1.3 (locked 1.3.0, was ^1.2 at 1.2.0).
