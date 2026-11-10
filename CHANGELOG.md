@@ -5,7 +5,8 @@ All notable changes to Preflight are recorded here. Entries follow
 are Git tags.
 
 ## Unreleased
-
+- Changed: the docs, agent-ready and deploy kits are Squire 0.10.6 (was 0.10.5 for the deploy kit, Squire a7a40ab of 2026-11-08 for the docs and agent-ready files): the docs builder and agent-ready generator see every file on Docker Desktop mounts, and each heading keeps its "#" link with its last word.
+- Changed: the docs, agent-ready and deploy kits are Squire 0.10.6 (was 0.10.5 for the deploy kit; the docs and agent-ready files were Squire a7a40ab, between 0.10.2 and 0.10.3 in name only): the docs builder and agent-ready generator see every file on Docker Desktop mounts, and each heading keeps its "#" link with its last word.
 - Fixed: secret detection really blocks now. GitLab's template marks the job allow_failure: true, so dropping the old override left it advisory (pipeline 5392). `.gitlab-ci.yml` sets allow_failure: false on secret_detection, and both check scripts now require it.
 - Added: a must-fail fixture for squire-kit. `must-fail-squire-kit` proves the component fails on a kit with a drifted file and on a folder with no .squire.json. Every component that runs as a job now has a must-fail fixture; only `a11y`'s still runs by hand, with no CI job yet.
 - Docs: BEST_PRACTICES matches the code before 1.0. The component version line (2.11) is `Enforced` by the contract job, the proctor default command (6.1) is `Checked` on every pipeline, and the counts are real again: ten components in Preflight's own pipeline, eight `working_dir` inputs, ten tags through 0.5.0, four components that take `allow_failure`. The must-fail list names npm-audit and package-publish and says squire-kit still has none, and thirteen finished backlog items are marked Done with the file that proves each. A preflight checklist that finally matches the airplane.
