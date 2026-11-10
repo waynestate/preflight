@@ -135,7 +135,7 @@ include:
 
 The jobs always cache Composer downloads in `.composer-cache/` so repeat runs
 do not re-download every package. The cache key is fixed per PHP version, not
-a `composer.lock` hash (D-072), so a lock change downloads only the packages
+a `composer.lock` hash, so a lock change downloads only the packages
 that changed and each PHP version gets its own cache.
 
 #### Try the next PHP release without breaking the pipeline

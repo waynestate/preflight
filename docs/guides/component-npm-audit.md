@@ -98,7 +98,7 @@ the log says `failing on moderate or higher`. The default, `high`, matches the s
 The job installs nothing, but npm fetches package metadata while it reports. It reads the app's own npm cache: the fixed
 key `npm` and the path `.cache/npm/` (`npm_config_cache` points there), the ones Sourdough's generated pipelines use,
 with `policy: pull`. The audit never uploads, so an audit running next to the app's install job cannot overwrite the
-packages that job just downloaded (D-072). In an app with no npm cache of its own the job simply starts cold.
+packages that job just downloaded. In an app with no npm cache of its own the job simply starts cold.
 
 ## Proof
 
