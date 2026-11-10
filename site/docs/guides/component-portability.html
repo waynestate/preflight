@@ -41,9 +41,9 @@
   <div class="docs-content">
     <main id="main">
       <article class="docs-article"><h1 id="the-portability-component">The portability <span class="docs-heading-tail"><span>component</span><a class="docs-heading-link" aria-label="Link to this section" href="#the-portability-component">#</a></span></h1>
-<p>The portability component proves your app image runs anywhere a container platform runs it: OpenShift, Coolify, plain Docker, and Citadel too. It builds the image, boots it twice side by side as a stranger (an arbitrary uid with no name, in group 0, with no capabilities), and runs the six checks from ADR-0010. Like the real pre-flight, it is a list you finish on the ground: if one light is red, nobody taxis.</p>
+<p>The portability component proves your app image runs anywhere a container platform runs it: OpenShift, Coolify, plain Docker, and Citadel too. It builds the image, boots it twice side by side as a stranger (an arbitrary uid with no name, in group 0, with no capabilities), and runs the six checks from ADR-0010 plus the image's own HEALTHCHECK. Like the real pre-flight, it is a list you finish on the ground: if one light is red, nobody taxis.</p>
 <h2 id="what-it-checks">What it <span class="docs-heading-tail"><span>checks</span><a class="docs-heading-link" aria-label="Link to this section" href="#what-it-checks">#</a></span></h2>
-<p>The strict boot comes first, because every other check stands on it. Then the six checks, each reported on its own line.</p>
+<p>The strict boot comes first, because every other check stands on it. Then the seven checks, each reported on its own line.</p>
 <div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
 <thead>
 <tr>
@@ -88,6 +88,11 @@
 <td>Sends SIGTERM to the main process and expects it to exit by itself within <code>stop_timeout</code> seconds, as PID 1 must.</td>
 <td>The process has no SIGTERM handler (PID 1 ignores the signal by default), or the handler hangs.</td>
 </tr>
+<tr>
+<td><code>healthcheck</code></td>
+<td>Runs the image's own <code>HEALTHCHECK</code> command, if it declares one, inside replica A as the app's uid with the same environment, up to three times two seconds apart, and expects exit 0. Fails when the command exits non-zero, or when the image declares no HEALTHCHECK and <code>require_healthcheck</code> is true.</td>
+<td>The image's own health command fails, so Docker and Coolify would mark the container unhealthy.</td>
+</tr>
 </tbody>
 </table></div>
 <p>The job prints one <code>portability: &lt;check&gt;: problem: ...</code> line per problem as it finds it, then a summary with <code>pass</code>, <code>FAIL</code> or <code>skipped</code> for every check, and passes only when every check that ran passed.</p>
@@ -119,7 +124,7 @@
 <h2 id="how-the-job-works">How the job <span class="docs-heading-tail"><span>works</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-the-job-works">#</a></span></h2>
 <p>The component is one job, named by <code>job_name</code> (default <code>portability</code>). It runs in the Buildah image, pinned by digest, with <code>STORAGE_DRIVER=vfs</code> and <code>BUILDAH_ISOLATION=chroot</code>, <code>interruptible: true</code> and <code>timeout: 30 minutes</code>. In order, it:</p>
 <ol>
-<li>Builds the image with <code>buildah bud</code>, from <code>dockerfile</code> in <code>context</code>, with <code>build_args</code>. Nothing is pushed: the image stays in the job's own storage.</li>
+<li>Builds the image with <code>buildah bud</code>, from <code>dockerfile</code> in <code>context</code>, with <code>build_args</code>. It builds with <code>--format docker</code>, because Buildah's default OCI format drops the image's HEALTHCHECK and the docker format keeps it. Nothing is pushed: the image stays in the job's own storage.</li>
 <li>Reads the image's <code>ENTRYPOINT</code> and <code>CMD</code>, makes two copies of its filesystem (replicas A and B) and runs the static parts of <code>strict-boot</code> and <code>env-only</code> on them.</li>
 <li>Starts both replicas with <code>buildah run --user &lt;uid&gt;:0 --cap-drop=ALL</code> and the <code>env</code> input, each through a small launcher that gives it its own stdio and session; B gets <code>port + 1</code> through <code>port_env</code>.</li>
 <li>Waits up to <code>boot_timeout</code> seconds for each replica's health path, then runs <code>health</code>, <code>env-only</code>, <code>forwarded-headers</code>, <code>session-hop</code>, <code>logs</code> and <code>sigterm</code> with curl.</li>
@@ -282,16 +287,22 @@
 <td>Directory, relative to <code>app_root</code>, where nothing may be written.</td>
 </tr>
 <tr>
+<td><code>require_healthcheck</code></td>
+<td>boolean</td>
+<td><code>false</code></td>
+<td>Fail when the image declares no HEALTHCHECK. Docker and Coolify use it; OpenShift and Kubernetes use their own probes.</td>
+</tr>
+<tr>
 <td><code>checks</code></td>
 <td>array</td>
-<td><code>[&quot;health&quot;, &quot;env-only&quot;, &quot;forwarded-headers&quot;, &quot;logs&quot;, &quot;session-hop&quot;, &quot;sigterm&quot;]</code></td>
+<td><code>[&quot;health&quot;, &quot;env-only&quot;, &quot;forwarded-headers&quot;, &quot;logs&quot;, &quot;session-hop&quot;, &quot;sigterm&quot;, &quot;healthcheck&quot;]</code></td>
 <td>The checks to run. Leave one out only on purpose; the strict boot always runs.</td>
 </tr>
 </tbody>
 </table></div>
 <p>The <code>image</code> default is an immutable tag (<code>-immutable</code>) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.</p>
 <h2 id="verify-locally">Verify <span class="docs-heading-tail"><span>locally</span><a class="docs-heading-link" aria-label="Link to this section" href="#verify-locally">#</a></span></h2>
-<p><code>tests/check-portability.sh</code> (and its <code>.ps1</code> twin) run the same probe in the same Buildah image against <code>tests/portability/app</code>: once clean, where every check must pass, and once per flaw (needs root, writes outside its paths, fixed port, host-bound health, a baked <code>.env</code>, trusts any proxy, file logs, file sessions, no SIGTERM handler), where the targeted check must fail. Two more builds must pass every check: one reopens <code>/proc/self/fd/2</code> and one signals its whole process group on SIGTERM, as Apache does; they fail without the launcher. Preflight's own pipeline runs the component on the clean fixture and this check as <code>must-fail-portability</code>. See <a href="../reference/local-checks.html">Local checks</a> for the commands.</p>
+<p><code>tests/check-portability.sh</code> (and its <code>.ps1</code> twin) run the same probe in the same Buildah image against <code>tests/portability/app</code>: once clean, where every check must pass, and once per flaw (needs root, writes outside its paths, fixed port, host-bound health, a baked <code>.env</code>, trusts any proxy, file logs, file sessions, no SIGTERM handler, a failing HEALTHCHECK), where the targeted check must fail. Two more builds must pass every check: one reopens <code>/proc/self/fd/2</code> and one signals its whole process group on SIGTERM, as Apache does; they fail without the launcher. Preflight's own pipeline runs the component on the clean fixture and this check as <code>must-fail-portability</code>. See <a href="../reference/local-checks.html">Local checks</a> for the commands.</p>
 <h2 id="related"><span class="docs-heading-tail"><span>Related</span><a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></span></h2>
 <ul>
 <li><a href="include-twice.html">Include a component twice</a>: the <code>job_name</code> input.</li>

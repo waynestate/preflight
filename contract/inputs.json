@@ -144,7 +144,8 @@
         { "name": "session_login_path", "type": "string", "default": "" },
         { "name": "session_check_path", "type": "string", "default": "" },
         { "name": "logs_path", "type": "string", "default": "storage/logs" },
-        { "name": "checks", "type": "array", "default": ["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm"] }
+        { "name": "require_healthcheck", "type": "boolean", "default": false },
+        { "name": "checks", "type": "array", "default": ["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm", "healthcheck"] }
       ],
       "jobs": ["portability"]
     },

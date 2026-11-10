@@ -47,6 +47,7 @@
 are Git tags.</p>
 <h2 id="unreleased"><span class="docs-heading-tail"><span>Unreleased</span><a class="docs-heading-link" aria-label="Link to this section" href="#unreleased">#</a></span></h2>
 <ul>
+<li>Added: the portability component runs the image's own HEALTHCHECK inside a replica (<code>healthcheck</code> check, new <code>require_healthcheck</code> input, default false), and builds with <code>--format docker</code> so the HEALTHCHECK survives; must-fail fixture <code>bad-healthcheck</code>.</li>
 <li>Changed: <code>scripts/a11y-container.sh</code> carries the <code># proctor-ignore script-pair:</code> marker: it runs only inside the container its two OS twins start, so PROCTOR's <code>script-pair</code> reports it as an info note, not a missing twin.</li>
 <li>Added: <code>must-fail-a11y</code> runs <code>tests/check-a11y.sh</code> in CI, in the a11y component's own Playwright image, so the a11y check's bad fixture is proven to fail on every pipeline like the other components'. <code>scripts/a11y.sh</code> gains an in-image mode (<code>A11Y_IN_IMAGE=1</code>) for that job.</li>
 <li>Changed: the deploy layer requires PROCTOR ^0.12 (locked 0.12.0, was ^0.11): two new warning-only checks, nothing breaks.</li>

@@ -727,11 +727,11 @@ spec:
       # ---------------------------------------------------------------- healthcheck
 
       # Docker and Coolify use the image's HEALTHCHECK to decide whether a container
-      # is healthy, so an image whose own health command fails is not
-      # portable. Run it in replica A, as the app's uid, with the environment
-      # replica A got. It runs while replica A is up: the command usually asks
-      # the app on 127.0.0.1, and the writes section stops both replicas after
-      # every check.
+      # is healthy, so an image whose own health command fails is not portable
+      # (WELD practice W12 waits on this). OpenShift and Kubernetes use their own
+      # probes, so a missing HEALTHCHECK is a problem only when require_healthcheck
+      # says so. Replica A must still be up when this runs, which is why it comes
+      # before the sigterm check stops it.
       if [ "$BOOTED" = yes ] && wanted healthcheck; then
         if [ -z "$HC_FORM" ]; then
           if [ "$REQUIRE_HEALTHCHECK" = true ]; then
@@ -740,19 +740,25 @@ spec:
             say "healthcheck: note: the image declares no HEALTHCHECK (OpenShift and Kubernetes use their own probes)"
             ok healthcheck "the image declares no HEALTHCHECK (OpenShift and Kubernetes use their own probes)"
           fi
+        elif ! buildah from --pull=never --name portability-hc localhost/portability-app > "$WORK/hc.ctr"; then
+          flag healthcheck "could not make a replica of the image to run its HEALTHCHECK"
         else
-          buildah from --pull=never --name portability-hc localhost/portability-app > "$WORK/hc.ctr" || { say "build: FAIL: buildah from failed"; exit 1; }
-          hc_code=1
-          for attempt in 1 2 3; do
+          hc_code=0
+          try=1
+          while [ "$try" -le 3 ]; do
             run_healthcheck "$HC_CMD"
             hc_code=$?
             [ "$hc_code" -eq 0 ] && break
-            [ "$attempt" -lt 3 ] && sleep 2
+            [ "$try" -lt 3 ] && sleep 2
+            try=$((try + 1))
           done
+          buildah rm "$(cat "$WORK/hc.ctr")" >/dev/null 2>&1
           if [ "$hc_code" -eq 0 ]; then
             ok healthcheck "the image's HEALTHCHECK ($HC_CMD) exited 0 in replica A"
           else
             flag healthcheck "the image's HEALTHCHECK ($HC_CMD) exited $hc_code in replica A"
+            say "healthcheck output (last 20 lines):"
+            tail -n 20 "$WORK/hc.out" | sed 's/^/  | /'
           fi
         fi
       fi

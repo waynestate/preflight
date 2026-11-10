@@ -1533,6 +1533,7 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ### Unreleased [#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Added: the portability component runs the image's own HEALTHCHECK inside a replica (`healthcheck` check, new `require_healthcheck` input, default false), and builds with `--format docker` so the HEALTHCHECK survives; must-fail fixture `bad-healthcheck`.
 - Changed: `scripts/a11y-container.sh` carries the `# proctor-ignore script-pair:` marker: it runs only inside the container its two OS twins start, so PROCTOR's `script-pair` reports it as an info note, not a missing twin.
 - Added: `must-fail-a11y` runs `tests/check-a11y.sh` in CI, in the a11y component's own Playwright image, so the a11y check's bad fixture is proven to fail on every pipeline like the other components'. `scripts/a11y.sh` gains an in-image mode (`A11Y_IN_IMAGE=1`) for that job.
 - Changed: the deploy layer requires PROCTOR ^0.12 (locked 0.12.0, was ^0.11): two new warning-only checks, nothing breaks.
@@ -2451,11 +2452,11 @@ Source: https://preflight.apps.wayne.edu/docs/guides/component-portability.html
 
 ## The portability component [#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#the-portability-component)
 
-The portability component proves your app image runs anywhere a container platform runs it: OpenShift, Coolify, plain Docker, and Citadel too. It builds the image, boots it twice side by side as a stranger (an arbitrary uid with no name, in group 0, with no capabilities), and runs the six checks from ADR-0010. Like the real pre-flight, it is a list you finish on the ground: if one light is red, nobody taxis.
+The portability component proves your app image runs anywhere a container platform runs it: OpenShift, Coolify, plain Docker, and Citadel too. It builds the image, boots it twice side by side as a stranger (an arbitrary uid with no name, in group 0, with no capabilities), and runs the six checks from ADR-0010 plus the image's own HEALTHCHECK. Like the real pre-flight, it is a list you finish on the ground: if one light is red, nobody taxis.
 
 ### What it checks [#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#what-it-checks)
 
-The strict boot comes first, because every other check stands on it. Then the six checks, each reported on its own line.
+The strict boot comes first, because every other check stands on it. Then the seven checks, each reported on its own line.
 
 | Check | What it does | What a failure usually means |
 | --- | --- | --- |
@@ -2466,6 +2467,7 @@ The strict boot comes first, because every other check stands on it. Then the si
 | `logs` | Fails if nothing reached stdout or stderr during the run, or if anything was written under `logs_path` (default `storage/logs`). | Logs go to files that vanish with the container. |
 | `session-hop` | Signs in on replica A with `session_login_path`, then sends that cookie to replica B's `session_check_path` and expects 200. The replicas have separate disks. | Sessions live in local files instead of a shared store or a signed cookie. |
 | `sigterm` | Sends SIGTERM to the main process and expects it to exit by itself within `stop_timeout` seconds, as PID 1 must. | The process has no SIGTERM handler (PID 1 ignores the signal by default), or the handler hangs. |
+| `healthcheck` | Runs the image's own `HEALTHCHECK` command, if it declares one, inside replica A as the app's uid with the same environment, up to three times two seconds apart, and expects exit 0. Fails when the command exits non-zero, or when the image declares no HEALTHCHECK and `require_healthcheck` is true. | The image's own health command fails, so Docker and Coolify would mark the container unhealthy. |
 
 The job prints one `portability: <check>: problem: ...` line per problem as it finds it, then a summary with `pass`, `FAIL` or `skipped` for every check, and passes only when every check that ran passed.
 
@@ -2513,7 +2515,7 @@ Add `"PORTABILITY_PROBE=yes"` to `env`. An app with no sign-in leaves `session-h
 
 The component is one job, named by `job_name` (default `portability`). It runs in the Buildah image, pinned by digest, with `STORAGE_DRIVER=vfs` and `BUILDAH_ISOLATION=chroot`, `interruptible: true` and `timeout: 30 minutes`. In order, it:
 
-1. Builds the image with `buildah bud`, from `dockerfile` in `context`, with `build_args`. Nothing is pushed: the image stays in the job's own storage.
+1. Builds the image with `buildah bud`, from `dockerfile` in `context`, with `build_args`. It builds with `--format docker`, because Buildah's default OCI format drops the image's HEALTHCHECK and the docker format keeps it. Nothing is pushed: the image stays in the job's own storage.
 2. Reads the image's `ENTRYPOINT` and `CMD`, makes two copies of its filesystem (replicas A and B) and runs the static parts of `strict-boot` and `env-only` on them.
 3. Starts both replicas with `buildah run --user <uid>:0 --cap-drop=ALL` and the `env` input, each through a small launcher that gives it its own stdio and session; B gets `port + 1` through `port_env`.
 4. Waits up to `boot_timeout` seconds for each replica's health path, then runs `health`, `env-only`, `forwarded-headers`, `session-hop`, `logs` and `sigterm` with curl.
@@ -2565,13 +2567,14 @@ Before 0.5.0 an Apache image needed a `start_command` shim such as `exec setsid 
 | `session_login_path` | string | `""` | GET path that signs in a test user and sets the session cookie. Needed by `session-hop`. |
 | `session_check_path` | string | `""` | Path that answers 200 only for a signed-in user. Needed by `session-hop`. |
 | `logs_path` | string | `storage/logs` | Directory, relative to `app_root`, where nothing may be written. |
-| `checks` | array | `["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm"]` | The checks to run. Leave one out only on purpose; the strict boot always runs. |
+| `require_healthcheck` | boolean | `false` | Fail when the image declares no HEALTHCHECK. Docker and Coolify use it; OpenShift and Kubernetes use their own probes. |
+| `checks` | array | `["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm", "healthcheck"]` | The checks to run. Leave one out only on purpose; the strict boot always runs. |
 
 The `image` default is an immutable tag (`-immutable`) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.
 
 ### Verify locally [#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#verify-locally)
 
-`tests/check-portability.sh` (and its `.ps1` twin) run the same probe in the same Buildah image against `tests/portability/app`: once clean, where every check must pass, and once per flaw (needs root, writes outside its paths, fixed port, host-bound health, a baked `.env`, trusts any proxy, file logs, file sessions, no SIGTERM handler), where the targeted check must fail. Two more builds must pass every check: one reopens `/proc/self/fd/2` and one signals its whole process group on SIGTERM, as Apache does; they fail without the launcher. Preflight's own pipeline runs the component on the clean fixture and this check as `must-fail-portability`. See [Local checks](https://preflight.apps.wayne.edu/docs/reference/local-checks.html) for the commands.
+`tests/check-portability.sh` (and its `.ps1` twin) run the same probe in the same Buildah image against `tests/portability/app`: once clean, where every check must pass, and once per flaw (needs root, writes outside its paths, fixed port, host-bound health, a baked `.env`, trusts any proxy, file logs, file sessions, no SIGTERM handler, a failing HEALTHCHECK), where the targeted check must fail. Two more builds must pass every check: one reopens `/proc/self/fd/2` and one signals its whole process group on SIGTERM, as Apache does; they fail without the launcher. Preflight's own pipeline runs the component on the clean fixture and this check as `must-fail-portability`. See [Local checks](https://preflight.apps.wayne.edu/docs/reference/local-checks.html) for the commands.
 
 ### Related [#](https://preflight.apps.wayne.edu/docs/guides/component-portability.html#related)
 

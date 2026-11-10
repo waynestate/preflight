@@ -12,6 +12,7 @@ All notable changes to Preflight are recorded here. Entries follow
 are Git tags.
 
 ## Unreleased
+- Added: the portability component runs the image's own HEALTHCHECK inside a replica (`healthcheck` check, new `require_healthcheck` input, default false), and builds with `--format docker` so the HEALTHCHECK survives; must-fail fixture `bad-healthcheck`.
 - Changed: `scripts/a11y-container.sh` carries the `# proctor-ignore script-pair:` marker: it runs only inside the container its two OS twins start, so PROCTOR's `script-pair` reports it as an info note, not a missing twin.
 - Added: `must-fail-a11y` runs `tests/check-a11y.sh` in CI, in the a11y component's own Playwright image, so the a11y check's bad fixture is proven to fail on every pipeline like the other components'. `scripts/a11y.sh` gains an in-image mode (`A11Y_IN_IMAGE=1`) for that job.
 - Changed: the deploy layer requires PROCTOR ^0.12 (locked 0.12.0, was ^0.11): two new warning-only checks, nothing breaks.
