@@ -6,6 +6,7 @@ are Git tags.
 
 ## Unreleased
 - Added: must-fail proofs for the contract check (`tests/check-contract-fails` in the `contract` job, and a PHPUnit case): a changed default or a renamed input now has to fail both comparisons.
+- Fixed: `tests/check-contract.ps1` names php-test's jobs from the `job_name` input like the `.sh` twin and the PHPUnit contract test, so it passes the real templates again on Windows.
 - Added: must-fail proofs for the image-input, cache-key and PHP-matrix guards (`tests/check-image-inputs-fails`, `tests/check-cache-fails`, `tests/check-php-matrix-fails`), and a `check-php-matrix` guard that keeps php-test's `parallel: matrix:` wiring, all run by the `contract` job.
 - Site: the front page's stale facts are current (the `proctor` placard says it keeps `proctor.json` for Rollcall since 0.5.0).
 - Changed: the deploy kit is Squire 0.10.7 (was 0.10.6): it ships a `.gitattributes` that pins line endings, so the deploy layer clears PROCTOR's line-ending warnings.
