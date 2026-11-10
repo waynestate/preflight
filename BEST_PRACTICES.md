@@ -562,8 +562,11 @@ Sources: [Composer basic usage: the lock file](https://getcomposer.org/doc/01-ba
 
 **How the stack holds it: Checked.** PROCTOR's `lock-committed` fails when the lock is missing. It runs only if the app
 includes the `proctor` component, whose default command now runs on a fresh app (see 6.1).
-`tests/check-proctor-lock-fails.sh` (and its `.ps1` twin) proves it with the real PROCTOR on a copy of the fixture app
-without its lock.
+`tests/check-proctor-lock-fails.sh` (and its `.ps1` twin) proves the check itself with the real PROCTOR on a copy of
+the fixture app whose lock is removed after the install. Gap: the `proctor` component runs `composer install` first, and
+Composer writes a new lock when none is committed, so inside the component an app that never committed its lock still
+passes `lock-committed`. Closing it needs `lock-committed` to ask whether git tracks `composer.lock`, not whether the
+file is on disk.
 
 ### 4.6 Audit the lock and fail the job
 Run `composer audit --locked`. A non-zero exit fails the job. Give the audit no `allow_failure`.
