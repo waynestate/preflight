@@ -146,6 +146,7 @@ Before 0.5.0 an Apache image needed a `start_command` shim such as `exec setsid 
 | `identity_header` | string | `X-Forwarded-User` | Identity header a gateway would set (forged in `forwarded-headers`). |
 | `session_login_path` | string | `""` | GET path that signs in a test user and sets the session cookie. Needed by `session-hop`. |
 | `session_check_path` | string | `""` | Path that answers 200 only for a signed-in user. Needed by `session-hop`. |
+| `session_header` | string | `""` | Optional `Name: $VARIABLE` header sent on every `session-hop` request, for example `session_header: "X-Portability-Token: $PORTABILITY_PROBE_TOKEN"`. The job reads the variable at run time and never prints it. Use it when the sign-in route needs a secret. |
 | `logs_path` | string | `storage/logs` | Directory, relative to `app_root`, where nothing may be written. |
 | `require_healthcheck` | boolean | `false` | Fail when the image declares no HEALTHCHECK. Docker and Coolify use it; OpenShift and Kubernetes use their own probes. |
 | `checks` | array | `["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm", "healthcheck"]` | The checks to run. Leave one out only on purpose; the strict boot always runs. |

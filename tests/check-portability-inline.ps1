@@ -79,5 +79,28 @@ if (($srcLines -join "`n").Contains('$[[')) {
   exit 1
 }
 
+# session_header: declared as an input, passed into the probe, resolved from
+# the job environment with printenv, and never through eval.
+if (-not @($tplLines | Where-Object { $_ -ceq '    session_header:' })) {
+  [Console]::Error.WriteLine("check-portability-inline: templates/portability/template.yml has no session_header input")
+  exit 1
+}
+if (-not @($tplLines | Where-Object { $_ -ceq '      session_header=$[[ inputs.session_header ]]' })) {
+  [Console]::Error.WriteLine("check-portability-inline: the inputs heredoc does not pass session_header to the probe")
+  exit 1
+}
+if (-not (($srcLines -join "`n").Contains('printenv'))) {
+  [Console]::Error.WriteLine("check-portability-inline: templates/portability/probe.sh does not resolve session_header with printenv")
+  exit 1
+}
+$usesEval = $false
+foreach ($line in $srcLines) {
+  if ($line -match '(^|[\s;|&(`])eval\s') { $usesEval = $true; break }
+}
+if ($usesEval) {
+  [Console]::Error.WriteLine("check-portability-inline: templates/portability/probe.sh uses eval")
+  exit 1
+}
+
 Write-Output "check-portability-inline: ok"
 exit 0

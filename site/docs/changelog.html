@@ -48,6 +48,9 @@ are Git tags.</p>
 <h2 id="unreleased"><span class="docs-heading-tail"><span>Unreleased</span><a class="docs-heading-link" aria-label="Link to this section" href="#unreleased">#</a></span></h2>
 <ul>
 <li>
+<p>Added: the portability component's <code>session_header</code> input sends one <code>Name: $VARIABLE</code> header on every session-hop request, read from the job's environment and never printed, so a probe sign-in route can require a per-job secret.</p>
+</li>
+<li>
 <p>Docs: a new guide, Which hosts the jobs reach (<code>docs/guides/network-egress.md</code>), lists every host a Preflight job downloads from, by component, keeps the runner's image pulls apart from the job's own requests, and ends with the deduplicated list a firewall or proxy needs (BEST_PRACTICES 5.4; agreeing and enforcing it stays with ops). <code>tests/DocsEgressTest.php</code> (in <code>composer ci</code>) fails when a component has no row, a template fetches from an <code>https://</code> host the page does not name, or a default image comes from a registry it does not name. The README links it next to Dependency caching.</p>
 </li>
 <li>

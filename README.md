@@ -456,6 +456,7 @@ sign-in route for `session-hop` and what each failure usually means.
 | `identity_header` | string | `X-Forwarded-User` | Identity header a gateway would set (forged in `forwarded-headers`). |
 | `session_login_path` | string | `""` | GET path that signs in a test user and sets the session cookie. Needed by `session-hop`. |
 | `session_check_path` | string | `""` | Path that answers 200 only for a signed-in user. Needed by `session-hop`. |
+| `session_header` | string | `""` | Optional `Name: $VARIABLE` header sent on every `session-hop` request, for a sign-in route that needs a per-job secret. The value names a CI variable; the job reads it at run time and never prints it. |
 | `logs_path` | string | `storage/logs` | Directory, relative to `app_root`, where nothing may be written. |
 | `require_healthcheck` | boolean | `false` | Fail when the image declares no HEALTHCHECK. Docker and Coolify use it; OpenShift and Kubernetes use their own probes. |
 | `checks` | array | `["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm", "healthcheck"]` | The checks to run. Leave one out only on purpose; the strict boot always runs. |

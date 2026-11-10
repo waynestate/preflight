@@ -105,6 +105,24 @@ PROBE_PATH=$(cfg probe_path); PROBE_PATH=${PROBE_PATH:-/}
 IDENTITY_HEADER=$(cfg identity_header); IDENTITY_HEADER=${IDENTITY_HEADER:-X-Forwarded-User}
 LOGIN_PATH=$(cfg session_login_path)
 CHECK_PATH=$(cfg session_check_path)
+SESSION_HEADER_SPEC=$(cfg session_header)
+SESSION_HEADER_NAME=""
+SESSION_HEADER_VAR=""
+SESSION_HEADER_VALUE=""
+SESSION_HEADER=""
+if [ -n "$SESSION_HEADER_SPEC" ]; then
+  if ! printf '%s\n' "$SESSION_HEADER_SPEC" | grep -qE '^[A-Za-z0-9-]+: \$[A-Z_][A-Z0-9_]*$'; then
+    say "input error: session_header must look like 'Name: \$VARIABLE'"
+    exit 2
+  fi
+  SESSION_HEADER_NAME=${SESSION_HEADER_SPEC%%: *}
+  SESSION_HEADER_VAR=${SESSION_HEADER_SPEC#*: }
+  SESSION_HEADER_VAR=${SESSION_HEADER_VAR#\$}
+  SESSION_HEADER_VALUE=$(printenv "$SESSION_HEADER_VAR" || true)
+  if [ -n "$SESSION_HEADER_VALUE" ]; then
+    SESSION_HEADER="$SESSION_HEADER_NAME: $SESSION_HEADER_VALUE"
+  fi
+fi
 LOGS_PATH=$(cfg logs_path); LOGS_PATH=${LOGS_PATH:-storage/logs}; LOGS_PATH=${LOGS_PATH%/}
 REQUIRE_HEALTHCHECK=$(cfg require_healthcheck); REQUIRE_HEALTHCHECK=${REQUIRE_HEALTHCHECK:-false}
 case "$REQUIRE_HEALTHCHECK" in true|false) ;; *) say "input error: require_healthcheck must be true or false"; exit 2 ;; esac
@@ -521,6 +539,17 @@ fetch() {
   printf '%s' "${code:-000}"
 }
 
+# sfetch: fetch plus the session header, when one was resolved. Only the
+# session-hop requests use it; the value comes from the job environment and
+# is never printed.
+sfetch() {
+  if [ -n "$SESSION_HEADER" ]; then
+    fetch "$@" -H "$SESSION_HEADER"
+  else
+    fetch "$@"
+  fi
+}
+
 location() { awk 'tolower($1) == "location:" { sub(/^[^:]*:[ \t]*/, ""); sub(/\r$/, ""); print; exit }' "$1" 2>/dev/null; }
 
 if [ "$BOOTED" = yes ] && wanted forwarded-headers; then
@@ -553,13 +582,17 @@ if [ "$BOOTED" = yes ] && wanted forwarded-headers; then
   done
 fi
 
+if wanted session-hop && [ -n "$SESSION_HEADER_VAR" ] && [ -z "$SESSION_HEADER" ]; then
+  flag session-hop "session_header names $SESSION_HEADER_VAR, which is not set in the job"
+fi
+
 if [ "$BOOTED" = yes ] && wanted session-hop; then
   if [ -z "$LOGIN_PATH" ] || [ -z "$CHECK_PATH" ]; then
     flag session-hop "set session_login_path and session_check_path, or leave session-hop out of checks"
   elif [ "$B_UP" != yes ]; then
     flag session-hop "replica B is not running, so there is nowhere to hop to"
   else
-    lcode=$(fetch "$WORK/login" "$LOGIN_PATH" "$PORT")
+    lcode=$(sfetch "$WORK/login" "$LOGIN_PATH" "$PORT")
     cookies=$(awk 'tolower($1) == "set-cookie:" { sub(/^[^:]*:[ \t]*/, ""); sub(/;.*$/, ""); sub(/\r$/, ""); printf "%s%s", sep, $0; sep = "; " }' "$WORK/login.h" 2>/dev/null)
     case "$lcode" in
       2??|3??) ;;
@@ -569,9 +602,9 @@ if [ "$BOOTED" = yes ] && wanted session-hop; then
       if [ -z "$cookies" ]; then
         flag session-hop "$LOGIN_PATH on replica A set no cookie"
       else
-        anon=$(fetch "$WORK/anon" "$CHECK_PATH" "$PORT_B")
-        same=$(fetch "$WORK/same" "$CHECK_PATH" "$PORT" -H "Cookie: $cookies")
-        hop=$(fetch "$WORK/hop" "$CHECK_PATH" "$PORT_B" -H "Cookie: $cookies")
+        anon=$(sfetch "$WORK/anon" "$CHECK_PATH" "$PORT_B")
+        same=$(sfetch "$WORK/same" "$CHECK_PATH" "$PORT" -H "Cookie: $cookies")
+        hop=$(sfetch "$WORK/hop" "$CHECK_PATH" "$PORT_B" -H "Cookie: $cookies")
         if [ "$anon" = 200 ]; then
           flag session-hop "$CHECK_PATH answers 200 with no session, so it cannot tell a signed-in user from a guest"
         elif [ "$same" != 200 ]; then

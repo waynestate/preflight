@@ -74,5 +74,24 @@ if grep -qF '$[[' "$SRC"; then
   exit 1
 fi
 
+# session_header: declared as an input, passed into the probe, resolved from
+# the job environment with printenv, and never through eval.
+if ! grep -qxF '    session_header:' "$TPL"; then
+  echo "check-portability-inline: templates/portability/template.yml has no session_header input" >&2
+  exit 1
+fi
+if ! grep -qxF '      session_header=$[[ inputs.session_header ]]' "$TPL"; then
+  echo "check-portability-inline: the inputs heredoc does not pass session_header to the probe" >&2
+  exit 1
+fi
+if ! grep -qF 'printenv' "$SRC"; then
+  echo "check-portability-inline: templates/portability/probe.sh does not resolve session_header with printenv" >&2
+  exit 1
+fi
+if grep -qE '(^|[[:space:];|&(`])eval[[:space:]]' "$SRC"; then
+  echo "check-portability-inline: templates/portability/probe.sh uses eval" >&2
+  exit 1
+fi
+
 echo "check-portability-inline: ok"
 exit 0

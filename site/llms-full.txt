@@ -446,6 +446,7 @@ sign-in route for `session-hop` and what each failure usually means.
 | `identity_header` | string | `X-Forwarded-User` | Identity header a gateway would set (forged in `forwarded-headers`). |
 | `session_login_path` | string | `""` | GET path that signs in a test user and sets the session cookie. Needed by `session-hop`. |
 | `session_check_path` | string | `""` | Path that answers 200 only for a signed-in user. Needed by `session-hop`. |
+| `session_header` | string | `""` | Optional `Name: $VARIABLE` header sent on every `session-hop` request, for a sign-in route that needs a per-job secret. The value names a CI variable; the job reads it at run time and never prints it. |
 | `logs_path` | string | `storage/logs` | Directory, relative to `app_root`, where nothing may be written. |
 | `require_healthcheck` | boolean | `false` | Fail when the image declares no HEALTHCHECK. Docker and Coolify use it; OpenShift and Kubernetes use their own probes. |
 | `checks` | array | `["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm", "healthcheck"]` | The checks to run. Leave one out only on purpose; the strict boot always runs. |
@@ -1615,6 +1616,7 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ### Unreleased [#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Added: the portability component's `session_header` input sends one `Name: $VARIABLE` header on every session-hop request, read from the job's environment and never printed, so a probe sign-in route can require a per-job secret.
 - Docs: a new guide, Which hosts the jobs reach (`docs/guides/network-egress.md`), lists every host a Preflight job downloads from, by component, keeps the runner's image pulls apart from the job's own requests, and ends with the deduplicated list a firewall or proxy needs (BEST_PRACTICES 5.4; agreeing and enforcing it stays with ops). `tests/DocsEgressTest.php` (in `composer ci`) fails when a component has no row, a template fetches from an `https://` host the page does not name, or a default image comes from a registry it does not name. The README links it next to Dependency caching.
 - Fixed: `package-publish` really refuses a moved version on GitLab. It looked for the package under the index's `packages` key (GitLab sends `"packages": []` and a `metadata-url`) and for versions under a `versions` key (GitLab keys them under `packages`, then the package name), so it never found a published version and would have let GitLab overwrite one quietly. The job now follows `metadata-url` (falling back to GitLab's documented `p2` path), reads the version keyed or listed, takes the commit from `source.reference` or `dist.reference`, treats a `404` for the package as no versions yet, and refuses a version it cannot tie to a commit. `tests/check-package-publish-fails` (sh and ps1, `must-fail-package-publish`) now runs the whole job against a fake registry on GitLab's documented shapes: a moved version fails with no publish request, the same commit exits 0, a new version publishes once. That closes the last component path without a failing fixture (BEST_PRACTICES 7.2). Checking the tail number before the plane leaves the gate, not after.
 - Added: `tests/DocsInputTablesTest.php` (in `composer ci`) holds the docs to `contract/inputs.json`: the input table for every component in the README, the components reference and the component's guide must list each input with its contract type and default, and nothing else. A checklist is only as good as the airplane it was written for.
@@ -2782,6 +2784,7 @@ Before 0.5.0 an Apache image needed a `start_command` shim such as `exec setsid 
 | `identity_header` | string | `X-Forwarded-User` | Identity header a gateway would set (forged in `forwarded-headers`). |
 | `session_login_path` | string | `""` | GET path that signs in a test user and sets the session cookie. Needed by `session-hop`. |
 | `session_check_path` | string | `""` | Path that answers 200 only for a signed-in user. Needed by `session-hop`. |
+| `session_header` | string | `""` | Optional `Name: $VARIABLE` header sent on every `session-hop` request, for example `session_header: "X-Portability-Token: $PORTABILITY_PROBE_TOKEN"`. The job reads the variable at run time and never prints it. Use it when the sign-in route needs a secret. |
 | `logs_path` | string | `storage/logs` | Directory, relative to `app_root`, where nothing may be written. |
 | `require_healthcheck` | boolean | `false` | Fail when the image declares no HEALTHCHECK. Docker and Coolify use it; OpenShift and Kubernetes use their own probes. |
 | `checks` | array | `["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm", "healthcheck"]` | The checks to run. Leave one out only on purpose; the strict boot always runs. |
@@ -4419,6 +4422,7 @@ The one-job form ships in 0.2.0; 0.1.4 carries the earlier two-job form (`portab
 | `identity_header` | string | `X-Forwarded-User` | Identity header a gateway would set (forged in `forwarded-headers`). |
 | `session_login_path` | string | `""` | GET path that signs in a test user and sets the session cookie. Needed by `session-hop`. |
 | `session_check_path` | string | `""` | Path that answers 200 only for a signed-in user. Needed by `session-hop`. |
+| `session_header` | string | `""` | Optional `Name: $VARIABLE` header sent on every `session-hop` request, for a sign-in route that needs a per-job secret. The value names a CI variable; the job reads it at run time and never prints it. |
 | `logs_path` | string | `storage/logs` | Directory, relative to `app_root`, where nothing may be written. |
 | `require_healthcheck` | boolean | `false` | Fail when the image declares no HEALTHCHECK. Docker and Coolify use it; OpenShift and Kubernetes use their own probes. |
 | `checks` | array | `["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm", "healthcheck"]` | The checks to run. Leave one out only on purpose; the strict boot always runs. |

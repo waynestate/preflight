@@ -311,6 +311,12 @@
 <td>Path that answers 200 only for a signed-in user. Needed by <code>session-hop</code>.</td>
 </tr>
 <tr>
+<td><code>session_header</code></td>
+<td>string</td>
+<td><code>&quot;&quot;</code></td>
+<td>Optional <code>Name: $VARIABLE</code> header sent on every <code>session-hop</code> request, for example <code>session_header: &quot;X-Portability-Token: $PORTABILITY_PROBE_TOKEN&quot;</code>. The job reads the variable at run time and never prints it. Use it when the sign-in route needs a secret.</td>
+</tr>
+<tr>
 <td><code>logs_path</code></td>
 <td>string</td>
 <td><code>storage/logs</code></td>
