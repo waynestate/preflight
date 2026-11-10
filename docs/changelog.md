@@ -12,6 +12,7 @@ All notable changes to Preflight are recorded here. Entries follow
 are Git tags.
 
 ## Unreleased
+- Site: the front page's stale facts are current (the `proctor` placard says it keeps `proctor.json` for Rollcall since 0.5.0).
 - Changed: the deploy kit is Squire 0.10.7 (was 0.10.6): it ships a `.gitattributes` that pins line endings, so the deploy layer clears PROCTOR's line-ending warnings.
 - Changed: the docs, agent-ready and deploy kits are Squire 0.10.6 (was 0.10.5 for the deploy kit, Squire a7a40ab of 2026-11-08 for the docs and agent-ready files): the docs builder and agent-ready generator see every file on Docker Desktop mounts, and each heading keeps its "#" link with its last word.
 - Changed: the docs, agent-ready and deploy kits are Squire 0.10.6 (was 0.10.5 for the deploy kit; the docs and agent-ready files were Squire a7a40ab, between 0.10.2 and 0.10.3 in name only): the docs builder and agent-ready generator see every file on Docker Desktop mounts, and each heading keeps its "#" link with its last word.
