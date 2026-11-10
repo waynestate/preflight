@@ -1534,6 +1534,7 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 ### Unreleased [#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
 - Changed: the docs, agent-ready and deploy kits are Squire 0.10.6 (was 0.10.5 for the deploy kit, Squire a7a40ab of 2026-11-08 for the docs and agent-ready files): the docs builder and agent-ready generator see every file on Docker Desktop mounts, and each heading keeps its "#" link with its last word.
+- Changed: the deploy kit is Squire 0.10.7 (was 0.10.6): it ships a `.gitattributes` that pins line endings, so the deploy layer clears PROCTOR's line-ending warnings.
 - Changed: the docs, agent-ready and deploy kits are Squire 0.10.6 (was 0.10.5 for the deploy kit; the docs and agent-ready files were Squire a7a40ab, between 0.10.2 and 0.10.3 in name only): the docs builder and agent-ready generator see every file on Docker Desktop mounts, and each heading keeps its "#" link with its last word.
 - Fixed: secret detection really blocks now. GitLab's template marks the job allow_failure: true, so dropping the old override left it advisory (pipeline 5392). `.gitlab-ci.yml` sets allow_failure: false on secret_detection, and both check scripts now require it.
 - Added: a must-fail fixture for squire-kit. `must-fail-squire-kit` proves the component fails on a kit with a drifted file and on a folder with no .squire.json. Every component that runs as a job now has a must-fail fixture; only `a11y`'s still runs by hand, with no CI job yet.
