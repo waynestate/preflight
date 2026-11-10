@@ -2,14 +2,16 @@
 
 Status: draft, checked against sources on 2026-10-27, with a second research pass the same day (see "Second pass
 (2026-10-27)" near the end). Applies to the Preflight components at the state of the repo today: the latest tag is
-0.1.2, and the six components added after 0.1.0 shipped in 0.1.1.
+0.5.0, and the six components added after 0.1.0 shipped in 0.1.1.
 
 ## What this covers
 
 Preflight is a set of GitLab CI/CD components that every stack project and WSU app includes with
 `include: component:`. Today it has fourteen: `php-test` (PHP versions through `parallel:matrix`), `composer-audit`, `npm-audit`,
 `proctor`, `sbom`, `pint`, `phpstan`, `eslint`, `secret-detection`, `a11y` (the accessibility suite, 6.5),
-`portability`, `package-publish`, `renovate` and `squire-kit` (a deploy kit still matches its Squire release). A contract suite comes later.
+`portability`, `package-publish`, `renovate` and `squire-kit` (a deploy kit still matches its Squire release). A contract
+suite, `contract/inputs.json`, holds the inputs and job names every template promises, and the `contract` job checks it
+on every pipeline.
 
 This guide is for two groups:
 
@@ -101,7 +103,7 @@ Why: the catalog gives typed discovery and lets consumers pin an exact or partia
 Sources: [GitLab: components, publishing](https://docs.gitlab.com/ci/components/).
 
 **How the stack holds it: Documented.** The layout is right (`templates/<name>/template.yml`, a README), and the tag-triggered `release` job now exists in this repository's own pipeline: pushing a protected tag creates the GitLab Release with the commit SHA in its notes, after the test and audit stages. The Catalog entry still depends on the first tag run, because the release job has not run for a tag yet.
-The README examples pin the latest release (0.3.0) for every component and the GitHub workflow.
+The README examples pin the latest release (0.5.0) for every component and the GitHub workflow.
 
 ### 1.4 Keep inputs and job names stable inside a major version
 Do not rename an input, change its type, or rename a job in a minor release.
@@ -145,7 +147,7 @@ Sources: [StepSecurity: tj-actions breach](https://www.stepsecurity.io/blog/when
 The tj-actions details above come from search summaries of these pages and the NVD record could not be read in this
 pass, so treat the exact counts and dates as unverified.
 
-**How the stack holds it: Documented.** Tags `0.1.0`, `0.1.1` and `0.1.2` exist, and MAINTAINING.md documents the release process,
+**How the stack holds it: Documented.** Ten tags, `0.1.0` through `0.5.0`, exist, and MAINTAINING.md documents the release process,
 including recording the tag's commit SHA in the CHANGELOG when a tag is cut. The tag-triggered `release` job now puts the
 commit SHA in the GitLab Release notes on every tag (the first run is still to come), so new releases carry the SHA from
 the start. Apps still pin the tag in their component includes, and nothing checks an app's includes.
@@ -209,9 +211,10 @@ Why: GitLab calls `posix_escape` best effort and says to use `type`, `regex` or 
 Sources: [GitLab: CI/CD inputs, guidance](https://docs.gitlab.com/ci/inputs/);
 [OWASP CICD-SEC-4 Poisoned Pipeline Execution](https://owasp.org/www-project-top-10-ci-cd-security-risks/).
 
-**How the stack holds it: Documented.** Every `working_dir` input (six components carry one) is constrained by
+**How the stack holds it: Documented.** Every `working_dir` input (eight components carry one) is constrained by
 `regex: '^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$'` and quoted at its only use, `cd "$[[ inputs.working_dir ]]"`. The two
-`composer_version` inputs match `^2\.\d+\.\d+$`, and `renovate`'s `dry_run` matches `^(null|lookup|full)$`. The four
+`composer_version` inputs match `^2\.(9\.([6-9]|[1-9][0-9]+)|[1-9][0-9]+\.[0-9]+)$` (2.9.6 or later), and
+`renovate`'s `dry_run` matches `^(null|lookup|full)$`. The four
 path-like inputs that reach a shell line are now constrained too: `phpstan` `config` and `pint` `config` and `sbom`
 `output` match `^[A-Za-z0-9_-][A-Za-z0-9._/-]*$` (a relative path only), and `phpstan` `memory_limit` matches
 `^(-1|[0-9]+[KkMmGg]?)$` (a PHP size such as `1G`); `tests/check-path-input-regex.sh` (and its `.ps1` twin) pins both
@@ -238,7 +241,8 @@ Sources: [GitLab: component examples](https://docs.gitlab.com/ci/components/exam
 
 **How the stack holds it: Enforced.** All fourteen templates follow it. `tests/check-contract.sh` fails on any top-level
 key that is not a job named in `contract/inputs.json`, so a template cannot add a global key. The README's "Which jobs
-may be allowed to fail" explains why only `proctor`, `secret-detection` and `a11y` take `allow_failure`.
+may be allowed to fail" explains why `proctor`, `secret-detection`, `a11y` and `squire-kit` take `allow_failure`, and
+why the audit jobs take none.
 
 ### 2.4 Make the stage an input
 Consumers have their own stage lists.
@@ -263,14 +267,16 @@ usual job name (`proctor`, `php-test`, `composer-audit`, `sbom`, `pint`, `phpsta
 resolves the key to the default, so the job names stay stable inside a major version.
 
 ### 2.6 Offer a way to weaken a gate only where it is meant
-`composer-audit` has no `allow_failure` input, on purpose. `proctor`, `secret-detection` and `a11y` have one, for adoption.
+`composer-audit` and `npm-audit` have no `allow_failure` input, on purpose. `proctor`, `secret-detection`, `a11y` and
+`squire-kit` have one, for adoption.
 
 Why: every switch is a way to ship around the standard.
 
 Sources: [GitLab: CI/CD YAML, `allow_failure`](https://docs.gitlab.com/ci/yaml/).
 
-**How the stack holds it: Documented.** A comment in the `composer-audit` template says advisories must fail. The
-difference between the two components is not explained in the README, and an app can override either one anyway (see 3.1).
+**How the stack holds it: Documented.** Comments in the `composer-audit` and `npm-audit` templates say advisories must
+fail. The README's "Which jobs may be allowed to fail" names the four components that take `allow_failure` and why each
+may fail during adoption, and an app can override any of them anyway (see 3.1).
 
 ### 2.7 Pass the tool's exit code through
 Redirect output to the report file; do not pipe it through `tee`, which would hide the exit code.
@@ -349,8 +355,12 @@ exposes `name`, `sha`, `version` and `reference`, was beta in 18.6 and became GA
 Sources: [GitLab: components, `spec:component`](https://docs.gitlab.com/ci/components/);
 [GitLab: component examples, versioning with component context](https://docs.gitlab.com/ci/components/examples/).
 
-**How the stack holds it: Not yet.** No template uses it. It needs GitLab 18.7 or later, which is unconfirmed for
-git.wayne.edu.
+**How the stack holds it: Enforced.** All fourteen templates declare `component: [name, version, sha, reference]` under
+`spec:` and print the `Preflight component <name> <version> (ref <reference>, sha <sha>)` line as the first command of
+every job (for example `templates/proctor/template.yml:75`), and `tests/check-component-version.sh` (and its `.ps1` twin)
+fails the `contract` job if a template drops the declaration or stops printing the line first. The line needs GitLab
+18.7 or later; the version on git.wayne.edu is still unconfirmed (see 5.5), but PROCTOR's and CREED's pipelines include
+`preflight/proctor@0.5.0`, which carries the declaration, and run on it.
 
 ---
 
@@ -636,8 +646,10 @@ Sources: [GitLab: pipeline security, shell tools](https://docs.gitlab.com/ci/pip
 [Composer: download, versioned releases with checksums](https://getcomposer.org/download/).
 
 **How the stack holds it: Enforced.** `proctor` and `php-test` install the Composer release named by the
-`composer_version` input (default `2.11.1`, which must match `^2\.\d+\.\d+$`), after checking the installer's SHA-384.
-`composer-audit` uses a digest-pinned `composer:2.11.1` image.
+`composer_version` input (default `2.11.1`), after checking the installer's SHA-384. The input's regex,
+`^2\.(9\.([6-9]|[1-9][0-9]+)|[1-9][0-9]+\.[0-9]+)$`, accepts 2.9.6 and later only (2.9.6 to 2.9.9, then 2.10 and up), so
+a pin older than the stack's floor is refused at pipeline creation. `composer-audit` uses a digest-pinned
+`composer:2.11.1` image, and `tests/check-composer-floor.sh` (and its `.ps1` twin) keeps the floor in both templates.
 
 Second pass: this practice pulls two ways, and the guide should say so. A pinned Composer is repeatable, but Composer
 shipped security releases on 2026-04 (2.9.6), 2026-06-04 (2.10.1), 2026-07-01 (2.10.2), 2026-08-27 (2.10.3) and
@@ -895,9 +907,12 @@ Why: a default that errors teaches developers to ignore the job.
 
 Sources: [GitLab: component examples, defaults](https://docs.gitlab.com/ci/components/examples/).
 
-**How the stack holds it: Documented.** The default `vendor/bin/proctor check --format=codequality` omits `--policy`,
+**How the stack holds it: Checked.** The default `vendor/bin/proctor check --format=codequality` omits `--policy`,
 which used to make it exit 2. Since PROCTOR 0.2.1 the policy resolves without the option: `PROCTOR_POLICY`, then the
-app's installed CREED policy, then the copy bundled with PROCTOR. No test in this repo runs the component yet.
+app's installed CREED policy, then the copy bundled with PROCTOR. This repository's pipeline includes the `proctor`
+component at `$CI_COMMIT_SHA` against `tests/fixture-app` (`.gitlab-ci.yml:11`), so the real PROCTOR runs the default
+command on every pipeline, and the `contract` job runs `tests/check-proctor-fails` on the failing and `--record`
+fixtures (see 7.2).
 
 ### 6.2 Derive the PHP matrix from the policy, and drop end-of-life versions
 The tested versions should be those the policy lists as supported, intersected with what the app declares.
@@ -987,8 +1002,11 @@ Why: it exercises exactly what will be released.
 
 Sources: [GitLab: components, testing](https://docs.gitlab.com/ci/components/).
 
-**How the stack holds it: Checked.** `.gitlab-ci.yml` includes six components at `$CI_COMMIT_SHA` against
-`tests/fixture-app`, plus a `contract` job running the `tests/check-*.sh` scripts.
+**How the stack holds it: Checked.** `.gitlab-ci.yml` includes ten components at `$CI_COMMIT_SHA`: `proctor`, `php-test`,
+`composer-audit`, `pint` and `phpstan` against `tests/fixture-app`, `sbom` in the project root, `npm-audit` against the
+clean lock in `tests/npm-audit-fixtures/clean`, `a11y` against this repository's own `site` (the stack's floor, WCAG 2.2
+AA), `squire-kit` against the kit Squire wrote in `tests/squire-kit-fixture`, and `portability` against the clean build in
+`tests/portability/app`, plus a `contract` job running the `tests/check-*.sh` scripts.
 
 ### 7.2 Test the failing cases, and that the expected jobs exist
 Each component needs a fixture that must fail it: a failing test, an advisory, a policy violation. A test can also
@@ -998,38 +1016,42 @@ Why: a component that never fails looks the same as one that works.
 
 Sources: [GitLab: components, testing](https://docs.gitlab.com/ci/components/).
 
-**How the stack holds it: Partly.** Ten components carry a fixture that must fail them, each kept in place by a
-check: `proctor` runs the template's own `--record` guard and command line on `tests/proctor-fails`, a fake proctor
-that prints one blocker finding and exits 1, against the clean stubs in `tests/fixture-app` (no `--record`, like
-PROCTOR 0.10.0) and `tests/proctor-record` (with it), and proves `proctor.json` is kept only when PROCTOR can write
-it (`tests/check-proctor-fails`); `composer-audit` runs the template's own script
-lines on `tests/audit-fixtures/advisory` (laravel/framework v9.0.0, which must fail naming CVE-2024-52301) and
-`tests/audit-fixtures/malware` (aikido/endpoint-test 0.0.1, Aikido's harmless package flagged on Packagist's malware
-list on purpose, which must fail naming it), both in every `abandoned` mode, and on `tests/audit-fixtures/abandoned`,
-which fails only in `fail` mode, against the clean case in `tests/fixture-app` (`tests/check-composer-audit-fails`,
-run in CI by `must-fail-composer-audit`; it needs Packagist, and a run without it fails rather than passes); `a11y` checks the bad site in `tests/a11y-fixtures/bad`, which fails with
-each flaw named (`tests/check-a11y`); `portability` builds `tests/portability/app` once clean and once per flaw (needs root, writes outside its paths,
-fixed port, host-bound health, a baked `.env`, trusts any proxy, file logs, file sessions, no SIGTERM handler) and
-passes only when the clean build passes and each flaw fails the check it targets (`tests/check-portability`, run in
-CI by `must-fail-portability`); `php-test` runs PHPUnit on
-`tests/php-test-fails`, which carries a failing test, against the clean case in `tests/fixture-app`
-(`tests/check-php-test-fails`); `phpstan` runs PHPStan on `tests/phpstan-fails`, which carries a type error, against
-the clean case in `tests/fixture-app` (`tests/check-phpstan-fails`); `pint` runs Pint in test mode on
-`tests/pint-fails`, which is not formatted to the standard, against the clean case in `tests/fixture-app`
-(`tests/check-pint-fails`); `eslint` runs the app's own ESLint and Prettier on `tests/eslint-fails`, which
-carries one unused `const`, against the clean case in `tests/eslint-clean` (`tests/check-eslint-fails`);
-`secret-detection` runs the template's own gitleaks command, with the template's own config, on
-`tests/secret-detection-clean` plus a token built at run time in `src/config.php`, which must fail with
-`gitlab-pat` named and the value redacted from the log, while the same token planted in `vendor/` and
-`node_modules/` must stay invisible (`tests/check-secret-detection-fails`, run in CI by
-`must-fail-secret-detection`); and
-`sbom` runs Composer and the CycloneDX plugin on `tests/sbom-fails`, whose `composer.lock` is not valid JSON,
-against the clean case in `tests/sbom-clean`, whose SBOM lists `psr/log` and not the dev-only `psr/container`
-(`tests/check-sbom-fails`, run in CI by `must-fail-sbom`).
-Still missing: `package-publish`'s
-offline guards are covered by `tests/check-package-publish-fails.sh` (run in CI by `must-fail-package-publish`),
-while its moved-version path needs a live registry and stays untested; `renovate` is a config, not a job, so it
-has nothing to fail.
+**How the stack holds it: Partly.** Ten components carry a must-fail fixture that a `must-fail-` job in `.gitlab-ci.yml`
+runs, and `proctor`'s runs in the `contract` job: `proctor` runs the template's own `--record` guard and command line
+on `tests/proctor-fails`, a fake proctor that prints one blocker finding and exits 1, against the clean stubs in
+`tests/fixture-app` (no `--record`, like PROCTOR 0.10.0) and `tests/proctor-record` (with it), and proves `proctor.json`
+is kept only when PROCTOR can write it (`tests/check-proctor-fails`, run in CI by the `contract` job); `composer-audit`
+runs the template's own script lines on `tests/audit-fixtures/advisory` (laravel/framework v9.0.0, which must fail
+naming CVE-2024-52301) and `tests/audit-fixtures/malware` (aikido/endpoint-test 0.0.1, Aikido's harmless package
+flagged on Packagist's malware list on purpose, which must fail naming it), both in every `abandoned` mode, and on
+`tests/audit-fixtures/abandoned`, which fails only in `fail` mode, against the clean case in `tests/fixture-app`
+(`tests/check-composer-audit-fails`, run in CI by `must-fail-composer-audit`; it needs Packagist, and a run without it
+fails rather than passes); `npm-audit` runs the template's own script on fixed locks in `tests/npm-audit-fails` and
+`tests/npm-audit-fixtures`: lodash 4.17.20 (GHSA-35jh-r3h4-6jhm, high) fails at high and medium and passes at critical,
+an `.npmrc` that turns the audit off still fails, a dev-only finding fails only with `omit_dev` false, and a clean
+lock, an app with no lock and an unreachable registry behave as the docs say (`tests/check-npm-audit-fails`, run in CI
+by `must-fail-npm-audit`); `a11y` checks the bad site in `tests/a11y-fixtures/bad`, which fails with each flaw named
+(`tests/check-a11y`; no CI job runs it yet); `portability` builds `tests/portability/app` once clean and once per flaw
+(needs root, writes outside its paths, fixed port, host-bound health, a baked `.env`, trusts any proxy, file logs, file
+sessions, no SIGTERM handler) and passes only when the clean build passes and each flaw fails the check it targets
+(`tests/check-portability`, run in CI by `must-fail-portability`); `php-test` runs PHPUnit on `tests/php-test-fails`,
+which carries a failing test, against the clean case in `tests/fixture-app` (`tests/check-php-test-fails`, run in CI by
+`must-fail-php-test`); `phpstan` runs PHPStan on `tests/phpstan-fails`, which carries a type error, against the clean
+case in `tests/fixture-app` (`tests/check-phpstan-fails`), and `pint` runs Pint in test mode on `tests/pint-fails`,
+which is not formatted to the standard, against the clean case in `tests/fixture-app` (`tests/check-pint-fails`), both
+run in CI by `must-fail-phpstan-pint`; `eslint` runs the app's own ESLint and Prettier on `tests/eslint-fails`, which
+carries one unused `const`, against the clean case in `tests/eslint-clean` (`tests/check-eslint-fails`, run in CI by
+`must-fail-eslint`); `secret-detection` runs the template's own gitleaks command, with the template's own config, on
+`tests/secret-detection-clean` plus a token built at run time in `src/config.php`, which must fail with `gitlab-pat`
+named and the value redacted from the log, while the same token planted in `vendor/` and `node_modules/` must stay
+invisible (`tests/check-secret-detection-fails`, run in CI by `must-fail-secret-detection`); `sbom` runs Composer and
+the CycloneDX plugin on `tests/sbom-fails`, whose `composer.lock` is not valid JSON, against the clean case in
+`tests/sbom-clean`, whose SBOM lists `psr/log` and not the dev-only `psr/container` (`tests/check-sbom-fails`, run in
+CI by `must-fail-sbom`); and `package-publish`'s offline guards stop a non-semantic-version tag and a missing
+`composer.json` before any registry contact (`tests/check-package-publish-fails.sh`, run in CI by
+`must-fail-package-publish`). Still missing: `squire-kit` has no must-fail fixture yet; `package-publish`'s
+moved-version path needs a live registry and stays untested; `renovate` is a config, not a job, so it has nothing to
+fail.
 
 ### 7.3 Use the stack's own projects as the first users
 Each stack repo includes Preflight, pinned.
@@ -1066,7 +1088,8 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
 
 1. Done: 6.1: The `proctor` default command works without `--policy` since PROCTOR 0.2.1 (`PROCTOR_POLICY`, then the
    app's installed CREED policy, then the copy bundled with PROCTOR), and both PROCTOR's and CREED's pipelines include
-   `preflight/proctor@0.5.0`. 6.1 stays `Documented`, because no test in this repo runs the component.
+   `preflight/proctor@0.5.0`. 6.1 is `Checked`: this repository's pipeline runs the component on `tests/fixture-app`,
+   and the `contract` job runs `tests/check-proctor-fails`.
 2. 7.2: Add a failing fixture for `package-publish`'s moved-version path (it needs a live registry). The other
    components have theirs, and Preflight's pipeline runs the real PROCTOR.
 3. Done: 3.3: PROCTOR's `preflight-pinned` and `preflight-gates` checks flag apps that skip, unpin or weaken
@@ -1083,14 +1106,20 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
    step: they are project settings Preflight cannot create or verify, and a read-only token drift report was
    considered and left out on purpose.
 8. 6.2: Derive the PHP matrix from the policy, and drop 8.2 by 2027-01-01.
-9. 4.9: Pin the Composer version the installer fetches and the `composer-audit` image.
+9. Done: 4.9: The Composer version the installer fetches and the `composer-audit` image are pinned: `proctor` and
+   `php-test` install the named release (default `2.11.1`, floor 2.9.6, `templates/proctor/template.yml:26`),
+   `composer-audit` runs the digest-pinned `composer:2.11.1` image (`templates/composer-audit/template.yml:16`), and
+   `tests/check-composer-floor.sh` keeps the floor in both templates.
 10. Done (partly): 2.2: the path-like inputs are constrained and pinned by `tests/check-path-input-regex`: `phpstan`
     `config` and `memory_limit`, `pint` `config` and `sbom` `output` carry input regexes (relative paths and PHP sizes).
     Left free by design: `test_command`, `proctor_command` and `eslint_args` (arbitrary commands and arguments).
 11. Done: 4.7: Documented the scheduled audit in the README: a weekly pipeline schedule on the default branch (project settings, Build, Pipeline schedules); the component has no `rules:` and runs in scheduled pipelines, and the schedule itself is a project setting Preflight cannot create or check.
-12. 4.2: Use a dependency proxy or Citadel images for job images.
-13. 3.2: Recommend branch and CI-file protection for app repos.
-14. 3.4: Add a `workflow:rules` example to the README.
+12. Done: 4.2: Every Docker Hub image goes through the Dependency Proxy: each component takes an `image_prefix` input
+    (default `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}`), kept in place by `tests/check-dependency-cache.sh`.
+13. Done: 3.2: Branch and CI-file protection for app repos is recommended in the README's "Protection checklist"
+    (README.md:755): a protected default branch with a required merge request, protected release tags, merge request
+    approvals of at least one, `no_one_allowed` pipeline variables, and no protected variables in fork pipelines.
+14. Done: 3.4: The `workflow:rules` example is in the README's "When the components run" (README.md:709).
 15. Done: 2.5: Build job names from an input so one project can include a component twice.
 16. Done: 4.8: every Composer and npm component caches under a fixed key, kept in place by `tests/check-php-test-cache` and `tests/check-proctor-cache`.
 17. Done (advisory): 5.1: Added secret detection to Preflight's own pipeline as an advisory job (`allow_failure:
@@ -1107,7 +1136,8 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
     changed type or a changed default fails the build, and `composer contract:update` rewrites the contract when the
     change was made on purpose.
 22. 2.3 and 2.6: Lint templates for global keys, and explain which components may be weakened.
-23. 3.1: Publish the "components do not force" limit in the README.
+23. Done: 3.1: The "components do not force" limit is published in the README's "What the components cannot force"
+    (README.md:735).
 24. 5.3 and 5.4 and 7.3: git.wayne.edu now has an instance runner, and the stack's CI runs on it; every product in the stack still strongly recommends a git.wayne.edu instance runner, so that capacity stays there. What remains open: 5.4's list of hosts jobs may reach.
 
 Added in the second pass (2026-10-27):
@@ -1128,17 +1158,27 @@ Added in the second pass (2026-10-27):
     `tests/check-renovate-review.sh` (and its `.ps1` twin) keeps that rule in place.
 30. Done: 1.6: The tag-triggered `release` job puts the commit SHA in every GitLab Release note from the first tag run on, and the README and examples already tell apps to pin the SHA with the tag in a trailing comment.
 31. 4.11: Write the stack's rule for Composer malware, advisory and abandoned policy, and require Composer 2.10 or later.
-32. 4.10: Name the Debian release in image tags, or match the image family of the target you deploy to.
+32. Done: 4.10: The image defaults name the Debian release: `php-test` `php:${PHP_VERSION}-cli-trixie`
+    (`templates/php-test/template.yml:16`), `proctor` `php:8.4-cli-trixie` by digest (`templates/proctor/template.yml:16`),
+    kept in place by `tests/check-image-inputs.sh`.
 33. 2.9 (done): Add `timeout` and `interruptible` to each job.
-34. 3.4 (updated): Put the `workflow:rules` example in the README, and say it must live in the app's own file.
-35. 3.5 and 3.6: Tell app owners to restrict pipeline variables and keep fork merge requests away from secrets.
-36. 2.10: Add an `image` input to `php-test`.
+34. Done: 3.4 (updated): The `workflow:rules` example lives in the README, and it says the rules must live in the app's
+    own file (README.md:727).
+35. Done: 3.5 and 3.6: The README's Protection checklist tells app owners to restrict who can use pipeline variables
+    (`no_one_allowed`) and to keep fork merge requests away from protected variables (README.md:767).
+36. Done: 2.10: `php-test` takes an `image` input (default `php:${PHP_VERSION}-cli-trixie`,
+    `templates/php-test/template.yml:16`), like every other component.
 37. 7.4: Add a cross-OS local run (Composer scripts first) and test the README's local commands in PowerShell.
-38. 6.4: Add an advisory job for the next PHP release.
-39. 6.5: Name WCAG 2.2 AA as the floor (it also meets the rule's 2.1 AA) before the accessibility component is written.
+38. Done: 6.4: `php-test` takes `php_advisory_version`, which adds a `<job_name>-advisory` job, advisory-only
+    (`allow_failure: true`, `templates/php-test/template.yml:27,104`).
+39. Done: 6.5: WCAG 2.2 AA is named as the floor on the front page (site/index.html:841), the same floor Preflight's
+    own `a11y` job passes as `wcag_tags` (.gitlab-ci.yml:44).
 40. 1.8: Write a retirement policy for components, and test whether SHA pins survive a Catalog unpublish.
-41. 4.12: Record the install-scripts rule before a JavaScript component is written.
-42. 2.11: Print the component version in job logs once the instance runs GitLab 18.7 or later.
+41. Done: 4.12: The install-scripts rule is recorded in the README's "Shared conventions": JavaScript components
+    install with `npm ci --ignore-scripts` (README.md:811).
+42. Done: 2.11: Every template prints the `Preflight component <name> <version>` line first in every job
+    (`templates/proctor/template.yml:75`), kept in place by `tests/check-component-version.sh` in the `contract` job
+    (.gitlab-ci.yml:88).
 43. Done (advisory): 5.1 (updated): added GitLab secret detection to Preflight's pipeline. Still open: confirm
     whether it runs on git.wayne.edu (Community Edition).
 
