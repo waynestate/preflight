@@ -47,6 +47,7 @@
 are Git tags.</p>
 <h2 id="unreleased"><span class="docs-heading-tail"><span>Unreleased</span><a class="docs-heading-link" aria-label="Link to this section" href="#unreleased">#</a></span></h2>
 <ul>
+<li>Changed: the deploy layer requires PROCTOR ^0.12 (locked 0.12.0, was ^0.11): two new warning-only checks, nothing breaks.</li>
 <li>Added: <code>must-fail-proctor-lock</code> and <code>must-warn-preflight-gates</code> jobs run the real PROCTOR on fixture-app copies: PROCTOR fails a copy whose lock is gone (removed after the install, since Composer writes one during it; BEST_PRACTICES 4.5 records that gap), and a pipeline without Preflight, with <code>allow_failure</code> on the proctor gate or pinned to <code>@main</code> warns without failing.</li>
 <li>Added: must-fail proofs for the contract check (<code>tests/check-contract-fails</code> in the <code>contract</code> job, and a PHPUnit case): a changed default or a renamed input now has to fail both comparisons.</li>
 <li>Fixed: <code>tests/check-contract.ps1</code> names php-test's jobs from the <code>job_name</code> input like the <code>.sh</code> twin and the PHPUnit contract test, so it passes the real templates again on Windows.</li>
