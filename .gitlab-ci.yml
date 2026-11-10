@@ -177,6 +177,50 @@ must-fail-composer-audit:
   script:
     - sh tests/check-composer-audit-fails.sh
 
+# The must-fail fixture for PROCTOR's lock-committed check: the check proves
+# row 4.5 with the real PROCTOR (installed from the fixture app's own lock)
+# on copies of tests/fixture-app: a clean copy passes and names no lock
+# finding, and a copy without composer.lock fails and names
+# proctor/lock-committed. Composer recreates a missing lock while
+# installing, so the script deletes it after the install, right before the
+# check. It needs Packagist, like the install: composer downloads land in
+# .composer-cache/ under a fixed key, so repeat pipelines skip them. Runs
+# in the template's own image, pinned by digest.
+must-fail-proctor-lock:
+  stage: test
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0
+  cache:
+    key: preflight-must-fail-proctor-lock
+    paths:
+      - .composer-cache/
+    when: always  # a failed job still keeps every package that finished downloading
+  variables:
+    COMPOSER_CACHE_DIR: "$CI_PROJECT_DIR/.composer-cache"
+  script:
+    - sh tests/check-proctor-lock-fails.sh
+
+# The warn-only fixtures for PROCTOR's preflight-gates and preflight-pinned
+# checks: the check proves row 3.3 with the real PROCTOR on a copy of
+# tests/fixture-app whose .gitlab-ci.yml is swapped per case: as-is it warns
+# no-include and no-proctor-job, an include pinned to a release tag with
+# allow_failure: true warns allow-failure, and an include at @main warns
+# unpinned. Every case exits 0: the warnings never fail the run. It needs
+# Packagist once, for the install: composer downloads land in
+# .composer-cache/ under a fixed key, so repeat pipelines skip them. Runs
+# in the template's own image, pinned by digest.
+must-warn-preflight-gates:
+  stage: test
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0
+  cache:
+    key: preflight-must-warn-gates
+    paths:
+      - .composer-cache/
+    when: always  # a failed job still keeps every package that finished downloading
+  variables:
+    COMPOSER_CACHE_DIR: "$CI_PROJECT_DIR/.composer-cache"
+  script:
+    - sh tests/check-preflight-gates-warns.sh
+
 # The must-fail fixtures for the npm-audit component: the check proves the
 # template keeps the job honest (no allow_failure, the gate's exit code
 # kept, the one || true on the report line only, the .npmrc override flags

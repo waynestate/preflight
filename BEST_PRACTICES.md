@@ -415,8 +415,9 @@ runs at all).
 the pipeline switches Composer's audit off or runs `composer update`. PROCTOR's `preflight-pinned` check warns on an
 include not pinned to a version or SHA, and its `preflight-gates` check (2026-11-09) warns on no Preflight include
 (`proctor/preflight-gates/no-include`), `allow_failure` on a gate (`proctor/preflight-gates/allow-failure`) and no
-proctor job (`proctor/preflight-gates/no-proctor-job`). Both warn and never fail. Rollcall's "apps with CI" number is a
-plan.
+proctor job (`proctor/preflight-gates/no-proctor-job`). Both warn and never fail. `tests/check-preflight-gates-warns.sh`
+(and its `.ps1` twin) proves the no-include, no-proctor-job, allow-failure and unpinned warnings with the real PROCTOR,
+and that none of them fails the run. Rollcall's "apps with CI" number is a plan.
 
 ### 3.4 Control when pipelines run, once, in the app
 Set `workflow:rules` so a branch with an open merge request does not run twice, and so merge request pipelines exist.
@@ -561,6 +562,8 @@ Sources: [Composer basic usage: the lock file](https://getcomposer.org/doc/01-ba
 
 **How the stack holds it: Checked.** PROCTOR's `lock-committed` fails when the lock is missing. It runs only if the app
 includes the `proctor` component, whose default command now runs on a fresh app (see 6.1).
+`tests/check-proctor-lock-fails.sh` (and its `.ps1` twin) proves it with the real PROCTOR on a copy of the fixture app
+without its lock.
 
 ### 4.6 Audit the lock and fail the job
 Run `composer audit --locked`. A non-zero exit fails the job. Give the audit no `allow_failure`.
