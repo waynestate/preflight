@@ -809,8 +809,10 @@ Sources: [GitLab: CI/CD variables](https://docs.gitlab.com/ci/variables/);
 
 **How the stack holds it: Documented.** The fourteen templates use no secrets, which is good. Nothing fails if a later
 template adds one. The repository's own pipeline runs GitLab's pipeline secret detection, and since 2026-11-10 the
-`secret_detection` job blocks: it was advisory for a week of green runs from 2026-11-02, and
-`tests/check-secret-detection.sh` and its `.ps1` twin now fail the `contract` job if anyone makes it advisory again. It
+`secret_detection` job blocks: it was advisory for a week of green runs from 2026-11-02. GitLab's template marks the
+job `allow_failure: true` itself, so `.gitlab-ci.yml` sets `allow_failure: false` on it, and
+`tests/check-secret-detection.sh` and its `.ps1` twin fail the `contract` job if that override goes missing or turns
+advisory again. It
 runs on the git.wayne.edu instance (Community Edition): every `secret_detection` job there passed from 2026-11-09 to
 2026-11-10.
 
