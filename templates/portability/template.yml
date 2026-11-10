@@ -946,7 +946,6 @@ spec:
         say "cleared for takeoff: the image runs off Citadel the way OpenShift, Coolify and plain Docker run it"
       fi
       exit "$status"
-
       PREFLIGHT_PORTABILITY_PROBE
 
       sh /tmp/portability-probe.sh /tmp/portability-inputs
