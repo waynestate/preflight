@@ -9,6 +9,55 @@ This page is the checklist for moving an app from one Preflight pin to the next,
 
 Every input and job name a component offers is recorded in `contract/inputs.json`, and Preflight's build fails when a template drifts from it, so the file is the exact list of what moved. Before you move a pin, diff it between your tag and the next one (for example `git diff 0.4.0 0.5.0 -- contract/inputs.json` in a clone of Preflight) and check each line against that version's Breaking and Steps below. [The inputs contract](guides/inputs-contract.md) explains what each kind of change means for your include.
 
+## 0.6.0
+
+Released 2026-11-10. This release adds one component, `mysql56-migrate`, which proves an app's migrations on the MySQL
+Citadel really runs. The portability job also runs the image's own `HEALTHCHECK` and can start a shared database for
+`session-hop`. No input or job was renamed or removed. Cleared for takeoff, with one more gauge on the panel.
+
+### Breaking
+
+**The `healthcheck` check is in the default `checks`.** An include that leaves `checks` at its default now runs the
+image's own `HEALTHCHECK` command inside replica A, as the app's uid, and fails when it exits non-zero three times in a
+row. An image that declares no `HEALTHCHECK` still passes, with a note (set `require_healthcheck: true` to fail
+instead). If your image's health command only works as root, or calls a tool the image lacks, fix the command in the
+same change as the bump. An include that lists `checks` itself does not get the new check until you add `healthcheck`
+to its list.
+
+### Changed
+
+- The portability job builds with `buildah bud --format docker`, because Buildah's default OCI format drops
+  `HEALTHCHECK`. The image the probe boots is otherwise the same.
+- New portability inputs: `require_healthcheck` (boolean, default `false`) and `services` (array, default `[]`, the
+  same shape as GitLab's `services:` keyword). See [the portability guide](guides/component-portability.md).
+
+### New: mysql56-migrate
+
+CREED's database rule says an app MUST run its migrations in CI against a real MySQL 5.6, because SQLite accepts DDL
+that 5.6.51 rejects (a `JSON` column, a `utf8mb4` unique index longer than 767 bytes). The component starts
+`mysql:5.6.51` as a service, waits for it, installs `pdo_mysql` (and Composer 2.11.1, when the image has none), and
+runs `migrate_command` (default `php artisan migrate --force --no-interaction`).
+
+- It carries the `amd64` runner tag by default, since the official MySQL 5.6 images are amd64 only. On a GitLab with
+  no amd64-tagged runner, set `tags: []` on an amd64 or emulating default runner.
+- It runs on the default branch and tags, is manual (and allowed to fail) on merge requests, and never runs from a
+  schedule.
+- A raw PHP app passes its own migration command; [the guide](guides/component-mysql56-migrate.md) has both includes.
+
+### Steps
+
+1. Move every Preflight include to the 0.6.0 tag's full commit SHA, with `# 0.6.0` in a trailing comment.
+2. If the app has migrations, add the `mysql56-migrate` include.
+3. If the portability job runs with the default `checks`, boot the image locally and run its `HEALTHCHECK` command as
+   a uid with no name in group 0 before you push.
+4. An app that keeps sessions in its database (WELD does) can now add `session-hop` back: give the portability include
+   a `services` database and point `DB_HOST` at its alias.
+
+### How to verify
+
+- The `mysql56-migrate` job is green on the default branch, and its log ends with the app's own migration output.
+- The portability job's summary lists `healthcheck` as passed, or as passed with the "declares no HEALTHCHECK" note.
+
 ## 0.5.0
 
 Released 2026-11-09. A new component, `npm-audit`, the front-end half of `composer-audit`; a portability probe that

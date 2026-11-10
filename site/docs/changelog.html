@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Changelog | Preflight docs</title>
 <meta name="description" content="All notable changes to this project.">
-<meta name="docs-version" content="0.5.0">
+<meta name="docs-version" content="0.6.0">
 <link rel="stylesheet" href="../assets/wayne-ui/wayne-ui.css">
 <link rel="stylesheet" href="../assets/docs.css">
 <link rel="stylesheet" href="../docs/theme/preflight.css">
@@ -20,7 +20,7 @@
     <a class="brand" href="../index.html">
       <img src="../brand/preflight-avatar-256.png" width="36" height="36" alt="">
       <span class="brand__name">PREFLIGHT</span>
-      <span class="brand__tail">0.5.0</span>
+      <span class="brand__tail">0.6.0</span>
     </a>
     <nav class="topnav" aria-label="Site">
       <a class="topnav__section" href="../index.html#checklist">Checklist</a>
@@ -46,10 +46,16 @@
 <a rel="noopener" href="https://keepachangelog.com/en/1.1.0/">Keep a Changelog</a>; released versions
 are Git tags.</p>
 <h2 id="unreleased"><span class="docs-heading-tail"><span>Unreleased</span><a class="docs-heading-link" aria-label="Link to this section" href="#unreleased">#</a></span></h2>
+<h2 id="0-6-0-2026-11-10">0.6.0 <span class="docs-heading-tail"><span>(2026-11-10)</span><a class="docs-heading-link" aria-label="Link to this section" href="#0-6-0-2026-11-10">#</a></span></h2>
+<p>A new component and a portability probe that checks more of what a platform checks. <code>mysql56-migrate</code> runs an app's
+migrations against MySQL 5.6.51, the version of Citadel's shared server, on the runner tagged <code>amd64</code>. The portability
+job runs the image's own <code>HEALTHCHECK</code> inside a replica (a new <code>healthcheck</code> check, in the default <code>checks</code>), and its
+new <code>services</code> input starts a database or cache both replicas share, so <code>session-hop</code> can pass for an app that keeps
+sessions there. No input or job was renamed or removed.</p>
 <ul>
+<li>Docs: the Upgrading page has a 0.6.0 section.</li>
 <li>Added: the portability component takes a <code>services</code> input (default none), so <code>session-hop</code> can run against a database or cache both replicas share (WELD W15).</li>
 <li>Added: the portability component runs the image's own HEALTHCHECK inside a replica (<code>healthcheck</code> check, new <code>require_healthcheck</code> input, default false), and builds with <code>--format docker</code> so the HEALTHCHECK survives; must-fail fixture <code>bad-healthcheck</code>.</li>
-<li>Added: <code>mysql56-migrate</code> component: runs the app's migrations against MySQL 5.6.51 (Citadel's shared server) on the runner tagged <code>amd64</code>, on the default branch and tags, manual on merge requests; must-fail fixtures for a JSON column and a too-long utf8mb4 index (D-078).</li>
 <li>Added: <code>mysql56-migrate</code> component: runs the app's migrations against MySQL 5.6.51 (Citadel's shared server) on the runner tagged <code>amd64</code>, on the default branch and tags, manual on merge requests; must-fail fixtures for a JSON column and a too-long utf8mb4 index; installs Composer 2.11.1 when the image has none (D-078).</li>
 <li>Changed: <code>scripts/a11y-container.sh</code> carries the <code># proctor-ignore script-pair:</code> marker: it runs only inside the container its two OS twins start, so PROCTOR's <code>script-pair</code> reports it as an info note, not a missing twin.</li>
 <li>Added: <code>must-fail-a11y</code> runs <code>tests/check-a11y.sh</code> in CI, in the a11y component's own Playwright image, so the a11y check's bad fixture is proven to fail on every pipeline like the other components'. <code>scripts/a11y.sh</code> gains an in-image mode (<code>A11Y_IN_IMAGE=1</code>) for that job.</li>
@@ -288,10 +294,10 @@ deprecation checks now run on every analysis.</li>
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../docs/upgrading.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">Upgrading</span></a></nav>
   </div>
-  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#unreleased">Unreleased</a></li><li class="docs-toc__item"><a href="#0-5-0-2026-11-09">0.5.0 (2026-11-09)</a></li><li class="docs-toc__item"><a href="#0-4-0-2026-11-08">0.4.0 (2026-11-08)</a></li><li class="docs-toc__item"><a href="#0-3-1-2026-11-08">0.3.1 (2026-11-08)</a></li><li class="docs-toc__item"><a href="#0-3-0-2026-11-08">0.3.0 (2026-11-08)</a></li><li class="docs-toc__item"><a href="#0-2-0-2026-11-07">0.2.0 (2026-11-07)</a></li><li class="docs-toc__item"><a href="#0-1-4-2026-11-03">0.1.4 (2026-11-03)</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed">Changed</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#added">Added</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#fixed">Fixed</a></li><li class="docs-toc__item"><a href="#0-1-3-2026-11-03">0.1.3 (2026-11-03)</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#added-1">Added</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed-1">Changed</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#fixed-1">Fixed</a></li><li class="docs-toc__item"><a href="#0-1-2-2026-10-29">0.1.2 (2026-10-29)</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#added-2">Added</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#fixed-2">Fixed</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed-2">Changed</a></li><li class="docs-toc__item"><a href="#0-1-1-2026-10-29">0.1.1 (2026-10-29)</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#added-3">Added</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed-3">Changed</a></li><li class="docs-toc__item"><a href="#0-1-0-2026-10-27">0.1.0 (2026-10-27)</a></li></ul></nav>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#unreleased">Unreleased</a></li><li class="docs-toc__item"><a href="#0-6-0-2026-11-10">0.6.0 (2026-11-10)</a></li><li class="docs-toc__item"><a href="#0-5-0-2026-11-09">0.5.0 (2026-11-09)</a></li><li class="docs-toc__item"><a href="#0-4-0-2026-11-08">0.4.0 (2026-11-08)</a></li><li class="docs-toc__item"><a href="#0-3-1-2026-11-08">0.3.1 (2026-11-08)</a></li><li class="docs-toc__item"><a href="#0-3-0-2026-11-08">0.3.0 (2026-11-08)</a></li><li class="docs-toc__item"><a href="#0-2-0-2026-11-07">0.2.0 (2026-11-07)</a></li><li class="docs-toc__item"><a href="#0-1-4-2026-11-03">0.1.4 (2026-11-03)</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed">Changed</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#added">Added</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#fixed">Fixed</a></li><li class="docs-toc__item"><a href="#0-1-3-2026-11-03">0.1.3 (2026-11-03)</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#added-1">Added</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed-1">Changed</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#fixed-1">Fixed</a></li><li class="docs-toc__item"><a href="#0-1-2-2026-10-29">0.1.2 (2026-10-29)</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#added-2">Added</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#fixed-2">Fixed</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed-2">Changed</a></li><li class="docs-toc__item"><a href="#0-1-1-2026-10-29">0.1.1 (2026-10-29)</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#added-3">Added</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed-3">Changed</a></li><li class="docs-toc__item"><a href="#0-1-0-2026-10-27">0.1.0 (2026-10-27)</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
-  <span>Documents Preflight <span data-docs-version>0.5.0</span></span>
+  <span>Documents Preflight <span data-docs-version>0.6.0</span></span>
   <span><a rel="noopener" href="https://github.com/waynestate/preflight">Source</a> <a href="changelog.md">Markdown</a></span>
 </footer>
 </body>
