@@ -77,7 +77,7 @@
         <div class="quickstart">
           <p class="quickstart__label" id="qs-label">.gitlab-ci.yml</p>
 <pre class="quickstart__code" id="quickstart-cmd" aria-labelledby="qs-label"><code>include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0</code></pre>
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0</code></pre>
           <button class="copy-btn" type="button" data-copy-from="#quickstart-cmd">
             <span class="copy-btn__label">Copy</span>
           </button>
@@ -302,18 +302,18 @@
       <div class="section__head">
         <p class="eyebrow">Cockpit placards</p>
         <h2 id="components-title">Nine checks, one include each</h2>
-        <p>Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All nine are in the 0.6.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Six more components ship in the same tag, and the docs cover each one: <code>secret-detection</code>, <code>squire-kit</code>, <code>portability</code>, <code>package-publish</code>, <code>renovate</code> and <code>npm-audit</code>. New in 0.6.0: <code>mysql56-migrate</code>, and <code>portability</code> builds with <code>--format docker</code> so the image keeps its <code>HEALTHCHECK</code>, then runs that command in a booted replica. The <code>healthcheck</code> check is on by default, which is the release's one breaking change; <code>require_healthcheck</code> fails an image that declares none, and a new <code>services</code> input starts a database both replicas share, so <code>session-hop</code> can pass. Since 0.5.0: <code>npm-audit</code>, the front-end half of <code>composer-audit</code>, and an Apache image boots with no <code>start_command</code> shim. Every input on these placards is held to <a href="#contract">a written contract</a>.</p>
+        <p>Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All nine are in the 0.7.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Six more components ship in the same tag, and the docs cover each one: <code>secret-detection</code>, <code>squire-kit</code>, <code>portability</code>, <code>package-publish</code>, <code>renovate</code> and <code>npm-audit</code>. New in 0.7.0: <code>portability</code> takes a <code>setup_command</code>, run once in its own container of the built image after any <code>services</code> are up and before either replica starts. A shared database is empty until the app migrates it, so that is where the migration goes before <code>session-hop</code> takes off; a non-zero exit fails the job with <code>setup: FAIL</code>. Nothing renamed, nothing removed. Since 0.6.0: <code>mysql56-migrate</code>, a <code>healthcheck</code> check that runs the image's own <code>HEALTHCHECK</code> in a booted replica, and the <code>services</code> input that starts a database both replicas share. Every input on these placards is held to <a href="#contract">a written contract</a>.</p>
       </div>
 
       <div class="placards">
 
         <article class="placard">
           <span class="placard__screws" aria-hidden="true"></span>
-          <p class="placard__tag placard__tag--tagged">in 0.6.0</p>
+          <p class="placard__tag placard__tag--tagged">in 0.7.0</p>
           <h3 class="placard__name">proctor</h3>
           <p class="placard__aside">Watches the cabin.</p>
           <p class="placard__line">Runs PROCTOR's checks, publishes a Code Quality report and, since 0.5.0, keeps <code>proctor.json</code> for Rollcall.</p>
-<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0</code></pre>
+<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0</code></pre>
           <details class="placard__inputs">
             <summary>6 inputs</summary>
             <dl>
@@ -329,11 +329,11 @@
 
         <article class="placard">
           <span class="placard__screws" aria-hidden="true"></span>
-          <p class="placard__tag placard__tag--tagged">in 0.6.0</p>
+          <p class="placard__tag placard__tag--tagged">in 0.7.0</p>
           <h3 class="placard__name">php-test</h3>
           <p class="placard__aside">Three engines, all running.</p>
           <p class="placard__line">The test command on each supported PHP version, one job per version.</p>
-<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0</code></pre>
+<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0</code></pre>
           <details class="placard__inputs">
             <summary>6 inputs</summary>
             <dl>
@@ -349,11 +349,11 @@
 
         <article class="placard">
           <span class="placard__screws" aria-hidden="true"></span>
-          <p class="placard__tag">new in 0.6.0</p>
+          <p class="placard__tag">in 0.7.0</p>
           <h3 class="placard__name">mysql56-migrate</h3>
           <p class="placard__aside">Practice on the runway you land on.</p>
           <p class="placard__line">Runs the app's migrations against a real MySQL 5.6.51, the version of Citadel's shared server, on the runner tagged <code>amd64</code>. SQLite waves through a <code>JSON</code> column or a too-long utf8mb4 index; 5.6 does not.</p>
-<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/mysql56-migrate@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0</code></pre>
+<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/mysql56-migrate@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0</code></pre>
           <details class="placard__inputs">
             <summary>6 inputs</summary>
             <dl>
@@ -369,11 +369,11 @@
 
         <article class="placard">
           <span class="placard__screws" aria-hidden="true"></span>
-          <p class="placard__tag placard__tag--tagged">in 0.6.0</p>
+          <p class="placard__tag placard__tag--tagged">in 0.7.0</p>
           <h3 class="placard__name">composer-audit</h3>
           <p class="placard__aside">Checks the passenger list.</p>
           <p class="placard__line"><code>composer audit --locked</code>, failing on any advisory.</p>
-<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0</code></pre>
+<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0</code></pre>
           <details class="placard__inputs">
             <summary>3 inputs</summary>
             <dl>
@@ -386,11 +386,11 @@
 
         <article class="placard">
           <span class="placard__screws" aria-hidden="true"></span>
-          <p class="placard__tag">in 0.6.0</p>
+          <p class="placard__tag">in 0.7.0</p>
           <h3 class="placard__name">sbom</h3>
           <p class="placard__aside">The cargo manifest.</p>
           <p class="placard__line">A validated CycloneDX SBOM, published as an artifact. The plugin installs globally, so the app's files stay as they are.</p>
-<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0</code></pre>
+<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0</code></pre>
           <details class="placard__inputs">
             <summary>4 inputs</summary>
             <dl>
@@ -404,11 +404,11 @@
 
         <article class="placard">
           <span class="placard__screws" aria-hidden="true"></span>
-          <p class="placard__tag">in 0.6.0</p>
+          <p class="placard__tag">in 0.7.0</p>
           <h3 class="placard__name">pint</h3>
           <p class="placard__aside">Uniform pressed.</p>
           <p class="placard__line">The app's own Laravel Pint in test mode. The app requires <code>laravel/pint</code> and ships a <code>pint.json</code>.</p>
-<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0</code></pre>
+<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0</code></pre>
           <details class="placard__inputs">
             <summary>4 inputs</summary>
             <dl>
@@ -422,11 +422,11 @@
 
         <article class="placard">
           <span class="placard__screws" aria-hidden="true"></span>
-          <p class="placard__tag">in 0.6.0</p>
+          <p class="placard__tag">in 0.7.0</p>
           <h3 class="placard__name">phpstan</h3>
           <p class="placard__aside">Instruments cross-checked.</p>
           <p class="placard__line">The app's own PHPStan, with a Code Quality report. The app requires <code>phpstan/phpstan</code> and ships a <code>phpstan.neon</code>.</p>
-<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0</code></pre>
+<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0</code></pre>
           <details class="placard__inputs">
             <summary>5 inputs</summary>
             <dl>
@@ -441,11 +441,11 @@
 
         <article class="placard">
           <span class="placard__screws" aria-hidden="true"></span>
-          <p class="placard__tag">in 0.6.0</p>
+          <p class="placard__tag">in 0.7.0</p>
           <h3 class="placard__name">eslint</h3>
           <p class="placard__aside">The front cabin, too.</p>
           <p class="placard__line">The app's own ESLint and Prettier. The app requires <code>@waynestate/pinstripe</code>, <code>eslint</code> and <code>prettier</code>.</p>
-<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0</code></pre>
+<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0</code></pre>
           <details class="placard__inputs">
             <summary>5 inputs</summary>
             <dl>
@@ -460,11 +460,11 @@
 
         <article class="placard">
           <span class="placard__screws" aria-hidden="true"></span>
-          <p class="placard__tag">in 0.6.0</p>
+          <p class="placard__tag">in 0.7.0</p>
           <h3 class="placard__name">a11y</h3>
           <p class="placard__aside">Boarding for every passenger.</p>
           <p class="placard__line">Opens the pages in Chromium and fails on any axe-core violation, with the reflow check at 320 px. It serves a static <code>site_dir</code>, or checks a running app at <code>base_url</code>.</p>
-<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0</code></pre>
+<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0</code></pre>
           <details class="placard__inputs">
             <summary>6 inputs</summary>
             <dl>
@@ -481,11 +481,11 @@
         <!-- Not a component: the reusable workflow for GitHub mirrors. -->
         <article class="placard placard--alt">
           <span class="placard__screws" aria-hidden="true"></span>
-          <p class="placard__tag">in 0.6.0</p>
+          <p class="placard__tag">in 0.7.0</p>
           <h3 class="placard__name">php-package.yml</h3>
           <p class="placard__aside">Two cockpits, one checklist.</p>
           <p class="placard__line">Components stay inside one GitLab instance, so GitHub mirrors call this reusable workflow instead: <code>composer ci</code> on each PHP version, then a Composer audit.</p>
-<pre class="placard__code"><code>uses: waynestate/preflight/.github/workflows/php-package.yml@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0</code></pre>
+<pre class="placard__code"><code>uses: waynestate/preflight/.github/workflows/php-package.yml@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0</code></pre>
           <details class="placard__inputs">
             <summary>3 inputs</summary>
             <dl>
@@ -524,10 +524,10 @@
           <div class="sheet__head">
             <p class="sheet__kicker">Type certificate data sheet</p>
             <p class="sheet__title"><code>portability</code></p>
-            <p class="sheet__rev" aria-hidden="true">Amdt<br><b>0.6.0</b></p>
+            <p class="sheet__rev" aria-hidden="true">Amdt<br><b>0.7.0</b></p>
           </div>
           <table class="sheet__table">
-            <caption class="wsu-sr-only">portability inputs in contract/inputs.json, abridged. Rows marked revised changed from 0.5.0 to 0.6.0.</caption>
+            <caption class="wsu-sr-only">portability inputs in contract/inputs.json, abridged. The row marked revised changed from 0.6.0 to 0.7.0.</caption>
             <thead>
               <tr><th scope="col">Input</th><th scope="col">Type</th><th scope="col">Default</th></tr>
             </thead>
@@ -537,21 +537,23 @@
               <tr><th scope="row"><code>port</code></th><td>number</td><td><code>8080</code></td></tr>
               <tr><th scope="row"><code>health_path</code></th><td>string</td><td><code>/up</code></td></tr>
               <tr><th scope="row"><code>uid</code></th><td>number</td><td><code>100123</code></td></tr>
+              <tr class="is-amended" style="--bar: 0"><th scope="row"><code>setup_command</code><span class="sheet__note">Added: run once before either replica, to migrate the database in <code>services</code></span></th><td>string</td><td><code>""</code></td></tr>
               <tr><th scope="row"><code>env</code></th><td>array</td><td><code>[]</code></td></tr>
-              <tr class="is-amended" style="--bar: 0"><th scope="row"><code>services</code><span class="sheet__note">Added: a database or cache both replicas share</span></th><td>array</td><td><code>[]</code></td></tr>
+              <tr><th scope="row"><code>services</code></th><td>array</td><td><code>[]</code></td></tr>
               <tr><th scope="row"><code>boot_timeout</code></th><td>number</td><td><code>60</code></td></tr>
-              <tr class="is-amended" style="--bar: 1"><th scope="row"><code>require_healthcheck</code><span class="sheet__note">Added: fail an image that declares no HEALTHCHECK</span></th><td>boolean</td><td><code>false</code></td></tr>
-              <tr class="is-amended" style="--bar: 2"><th scope="row"><code>checks</code><span class="sheet__note">Revised: <code>healthcheck</code> joins the default list</span></th><td>array</td><td><code>health</code> <code>env-only</code> <code>forwarded-headers</code> <code>logs</code> <code>session-hop</code> <code>sigterm</code> <code>healthcheck</code></td></tr>
+              <tr><th scope="row"><code>require_healthcheck</code></th><td>boolean</td><td><code>false</code></td></tr>
+              <tr><th scope="row"><code>checks</code></th><td>array</td><td><code>health</code> <code>env-only</code> <code>forwarded-headers</code> <code>logs</code> <code>session-hop</code> <code>sigterm</code> <code>healthcheck</code></td></tr>
             </tbody>
           </table>
           <div class="sheet__log">
             <p class="sheet__log-title">Log of amendments</p>
             <ol>
               <li><b>0.2.0</b> <span>Entered on the sheet: 23 inputs and six checks that boot the image twice, side by side, as a uid with no name.</span></li>
-              <li class="is-latest"><b>0.6.0</b> <span>Added <code>services</code> and <code>require_healthcheck</code>; <code>checks</code> gains <code>healthcheck</code>, the one breaking change. Nothing renamed, nothing removed.</span></li>
+              <li><b>0.6.0</b> <span>Added <code>services</code> and <code>require_healthcheck</code>; <code>checks</code> gains <code>healthcheck</code>, the one breaking change. Nothing renamed, nothing removed.</span></li>
+              <li class="is-latest"><b>0.7.0</b> <span>Added <code>setup_command</code>. Nothing renamed, nothing removed.</span></li>
             </ol>
           </div>
-          <figcaption class="sheet__foot" id="sheet-cap">One of fifteen entries on main, abridged. A bar in the margin marks a line revised from 0.5.0 to 0.6.0. The same amendment adds the fifteenth entry, <code>mysql56-migrate</code>, with eleven inputs of its own. Four tags without a change bar on this sheet, then three at once.</figcaption>
+          <figcaption class="sheet__foot" id="sheet-cap">One of fifteen entries on main, abridged. A bar in the margin marks a line revised from 0.6.0 to 0.7.0. Four tags without a change bar on this sheet, three bars at once in 0.6.0, and now a short hop: one bar, one more item on the checklist.</figcaption>
         </figure>
 
         <div class="contract__terms">
@@ -561,7 +563,7 @@
             <li><b>Defaults move in the open.</b> Image digests are defaults, and Renovate moves them. Leave an input unset and you get the new default when you move the pin.</li>
           </ol>
           <p class="contract__lede">Before you move a pin, read the diff:</p>
-<pre class="term"><code><span class="t-dim">$</span> git diff 0.5.0 0.6.0 -- contract/inputs.json</code></pre>
+<pre class="term"><code><span class="t-dim">$</span> git diff 0.6.0 0.7.0 -- contract/inputs.json</code></pre>
           <p class="contract__more"><a href="docs/guides/inputs-contract.html">The inputs contract, in full</a> <span aria-hidden="true">·</span> <a href="docs/upgrading.html">Upgrading</a></p>
         </div>
       </div>
@@ -590,13 +592,13 @@
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0</code></pre>
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0</code></pre>
             <button class="copy-btn copy-btn--box" type="button" data-copy-from="#route-yaml"><span class="copy-btn__label">Copy</span></button>
           </div>
         </article>
@@ -645,7 +647,7 @@ on:
 
 jobs:
   ci:
-    uses: waynestate/preflight/.github/workflows/php-package.yml@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0</code></pre>
+    uses: waynestate/preflight/.github/workflows/php-package.yml@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0</code></pre>
             <button class="copy-btn copy-btn--box" type="button" data-copy-from="#gh-yaml"><span class="copy-btn__label">Copy</span></button>
           </div>
         </article>
