@@ -562,6 +562,7 @@ Preflight is one stop on the way to Citadel. Here is everyone else on the board.
 - [PROCTOR](https://proctor.apps.wayne.edu/) One command that checks an app. First item on the checklist.
 - Preflight Shared CI on every push. **You are here.**
 - [Squire](https://squire.apps.wayne.edu/) Carries the cleared release to Citadel.
+- Parity Citadel on your computer: the flight simulator before the real runway. Site coming.
 - [Rollcall](https://rollcall.apps.wayne.edu/) Every app answers "present". Skipped gates show up here.
 - [Booster](https://booster.apps.wayne.edu/) Keeps an app's PHP current, so it stays on the test matrix.
 - [HELMET](https://helmet.apps.wayne.edu/) Security headers and runtime hardening.

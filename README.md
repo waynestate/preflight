@@ -978,6 +978,7 @@ pwsh -File tests/check-npm-audit-fails.ps1
   <a href="https://github.com/waynestate/helmet" title="HELMET"><img src="docs/readme/cast/helmet.png" width="48" alt="HELMET"></a>
   <a href="https://github.com/waynestate/sourdough" title="Sourdough"><img src="docs/readme/cast/sourdough.png" width="48" alt="Sourdough"></a>
   <a href="https://github.com/waynestate/squire" title="Squire"><img src="docs/readme/cast/squire.png" width="48" alt="Squire"></a>
+  <a href="https://git.wayne.edu/enterprise-apps/parity" title="Parity"><img src="docs/readme/cast/parity.png" width="48" alt="Parity"></a>
   <a href="https://github.com/waynestate/preflight" title="Preflight"><img src="docs/readme/cast/preflight.png" width="48" alt="Preflight"></a>
   <a href="https://github.com/waynestate/pinstripe" title="Pinstripe"><img src="docs/readme/cast/pinstripe.png" width="48" alt="Pinstripe"></a>
   <a href="https://github.com/waynestate/booster" title="Booster"><img src="docs/readme/cast/booster.png" width="48" alt="Booster"></a>
@@ -987,5 +988,5 @@ pwsh -File tests/check-npm-audit-fails.ps1
   <a href="https://github.com/waynestate/weld" title="WELD"><img src="docs/readme/cast/weld.png" width="48" alt="WELD"></a>
 </div>
 
-<div align="center"><sub>Fourteen on the manifest, every one checked in. The README art is cut from the front page by
+<div align="center"><sub>Fifteen on the manifest, every one checked in. The README art is cut from the front page by
 <a href="scripts/readme-art/README.md"><code>scripts/readme-art</code></a>; no runways were painted in its making.</sub></div>
