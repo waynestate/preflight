@@ -1053,8 +1053,9 @@ CI by `must-fail-sbom`); `squire-kit` runs the template's own script against the
 naming the file, and a copy with no `.squire.json`, which must stop with exit 2 (`tests/check-squire-kit-fails`, run
 in CI by `must-fail-squire-kit`); and `package-publish`'s offline guards stop a non-semantic-version tag and a missing
 `composer.json` before any registry contact (`tests/check-package-publish-fails.sh`, run in CI by
-`must-fail-package-publish`). Still missing: `package-publish`'s moved-version path needs a live registry and stays
-untested; `renovate` is a config, not a job, so it has nothing to fail.
+`must-fail-package-publish`). Still missing: `a11y`'s fixture runs only by hand, since no CI job runs
+`tests/check-a11y` yet; `package-publish`'s moved-version path needs a live registry and stays untested; `renovate` is
+a config, not a job, so it has nothing to fail.
 
 ### 7.3 Use the stack's own projects as the first users
 Each stack repo includes Preflight, pinned.
