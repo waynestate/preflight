@@ -128,11 +128,12 @@
 </tr>
 </tbody>
 </table></div>
+<p>An app whose <code>composer.json</code> needs extensions with system libraries (<code>intl</code>, <code>zip</code>, <code>gd</code>) sets <code>image</code> to one that has them, since <code>docker-php-ext-install</code> alone cannot build those.</p>
 <h2 id="how-the-job-works">How the job <span class="docs-heading-tail"><span>works</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-the-job-works">#</a></span></h2>
 <p>The job is named by <code>job_name</code> (default <code>mysql56-migrate</code>). It runs in the <code>test</code> stage by default, is <code>interruptible: true</code>, and has a timeout of 30 minutes. In order, it:</p>
 <ol>
 <li>Installs every extension in <code>php_extensions</code> that <code>php -m</code> does not already list. The official <code>php:*-cli</code> images ship <code>PDO</code> and <code>mysqlnd</code> but not <code>pdo_mysql</code>.</li>
-<li>Runs <code>composer install --no-interaction --no-progress</code> when a <code>composer.json</code> exists, using the fixed Composer cache key <code>preflight-mysql56-migrate</code> and the path <code>.composer-cache/</code>.</li>
+<li>Runs <code>composer install --no-interaction --no-progress</code> when a <code>composer.json</code> exists, using the fixed Composer cache key <code>preflight-mysql56-migrate</code> and the path <code>.composer-cache/</code>. When the image has no Composer, it installs Composer 2.11.1 first (verified by its SHA-256 checksum, with git and unzip through apt-get).</li>
 <li>Waits for the MySQL service with a bounded loop: up to 60 tries, 2 seconds apart. Each try is a PDO connect through <code>php -r</code>. On timeout it prints one clear line and exits 1.</li>
 <li>Runs <code>migrate_command</code> with the job's <code>DB_*</code> variables: <code>DB_CONNECTION=mysql</code>, <code>DB_HOST=mysql</code>, <code>DB_PORT=3306</code>, and the <code>db_name</code>, <code>db_user</code> and <code>db_password</code> values.</li>
 </ol>

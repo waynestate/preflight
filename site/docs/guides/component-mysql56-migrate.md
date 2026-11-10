@@ -41,12 +41,14 @@ The official MySQL 5.6 images are amd64 only, so the job defaults to `tags: ["am
 | `tags` | array | `["amd64"]` | Runner tags for the job. The official MySQL 5.6 images are amd64 only; set an empty list on an amd64 or emulating default runner. |
 | `php_extensions` | array | `["pdo_mysql"]` | PHP extensions installed with `docker-php-ext-install` unless `php -m` already lists them. |
 
+An app whose `composer.json` needs extensions with system libraries (`intl`, `zip`, `gd`) sets `image` to one that has them, since `docker-php-ext-install` alone cannot build those.
+
 ## How the job works [#](https://preflight.apps.wayne.edu/docs/guides/component-mysql56-migrate.html#how-the-job-works)
 
 The job is named by `job_name` (default `mysql56-migrate`). It runs in the `test` stage by default, is `interruptible: true`, and has a timeout of 30 minutes. In order, it:
 
 1. Installs every extension in `php_extensions` that `php -m` does not already list. The official `php:*-cli` images ship `PDO` and `mysqlnd` but not `pdo_mysql`.
-2. Runs `composer install --no-interaction --no-progress` when a `composer.json` exists, using the fixed Composer cache key `preflight-mysql56-migrate` and the path `.composer-cache/`.
+2. Runs `composer install --no-interaction --no-progress` when a `composer.json` exists, using the fixed Composer cache key `preflight-mysql56-migrate` and the path `.composer-cache/`. When the image has no Composer, it installs Composer 2.11.1 first (verified by its SHA-256 checksum, with git and unzip through apt-get).
 3. Waits for the MySQL service with a bounded loop: up to 60 tries, 2 seconds apart. Each try is a PDO connect through `php -r`. On timeout it prints one clear line and exits 1.
 4. Runs `migrate_command` with the job's `DB_*` variables: `DB_CONNECTION=mysql`, `DB_HOST=mysql`, `DB_PORT=3306`, and the `db_name`, `db_user` and `db_password` values.
 
