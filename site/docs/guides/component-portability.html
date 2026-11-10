@@ -145,7 +145,7 @@
 <li>Reads the image's <code>ENTRYPOINT</code> and <code>CMD</code>, makes two copies of its filesystem (replicas A and B) and runs the static parts of <code>strict-boot</code> and <code>env-only</code> on them.</li>
 <li>Runs <code>setup_command</code> once, in a fresh container of the built image, as the same uid with the same env as replica A will get, when it is set. A non-zero exit stops the job before any replica starts.</li>
 <li>Starts both replicas with <code>buildah run --user &lt;uid&gt;:0 --cap-drop=ALL</code> and the <code>env</code> input, each through a small launcher that gives it its own stdio and session; B gets <code>port + 1</code> through <code>port_env</code>.</li>
-<li>Waits up to <code>boot_timeout</code> seconds for each replica's health path, then runs <code>health</code>, <code>env-only</code>, <code>forwarded-headers</code>, <code>session-hop</code>, <code>logs</code> and <code>sigterm</code> with curl.</li>
+<li>Waits up to <code>boot_timeout</code> seconds for each replica's health path, then runs <code>health</code>, <code>env-only</code>, <code>forwarded-headers</code>, <code>session-hop</code>, <code>logs</code> and <code>sigterm</code> with curl, and <code>healthcheck</code> with the image's own command.</li>
 <li>Stops both replicas and compares what changed on disk against <code>writable_paths</code> and <code>runtime_paths</code>.</li>
 </ol>
 <p>The probe is <code>templates/portability/probe.sh</code>, inlined in the template byte for byte, because a component ships only its <code>template.yml</code>. The inputs reach it through a quoted heredoc as data; nothing in them is run except <code>start_command</code>.</p>

@@ -108,7 +108,7 @@ docker run --rm -v &quot;${PWD}:/app&quot; -v stack-composer-cache:/tmp/cache -w
 <tr>
 <td><code>test</code></td>
 <td><code>phpunit</code></td>
-<td>Run the PHPUnit suite: the inputs contract test (<code>tests/ComponentsContractTest.php</code>) and the regeneration stability test.</td>
+<td>Run the PHPUnit suite: the inputs contract test (<code>tests/ComponentsContractTest.php</code>) and the docs input-table test (<code>tests/DocsInputTablesTest.php</code>), which fails when an input table in the README, the components reference or a component guide disagrees with <code>contract/inputs.json</code>.</td>
 </tr>
 <tr>
 <td><code>contract:update</code></td>

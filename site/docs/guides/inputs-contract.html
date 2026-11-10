@@ -75,6 +75,10 @@ rename is a breaking change.</li>
 reject any top-level key in a template that is not one of its jobs (no <code>default:</code>, <code>variables:</code> or <code>workflow:</code>
 leaking into your pipeline).</li>
 </ul>
+<p>The docs are held to the same file. <code>tests/DocsInputTablesTest.php</code>, in the same PHPUnit suite, reads the input table
+for every component in the README, in the <a href="../reference/components.html">components reference</a> and in the component's
+own guide, and fails when a table is missing, leaves an input out, lists one the component no longer has, or gives it
+a different type or default. A new input reaches a tag only with its row in all three.</p>
 <p>When a change to the surface is made on purpose, the same commit rewrites the file with <code>composer contract:update</code>,
 so the change shows up in review as a diff of <code>contract/inputs.json</code>, not as a surprise in your pipeline.</p>
 <h2 id="what-that-means-for-your-pin">What that means for your <span class="docs-heading-tail"><span>pin</span><a class="docs-heading-link" aria-label="Link to this section" href="#what-that-means-for-your-pin">#</a></span></h2>

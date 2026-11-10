@@ -38,6 +38,8 @@ The templates cannot drift from the file. Two checks compare them on every Prefl
 - `tests/ComponentsContractTest.php`, a PHPUnit suite that `composer ci` runs. It parses every template and fails on any difference, naming the component and the input or job that was added, removed or changed, and it says that a rename is a breaking change.
 - `tests/check-contract.sh` and its `.ps1` twin, in the `contract` job, which make the same comparison and also reject any top-level key in a template that is not one of its jobs (no `default:`, `variables:` or `workflow:` leaking into your pipeline).
 
+The docs are held to the same file. `tests/DocsInputTablesTest.php`, in the same PHPUnit suite, reads the input table for every component in the README, in the [components reference](https://preflight.apps.wayne.edu/docs/reference/components.html) and in the component's own guide, and fails when a table is missing, leaves an input out, lists one the component no longer has, or gives it a different type or default. A new input reaches a tag only with its row in all three.
+
 When a change to the surface is made on purpose, the same commit rewrites the file with `composer contract:update`, so the change shows up in review as a diff of `contract/inputs.json`, not as a surprise in your pipeline.
 
 ## What that means for your pin [#](https://preflight.apps.wayne.edu/docs/guides/inputs-contract.html#what-that-means-for-your-pin)

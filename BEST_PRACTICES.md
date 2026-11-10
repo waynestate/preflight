@@ -196,9 +196,13 @@ the run.
 Sources: [GitLab: CI/CD inputs](https://docs.gitlab.com/ci/inputs/);
 [GitLab: component examples](https://docs.gitlab.com/ci/components/examples/).
 
-**How the stack holds it: Enforced.** All fourteen templates use `spec:inputs` with types, descriptions and defaults.
+**How the stack holds it: Enforced.** All fifteen templates use `spec:inputs` with types, descriptions and defaults.
 GitLab rejects a wrong type or an unknown input at pipeline creation. The first pipeline, back when Preflight had
-three components, passed all six jobs with the array input.
+three components, passed all six jobs with the array input. The documented defaults are held too:
+`tests/DocsInputTablesTest.php` (in `composer ci`) fails when the input table for a component in the README, the
+components reference or the component's guide misses an input, lists a removed one, or names another type or default
+than `contract/inputs.json`. Its first run found six stale tables: no `mysql56-migrate` section in the README or the
+reference, and both missing php-test's `php_advisory_version` and portability's three newest inputs.
 
 Second pass, limits to design around: GitLab's inputs page says a pipeline can take up to 20 inputs (it does not say
 whether that counts per include, so check on the real instance before adding many), a string that uses an input must be

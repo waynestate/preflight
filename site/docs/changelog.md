@@ -12,6 +12,9 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ## Unreleased [#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Added: `tests/DocsInputTablesTest.php` (in `composer ci`) holds the docs to `contract/inputs.json`: the input table for every component in the README, the components reference and the component's guide must list each input with its contract type and default, and nothing else. A checklist is only as good as the airplane it was written for.
+- Docs: the README and the components reference get a `mysql56-migrate` section (it shipped in 0.6.0 with only a guide), php-test's `php_advisory_version` row, and portability's `setup_command`, `services` and `require_healthcheck` rows with the `healthcheck` check in the default `checks`; the README's opening line names npm audit, MySQL 5.6 migrations and the portability probe. Found by the new test.
+
 ## 0.7.0 (2026-11-10) [#](https://preflight.apps.wayne.edu/docs/changelog.html#0-7-0-2026-11-10)
 
 One new portability input. `setup_command` runs a command once, in its own container of the built image, before either replica starts, so an app can migrate the `services` database before `session-hop` runs. No input or job was renamed or removed, and nothing changes for an include that leaves it empty.

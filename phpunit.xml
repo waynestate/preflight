@@ -8,6 +8,7 @@
         <!-- One file, not a directory: the fixture apps under tests/ carry their own ExampleTest.php files, which belong to their own pipelines. -->
         <testsuite name="preflight">
             <file>tests/ComponentsContractTest.php</file>
+            <file>tests/DocsInputTablesTest.php</file>
         </testsuite>
     </testsuites>
     <source>

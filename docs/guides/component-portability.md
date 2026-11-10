@@ -91,7 +91,7 @@ The component is one job, named by `job_name` (default `portability`). It runs i
 2. Reads the image's `ENTRYPOINT` and `CMD`, makes two copies of its filesystem (replicas A and B) and runs the static parts of `strict-boot` and `env-only` on them.
 3. Runs `setup_command` once, in a fresh container of the built image, as the same uid with the same env as replica A will get, when it is set. A non-zero exit stops the job before any replica starts.
 4. Starts both replicas with `buildah run --user <uid>:0 --cap-drop=ALL` and the `env` input, each through a small launcher that gives it its own stdio and session; B gets `port + 1` through `port_env`.
-5. Waits up to `boot_timeout` seconds for each replica's health path, then runs `health`, `env-only`, `forwarded-headers`, `session-hop`, `logs` and `sigterm` with curl.
+5. Waits up to `boot_timeout` seconds for each replica's health path, then runs `health`, `env-only`, `forwarded-headers`, `session-hop`, `logs` and `sigterm` with curl, and `healthcheck` with the image's own command.
 6. Stops both replicas and compares what changed on disk against `writable_paths` and `runtime_paths`.
 
 The probe is `templates/portability/probe.sh`, inlined in the template byte for byte, because a component ships only its `template.yml`. The inputs reach it through a quoted heredoc as data; nothing in them is run except `start_command`.

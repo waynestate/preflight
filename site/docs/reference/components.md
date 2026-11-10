@@ -109,6 +109,7 @@ include:
 | `image` | string | `php:${PHP_VERSION}-cli-trixie` | Docker image for the jobs. The default carries the literal `${PHP_VERSION}`, which GitLab expands in the image at job time. |
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `php_versions` | array | `["8.3", "8.4", "8.5"]` | PHP versions to test against. |
+| `php_advisory_version` | string | `""` | One more PHP version tested in a separate `<job_name>-advisory` job that may fail (`allow_failure: true`), for a release candidate. Empty: no advisory job. Never add a release candidate to `php_versions`. |
 | `composer_version` | string | `2.11.1` | Composer version to install, 2.9.6 or later. |
 | `test_command` | string | `vendor/bin/phpunit` | The test command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
@@ -301,7 +302,7 @@ include:
 | `job_name` | string | `secret-detection` | Name of the job. Set it when you include this component more than once. |
 | `image` | string | `zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f` | Docker image for the job. |
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
-| `config_path` | string | (empty) | Path to a `.gitleaks.toml` config file, relative to the project root. Empty uses the built-in rules plus a path allowlist for `vendor/` and `node_modules/`. When set, your file replaces the default, so add the same `vendor` and `node_modules` path allowlist to it. |
+| `config_path` | string | `""` | Path to a `.gitleaks.toml` config file, relative to the project root. Empty uses the built-in rules plus a path allowlist for `vendor/` and `node_modules/`. When set, your file replaces the default, so add the same `vendor` and `node_modules` path allowlist to it. |
 | `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline. |
 
 From `templates/secret-detection/template.yml`: the single job (named by `job_name`) runs in the `test` stage by default, is `interruptible: true`, and has a timeout of 30 minutes. The job overrides the image's entrypoint with an empty value, because GitLab's Docker executor would otherwise pass the script to the gitleaks binary; the image is Alpine-based with `/bin/sh`, and the script is plain POSIX sh. The job writes the default config to `/tmp` (outside the scanned tree) unless `config_path` is set, then runs `gitleaks dir --redact --no-banner` with `--config` pointing at that file or the user's, writing a JSON report to `gitleaks.json` at the project root. The report is published as an artifact with `when: always` and `expire_in: 30 days`, so a red pipeline still shows what was found, redacted. In `dir` mode Gitleaks reads a `.gitleaksignore` at the project root without an extra flag.
@@ -359,7 +360,7 @@ From `templates/renovate/template.yml`: the job has no `stage` input and sets no
 
 ## portability [#](https://preflight.apps.wayne.edu/docs/reference/components.html#portability)
 
-Proves the app image runs the way OpenShift, Coolify and plain Docker run it, not only on Citadel (ADR-0010). One job builds the image with Buildah (vfs storage, chroot isolation: no Docker daemon, no privileged runner, no registry), boots it twice side by side as an arbitrary uid in group 0 with no capabilities, and probes it with curl. It fails unless the strict boot holds (no passwd entry for the uid, app root not writable, writable paths writable by group 0, the port variable honored, no writes outside the allowed paths) and six checks pass: `health`, `env-only`, `forwarded-headers`, `logs`, `session-hop` and `sigterm`. See [The portability component](https://preflight.apps.wayne.edu/docs/guides/component-portability.html). No takeoff without a clean pre-flight.
+Proves the app image runs the way OpenShift, Coolify and plain Docker run it, not only on Citadel (ADR-0010). One job builds the image with Buildah (vfs storage, chroot isolation: no Docker daemon, no privileged runner, no registry), boots it twice side by side as an arbitrary uid in group 0 with no capabilities, and probes it with curl. It fails unless the strict boot holds (no passwd entry for the uid, app root not writable, writable paths writable by group 0, the port variable honored, no writes outside the allowed paths) and seven checks pass: `health`, `env-only`, `forwarded-headers`, `logs`, `session-hop`, `sigterm` and `healthcheck` (the image's own HEALTHCHECK, run inside a replica). `services` starts a database or cache both replicas share, and `setup_command` runs once (a migration, say) before either replica starts. See [The portability component](https://preflight.apps.wayne.edu/docs/guides/component-portability.html). No takeoff without a clean pre-flight.
 
 ```yaml
 include:
@@ -388,7 +389,9 @@ The one-job form ships in 0.2.0; 0.1.4 carries the earlier two-job form (`portab
 | `health_path` | string | `/up` | Path that must answer 200 for any Host, before trusted hosts, HTTPS redirects, sessions and auth. |
 | `uid` | number | `100123` | Numeric uid the app runs as, with no `/etc/passwd` entry. The gid is always 0. |
 | `start_command` | string | `""` | Command that starts the app, run with `sh -c`. Empty runs the image's own `ENTRYPOINT` and `CMD`. |
+| `setup_command` | string | `""` | Command run once with `sh -c` before either replica starts, in a fresh container of the built image, as the same uid (gid 0) with the same env as replica A. Use it for one-time work a release does, such as `php artisan migrate --force` against a database in `services`. Empty runs nothing. A non-zero exit fails the job and no replica starts. |
 | `env` | array | `[]` | Environment for both replicas, as `NAME=value` (or `NAME` to pass the job's variable through). Keep secrets in CI/CD variables. |
+| `services` | array | `[]` | Service containers for the job, as GitLab's `services:` keyword takes them (an image string, or a map with `name`, `alias` and `variables`). A database or cache the replicas share lets `session-hop` pass for an app that keeps sessions there. Pin each image by digest. |
 | `boot_timeout` | number | `60` | Seconds each replica has to answer the health path. |
 | `stop_timeout` | number | `10` | Seconds the main process has to exit after SIGTERM. |
 | `probe_path` | string | `/` | Page probed with and without forged forwarded headers. |
@@ -396,7 +399,8 @@ The one-job form ships in 0.2.0; 0.1.4 carries the earlier two-job form (`portab
 | `session_login_path` | string | `""` | GET path that signs in a test user and sets the session cookie. Needed by `session-hop`. |
 | `session_check_path` | string | `""` | Path that answers 200 only for a signed-in user. Needed by `session-hop`. |
 | `logs_path` | string | `storage/logs` | Directory, relative to `app_root`, where nothing may be written. |
-| `checks` | array | `["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm"]` | The checks to run. Leave one out only on purpose; the strict boot always runs. |
+| `require_healthcheck` | boolean | `false` | Fail when the image declares no HEALTHCHECK. Docker and Coolify use it; OpenShift and Kubernetes use their own probes. |
+| `checks` | array | `["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm", "healthcheck"]` | The checks to run. Leave one out only on purpose; the strict boot always runs. |
 
 The `image` default is an immutable tag (`-immutable`) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.
 
@@ -459,6 +463,33 @@ include:
 
 From `templates/squire-kit/template.yml`: the single job (named by `job_name`) runs in the `test` stage by default, is `interruptible: true`, and has a timeout of 10 minutes. It installs `waynestate/squire` at the recorded version with `composer create-project --no-dev --no-scripts` into a temporary folder outside the project and runs `squire init --check --path=.` in `working_dir`. It exits 0 when the kit matches, 1 when it drifted, and 2 when the check could not run (no `.squire.json`, no released version recorded, or no such release). `allow_failure` is interpolated as a real YAML boolean.
 
+## mysql56-migrate [#](https://preflight.apps.wayne.edu/docs/reference/components.html#mysql56-migrate)
+
+Runs the app's migrations against MySQL 5.6.51, the version of Citadel's shared server, so DDL that 5.6 rejects (a `JSON` column, a utf8mb4 index longer than 767 bytes) fails the pipeline instead of the release. It starts the same `mysql:5.6.51` pin Squire runs locally as a GitLab service and runs `migrate_command` with the `DB_*` variables Laravel reads. See [The mysql56-migrate component](https://preflight.apps.wayne.edu/docs/guides/component-mysql56-migrate.html).
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/mysql56-migrate@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
+```
+
+mysql56-migrate ships in 0.6.0. A raw PHP app sets `migrate_command` to its own script.
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `test` | Pipeline stage for the mysql56-migrate job. |
+| `job_name` | string | `mysql56-migrate` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `php:8.3-cli-trixie@sha256:628102249d93494233b54490b785f12db9cd60f4dc89416dfca15973f2125f10` | Container image for the job. It needs PHP 8.3 or later; the job installs any missing `php_extensions` itself. |
+| `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path put in front of the image and service_image values. The default is this group's GitLab Dependency Proxy, so Docker Hub images are pulled once and then served from GitLab's cache. On a GitLab or group without the proxy, set it to `docker.io`. No trailing slash. |
+| `service_image` | string | `mysql:5.6.51@sha256:20575ecebe6216036d25dab5903808211f1e9ba63dc7825ac20cb975e34cfcae` | MySQL 5.6.51 service image, the same pin Squire runs locally. |
+| `db_name` | string | `app` | Database name created by the service. |
+| `db_user` | string | `app` | Database user created by the service. |
+| `db_password` | string | `preflight-mysql56-ci` | Throwaway password for the ephemeral service; nothing outside the job connects to it. |
+| `migrate_command` | string | `php artisan migrate --force --no-interaction` | Command that runs the app's migrations. |
+| `tags` | array | `["amd64"]` | Runner tags for the job. The official MySQL 5.6 images are amd64 only; set an empty list on an amd64 or emulating default runner. |
+| `php_extensions` | array | `["pdo_mysql"]` | PHP extensions installed with `docker-php-ext-install` unless `php -m` already lists them. |
+
+From `templates/mysql56-migrate/template.yml`: the single job (named by `job_name`) runs in the `test` stage by default, is `interruptible: true`, and has a timeout of 30 minutes. Its service is `image_prefix/service_image` with `alias: mysql`, created with the `db_name`, `db_user` and `db_password` inputs. It installs each of `php_extensions` that `php -m` does not list, runs `composer install --no-interaction --no-progress` when a `composer.json` exists (installing Composer 2.11.1, checked by SHA-256, when the image has none), waits up to 120 seconds for a PDO connection, then runs `migrate_command` with `DB_CONNECTION=mysql`, `DB_HOST=mysql` and `DB_PORT=3306`. The Composer cache uses the fixed key `preflight-mysql56-migrate` and the path `.composer-cache/`, saved with `when: always`. Its rules never run it on schedules, run it on tags and the default branch, and make it manual with `allow_failure: true` on merge requests.
+
 ## Related [#](https://preflight.apps.wayne.edu/docs/reference/components.html#related)
 
 - [The proctor component](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html)
@@ -474,6 +505,7 @@ From `templates/squire-kit/template.yml`: the single job (named by `job_name`) r
 - [The portability component](https://preflight.apps.wayne.edu/docs/guides/component-portability.html)
 - [The a11y component](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html)
 - [The squire-kit component](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html)
+- [The mysql56-migrate component](https://preflight.apps.wayne.edu/docs/guides/component-mysql56-migrate.html)
 - [Shared conventions](https://preflight.apps.wayne.edu/docs/reference/conventions.html)
 - [Local checks](https://preflight.apps.wayne.edu/docs/reference/local-checks.html)
 - [Troubleshooting](https://preflight.apps.wayne.edu/docs/troubleshooting.html)

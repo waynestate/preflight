@@ -5,8 +5,10 @@
 **Every push is cleared for takeoff.**
 
 Preflight is a set of GitLab CI/CD components that give every WSU app the
-same checks: PROCTOR, PHP tests on each supported version, Composer audit,
-an SBOM, Pint, PHPStan, ESLint, secret detection and an accessibility gate.
+same checks: PROCTOR, PHP tests on each supported version, Composer and npm
+audits, an SBOM, Pint, PHPStan, ESLint, secret detection, an accessibility
+gate, migrations on MySQL 5.6 and a portability probe that boots the image the
+way OpenShift, Coolify and plain Docker do.
 
 **Not to be confused with:** Preflight is the CI pipeline; it runs Pinstripe's style checks and PROCTOR but sets neither.
 
