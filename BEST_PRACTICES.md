@@ -116,8 +116,10 @@ Sources: [GitLab: components, partial semver](https://docs.gitlab.com/ci/compone
 **How the stack holds it: Checked.** `contract/inputs.json` lists each component's inputs (name, type, default) and
 job names. `tests/ComponentsContractTest.php` (PHPUnit, run by `composer test` inside `composer ci`) parses every
 template and fails on any drift, naming the component and the added, removed or changed key; `tests/check-contract.sh`
-and `tests/check-contract.ps1` make the same comparison in the `contract` job. A rename or a changed default is a
-breaking change: bump the major version and say so in `CHANGELOG.md`. When the change was made on purpose,
+and `tests/check-contract.ps1` make the same comparison in the `contract` job. `tests/check-contract-fails.sh` (and
+its `.ps1` twin) and `testTheComparisonCatchesAChangedDefaultAndARename` prove both comparisons fail on a changed
+default and a renamed input. A rename or a changed default is a breaking change: bump the major version and say so in
+`CHANGELOG.md`. When the change was made on purpose,
 `composer contract:update` rewrites the contract from the templates.
 
 ### 1.5 Know that components work only inside one GitLab instance
