@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Upgrading | Preflight docs</title>
 <meta name="description" content="How to move an app from one Preflight pin to the next.">
-<meta name="docs-version" content="0.6.0">
+<meta name="docs-version" content="0.7.0">
 <link rel="stylesheet" href="../assets/wayne-ui/wayne-ui.css">
 <link rel="stylesheet" href="../assets/docs.css">
 <link rel="stylesheet" href="../docs/theme/preflight.css">
@@ -20,7 +20,7 @@
     <a class="brand" href="../index.html">
       <img src="../brand/preflight-avatar-256.png" width="36" height="36" alt="">
       <span class="brand__name">PREFLIGHT</span>
-      <span class="brand__tail">0.6.0</span>
+      <span class="brand__tail">0.7.0</span>
     </a>
     <nav class="topnav" aria-label="Site">
       <a class="topnav__section" href="../index.html#checklist">Checklist</a>
@@ -43,11 +43,42 @@
       <article class="docs-article"><h1 id="upgrading"><span class="docs-heading-tail"><span>Upgrading</span><a class="docs-heading-link" aria-label="Link to this section" href="#upgrading">#</a></span></h1>
 <p>This page is the checklist for moving an app from one Preflight pin to the next, one released version at a time, newest first; every section follows <code>CHANGELOG.md</code>. Read the section for the version you are moving to, apply its steps, and verify on the next pipeline. Like a real preflight, the walk takes a few minutes and earns its keep: move the pin only after you have read the version notes.</p>
 <p>Every input and job name a component offers is recorded in <code>contract/inputs.json</code>, and Preflight's build fails when a template drifts from it, so the file is the exact list of what moved. Before you move a pin, diff it between your tag and the next one (for example <code>git diff 0.4.0 0.5.0 -- contract/inputs.json</code> in a clone of Preflight) and check each line against that version's Breaking and Steps below. <a href="guides/inputs-contract.html">The inputs contract</a> explains what each kind of change means for your include.</p>
+<h2 id="0-7-0"><span class="docs-heading-tail"><span>0.7.0</span><a class="docs-heading-link" aria-label="Link to this section" href="#0-7-0">#</a></span></h2>
+<p>Released 2026-11-10. One new input on the portability component, <code>setup_command</code>, for the step a platform runs before
+it scales an app out: migrating the database. No input or job was renamed or removed. A short hop: same aircraft, one
+more item on the checklist.</p>
+<h3 id="breaking"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking">#</a></span></h3>
+<ul>
+<li>None. <code>setup_command</code> defaults to empty, and an empty value runs nothing.</li>
+</ul>
+<h3 id="new-setup-command">New: <span class="docs-heading-tail"><span>setup_command</span><a class="docs-heading-link" aria-label="Link to this section" href="#new-setup-command">#</a></span></h3>
+<p>The probe runs <code>setup_command</code> once, in a container of the built image named <code>portability-setup</code>, after any
+<code>services</code> are up and before replica A or B starts. A non-zero exit fails the job with <code>setup: FAIL</code> and the last 40
+lines of its output. A pass shows as <code>setup</code> in the job's summary. The must-fail case <code>setup-fails</code> proves it.</p>
+<p>Use it with <code>services</code> and <code>session-hop</code>: a database both replicas share is empty until the app migrates it, so the
+replicas' first session write fails without it. For a Laravel app:</p>
+<pre tabindex="0"><code class="language-yaml">      services: [{ name: &quot;mysql:8.4.7@sha256:&lt;digest&gt;&quot;, alias: db, variables: { MYSQL_ROOT_PASSWORD: &quot;portability&quot;, MYSQL_DATABASE: &quot;app&quot; } }]
+      setup_command: php artisan migrate --force
+      checks: [&quot;health&quot;, &quot;env-only&quot;, &quot;forwarded-headers&quot;, &quot;logs&quot;, &quot;sigterm&quot;, &quot;healthcheck&quot;, &quot;session-hop&quot;]
+</code></pre>
+<p>Pin the service image by digest, as every Preflight default is, and point the app's <code>DB_HOST</code> at the alias. See
+<a href="guides/component-portability.html">the portability guide</a>.</p>
+<h3 id="steps"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps">#</a></span></h3>
+<ol>
+<li>Move every Preflight include to the 0.7.0 tag's full commit SHA, with <code># 0.7.0</code> in a trailing comment.</li>
+<li>An app that runs <code>session-hop</code> against a <code>services</code> database adds <code>setup_command</code> with its migration command.</li>
+<li>Nothing else changes.</li>
+</ol>
+<h3 id="how-to-verify">How to <span class="docs-heading-tail"><span>verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify">#</a></span></h3>
+<ul>
+<li>The portability job's summary lists <code>setup</code> as passed when <code>setup_command</code> is set, and has no <code>setup</code> line when it is
+empty.</li>
+</ul>
 <h2 id="0-6-0"><span class="docs-heading-tail"><span>0.6.0</span><a class="docs-heading-link" aria-label="Link to this section" href="#0-6-0">#</a></span></h2>
 <p>Released 2026-11-10. This release adds one component, <code>mysql56-migrate</code>, which proves an app's migrations on the MySQL
 Citadel really runs. The portability job also runs the image's own <code>HEALTHCHECK</code> and can start a shared database for
 <code>session-hop</code>. No input or job was renamed or removed. Cleared for takeoff, with one more gauge on the panel.</p>
-<h3 id="breaking"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking">#</a></span></h3>
+<h3 id="breaking-1"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-1">#</a></span></h3>
 <p><strong>The <code>healthcheck</code> check is in the default <code>checks</code>.</strong> An include that leaves <code>checks</code> at its default now runs the
 image's own <code>HEALTHCHECK</code> command inside replica A, as the app's uid, and fails when it exits non-zero three times in a
 row. An image that declares no <code>HEALTHCHECK</code> still passes, with a note (set <code>require_healthcheck: true</code> to fail
@@ -73,7 +104,7 @@ no amd64-tagged runner, set <code>tags: []</code> on an amd64 or emulating defau
 schedule.</li>
 <li>A raw PHP app passes its own migration command; <a href="guides/component-mysql56-migrate.html">the guide</a> has both includes.</li>
 </ul>
-<h3 id="steps"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps">#</a></span></h3>
+<h3 id="steps-1"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps-1">#</a></span></h3>
 <ol>
 <li>Move every Preflight include to the 0.6.0 tag's full commit SHA, with <code># 0.6.0</code> in a trailing comment.</li>
 <li>If the app has migrations, add the <code>mysql56-migrate</code> include.</li>
@@ -82,7 +113,7 @@ a uid with no name in group 0 before you push.</li>
 <li>An app that keeps sessions in its database (WELD does) can now add <code>session-hop</code> back: give the portability include
 a <code>services</code> database and point <code>DB_HOST</code> at its alias.</li>
 </ol>
-<h3 id="how-to-verify">How to <span class="docs-heading-tail"><span>verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify">#</a></span></h3>
+<h3 id="how-to-verify-1">How to <span class="docs-heading-tail"><span>verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-1">#</a></span></h3>
 <ul>
 <li>The <code>mysql56-migrate</code> job is green on the default branch, and its log ends with the app's own migration output.</li>
 <li>The portability job's summary lists <code>healthcheck</code> as passed, or as passed with the &quot;declares no HEALTHCHECK&quot; note.</li>
@@ -92,7 +123,7 @@ a <code>services</code> database and point <code>DB_HOST</code> at its alias.</l
 starts each replica the way a container runtime does, so an Apache image needs no <code>start_command</code> shim; a proctor job
 that keeps PROCTOR's JSON report as <code>proctor.json</code> for Rollcall; and Composer 2.11.1 in every default. No input or job
 was renamed or removed.</p>
-<h3 id="breaking-1"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-1">#</a></span></h3>
+<h3 id="breaking-2"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-2">#</a></span></h3>
 <p><strong>The portability launcher.</strong> The <code>portability</code> job now starts each replica through a launcher that gives it stdout
 and stderr its uid owns and a session of its own (<code>setsid</code>), as a container runtime does. An include that still
 carries a <code>start_command</code> shim calling <code>setsid</code> (WELD's was <code>exec setsid bash -c '...'</code>) breaks on 0.5.0: inside the
@@ -133,7 +164,7 @@ accepted too and maps to npm's <code>moderate</code>.</li>
 <p>An app with no lock file (no <code>package-lock.json</code> or <code>npm-shrinkwrap.json</code>) passes with a note,
 <code>npm-audit: no lock file ... nothing to audit.</code>, so a PHP-only app never goes red. An unreachable registry fails the
 job. See <a href="guides/component-npm-audit.html">The npm-audit component</a>.</p>
-<h3 id="steps-1"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps-1">#</a></span></h3>
+<h3 id="steps-2"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps-2">#</a></span></h3>
 <ol>
 <li>If an include of <code>portability</code> sets a <code>start_command</code> shim that calls <code>setsid</code>, delete the shim (or the whole
 <code>start_command</code> line) in the same change as step 2.</li>
@@ -155,7 +186,7 @@ comment:</li>
 <li>Optional: to feed Rollcall, move the app to PROCTOR 0.11.0 or later
 (<code>composer require --dev waynestate/proctor:^0.11</code>).</li>
 </ol>
-<h3 id="how-to-verify-1">How to <span class="docs-heading-tail"><span>verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-1">#</a></span></h3>
+<h3 id="how-to-verify-2">How to <span class="docs-heading-tail"><span>verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-2">#</a></span></h3>
 <p>The pipeline is green. The <code>portability</code> job passes all its checks with no shim, the composer-based jobs' <code>Pulling docker image</code> line names <code>composer:2.11.1</code>, and on PROCTOR 0.11.0 or later the proctor job's artifact holds
 <code>proctor.json</code>. With <code>npm-audit</code> included, its log ends with <code>npm audit</code>'s summary, or with the no-lock-file note.
 Checklist done, doors armed: cleared for takeoff.</p>
@@ -165,13 +196,13 @@ the full history, so PROCTOR's override-approver check can read git blame on eve
 could-not-run past GitLab's 20-commit default. php-test's <code>php_advisory_version</code> runs one more PHP version, such as a
 release candidate, in a separate job that may fail. php-test and proctor refuse a <code>composer_version</code> older than 2.9.6,
 the floor with the 2026 security fixes.</p>
-<h3 id="breaking-2"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-2">#</a></span></h3>
+<h3 id="breaking-3"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-3">#</a></span></h3>
 <p>An include that sets <code>composer_version</code> on php-test or proctor to a version older than 2.9.6 no longer starts: GitLab
 rejects the input before the pipeline runs. The default (2.10.3) is unaffected, and no other input, default or job
 name changed.</p>
 <h3 id="deprecated-1"><span class="docs-heading-tail"><span>Deprecated</span><a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-1">#</a></span></h3>
 <p>Nothing was deprecated in 0.4.0.</p>
-<h3 id="steps-2"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps-2">#</a></span></h3>
+<h3 id="steps-3"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps-3">#</a></span></h3>
 <ol>
 <li>If an include sets <code>composer_version</code> below 2.9.6, remove the input (the default is 2.10.3) or set 2.9.6 or later.</li>
 <li>Point each component include at the <code>0.4.0</code> tag, pinned to the tag's full commit SHA with the tag in a trailing
@@ -185,27 +216,27 @@ comment:</li>
 lines older than that then report could-not-run. To hear about the next PHP early, set php-test's
 <code>php_advisory_version</code>, for example <code>8.6.0RC2</code>.</li>
 </ol>
-<h3 id="how-to-verify-2">How to <span class="docs-heading-tail"><span>verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-2">#</a></span></h3>
+<h3 id="how-to-verify-3">How to <span class="docs-heading-tail"><span>verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-3">#</a></span></h3>
 <p>The pipeline is green, the proctor job log's fetch line no longer says <code>git depth set to 20</code> (unless you set
 <code>git_depth</code>), and with <code>php_advisory_version</code> set a <code>php-test-advisory</code> job runs and may fail without failing the
 pipeline.</p>
 <h2 id="0-3-1"><span class="docs-heading-tail"><span>0.3.1</span><a class="docs-heading-link" aria-label="Link to this section" href="#0-3-1">#</a></span></h2>
 <p>Released 2026-11-08. Every component that installs packages caches under a fixed key per component (such as <code>preflight-pint</code>, or <code>preflight-php-8.4</code> for one PHP version of <code>php-test</code>) instead of a lock-file hash, and saves its cache even when the job fails. A lock change, or a retry after a dropped download, fetches only what is missing.</p>
-<h3 id="breaking-3"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-3">#</a></span></h3>
+<h3 id="breaking-4"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-4">#</a></span></h3>
 <p>0.3.1 has no breaking changes: inputs, defaults and job names are the same as in 0.3.0.</p>
 <h3 id="deprecated-2"><span class="docs-heading-tail"><span>Deprecated</span><a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-2">#</a></span></h3>
 <p>Nothing was deprecated in 0.3.1.</p>
-<h3 id="steps-3"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps-3">#</a></span></h3>
+<h3 id="steps-4"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps-4">#</a></span></h3>
 <p>Point each component include at the <code>0.3.1</code> tag, pinned to the tag's full commit SHA with the tag in a trailing comment:</p>
 <pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@b90323b5823287a7840095d0d5f0682aaeedf327 # 0.3.1
 </code></pre>
 <p>The first pipeline on the new pin fills the new cache keys, so expect it to download everything once.</p>
-<h3 id="how-to-verify-3">How to <span class="docs-heading-tail"><span>verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-3">#</a></span></h3>
+<h3 id="how-to-verify-4">How to <span class="docs-heading-tail"><span>verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-4">#</a></span></h3>
 <p>The pipeline is green, and a component's job log shows <code>Creating cache preflight-</code> followed by the component's key, and, after a failed job, <code>Saving cache for failed job</code>.</p>
 <h2 id="0-3-0"><span class="docs-heading-tail"><span>0.3.0</span><a class="docs-heading-link" aria-label="Link to this section" href="#0-3-0">#</a></span></h2>
 <p>Released 2026-11-08. Docker Hub images now come through the group's Dependency Proxy by default (a new <code>image_prefix</code> input), and more components cache their Composer and npm downloads.</p>
-<h3 id="breaking-4"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-4">#</a></span></h3>
+<h3 id="breaking-5"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-5">#</a></span></h3>
 <p>Every component whose image comes from Docker Hub (<code>proctor</code>, <code>php-test</code>, <code>composer-audit</code>, <code>sbom</code>, <code>pint</code>, <code>phpstan</code>, <code>eslint</code>, <code>secret-detection</code>, <code>package-publish</code>, <code>renovate</code>, <code>squire-kit</code>) now pulls <code>image_prefix/image</code>, and <code>image_prefix</code> defaults to your group's Dependency Proxy (<code>${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}</code>). <code>image</code> keeps its default and is the path after the prefix. Only an app that overrides <code>image</code>, or runs where the proxy is off, needs to act:</p>
 <ol>
 <li>If the override was <code>${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/&lt;image&gt;</code> only to reach the proxy, delete the <code>image:</code> input; the default does the same. Keeping it puts the prefix in twice, and the pull fails.</li>
@@ -216,7 +247,7 @@ pipeline.</p>
 <p><code>a11y</code> (mcr.microsoft.com) and <code>portability</code> (quay.io) have no <code>image_prefix</code> and are unchanged: the proxy serves Docker Hub only.</p>
 <h3 id="deprecated-3"><span class="docs-heading-tail"><span>Deprecated</span><a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-3">#</a></span></h3>
 <p>Nothing was deprecated in 0.3.0.</p>
-<h3 id="steps-4"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps-4">#</a></span></h3>
+<h3 id="steps-5"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps-5">#</a></span></h3>
 <ol>
 <li>
 <p>Move every Preflight include to the <code>0.3.0</code> tag in one change, pinned to the tag's full commit SHA with the tag in a trailing comment, and remove any proxied <code>image:</code> input in the same change (step 1 above):</p>
@@ -243,7 +274,7 @@ pipeline.</p>
 </ol>
 <p>Verify: the job log's <code>Pulling docker image</code> line shows the prefix once, and each job's first line (<code>Preflight component &lt;name&gt; ...</code>) shows the new ref and sha. See <a href="guides/dependency-caching.html">Dependency caching</a>.</p>
 <h2 id="0-2-0"><span class="docs-heading-tail"><span>0.2.0</span><a class="docs-heading-link" aria-label="Link to this section" href="#0-2-0">#</a></span></h2>
-<h3 id="breaking-5"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-5">#</a></span></h3>
+<h3 id="breaking-6"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-6">#</a></span></h3>
 <p>The <code>portability</code> component is now one job, <code>portability</code> (named by a new <code>job_name</code> input), instead of <code>portability-build</code> and <code>portability-run</code>, and it checks what ADR-0010 asks for instead of the goss list. It builds the image with Buildah and runs it in the same job, so nothing is pushed to the container registry and no app image is pulled. Only an app that already includes <code>portability</code> from 0.1.4 needs to act:</p>
 <ul>
 <li><code>buildah_image</code> is renamed <code>image</code> (same default, the Buildah image pinned by digest); the old <code>image</code> input (the app image) is gone.</li>
@@ -262,11 +293,11 @@ The Renovate preset no longer updates files inside a Squire kit (<code>docker-co
 This release needs GitLab 18.7 or later: every component now declares <code>spec: component:</code> and prints a <code>Preflight component</code> line as its first command, and GitLab accepts that spec key only from 18.7 on. On an older instance, pipeline creation fails on the unknown key, so upgrade GitLab or pin an older Preflight tag.</p>
 <h2 id="0-1-4"><span class="docs-heading-tail"><span>0.1.4</span><a class="docs-heading-link" aria-label="Link to this section" href="#0-1-4">#</a></span></h2>
 <p>Released 2026-11-03. The new pieces are opt-in: the <code>portability</code> component, a <code>job_name</code> input on every component except <code>portability</code>, and a stricter Renovate preset.</p>
-<h3 id="breaking-6"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-6">#</a></span></h3>
+<h3 id="breaking-7"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-7">#</a></span></h3>
 <p>0.1.4 has no breaking changes: the version adds a component, an input and preset rules, and removes nothing.</p>
 <h3 id="deprecated-4"><span class="docs-heading-tail"><span>Deprecated</span><a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-4">#</a></span></h3>
 <p>Nothing was deprecated in 0.1.4.</p>
-<h3 id="steps-5"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps-5">#</a></span></h3>
+<h3 id="steps-6"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps-6">#</a></span></h3>
 <p>Point each component include at the <code>0.1.4</code> tag, pinned to the tag's full commit SHA with the tag in a trailing comment:</p>
 <pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@79029cc2300702d0d450c42cc699e12af1b731f8 # 0.1.4
@@ -283,15 +314,15 @@ This release needs GitLab 18.7 or later: every component now declares <code>spec
 <li><strong>Renovate preset</strong>: component version bumps now really wait for review instead of auto-merging (the component-rule manager name is <code>gitlabci</code>, matching repository deps), and a bump of the recorded Squire kit version carries the <code>squire-kit</code> label and never auto-merges; a person runs <code>squire update</code> to refresh the kit files.</li>
 </ul>
 <aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>Pins change only through a reviewed merge request. A tag or branch can move; a SHA cannot.</p></aside>
-<h3 id="how-to-verify-4">How to <span class="docs-heading-tail"><span>verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-4">#</a></span></h3>
+<h3 id="how-to-verify-5">How to <span class="docs-heading-tail"><span>verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-5">#</a></span></h3>
 <p>Push the change and run the app's pipeline. The components are ordinary jobs, so they run whenever the app's pipeline runs; expect the same jobs as before, green. PROCTOR's <code>preflight-pinned</code> check warns when an include is not pinned to a commit SHA. If you added <code>portability</code>, the <code>portability-run</code> job passes only when the image boots the strict way and the goss checks hold.</p>
 <h2 id="0-1-3"><span class="docs-heading-tail"><span>0.1.3</span><a class="docs-heading-link" aria-label="Link to this section" href="#0-1-3">#</a></span></h2>
 <p>Released 2026-11-03. Two consumer-facing changes: the <code>proctor</code> component installs the app with <code>--no-plugins --no-scripts</code>, and the shared Renovate preset stopped auto-merging the pins that every pipeline runs.</p>
-<h3 id="breaking-7"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-7">#</a></span></h3>
+<h3 id="breaking-8"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-8">#</a></span></h3>
 <p>0.1.3 has no breaking changes, but the <code>proctor</code> job now installs the app's dependencies with <code>composer install --no-plugins --no-scripts</code>, so the app's plugins and scripts never run inside the job.</p>
 <h3 id="deprecated-5"><span class="docs-heading-tail"><span>Deprecated</span><a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-5">#</a></span></h3>
 <p>Nothing was deprecated in 0.1.3.</p>
-<h3 id="steps-6"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps-6">#</a></span></h3>
+<h3 id="steps-7"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps-7">#</a></span></h3>
 <p>Bump each component include to the <code>0.1.3</code> tag's full commit SHA, with the tag in a trailing comment:</p>
 <pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@&lt;full commit SHA&gt; # 0.1.3
@@ -302,28 +333,28 @@ This release needs GitLab 18.7 or later: every component now declares <code>spec
 <li>The <code>renovate</code> component no longer sets <code>RENOVATE_TOKEN</code> and <code>GITHUB_COM_TOKEN</code> from themselves in the job <code>variables:</code>; on GitLab 19.5 that self-reference arrived as literal text and shadowed the masked project CI/CD variables, so the job now reads both tokens straight from the project.</li>
 </ul>
 <aside class="docs-callout docs-callout--warning" role="note"><p class="docs-callout__label">Warning</p><p>Do not add <code>RENOVATE_TOKEN: $RENOVATE_TOKEN</code> to your own <code>variables:</code>; that self-reference arrives as literal text.</p></aside>
-<h3 id="how-to-verify-5">How to <span class="docs-heading-tail"><span>verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-5">#</a></span></h3>
+<h3 id="how-to-verify-6">How to <span class="docs-heading-tail"><span>verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-6">#</a></span></h3>
 <p>Run the pipeline and confirm the jobs run on the new pin. In the runner project, confirm the job reads <code>RENOVATE_TOKEN</code> straight from the project as a masked CI variable, and that a bump touching the templates, the contract or a component include pin opens a merge request labeled <code>needs-review</code> instead of auto-merging.</p>
 <h2 id="0-1-2"><span class="docs-heading-tail"><span>0.1.2</span><a class="docs-heading-link" aria-label="Link to this section" href="#0-1-2">#</a></span></h2>
 <p>Released 2026-10-29. The site gained the agent-ready kit (prompt blocks, Markdown twins, llms.txt) from Squire, and the proof page moved to a private site that needs a Wayne State sign-in.</p>
-<h3 id="breaking-8"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-8">#</a></span></h3>
+<h3 id="breaking-9"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-9">#</a></span></h3>
 <p>0.1.2 has no breaking changes: the version touches the site, the README and the proof page, not the components.</p>
 <h3 id="deprecated-6"><span class="docs-heading-tail"><span>Deprecated</span><a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-6">#</a></span></h3>
 <p>Nothing was deprecated in 0.1.2.</p>
-<h3 id="steps-7"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps-7">#</a></span></h3>
+<h3 id="steps-8"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps-8">#</a></span></h3>
 <p>Bump each component include to the <code>0.1.2</code> tag's full commit SHA, with the tag in a trailing comment:</p>
 <pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@&lt;full commit SHA&gt; # 0.1.2
 </code></pre>
-<h3 id="how-to-verify-6">How to <span class="docs-heading-tail"><span>verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-6">#</a></span></h3>
+<h3 id="how-to-verify-7">How to <span class="docs-heading-tail"><span>verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-7">#</a></span></h3>
 <p>Run the pipeline and confirm the component jobs run on the new pin. PROCTOR's <code>preflight-pinned</code> check warns when an include is not pinned to a commit SHA.</p>
 <h2 id="0-1-1"><span class="docs-heading-tail"><span>0.1.1</span><a class="docs-heading-link" aria-label="Link to this section" href="#0-1-1">#</a></span></h2>
 <p>Released 2026-10-29. Two new components: <code>package-publish</code>, which publishes a semantic version tag to the GitLab group's built-in Composer registry, and <code>renovate</code>, with the shared preset <code>renovate/default.json</code>. The reusable GitHub Actions workflow for mirrors ships in this tag too.</p>
-<h3 id="breaking-9"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-9">#</a></span></h3>
+<h3 id="breaking-10"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-10">#</a></span></h3>
 <p>0.1.1 has no breaking changes: the version adds components and changes only the repository's own PHPStan config.</p>
 <h3 id="deprecated-7"><span class="docs-heading-tail"><span>Deprecated</span><a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-7">#</a></span></h3>
 <p>Nothing was deprecated in 0.1.1.</p>
-<h3 id="steps-8"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps-8">#</a></span></h3>
+<h3 id="steps-9"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps-9">#</a></span></h3>
 <p>Bump the existing includes to the <code>0.1.1</code> tag's full commit SHA, and add the new components where you want them:</p>
 <pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@&lt;full commit SHA&gt; # 0.1.1
@@ -344,20 +375,20 @@ jobs:
   ci:
     uses: waynestate/preflight/.github/workflows/php-package.yml@&lt;full commit SHA&gt; # 0.1.1
 </code></pre>
-<h3 id="how-to-verify-7">How to <span class="docs-heading-tail"><span>verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-7">#</a></span></h3>
+<h3 id="how-to-verify-8">How to <span class="docs-heading-tail"><span>verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-8">#</a></span></h3>
 <p>Run the pipeline. For <code>package-publish</code>, the job runs only on tags and reads the registry first: a version already published from this commit passes quietly, and a version published from a different commit fails the pipeline. For a mirrored package, a release tag is not done until it is green on both sides.</p>
 <h2 id="0-1-0"><span class="docs-heading-tail"><span>0.1.0</span><a class="docs-heading-link" aria-label="Link to this section" href="#0-1-0">#</a></span></h2>
 <p>Released 2026-10-27. First tagged release.</p>
-<h3 id="breaking-10"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-10">#</a></span></h3>
+<h3 id="breaking-11"><span class="docs-heading-tail"><span>Breaking</span><a class="docs-heading-link" aria-label="Link to this section" href="#breaking-11">#</a></span></h3>
 <p>0.1.0 is the first tagged release, so there is nothing to break: it is the baseline every later pin moves from.</p>
 <h3 id="deprecated-8"><span class="docs-heading-tail"><span>Deprecated</span><a class="docs-heading-link" aria-label="Link to this section" href="#deprecated-8">#</a></span></h3>
 <p>Nothing was deprecated in 0.1.0.</p>
-<h3 id="steps-9"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps-9">#</a></span></h3>
+<h3 id="steps-10"><span class="docs-heading-tail"><span>Steps</span><a class="docs-heading-link" aria-label="Link to this section" href="#steps-10">#</a></span></h3>
 <p>Include the components pinned to the <code>0.1.0</code> tag's full commit SHA:</p>
 <pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@&lt;full commit SHA&gt; # 0.1.0
 </code></pre>
-<h3 id="how-to-verify-8">How to <span class="docs-heading-tail"><span>verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-8">#</a></span></h3>
+<h3 id="how-to-verify-9">How to <span class="docs-heading-tail"><span>verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-to-verify-9">#</a></span></h3>
 <p>Run the pipeline and confirm the component jobs run on the pin.</p>
 <h2 id="related"><span class="docs-heading-tail"><span>Related</span><a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></span></h2>
 <ul>
@@ -372,10 +403,10 @@ jobs:
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../docs/troubleshooting.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">Troubleshooting</span></a><a class="docs-pager__link docs-pager__link--next" href="../docs/changelog.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">Changelog</span></a></nav>
   </div>
-  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#0-6-0">0.6.0</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed">Changed</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#new-mysql56-migrate">New: mysql56-migrate</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps">Steps</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#how-to-verify">How to verify</a></li><li class="docs-toc__item"><a href="#0-5-0">0.5.0</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-1">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#deprecated">Deprecated</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed-1">Changed</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#new-npm-audit">New: npm-audit</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps-1">Steps</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#how-to-verify-1">How to verify</a></li><li class="docs-toc__item"><a href="#0-4-0">0.4.0</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-2">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#deprecated-1">Deprecated</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps-2">Steps</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#how-to-verify-2">How to verify</a></li><li class="docs-toc__item"><a href="#0-3-1">0.3.1</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-3">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#deprecated-2">Deprecated</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps-3">Steps</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#how-to-verify-3">How to verify</a></li><li class="docs-toc__item"><a href="#0-3-0">0.3.0</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-4">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#deprecated-3">Deprecated</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps-4">Steps</a></li><li class="docs-toc__item"><a href="#0-2-0">0.2.0</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-5">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed-2">Changed</a></li><li class="docs-toc__item"><a href="#0-1-4">0.1.4</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-6">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#deprecated-4">Deprecated</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps-5">Steps</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#how-to-verify-4">How to verify</a></li><li class="docs-toc__item"><a href="#0-1-3">0.1.3</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-7">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#deprecated-5">Deprecated</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps-6">Steps</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#how-to-verify-5">How to verify</a></li><li class="docs-toc__item"><a href="#0-1-2">0.1.2</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-8">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#deprecated-6">Deprecated</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps-7">Steps</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#how-to-verify-6">How to verify</a></li><li class="docs-toc__item"><a href="#0-1-1">0.1.1</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-9">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#deprecated-7">Deprecated</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps-8">Steps</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#how-to-verify-7">How to verify</a></li><li class="docs-toc__item"><a href="#0-1-0">0.1.0</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-10">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#deprecated-8">Deprecated</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps-9">Steps</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#how-to-verify-8">How to verify</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#0-7-0">0.7.0</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#new-setup-command">New: setup_command</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps">Steps</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#how-to-verify">How to verify</a></li><li class="docs-toc__item"><a href="#0-6-0">0.6.0</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-1">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed">Changed</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#new-mysql56-migrate">New: mysql56-migrate</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps-1">Steps</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#how-to-verify-1">How to verify</a></li><li class="docs-toc__item"><a href="#0-5-0">0.5.0</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-2">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#deprecated">Deprecated</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed-1">Changed</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#new-npm-audit">New: npm-audit</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps-2">Steps</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#how-to-verify-2">How to verify</a></li><li class="docs-toc__item"><a href="#0-4-0">0.4.0</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-3">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#deprecated-1">Deprecated</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps-3">Steps</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#how-to-verify-3">How to verify</a></li><li class="docs-toc__item"><a href="#0-3-1">0.3.1</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-4">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#deprecated-2">Deprecated</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps-4">Steps</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#how-to-verify-4">How to verify</a></li><li class="docs-toc__item"><a href="#0-3-0">0.3.0</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-5">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#deprecated-3">Deprecated</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps-5">Steps</a></li><li class="docs-toc__item"><a href="#0-2-0">0.2.0</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-6">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed-2">Changed</a></li><li class="docs-toc__item"><a href="#0-1-4">0.1.4</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-7">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#deprecated-4">Deprecated</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps-6">Steps</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#how-to-verify-5">How to verify</a></li><li class="docs-toc__item"><a href="#0-1-3">0.1.3</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-8">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#deprecated-5">Deprecated</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps-7">Steps</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#how-to-verify-6">How to verify</a></li><li class="docs-toc__item"><a href="#0-1-2">0.1.2</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-9">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#deprecated-6">Deprecated</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps-8">Steps</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#how-to-verify-7">How to verify</a></li><li class="docs-toc__item"><a href="#0-1-1">0.1.1</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-10">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#deprecated-7">Deprecated</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps-9">Steps</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#how-to-verify-8">How to verify</a></li><li class="docs-toc__item"><a href="#0-1-0">0.1.0</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#breaking-11">Breaking</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#deprecated-8">Deprecated</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#steps-10">Steps</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#how-to-verify-9">How to verify</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
-  <span>Documents Preflight <span data-docs-version>0.6.0</span></span>
+  <span>Documents Preflight <span data-docs-version>0.7.0</span></span>
   <span><a rel="noopener" href="https://github.com/waynestate/preflight">Source</a> <a href="upgrading.md">Markdown</a></span>
 </footer>
 </body>
