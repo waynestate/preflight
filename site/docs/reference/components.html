@@ -171,13 +171,13 @@
 <p>Every job the templates define is <code>interruptible: true</code>. Every component takes a <code>job_name</code> input whose default is the job's usual name; set it when one project includes the same component more than once.</p>
 <h2 id="the-inputs-contract">The inputs <span class="docs-heading-tail"><span>contract</span><a class="docs-heading-link" aria-label="Link to this section" href="#the-inputs-contract">#</a></span></h2>
 <p>The inputs and job names on this page are a promise, written down in <code>contract/inputs.json</code>: every input's name, type, default and allowed pattern, and every job each component adds. Preflight's own build fails when a template drifts from it (<code>tests/ComponentsContractTest.php</code> in <code>composer ci</code>, and the <code>contract</code> job), so a change reaches a tag only on purpose, with the file rewritten by <code>composer contract:update</code> in the same commit. An input or job is renamed or removed only in a release whose <a href="../upgrading.html">Upgrading</a> section lists it under Breaking; before 1.0 that is a new minor, never a patch. To see exactly what moved between your pin and the next tag:</p>
-<pre tabindex="0"><code>git diff 0.4.0 0.5.0 -- contract/inputs.json
+<pre tabindex="0"><code>git diff 0.5.0 0.6.0 -- contract/inputs.json
 </code></pre>
 <p><a href="../guides/inputs-contract.html">The inputs contract</a> has the whole story: what counts as breaking, why defaults still move, and how to read the diff.</p>
 <h2 id="proctor"><span class="docs-heading-tail"><span>proctor</span><a class="docs-heading-link" aria-label="Link to this section" href="#proctor">#</a></span></h2>
 <p>Runs <code>vendor/bin/proctor check --format=codequality</code> and publishes the result as a GitLab Code Quality report. The job installs the app's dependencies with <code>composer install --no-plugins --no-scripts --ignore-platform-reqs</code>, so the app's plugins and scripts never run inside the job, and an app locked to an older PHP or needing an extension the image lacks still gets its report.</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@60314791565a264e97cb210813ef4f3e76512402 # 0.5.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
     inputs:
       proctor_command: vendor/bin/proctor check --format=codequality
 </code></pre>
@@ -251,7 +251,7 @@
 <h2 id="php-test"><span class="docs-heading-tail"><span>php-test</span><a class="docs-heading-link" aria-label="Link to this section" href="#php-test">#</a></span></h2>
 <p>Runs the test command on each supported PHP version through <code>parallel:matrix</code>.</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@60314791565a264e97cb210813ef4f3e76512402 # 0.5.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
     inputs:
       test_command: vendor/bin/phpunit
 </code></pre>
@@ -335,7 +335,7 @@ php-test-next:
 <h2 id="composer-audit"><span class="docs-heading-tail"><span>composer-audit</span><a class="docs-heading-link" aria-label="Link to this section" href="#composer-audit">#</a></span></h2>
 <p>Runs <code>composer audit --locked</code> and fails on advisories.</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@60314791565a264e97cb210813ef4f3e76512402 # 0.5.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
     inputs:
       working_dir: .
 </code></pre>
@@ -393,7 +393,7 @@ php-test-next:
 <h2 id="npm-audit"><span class="docs-heading-tail"><span>npm-audit</span><a class="docs-heading-link" aria-label="Link to this section" href="#npm-audit">#</a></span></h2>
 <p>Runs <code>npm audit</code> on the app's <code>package-lock.json</code> and fails on advisories at or above <code>audit_level</code> in runtime dependencies, then prints a full report with dev dependencies that never fails. New in 0.5.0; 0.4.0 does not include it.</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@60314791565a264e97cb210813ef4f3e76512402 # 0.5.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
     inputs:
       audit_level: high
 </code></pre>
@@ -455,7 +455,7 @@ php-test-next:
 <h2 id="sbom"><span class="docs-heading-tail"><span>sbom</span><a class="docs-heading-link" aria-label="Link to this section" href="#sbom">#</a></span></h2>
 <p>Generates a CycloneDX SBOM with <code>cyclonedx/cyclonedx-php-composer</code>, validates it, and publishes it as an artifact. The plugin is installed globally, so the app's <code>composer.json</code> is never touched.</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@60314791565a264e97cb210813ef4f3e76512402 # 0.5.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
     inputs:
       output: sbom.cdx.json
 </code></pre>
@@ -512,7 +512,7 @@ php-test-next:
 <p>Version 1 · Category: Testing/Validation · Tags: php,style,pint</p>
 <p>Runs the app's own <a rel="noopener" href="https://laravel.com/docs/12.x/pint">Laravel Pint</a> in test mode and fails the pipeline on style errors. The app must require <code>laravel/pint</code> as a dev dependency and ship a <code>pint.json</code> (or point <code>config</code> at its own file).</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@60314791565a264e97cb210813ef4f3e76512402 # 0.5.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
     inputs:
       config: pint.json
 </code></pre>
@@ -569,7 +569,7 @@ php-test-next:
 <p>Version 1 · Category: Testing/Validation · Tags: php,static-analysis,phpstan</p>
 <p>Runs the app's own <a rel="noopener" href="https://phpstan.org/">PHPStan</a> and fails the pipeline on static analysis errors, writing a GitLab Code Quality report. The app must require <code>phpstan/phpstan</code> as a dev dependency and ship a <code>phpstan.neon</code> (or point <code>config</code> at its own file).</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@60314791565a264e97cb210813ef4f3e76512402 # 0.5.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
     inputs:
       config: phpstan.neon
       memory_limit: 1G
@@ -633,7 +633,7 @@ php-test-next:
 <p>Version 1 · Category: Testing/Validation · Tags: javascript,style,eslint,prettier</p>
 <p>Runs the app's own <a rel="noopener" href="https://eslint.org/">ESLint</a> (and <a rel="noopener" href="https://prettier.io/">Prettier</a>) and fails the pipeline on lint or format errors. The app must require <code>@waynestate/pinstripe</code>, <code>eslint</code> and <code>prettier</code> as dev dependencies and ship an <code>eslint.config.js</code> (or point <code>eslint_args</code> at its own files).</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@60314791565a264e97cb210813ef4f3e76512402 # 0.5.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
     inputs:
       eslint_args: .
 </code></pre>
@@ -696,7 +696,7 @@ php-test-next:
 <p>Version 1 · Category: Security/Secrets · Tags: security,secrets,gitleaks</p>
 <p>Runs <a rel="noopener" href="https://github.com/gitleaks/gitleaks">Gitleaks</a> over the checked-out tree and fails the pipeline when a rule matches, with every match redacted in the job log and the <code>gitleaks.json</code> report artifact. By default it runs the built-in rules plus a path allowlist for <code>vendor/</code> and <code>node_modules/</code>, which a CI cache can restore into the checkout; point <code>config_path</code> at your own <code>.gitleaks.toml</code> to replace the default, and add the same <code>vendor</code> and <code>node_modules</code> path allowlist to your file.</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/secret-detection@60314791565a264e97cb210813ef4f3e76512402 # 0.5.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/secret-detection@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
 </code></pre>
 <div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
 <thead>
@@ -751,7 +751,7 @@ php-test-next:
 <p>Version 1 · Category: Release/Publishing · Tags: composer,publish,release</p>
 <p>Publishes a semantic version tag to the GitLab group's built-in Composer registry. The job runs only on tags, reads the registry first, and refuses a moved version: a version already published from this commit passes quietly, and a version published from a different commit fails the pipeline, because GitLab would otherwise overwrite it without a word. The default image ships curl and PHP, which the job uses for the registry round trip.</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@60314791565a264e97cb210813ef4f3e76512402 # 0.5.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
     inputs:
       group_id: &quot;&lt;your group id&gt;&quot;
 </code></pre>
@@ -808,7 +808,7 @@ php-test-next:
 <h2 id="renovate"><span class="docs-heading-tail"><span>renovate</span><a class="docs-heading-link" aria-label="Link to this section" href="#renovate">#</a></span></h2>
 <p>Runs <a rel="noopener" href="https://docs.renovatebot.com/">Renovate</a> as a scheduled or manual job that bumps image digests, GitHub action SHAs and package versions across the group's repositories, and merges the green ones itself. Bumps of <code>component:</code> include pins are covered by the preset and wait for review. Majors open a merge request and wait for a person. See <a href="../guides/renovate.html">Renovate</a> for what auto-merges and what waits.</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@60314791565a264e97cb210813ef4f3e76512402 # 0.5.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
     inputs:
       git_author: &quot;Preflight Bot &lt;preflight-bot@example.com&gt;&quot;
 </code></pre>
@@ -870,7 +870,7 @@ php-test-next:
 <h2 id="portability"><span class="docs-heading-tail"><span>portability</span><a class="docs-heading-link" aria-label="Link to this section" href="#portability">#</a></span></h2>
 <p>Proves the app image runs the way OpenShift, Coolify and plain Docker run it, not only on Citadel (ADR-0010). One job builds the image with Buildah (vfs storage, chroot isolation: no Docker daemon, no privileged runner, no registry), boots it twice side by side as an arbitrary uid in group 0 with no capabilities, and probes it with curl. It fails unless the strict boot holds (no passwd entry for the uid, app root not writable, writable paths writable by group 0, the port variable honored, no writes outside the allowed paths) and six checks pass: <code>health</code>, <code>env-only</code>, <code>forwarded-headers</code>, <code>logs</code>, <code>session-hop</code> and <code>sigterm</code>. See <a href="../guides/component-portability.html">The portability component</a>. No takeoff without a clean pre-flight.</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@60314791565a264e97cb210813ef4f3e76512402 # 0.5.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
     inputs:
       env: [&quot;APP_KEY=${PORTABILITY_APP_KEY}&quot;, &quot;APP_URL=https://myapp.example.edu&quot;]
       session_login_path: /_portability/login
@@ -1033,7 +1033,7 @@ php-test-next:
 <p>Version 1 · Category: Testing/Validation · Tags: accessibility,a11y,wcag,axe-core,playwright</p>
 <p>Opens the app's pages in a real Chromium browser with Playwright and runs axe-core through @axe-core/playwright, in light and dark mode at 320 px and 1280 px, and fails the pipeline on any violation. The default tags are WCAG 2.1 Level AA (the ADA Title II level); add <code>wcag22aa</code> for WCAG 2.2 AA, the stack's floor. At 320 px it also checks WCAG 1.4.10 Reflow, which axe-core cannot. It writes a JUnit report and a JSON report. See <a href="../guides/component-a11y.html">The a11y component</a>.</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@60314791565a264e97cb210813ef4f3e76512402 # 0.5.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
     inputs:
       pages: [&quot;index.html&quot;, &quot;docs/**/*.html&quot;]
       wcag_tags: [&quot;wcag2a&quot;, &quot;wcag2aa&quot;, &quot;wcag21a&quot;, &quot;wcag21aa&quot;, &quot;wcag22aa&quot;]
@@ -1133,7 +1133,7 @@ php-test-next:
 <p>Version 1 · Category: Testing/Validation · Tags: squire,deploy,drift</p>
 <p>Installs the Squire release a deploy kit records in its <code>.squire.json</code> and runs <code>squire init --check</code> on the kit folder, so the pipeline fails when a kit file was edited, is missing or is not that release's template. It checks the recorded version, so a new Squire release never turns main red by itself; Renovate's Squire rule moves the version. See <a href="../guides/component-squire-kit.html">The squire-kit component</a>.</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@60314791565a264e97cb210813ef4f3e76512402 # 0.5.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
     inputs:
       working_dir: deploy
 </code></pre>

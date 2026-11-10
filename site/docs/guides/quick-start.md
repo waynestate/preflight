@@ -14,7 +14,7 @@ This quick start adds the `php-test` component to an app, the same way the front
 2. **Add the include** to the app's `.gitlab-ci.yml`:
    ```yaml
    include:
-     - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@60314791565a264e97cb210813ef4f3e76512402 # 0.5.0
+     - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
      inputs:
        test_command: vendor/bin/phpunit
    ```
