@@ -6,6 +6,7 @@ are Git tags.
 
 ## Unreleased
 
+- Added: a must-fail fixture for squire-kit. `must-fail-squire-kit` proves the component fails on a kit with a drifted file and on a folder with no .squire.json, so every component now has one.
 - Docs: BEST_PRACTICES matches the code before 1.0. The component version line (2.11) is `Enforced` by the contract job, the proctor default command (6.1) is `Checked` on every pipeline, and the counts are real again: ten components in Preflight's own pipeline, eight `working_dir` inputs, ten tags through 0.5.0, four components that take `allow_failure`. The must-fail list names npm-audit and package-publish and says squire-kit still has none, and thirteen finished backlog items are marked Done with the file that proves each. A preflight checklist that finally matches the airplane.
 - Site: `assets/stack-env.js` knows Parity, so a pre-production page links Parity's pre-production site and a dev page links its local `site/` folder. Until now Parity, of all parts, was the one link that ignored its environment.
 - Changed: Preflight's own secret detection job now blocks the pipeline (a week of green runs since 2026-11-02 ended its advisory spell), and the README badge's alt text counts 14 components like the badge does.

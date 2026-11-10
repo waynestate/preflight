@@ -1017,7 +1017,7 @@ Why: a component that never fails looks the same as one that works.
 
 Sources: [GitLab: components, testing](https://docs.gitlab.com/ci/components/).
 
-**How the stack holds it: Partly.** Ten components carry a must-fail fixture that a `must-fail-` job in `.gitlab-ci.yml`
+**How the stack holds it: Partly.** Eleven components carry a must-fail fixture that a `must-fail-` job in `.gitlab-ci.yml`
 runs, and `proctor`'s runs in the `contract` job: `proctor` runs the template's own `--record` guard and command line
 on `tests/proctor-fails`, a fake proctor that prints one blocker finding and exits 1, against the clean stubs in
 `tests/fixture-app` (no `--record`, like PROCTOR 0.10.0) and `tests/proctor-record` (with it), and proves `proctor.json`
@@ -1048,11 +1048,13 @@ named and the value redacted from the log, while the same token planted in `vend
 invisible (`tests/check-secret-detection-fails`, run in CI by `must-fail-secret-detection`); `sbom` runs Composer and
 the CycloneDX plugin on `tests/sbom-fails`, whose `composer.lock` is not valid JSON, against the clean case in
 `tests/sbom-clean`, whose SBOM lists `psr/log` and not the dev-only `psr/container` (`tests/check-sbom-fails`, run in
-CI by `must-fail-sbom`); and `package-publish`'s offline guards stop a non-semantic-version tag and a missing
+CI by `must-fail-sbom`); `squire-kit` runs the template's own script against the clean kit in
+`tests/squire-kit-fixture`, which must pass, a copy with a line appended to `.squire/php-web.ini`, which must fail
+naming the file, and a copy with no `.squire.json`, which must stop with exit 2 (`tests/check-squire-kit-fails`, run
+in CI by `must-fail-squire-kit`); and `package-publish`'s offline guards stop a non-semantic-version tag and a missing
 `composer.json` before any registry contact (`tests/check-package-publish-fails.sh`, run in CI by
-`must-fail-package-publish`). Still missing: `squire-kit` has no must-fail fixture yet; `package-publish`'s
-moved-version path needs a live registry and stays untested; `renovate` is a config, not a job, so it has nothing to
-fail.
+`must-fail-package-publish`). Still missing: `package-publish`'s moved-version path needs a live registry and stays
+untested; `renovate` is a config, not a job, so it has nothing to fail.
 
 ### 7.3 Use the stack's own projects as the first users
 Each stack repo includes Preflight, pinned.
