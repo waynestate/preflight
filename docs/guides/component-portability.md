@@ -71,14 +71,14 @@ include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@60314791565a264e97cb210813ef4f3e76512402 # 0.5.0
     inputs:
       services: [{ name: "mysql:8.4.7@sha256:<digest>", alias: db, variables: { MYSQL_ROOT_PASSWORD: "portability", MYSQL_DATABASE: "app" } }]
-      env: ["APP_KEY=${PORTABILITY_APP_KEY}", "DB_HOST=db", "SESSION_DRIVER=mysql", "LOG_CHANNEL=stderr"]
+      env: ["APP_KEY=${PORTABILITY_APP_KEY}", "DB_CONNECTION=mysql", "DB_HOST=db", "DB_DATABASE=app", "DB_USERNAME=root", "DB_PASSWORD=portability", "SESSION_DRIVER=database", "LOG_CHANNEL=stderr"]
       session_login_path: /_portability/login
       session_check_path: /_portability/me
 ```
 
 Replace `<digest>` with the digest of the image you actually pull; never copy a placeholder pin into a pipeline. Two things to know about the service:
 
-- The database has to accept connections before the replicas boot. The probe's `boot_timeout` covers that wait, or a `start_command` can run migrations first.
+- The database has to accept connections before the replicas boot. The probe's `boot_timeout` covers that wait, or a `start_command` can run migrations first. A Laravel app needs its `sessions` table, so its `start_command` runs `php artisan migrate --force` before it serves.
 - The runner is arm64, so the service image must be multi-arch. `mysql:8.4` is; `mysql:5.6` is not.
 
 ## How the job works
