@@ -47,6 +47,8 @@
 are Git tags.</p>
 <h2 id="unreleased"><span class="docs-heading-tail"><span>Unreleased</span><a class="docs-heading-link" aria-label="Link to this section" href="#unreleased">#</a></span></h2>
 <ul>
+<li>Added: must-fail proofs for the contract check (<code>tests/check-contract-fails</code> in the <code>contract</code> job, and a PHPUnit case): a changed default or a renamed input now has to fail both comparisons.</li>
+<li>Fixed: <code>tests/check-contract.ps1</code> names php-test's jobs from the <code>job_name</code> input like the <code>.sh</code> twin and the PHPUnit contract test, so it passes the real templates again on Windows.</li>
 <li>Added: must-fail proofs for the image-input, cache-key and PHP-matrix guards (<code>tests/check-image-inputs-fails</code>, <code>tests/check-cache-fails</code>, <code>tests/check-php-matrix-fails</code>), and a <code>check-php-matrix</code> guard that keeps php-test's <code>parallel: matrix:</code> wiring, all run by the <code>contract</code> job.</li>
 <li>Site: the front page's stale facts are current (the <code>proctor</code> placard says it keeps <code>proctor.json</code> for Rollcall since 0.5.0).</li>
 <li>Changed: the deploy kit is Squire 0.10.7 (was 0.10.6): it ships a <code>.gitattributes</code> that pins line endings, so the deploy layer clears PROCTOR's line-ending warnings.</li>
