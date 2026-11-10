@@ -29,7 +29,7 @@ on:
 
 jobs:
   ci:
-    uses: waynestate/preflight/.github/workflows/php-package.yml@60314791565a264e97cb210813ef4f3e76512402 # 0.5.0
+    uses: waynestate/preflight/.github/workflows/php-package.yml@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
 ```
 
 ## Pin the include to a commit SHA

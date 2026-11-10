@@ -13,7 +13,7 @@ Goal: your app's pipeline fails whenever a locked dependency has a known advisor
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@60314791565a264e97cb210813ef4f3e76512402 # 0.5.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@30dd7094089931015ec8754fb321e17659749f05 # 0.6.0
     inputs:
       working_dir: .
 ```
