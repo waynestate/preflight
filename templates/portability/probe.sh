@@ -11,6 +11,7 @@
 #                      honors its port variable (replica B); during the run
 #                      nothing is written outside the writable and runtime
 #                      paths (what a read-only root filesystem would refuse)
+#   setup              setup_command, when set, ran once and exited 0 before the replicas started
 #   health             the health path answers 200 to Host: 10.1.2.3:<port>,
 #                      with no forwarded headers, sent to the pod address
 #   env-only           no .env file and no build-time config cache in the
@@ -97,6 +98,7 @@ PORT_ENV=$(cfg port_env); PORT_ENV=${PORT_ENV:-PORT}
 HEALTH_PATH=$(cfg health_path); HEALTH_PATH=${HEALTH_PATH:-/up}
 UID_NUM=$(cfg uid); UID_NUM=${UID_NUM:-100123}
 START_COMMAND=$(cfg start_command)
+SETUP_COMMAND=$(cfg setup_command)
 BOOT_TIMEOUT=$(cfg boot_timeout); BOOT_TIMEOUT=${BOOT_TIMEOUT:-60}
 STOP_TIMEOUT=$(cfg stop_timeout); STOP_TIMEOUT=${STOP_TIMEOUT:-10}
 PROBE_PATH=$(cfg probe_path); PROBE_PATH=${PROBE_PATH:-/}
@@ -195,7 +197,7 @@ cleanup() {
     kill -KILL "$bpid" 2>/dev/null
     wait "$bpid" 2>/dev/null
   done
-  for r in a b hc; do
+  for r in a b hc setup; do
     [ -f "$WORK/$r.ctr" ] && buildah rm "$(cat "$WORK/$r.ctr")" >/dev/null 2>&1
   done
   rm -rf "$WORK"
@@ -425,6 +427,55 @@ run_healthcheck() {
   set -- "$@" "$(cat "$WORK/hc.ctr")" -- sh -c "$hc_cmd"
   buildah run "$@" > "$WORK/hc.out" 2>&1
 }
+
+# run_setup: run the setup_command once in its own container of the built
+# image, as the same uid with gid 0 and the same environment replica A will
+# get (including its port variable), the way run_healthcheck runs commands
+# in a fresh container. It runs before either replica starts, so it cannot
+# run in one of theirs: they do not exist yet, and the point is that it
+# runs once, not once per replica. 0 when the command exits 0.
+run_setup() {
+  set -- --user "$UID_NUM:0" --cap-drop=ALL --env "$PORT_ENV=$PORT"
+  while IFS= read -r e; do set -- "$@" --env "$e"; done < "$WORK/env.list"
+  set -- "$@" "$(cat "$WORK/setup.ctr")" -- sh -c "$SETUP_COMMAND"
+  buildah run "$@" > "$WORK/setup.out" 2>&1
+}
+
+# ---------------------------------------------------------------- setup
+
+# The setup_command, when set, runs once in its own container of the built
+# image, before either replica starts, the way a release migrates its
+# database once before the web pods start. It is not a check: it runs
+# whenever the input is set, like the strict boot always runs. A non-zero
+# exit ends the probe here, so no replica ever starts.
+if [ -n "$SETUP_COMMAND" ]; then
+  say "setup: running setup_command once before the replicas start"
+  setup_failed=no
+  if ! buildah from --pull=never --name portability-setup localhost/portability-app > "$WORK/setup.ctr"; then
+    flag setup "could not create the setup container"
+    setup_failed=yes
+  else
+    run_setup
+    setup_code=$?
+    if [ "$setup_code" -eq 0 ]; then
+      ok setup "setup_command exited 0"
+    else
+      flag setup "setup_command exited $setup_code"
+      setup_failed=yes
+    fi
+  fi
+  if [ "$setup_failed" = yes ]; then
+    if [ -f "$WORK/setup.out" ]; then
+      say "setup output (last 40 lines):"
+      tail -n 40 "$WORK/setup.out" | sed 's/^/  | /'
+    fi
+    echo
+    say "summary"
+    say "setup: FAIL"
+    sed 's/^/  - /' "$WORK/fail.setup"
+    exit 1
+  fi
+fi
 
 say "starting replica A on $PORT_ENV=$PORT and replica B on $PORT_ENV=$PORT_B as uid $UID_NUM gid 0, probing $POD_IP"
 start_replica a "$PORT"
@@ -700,6 +751,16 @@ for c in $ALL_CHECKS; do
     status=1
   fi
 done
+# setup is not a check: it ran once before the replicas, so report it after
+# the checks, when it ran at all.
+if [ -s "$WORK/fail.setup" ]; then
+  say "setup: FAIL"
+  sed 's/^/  - /' "$WORK/fail.setup"
+  status=1
+elif [ -s "$WORK/ok.setup" ]; then
+  say "setup: pass"
+  sed 's/^/  - /' "$WORK/ok.setup"
+fi
 if [ "$status" -eq 0 ]; then
   say "cleared for takeoff: the image runs off Citadel the way OpenShift, Coolify and plain Docker run it"
 fi

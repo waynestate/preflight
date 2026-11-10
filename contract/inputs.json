@@ -136,6 +136,7 @@
         { "name": "health_path", "type": "string", "default": "/up" },
         { "name": "uid", "type": "number", "default": 100123 },
         { "name": "start_command", "type": "string", "default": "" },
+        { "name": "setup_command", "type": "string", "default": "" },
         { "name": "env", "type": "array", "default": [] },
         { "name": "services", "type": "array", "default": [] },
         { "name": "boot_timeout", "type": "number", "default": 60 },

@@ -17,6 +17,7 @@
 #   file-sessions    session-hop fails (sessions on one replica's disk)
 #   no-term-handler  sigterm fails (no SIGTERM handler in the main process)
 #   bad-healthcheck  healthcheck fails (the image's HEALTHCHECK exits 1)
+#   setup-fails      setup fails (setup_command exits 3; no replica starts)
 #   reopens-stderr   every check passes (the app reopens /proc/self/fd/2)
 #   signals-group    every check passes (the app signals its process group
 #                    on SIGTERM)
@@ -58,7 +59,7 @@ fi
 export STORAGE_DRIVER="${STORAGE_DRIVER:-vfs}"
 export BUILDAH_ISOLATION="${BUILDAH_ISOLATION:-chroot}"
 
-CASES="none:pass needs-root:strict-boot writes-root:strict-boot fixed-port:strict-boot host-bound:health dotenv:env-only trusts-proxy:forwarded-headers file-logs:logs file-sessions:session-hop no-term-handler:sigterm bad-healthcheck:healthcheck reopens-stderr:pass signals-group:pass"
+CASES="none:pass needs-root:strict-boot writes-root:strict-boot fixed-port:strict-boot host-bound:health dotenv:env-only trusts-proxy:forwarded-headers file-logs:logs file-sessions:session-hop no-term-handler:sigterm bad-healthcheck:healthcheck setup-fails:setup reopens-stderr:pass signals-group:pass"
 
 # In GitLab, pull the fixture's base image through the Dependency Proxy. The
 # probe replaces ${NAME} from the job's variables.
@@ -83,6 +84,11 @@ for entry in $CASES; do
     esac
   fi
 
+  # Every case proves a setup that succeeds lets the replicas boot; only
+  # setup-fails runs one that exits 3.
+  setup=true
+  [ "$flaw" = setup-fails ] && setup='exit 3'
+
   inputs="$tmp/$flaw.inputs"
   cat > "$inputs" <<EOF
 dockerfile=Dockerfile
@@ -96,6 +102,7 @@ port_env=PORT
 health_path=/up
 uid=100123
 start_command=
+setup_command=$setup
 env=["APP_URL=http://portability.invalid", "APP_KEY=portability-fixture-key-not-a-secret"]
 boot_timeout=30
 stop_timeout=10

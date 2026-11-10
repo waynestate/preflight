@@ -72,13 +72,15 @@ include:
     inputs:
       services: [{ name: "mysql:8.4.7@sha256:<digest>", alias: db, variables: { MYSQL_ROOT_PASSWORD: "portability", MYSQL_DATABASE: "app" } }]
       env: ["APP_KEY=${PORTABILITY_APP_KEY}", "DB_CONNECTION=mysql", "DB_HOST=db", "DB_DATABASE=app", "DB_USERNAME=root", "DB_PASSWORD=portability", "SESSION_DRIVER=database", "LOG_CHANNEL=stderr"]
+      setup_command: "php artisan migrate --force"
       session_login_path: /_portability/login
       session_check_path: /_portability/me
 ```
 
 Replace `<digest>` with the digest of the image you actually pull; never copy a placeholder pin into a pipeline. Two things to know about the service:
 
-- The database has to accept connections before the replicas boot. The probe's `boot_timeout` covers that wait, or a `start_command` can run migrations first. A Laravel app needs its `sessions` table, so its `start_command` runs `php artisan migrate --force` before it serves.
+- A Laravel app needs its `sessions` table before it serves. `setup_command` runs `php artisan migrate --force` once, in its own container, before either replica starts, the way a release migrates once before the web pods start. Use it instead of `start_command`, which runs in both replicas at once and replaces the image's own entrypoint.
+- The service may take a few seconds to accept connections. If the first migrate fails with a connection error, wrap it in a short retry, for example `for i in 1 2 3 4 5 6 7 8 9 10; do php artisan migrate --force && exit 0; sleep 3; done; exit 1`.
 - The runner is arm64, so the service image must be multi-arch. `mysql:8.4` is; `mysql:5.6` is not.
 
 ## How the job works
@@ -87,9 +89,10 @@ The component is one job, named by `job_name` (default `portability`). It runs i
 
 1. Builds the image with `buildah bud`, from `dockerfile` in `context`, with `build_args`. It builds with `--format docker`, because Buildah's default OCI format drops the image's HEALTHCHECK and the docker format keeps it. Nothing is pushed: the image stays in the job's own storage.
 2. Reads the image's `ENTRYPOINT` and `CMD`, makes two copies of its filesystem (replicas A and B) and runs the static parts of `strict-boot` and `env-only` on them.
-3. Starts both replicas with `buildah run --user <uid>:0 --cap-drop=ALL` and the `env` input, each through a small launcher that gives it its own stdio and session; B gets `port + 1` through `port_env`.
-4. Waits up to `boot_timeout` seconds for each replica's health path, then runs `health`, `env-only`, `forwarded-headers`, `session-hop`, `logs` and `sigterm` with curl.
-5. Stops both replicas and compares what changed on disk against `writable_paths` and `runtime_paths`.
+3. Runs `setup_command` once, in a fresh container of the built image, as the same uid with the same env as replica A will get, when it is set. A non-zero exit stops the job before any replica starts.
+4. Starts both replicas with `buildah run --user <uid>:0 --cap-drop=ALL` and the `env` input, each through a small launcher that gives it its own stdio and session; B gets `port + 1` through `port_env`.
+5. Waits up to `boot_timeout` seconds for each replica's health path, then runs `health`, `env-only`, `forwarded-headers`, `session-hop`, `logs` and `sigterm` with curl.
+6. Stops both replicas and compares what changed on disk against `writable_paths` and `runtime_paths`.
 
 The probe is `templates/portability/probe.sh`, inlined in the template byte for byte, because a component ships only its `template.yml`. The inputs reach it through a quoted heredoc as data; nothing in them is run except `start_command`.
 
@@ -128,6 +131,7 @@ The checks run in an unprivileged job, so a few things are emulated rather than 
 | `health_path` | string | `/up` | Path that must answer 200 for any Host, before trusted hosts, HTTPS redirects, sessions and auth. |
 | `uid` | number | `100123` | Numeric uid the app runs as, with no `/etc/passwd` entry. The gid is always 0. |
 | `start_command` | string | `""` | Command that starts the app, run with `sh -c`. Empty runs the image's own `ENTRYPOINT` and `CMD`. |
+| `setup_command` | string | `""` | Command run once with `sh -c` before either replica starts, in a fresh container of the built image, as the same uid (gid 0) with the same env as replica A. Use it for one-time work a release does, such as `php artisan migrate --force` against a database in `services`. Empty runs nothing. A non-zero exit fails the job and no replica starts. |
 | `env` | array | `[]` | Environment for both replicas, as `NAME=value` (or `NAME` to pass the job's variable through). Keep secrets in CI/CD variables. |
 | `services` | array | `[]` | Service containers for the job, as GitLab's `services:` keyword takes them (an image string, or a map with `name`, `alias` and `variables`). A database or cache the replicas share lets `session-hop` pass for an app that keeps sessions there. Pin each image by digest. |
 | `boot_timeout` | number | `60` | Seconds each replica has to answer the health path. |

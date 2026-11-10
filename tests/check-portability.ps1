@@ -5,7 +5,9 @@
 # container: it runs inside the component's own Buildah image and runs
 # templates/portability/probe.sh against tests/portability/app, once clean
 # and once per flaw, passing only when the clean case passes and each flaw
-# fails the check it targets. This wrapper runs the .sh in that image with
+# fails the check it targets. The setup-fails case proves a setup_command
+# that exits 3 stops the job before any replica starts. This wrapper runs
+# the .sh in that image with
 # Docker, the repository bound read-only:
 #
 #   docker run --rm --security-opt seccomp=unconfined -v "<repo>:/src:ro" -w /src \

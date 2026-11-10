@@ -6,6 +6,8 @@ are Git tags.
 
 ## Unreleased
 
+- Added: the portability component takes a `setup_command` input (default empty): a command run once, in its own container of the built image, before either replica starts, so an app can migrate the database in `services` before `session-hop` runs (WELD W15). A non-zero exit fails the job; must-fail case `setup-fails`.
+
 ## 0.6.0 (2026-11-10)
 
 A new component and a portability probe that checks more of what a platform checks. `mysql56-migrate` runs an app's
