@@ -106,6 +106,10 @@ contract:
     - sh tests/check-squire-kit.sh
     - sh tests/check-composer-floor.sh
     - sh tests/check-abandoned-input.sh
+    - sh tests/check-php-matrix.sh
+    - sh tests/check-image-inputs-fails.sh
+    - sh tests/check-cache-fails.sh
+    - sh tests/check-php-matrix-fails.sh
 
 # The must-fail fixture for the php-test component: the check proves the
 # template keeps the job line that lets the tool's exit code be the job

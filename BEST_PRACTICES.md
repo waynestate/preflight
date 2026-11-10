@@ -334,7 +334,8 @@ Sources: [GitLab: component examples, inputs for image versions](https://docs.gi
 `$[[ inputs.image ]]`. `php-test`'s default is `php:${PHP_VERSION}-cli-trixie`: the literal `${PHP_VERSION}`
 survives input interpolation, and GitLab expands it in the image at job time, so the matrix keeps working.
 `tests/check-image-inputs.sh` (and its `.ps1` twin) fail if a job's `image:` stops being an input or a default
-`php:` tag loses its Debian release name.
+`php:` tag loses its Debian release name. `tests/check-image-inputs-fails.sh` (and its `.ps1` twin) proves it: a
+hard-coded php-test image and a default tag without the Debian release both make the guard fail.
 
 There are no exemptions: `portability` builds and runs the app image inside its own job, so its `image` input is the
 Buildah image the job runs in, like every other component's.
@@ -627,7 +628,7 @@ Why: pipelines run faster, and an unreviewed branch cannot poison the cache that
 
 Sources: [GitLab: caching](https://docs.gitlab.com/ci/caching/).
 
-**How the stack holds it: Checked.** `php-test`, `proctor`, `pint`, `phpstan`, `sbom` and `squire-kit` cache Composer downloads in `.composer-cache/`, and `eslint` and `a11y` cache npm downloads in `.npm-cache/`, each under a fixed key: `preflight-php-${PHP_VERSION}` for `php-test`, one key per PHP version, and `preflight-proctor`, `preflight-pint`, `preflight-phpstan`, `preflight-sbom`, `preflight-squire-kit`, `preflight-eslint` and `preflight-a11y` for the rest. `tests/check-php-test-cache` (and its `.ps1` twin) fail if the key turns back into a lock-file hash or drops the PHP version, and `tests/check-proctor-cache` (and its `.ps1` twin) fail if the proctor key turns back into a lock-file hash. `composer-audit` still defines no cache. `npm-audit` installs nothing; it reads the app's own npm cache under the fixed key `npm` and path `.cache/npm/` (the ones Sourdough's generated pipelines use) with `policy: pull`, so it never overwrites what the install job downloaded. Every component cache also saves with `when: always`, so a retry after a dropped download fetches only what is missing, and `tests/check-dependency-cache` fails on a block without it.
+**How the stack holds it: Checked.** `php-test`, `proctor`, `pint`, `phpstan`, `sbom` and `squire-kit` cache Composer downloads in `.composer-cache/`, and `eslint` and `a11y` cache npm downloads in `.npm-cache/`, each under a fixed key: `preflight-php-${PHP_VERSION}` for `php-test`, one key per PHP version, and `preflight-proctor`, `preflight-pint`, `preflight-phpstan`, `preflight-sbom`, `preflight-squire-kit`, `preflight-eslint` and `preflight-a11y` for the rest. `tests/check-php-test-cache` (and its `.ps1` twin) fail if the key turns back into a lock-file hash or drops the PHP version, and `tests/check-proctor-cache` (and its `.ps1` twin) fail if the proctor key turns back into a lock-file hash. `composer-audit` still defines no cache. `npm-audit` installs nothing; it reads the app's own npm cache under the fixed key `npm` and path `.cache/npm/` (the ones Sourdough's generated pipelines use) with `policy: pull`, so it never overwrites what the install job downloaded. Every component cache also saves with `when: always`, so a retry after a dropped download fetches only what is missing, and `tests/check-dependency-cache` fails on a block without it. `tests/check-cache-fails.sh` (and its `.ps1` twin) proves all three guards fail on five broken copies (lock-hash keys, a key without the PHP version, a renamed proctor key, a block without `when: always`).
 
 Second pass: GitLab appends `-protected` or `-non_protected` to every cache key. Pipelines on protected branches or tags,
 and pipelines started by a Maintainer or Owner, get `-protected`. The separation is on by default and GitLab calls it
@@ -677,7 +678,8 @@ Sources: [Docker Official Image: php](https://github.com/docker-library/docs/blo
 **How the stack holds it: Checked.** The `php:` defaults name the Debian release: `php-test` defaults to
 `php:${PHP_VERSION}-cli-trixie` and `proctor` to `php:8.4-cli-trixie@sha256:...` (Debian 13, the release the
 bare `cli` tags point at as of 2026-10-28). `tests/check-image-inputs.sh` (and its `.ps1` twin) fail if a
-default `php:` tag loses its Debian release name. For the `citadel` target, the jobs should run on Citadel's
+default `php:` tag loses its Debian release name. `tests/check-image-inputs-fails.sh` proves the release-name
+half on a php-test default stripped of `-trixie`. For the `citadel` target, the jobs should run on Citadel's
 own images; which Debian release those use is not stated in the documents read for this guide.
 
 ### 4.11 Use Composer's malware and advisory blocking, and review lock changes
@@ -956,7 +958,9 @@ Why: a constraint of `^8.2` is a promise about 8.2, 8.3, 8.4 and 8.5.
 Sources: [GitLab: CI/CD YAML, `parallel:matrix`](https://docs.gitlab.com/ci/yaml/).
 
 **How the stack holds it: Checked.** `php-test` creates one job per entry through `parallel:matrix`. The first
-pipeline ran it on 8.2, 8.3, 8.4 and 8.5.
+pipeline ran it on 8.2, 8.3, 8.4 and 8.5. `tests/check-php-matrix.sh` (and its `.ps1` twin) fails if the
+`parallel: matrix:` block or the array-typed `php_versions` input goes away, and `tests/check-php-matrix-fails.sh`
+proves it on broken copies; GitLab itself expands the matrix, so only a pipeline shows the jobs.
 
 The matrix limit of 200 permutations was re-checked in the GitLab YAML reference and is correct.
 
