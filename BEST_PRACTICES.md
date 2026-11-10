@@ -808,10 +808,11 @@ Sources: [GitLab: CI/CD variables](https://docs.gitlab.com/ci/variables/);
 [OWASP CICD-SEC-6 Insufficient Credential Hygiene](https://owasp.org/www-project-top-10-ci-cd-security-risks/).
 
 **How the stack holds it: Documented.** The fourteen templates use no secrets, which is good. Nothing fails if a later
-template adds one. The repository's own pipeline now runs GitLab's pipeline secret detection as an advisory job
-(`secret_detection` with `allow_failure: true`, kept in place by `tests/check-secret-detection.sh` and its `.ps1`
-twin); the plan is to make it blocking after a week of green pipelines. Whether it runs on the git.wayne.edu
-instance (Community Edition) is still to confirm.
+template adds one. The repository's own pipeline runs GitLab's pipeline secret detection, and since 2026-11-10 the
+`secret_detection` job blocks: it was advisory for a week of green runs from 2026-11-02, and
+`tests/check-secret-detection.sh` and its `.ps1` twin now fail the `contract` job if anyone makes it advisory again. It
+runs on the git.wayne.edu instance (Community Edition): every `secret_detection` job there passed from 2026-11-09 to
+2026-11-10.
 
 Second pass: GitLab's pipeline secret detection is available on Free, Premium and Ultimate. Its docs show
 `include: template: Jobs/Secret-Detection.gitlab-ci.yml`, and the error messages reference gitleaks. Limits: it needs a
