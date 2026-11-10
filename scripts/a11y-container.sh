@@ -1,4 +1,5 @@
 #!/bin/sh
+# proctor-ignore script-pair: runs only inside the Playwright container that scripts/a11y.sh and scripts/a11y.ps1 start
 # Runs inside the Playwright image for scripts/a11y.sh and scripts/a11y.ps1,
 # from the read-only repo mount: the same steps as the a11y component's job.
 # Not a developer script; run one of those two instead.
