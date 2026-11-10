@@ -893,7 +893,12 @@ Why: network limits reduce what a bad job can send out.
 
 Sources: [GitLab Runner: security, network segmentation](https://docs.gitlab.com/runner/security/).
 
-**How the stack holds it: Documented.** The instance runner case lists network access as an open question for ops.
+**How the stack holds it: Documented.** `docs/guides/network-egress.md` lists
+every host a Preflight job reaches, by component, with the runner's image pulls kept apart from the job's own
+requests, and the deduplicated list a firewall or proxy needs. `tests/DocsEgressTest.php` (in `composer ci`) fails
+when a component has no row, when a template fetches from an `https://` host the page does not name, or when a
+default image comes from a registry the page does not name. Turning the list into a runner allowlist is a
+setting on the runner's network, outside this repository, and stays a decision for ops.
 
 ### 5.5 Keep the GitLab instance and runners patched, and know the version
 Ask ops for the GitLab version and runner version, and for the patch schedule. Subscribe to GitLab's patch release notices.
@@ -1154,7 +1159,8 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
 19. Done: 5.3: Stated the runner request wording in the README: a non-privileged Docker executor (no privileged mode,
     no Docker socket mount), a fresh ephemeral environment for every job, and no shell executor shared between
     projects.
-20. 5.4: Agree the list of hosts jobs may reach.
+20. 5.4 (partly done): The list of hosts jobs reach is written and held by a test (`docs/guides/network-egress.md`,
+    `tests/DocsEgressTest.php`). Still open: ops agreeing it and enforcing it on the runner.
 21. Done: 1.4: The inputs contract is `contract/inputs.json`, held by `tests/ComponentsContractTest.php` (PHPUnit, in
     `composer ci`) and `tests/check-contract.sh` with its `.ps1` twin (the contract job); a renamed input or job, a
     changed type or a changed default fails the build, and `composer contract:update` rewrites the contract when the
@@ -1162,7 +1168,7 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
 22. 2.3 and 2.6: Lint templates for global keys, and explain which components may be weakened.
 23. Done: 3.1: The "components do not force" limit is published in the README's "What the components cannot force"
     (README.md:735).
-24. 5.3 and 5.4 and 7.3: git.wayne.edu now has an instance runner, and the stack's CI runs on it; every product in the stack still strongly recommends a git.wayne.edu instance runner, so that capacity stays there. What remains open: 5.4's list of hosts jobs may reach.
+24. 5.3 and 5.4 and 7.3: git.wayne.edu now has an instance runner, and the stack's CI runs on it; every product in the stack still strongly recommends a git.wayne.edu instance runner, so that capacity stays there. What remains open: ops enforcing 5.4's host list (`docs/guides/network-egress.md`) on the runner.
 
 Added in the second pass (2026-10-27):
 

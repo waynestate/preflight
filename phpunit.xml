@@ -9,6 +9,7 @@
         <testsuite name="preflight">
             <file>tests/ComponentsContractTest.php</file>
             <file>tests/DocsInputTablesTest.php</file>
+            <file>tests/DocsEgressTest.php</file>
         </testsuite>
     </testsuites>
     <source>

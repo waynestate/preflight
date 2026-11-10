@@ -890,6 +890,15 @@ without the proxy, set `image_prefix: docker.io`. Composer and npm downloads are
 fails a component that skips either. Details, and the upgrade step for apps that passed a proxied `image`:
 [Dependency caching](docs/guides/dependency-caching.md).
 
+## Which hosts the jobs reach
+
+A runner whose network is locked down needs a list of the hosts Preflight's jobs download from: the GitLab instance,
+Packagist and GitHub for Composer, getcomposer.org and composer.github.io for the Composer installer,
+`registry.npmjs.org`, the Debian mirror, and Microsoft's and Quay's registries for the `a11y` and `portability`
+images. [Which hosts the jobs reach](docs/guides/network-egress.md) has it by component, with the runner's image pulls
+apart from the job's own requests, and `tests/DocsEgressTest.php` fails when a template fetches from a host the page
+does not name. Your app's own registries and base images come on top.
+
 ## Template lint
 
 `composer ci` runs `bin/lint-templates` before the fixture tests. The lint scans

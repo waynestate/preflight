@@ -65,7 +65,7 @@
     },
     "scripts-descriptions": {
         "ci": "The full CI gate: template lint, fixture tests, Pint, PHPStan, unit tests, agent-ready files, docs site.",
-        "test": "Run the PHPUnit suite: the inputs contract test and the docs input-table test (README, the components reference and every component guide list each input with its contract type and default).",
+        "test": "Run the PHPUnit suite: the inputs contract test, the docs input-table test (README, the components reference and every component guide list each input with its contract type and default) and the egress test (the hosts page names every host a template fetches from).",
         "contract:update": "Rewrite contract/inputs.json from templates/. Run it only when the change is deliberate; a rename or a changed default is a breaking change.",
         "site:agent-ready": "Rewrite the Markdown twins, llms.txt, llms-full.txt, robots.txt and sitemap.xml in site/ (Squire's agent-ready kit).",
         "site:agent-ready-check": "Fail when the agent-ready files are stale, a page lacks its Markdown link, a prompt drifts from the docs, or the kit was edited here.",

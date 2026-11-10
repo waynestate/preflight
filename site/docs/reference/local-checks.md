@@ -69,7 +69,7 @@ The scripts from `composer.json`:
 | `lint` | `pint --test` | Run Pint in test mode; fails on style errors without changing files. |
 | `fix` | `pint` | Run Pint and rewrite the files it finds. |
 | `analyse` | `phpstan analyse --memory-limit=1G` | Run PHPStan with a 1G memory limit. |
-| `test` | `phpunit` | Run the PHPUnit suite: the inputs contract test (`tests/ComponentsContractTest.php`) and the docs input-table test (`tests/DocsInputTablesTest.php`), which fails when an input table in the README, the components reference or a component guide disagrees with `contract/inputs.json`. |
+| `test` | `phpunit` | Run the PHPUnit suite: the inputs contract test (`tests/ComponentsContractTest.php`) and the docs input-table test (`tests/DocsInputTablesTest.php`), which fails when an input table in the README, the components reference or a component guide disagrees with `contract/inputs.json`, and the egress test (`tests/DocsEgressTest.php`), which fails when [Which hosts the jobs reach](https://preflight.apps.wayne.edu/docs/guides/network-egress.html) misses a component, a fetched host or an image registry. |
 | `contract:update` | `php bin/contract-update.php` | Rewrite `contract/inputs.json` from `templates/`. Run it only when the change is deliberate; a rename or a changed default is a breaking change that needs a new major version. |
 | `site:agent-ready` | `php bin/agent-ready.php` | Rewrite the Markdown twins, llms.txt, llms-full.txt, robots.txt and sitemap.xml in `site/` (Squire's agent-ready kit). |
 | `site:agent-ready-check` | `php bin/agent-ready.php --check` | Fail when the agent-ready files are stale, a page lacks its Markdown link, a prompt drifts from the docs, or the kit was edited here. |

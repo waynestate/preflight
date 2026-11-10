@@ -127,6 +127,10 @@
           "path": "guides/dependency-caching"
         },
         {
+          "title": "Which hosts the jobs reach",
+          "path": "guides/network-egress"
+        },
+        {
           "title": "Template lint",
           "path": "guides/template-lint"
         },
