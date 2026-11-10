@@ -12,11 +12,41 @@ This page is the checklist for moving an app from one Preflight pin to the next,
 
 Every input and job name a component offers is recorded in `contract/inputs.json`, and Preflight's build fails when a template drifts from it, so the file is the exact list of what moved. Before you move a pin, diff it between your tag and the next one (for example `git diff 0.4.0 0.5.0 -- contract/inputs.json` in a clone of Preflight) and check each line against that version's Breaking and Steps below. [The inputs contract](https://preflight.apps.wayne.edu/docs/guides/inputs-contract.html) explains what each kind of change means for your include.
 
+## 0.8.0 [#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-8-0)
+
+Released 2026-11-10. One new input on the portability component, `session_header`, for an app whose probe sign-in route must not open for just anyone, plus a fix that makes `package-publish` refuse a moved version on GitLab's real registry. No input or job was renamed or removed. The boarding pass now gets checked against the passport.
+
+### Breaking [#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking)
+
+- None. `session_header` defaults to empty, and an empty value sends no extra header.
+- `package-publish` now fails a release whose version is already published on GitLab from a different commit. That is the job doing what it always promised; a pipeline that passed by overwriting a version will now stop.
+
+### New: session_header [#](https://preflight.apps.wayne.edu/docs/upgrading.html#new-session-header)
+
+Give it one header name and one CI variable, written `Name: $VARIABLE`:
+
+```yaml
+      session_header: "X-Portability-Token: $PORTABILITY_PROBE_TOKEN"
+```
+
+The probe reads the variable at run time with `printenv` (never `eval`) and sends the header on the login, `same`, `hop` and `anon` requests of `session-hop`. It never prints the value; any message names only the header and the variable. A value that does not match `Name: $VARIABLE` stops the job with an input error, and a variable that is not set in the job flags `session-hop` and sends no header. Set the variable as a masked CI variable. See [the portability guide](https://preflight.apps.wayne.edu/docs/guides/component-portability.html).
+
+### Steps [#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps)
+
+1. Move every Preflight include to the 0.8.0 tag's full commit SHA, with `# 0.8.0` in a trailing comment.
+2. An app whose probe sign-in route needs a secret adds `session_header` and a masked CI variable of the same name.
+3. Nothing else changes.
+
+### How to verify [#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify)
+
+- With `session_header` set, `session-hop` passes and the job log shows the header name, never its value.
+- Without it, the job behaves exactly as on 0.7.0.
+
 ## 0.7.0 [#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-7-0)
 
 Released 2026-11-10. One new input on the portability component, `setup_command`, for the step a platform runs before it scales an app out: migrating the database. No input or job was renamed or removed. A short hop: same aircraft, one more item on the checklist.
 
-### Breaking [#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking)
+### Breaking [#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-1)
 
 - None. `setup_command` defaults to empty, and an empty value runs nothing.
 
@@ -34,13 +64,13 @@ Use it with `services` and `session-hop`: a database both replicas share is empt
 
 Pin the service image by digest, as every Preflight default is, and point the app's `DB_HOST` at the alias. See [the portability guide](https://preflight.apps.wayne.edu/docs/guides/component-portability.html).
 
-### Steps [#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps)
+### Steps [#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-1)
 
 1. Move every Preflight include to the 0.7.0 tag's full commit SHA, with `# 0.7.0` in a trailing comment.
 2. An app that runs `session-hop` against a `services` database adds `setup_command` with its migration command.
 3. Nothing else changes.
 
-### How to verify [#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify)
+### How to verify [#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-1)
 
 - The portability job's summary lists `setup` as passed when `setup_command` is set, and has no `setup` line when it is empty.
 
@@ -48,7 +78,7 @@ Pin the service image by digest, as every Preflight default is, and point the ap
 
 Released 2026-11-10. This release adds one component, `mysql56-migrate`, which proves an app's migrations on the MySQL Citadel really runs. The portability job also runs the image's own `HEALTHCHECK` and can start a shared database for `session-hop`. No input or job was renamed or removed. Cleared for takeoff, with one more gauge on the panel.
 
-### Breaking [#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-1)
+### Breaking [#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-2)
 
 **The `healthcheck` check is in the default `checks`.** An include that leaves `checks` at its default now runs the image's own `HEALTHCHECK` command inside replica A, as the app's uid, and fails when it exits non-zero three times in a row. An image that declares no `HEALTHCHECK` still passes, with a note (set `require_healthcheck: true` to fail instead). If your image's health command only works as root, or calls a tool the image lacks, fix the command in the same change as the bump. An include that lists `checks` itself does not get the new check until you add `healthcheck` to its list.
 
@@ -65,14 +95,14 @@ CREED's database rule says an app MUST run its migrations in CI against a real M
 - It runs on the default branch and tags, is manual (and allowed to fail) on merge requests, and never runs from a schedule.
 - A raw PHP app passes its own migration command; [the guide](https://preflight.apps.wayne.edu/docs/guides/component-mysql56-migrate.html) has both includes.
 
-### Steps [#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-1)
+### Steps [#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-2)
 
 1. Move every Preflight include to the 0.6.0 tag's full commit SHA, with `# 0.6.0` in a trailing comment.
 2. If the app has migrations, add the `mysql56-migrate` include.
 3. If the portability job runs with the default `checks`, boot the image locally and run its `HEALTHCHECK` command as a uid with no name in group 0 before you push.
 4. An app that keeps sessions in its database (WELD does) can now add `session-hop` back: give the portability include a `services` database and point `DB_HOST` at its alias.
 
-### How to verify [#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-1)
+### How to verify [#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-2)
 
 - The `mysql56-migrate` job is green on the default branch, and its log ends with the app's own migration output.
 - The portability job's summary lists `healthcheck` as passed, or as passed with the "declares no HEALTHCHECK" note.
@@ -81,7 +111,7 @@ CREED's database rule says an app MUST run its migrations in CI against a real M
 
 Released 2026-11-09. A new component, `npm-audit`, the front-end half of `composer-audit`; a portability probe that starts each replica the way a container runtime does, so an Apache image needs no `start_command` shim; a proctor job that keeps PROCTOR's JSON report as `proctor.json` for Rollcall; and Composer 2.11.1 in every default. No input or job was renamed or removed.
 
-### Breaking [#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-2)
+### Breaking [#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-3)
 
 **The portability launcher.** The `portability` job now starts each replica through a launcher that gives it stdout and stderr its uid owns and a session of its own (`setsid`), as a container runtime does. An include that still carries a `start_command` shim calling `setsid` (WELD's was `exec setsid bash -c '...'`) breaks on 0.5.0: inside the launcher the shim forks the app away from the replica's main process, and `health` fails. Delete the shim in the same change as the bump. With an empty `start_command` the job runs the image's own `ENTRYPOINT` and `CMD`, which is what an Apache image (Squire's portable image, a Sourdough or WELD app) needs. A `start_command` that only starts the app, with no `setsid` and no stdio redirect, keeps working.
 
@@ -106,7 +136,7 @@ The `npm-audit` component runs `npm audit` on the app's `package-lock.json` in t
 
 An app with no lock file (no `package-lock.json` or `npm-shrinkwrap.json`) passes with a note, `npm-audit: no lock file ... nothing to audit.`, so a PHP-only app never goes red. An unreachable registry fails the job. See [The npm-audit component](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html).
 
-### Steps [#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-2)
+### Steps [#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-3)
 
 1. If an include of `portability` sets a `start_command` shim that calls `setsid`, delete the shim (or the whole `start_command` line) in the same change as step 2.
 2. Point each component include at the `0.5.0` tag, pinned to the tag's full commit SHA with the tag in a trailing comment:
@@ -127,7 +157,7 @@ include:
 
 4. Optional: to feed Rollcall, move the app to PROCTOR 0.11.0 or later (`composer require --dev waynestate/proctor:^0.11`).
 
-### How to verify [#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-2)
+### How to verify [#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-3)
 
 The pipeline is green. The `portability` job passes all its checks with no shim, the composer-based jobs' `Pulling docker image` line names `composer:2.11.1`, and on PROCTOR 0.11.0 or later the proctor job's artifact holds `proctor.json`. With `npm-audit` included, its log ends with `npm audit`'s summary, or with the no-lock-file note. Checklist done, doors armed: cleared for takeoff.
 
@@ -135,7 +165,7 @@ The pipeline is green. The `portability` job passes all its checks with no shim,
 
 Released 2026-11-08. Two new inputs and a Composer floor. The proctor component's `git_depth` (default `"0"`) clones the full history, so PROCTOR's override-approver check can read git blame on every override line instead of reporting could-not-run past GitLab's 20-commit default. php-test's `php_advisory_version` runs one more PHP version, such as a release candidate, in a separate job that may fail. php-test and proctor refuse a `composer_version` older than 2.9.6, the floor with the 2026 security fixes.
 
-### Breaking [#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-3)
+### Breaking [#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-4)
 
 An include that sets `composer_version` on php-test or proctor to a version older than 2.9.6 no longer starts: GitLab rejects the input before the pipeline runs. The default (2.10.3) is unaffected, and no other input, default or job name changed.
 
@@ -143,7 +173,7 @@ An include that sets `composer_version` on php-test or proctor to a version olde
 
 Nothing was deprecated in 0.4.0.
 
-### Steps [#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-3)
+### Steps [#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-4)
 
 1. If an include sets `composer_version` below 2.9.6, remove the input (the default is 2.10.3) or set 2.9.6 or later.
 2. Point each component include at the `0.4.0` tag, pinned to the tag's full commit SHA with the tag in a trailing comment:
@@ -155,7 +185,7 @@ include:
 
 3. Optional: on a very large repository, set the proctor component's `git_depth` to a number such as `50`; override lines older than that then report could-not-run. To hear about the next PHP early, set php-test's `php_advisory_version`, for example `8.6.0RC2`.
 
-### How to verify [#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-3)
+### How to verify [#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-4)
 
 The pipeline is green, the proctor job log's fetch line no longer says `git depth set to 20` (unless you set `git_depth`), and with `php_advisory_version` set a `php-test-advisory` job runs and may fail without failing the pipeline.
 
@@ -163,7 +193,7 @@ The pipeline is green, the proctor job log's fetch line no longer says `git dept
 
 Released 2026-11-08. Every component that installs packages caches under a fixed key per component (such as `preflight-pint`, or `preflight-php-8.4` for one PHP version of `php-test`) instead of a lock-file hash, and saves its cache even when the job fails. A lock change, or a retry after a dropped download, fetches only what is missing.
 
-### Breaking [#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-4)
+### Breaking [#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-5)
 
 0.3.1 has no breaking changes: inputs, defaults and job names are the same as in 0.3.0.
 
@@ -171,7 +201,7 @@ Released 2026-11-08. Every component that installs packages caches under a fixed
 
 Nothing was deprecated in 0.3.1.
 
-### Steps [#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-4)
+### Steps [#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-5)
 
 Point each component include at the `0.3.1` tag, pinned to the tag's full commit SHA with the tag in a trailing comment:
 
@@ -182,7 +212,7 @@ include:
 
 The first pipeline on the new pin fills the new cache keys, so expect it to download everything once.
 
-### How to verify [#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-4)
+### How to verify [#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-5)
 
 The pipeline is green, and a component's job log shows `Creating cache preflight-` followed by the component's key, and, after a failed job, `Saving cache for failed job`.
 
@@ -190,7 +220,7 @@ The pipeline is green, and a component's job log shows `Creating cache preflight
 
 Released 2026-11-08. Docker Hub images now come through the group's Dependency Proxy by default (a new `image_prefix` input), and more components cache their Composer and npm downloads.
 
-### Breaking [#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-5)
+### Breaking [#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-6)
 
 Every component whose image comes from Docker Hub (`proctor`, `php-test`, `composer-audit`, `sbom`, `pint`, `phpstan`, `eslint`, `secret-detection`, `package-publish`, `renovate`, `squire-kit`) now pulls `image_prefix/image`, and `image_prefix` defaults to your group's Dependency Proxy (`${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}`). `image` keeps its default and is the path after the prefix. Only an app that overrides `image`, or runs where the proxy is off, needs to act:
 
@@ -205,7 +235,7 @@ Every component whose image comes from Docker Hub (`proctor`, `php-test`, `compo
 
 Nothing was deprecated in 0.3.0.
 
-### Steps [#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-5)
+### Steps [#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-6)
 
 1. Move every Preflight include to the `0.3.0` tag in one change, pinned to the tag's full commit SHA with the tag in a trailing comment, and remove any proxied `image:` input in the same change (step 1 above):
    ```yaml
@@ -231,7 +261,7 @@ Verify: the job log's `Pulling docker image` line shows the prefix once, and eac
 
 ## 0.2.0 [#](https://preflight.apps.wayne.edu/docs/upgrading.html#0-2-0)
 
-### Breaking [#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-6)
+### Breaking [#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-7)
 
 The `portability` component is now one job, `portability` (named by a new `job_name` input), instead of `portability-build` and `portability-run`, and it checks what ADR-0010 asks for instead of the goss list. It builds the image with Buildah and runs it in the same job, so nothing is pushed to the container registry and no app image is pulled. Only an app that already includes `portability` from 0.1.4 needs to act:
 
@@ -251,7 +281,7 @@ The Buildah image default (now the `portability` component's `image` input) move
 
 Released 2026-11-03. The new pieces are opt-in: the `portability` component, a `job_name` input on every component except `portability`, and a stricter Renovate preset.
 
-### Breaking [#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-7)
+### Breaking [#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-8)
 
 0.1.4 has no breaking changes: the version adds a component, an input and preset rules, and removes nothing.
 
@@ -259,7 +289,7 @@ Released 2026-11-03. The new pieces are opt-in: the `portability` component, a `
 
 Nothing was deprecated in 0.1.4.
 
-### Steps [#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-6)
+### Steps [#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-7)
 
 Point each component include at the `0.1.4` tag, pinned to the tag's full commit SHA with the tag in a trailing comment:
 
@@ -286,7 +316,7 @@ Note
 
 Pins change only through a reviewed merge request. A tag or branch can move; a SHA cannot.
 
-### How to verify [#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-5)
+### How to verify [#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-6)
 
 Push the change and run the app's pipeline. The components are ordinary jobs, so they run whenever the app's pipeline runs; expect the same jobs as before, green. PROCTOR's `preflight-pinned` check warns when an include is not pinned to a commit SHA. If you added `portability`, the `portability-run` job passes only when the image boots the strict way and the goss checks hold.
 
@@ -294,7 +324,7 @@ Push the change and run the app's pipeline. The components are ordinary jobs, so
 
 Released 2026-11-03. Two consumer-facing changes: the `proctor` component installs the app with `--no-plugins --no-scripts`, and the shared Renovate preset stopped auto-merging the pins that every pipeline runs.
 
-### Breaking [#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-8)
+### Breaking [#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-9)
 
 0.1.3 has no breaking changes, but the `proctor` job now installs the app's dependencies with `composer install --no-plugins --no-scripts`, so the app's plugins and scripts never run inside the job.
 
@@ -302,7 +332,7 @@ Released 2026-11-03. Two consumer-facing changes: the `proctor` component instal
 
 Nothing was deprecated in 0.1.3.
 
-### Steps [#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-7)
+### Steps [#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-8)
 
 Bump each component include to the `0.1.3` tag's full commit SHA, with the tag in a trailing comment:
 
@@ -320,7 +350,7 @@ Warning
 
 Do not add `RENOVATE_TOKEN: $RENOVATE_TOKEN` to your own `variables:`; that self-reference arrives as literal text.
 
-### How to verify [#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-6)
+### How to verify [#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-7)
 
 Run the pipeline and confirm the jobs run on the new pin. In the runner project, confirm the job reads `RENOVATE_TOKEN` straight from the project as a masked CI variable, and that a bump touching the templates, the contract or a component include pin opens a merge request labeled `needs-review` instead of auto-merging.
 
@@ -328,7 +358,7 @@ Run the pipeline and confirm the jobs run on the new pin. In the runner project,
 
 Released 2026-10-29. The site gained the agent-ready kit (prompt blocks, Markdown twins, llms.txt) from Squire, and the proof page moved to a private site that needs a Wayne State sign-in.
 
-### Breaking [#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-9)
+### Breaking [#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-10)
 
 0.1.2 has no breaking changes: the version touches the site, the README and the proof page, not the components.
 
@@ -336,7 +366,7 @@ Released 2026-10-29. The site gained the agent-ready kit (prompt blocks, Markdow
 
 Nothing was deprecated in 0.1.2.
 
-### Steps [#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-8)
+### Steps [#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-9)
 
 Bump each component include to the `0.1.2` tag's full commit SHA, with the tag in a trailing comment:
 
@@ -345,7 +375,7 @@ include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@<full commit SHA> # 0.1.2
 ```
 
-### How to verify [#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-7)
+### How to verify [#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-8)
 
 Run the pipeline and confirm the component jobs run on the new pin. PROCTOR's `preflight-pinned` check warns when an include is not pinned to a commit SHA.
 
@@ -353,7 +383,7 @@ Run the pipeline and confirm the component jobs run on the new pin. PROCTOR's `p
 
 Released 2026-10-29. Two new components: `package-publish`, which publishes a semantic version tag to the GitLab group's built-in Composer registry, and `renovate`, with the shared preset `renovate/default.json`. The reusable GitHub Actions workflow for mirrors ships in this tag too.
 
-### Breaking [#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-10)
+### Breaking [#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-11)
 
 0.1.1 has no breaking changes: the version adds components and changes only the repository's own PHPStan config.
 
@@ -361,7 +391,7 @@ Released 2026-10-29. Two new components: `package-publish`, which publishes a se
 
 Nothing was deprecated in 0.1.1.
 
-### Steps [#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-9)
+### Steps [#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-10)
 
 Bump the existing includes to the `0.1.1` tag's full commit SHA, and add the new components where you want them:
 
@@ -393,7 +423,7 @@ jobs:
     uses: waynestate/preflight/.github/workflows/php-package.yml@<full commit SHA> # 0.1.1
 ```
 
-### How to verify [#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-8)
+### How to verify [#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-9)
 
 Run the pipeline. For `package-publish`, the job runs only on tags and reads the registry first: a version already published from this commit passes quietly, and a version published from a different commit fails the pipeline. For a mirrored package, a release tag is not done until it is green on both sides.
 
@@ -401,7 +431,7 @@ Run the pipeline. For `package-publish`, the job runs only on tags and reads the
 
 Released 2026-10-27. First tagged release.
 
-### Breaking [#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-11)
+### Breaking [#](https://preflight.apps.wayne.edu/docs/upgrading.html#breaking-12)
 
 0.1.0 is the first tagged release, so there is nothing to break: it is the baseline every later pin moves from.
 
@@ -409,7 +439,7 @@ Released 2026-10-27. First tagged release.
 
 Nothing was deprecated in 0.1.0.
 
-### Steps [#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-10)
+### Steps [#](https://preflight.apps.wayne.edu/docs/upgrading.html#steps-11)
 
 Include the components pinned to the `0.1.0` tag's full commit SHA:
 
@@ -418,7 +448,7 @@ include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@<full commit SHA> # 0.1.0
 ```
 
-### How to verify [#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-9)
+### How to verify [#](https://preflight.apps.wayne.edu/docs/upgrading.html#how-to-verify-10)
 
 Run the pipeline and confirm the component jobs run on the pin.
 
