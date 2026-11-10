@@ -12,6 +12,7 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ## Unreleased [#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Added: `must-fail-proctor-lock` and `must-warn-preflight-gates` jobs run the real PROCTOR on fixture-app copies: PROCTOR fails a copy whose lock is gone (removed after the install, since Composer writes one during it; BEST_PRACTICES 4.5 records that gap), and a pipeline without Preflight, with `allow_failure` on the proctor gate or pinned to `@main` warns without failing.
 - Added: must-fail proofs for the contract check (`tests/check-contract-fails` in the `contract` job, and a PHPUnit case): a changed default or a renamed input now has to fail both comparisons.
 - Fixed: `tests/check-contract.ps1` names php-test's jobs from the `job_name` input like the `.sh` twin and the PHPUnit contract test, so it passes the real templates again on Windows.
 - Added: must-fail proofs for the image-input, cache-key and PHP-matrix guards (`tests/check-image-inputs-fails`, `tests/check-cache-fails`, `tests/check-php-matrix-fails`), and a `check-php-matrix` guard that keeps php-test's `parallel: matrix:` wiring, all run by the `contract` job.
