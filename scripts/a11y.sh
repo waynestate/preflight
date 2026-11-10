@@ -5,6 +5,7 @@
 # templates/a11y/template.yml, so a local run and a pipeline run check the
 # same way. Linux and macOS; on Windows use scripts/a11y.ps1, or this script
 # from Git Bash (the MSYSTEM block below handles its path conversion).
+# A11Y_IN_IMAGE=1 runs the checker in the current image instead of Docker (the must-fail-a11y CI job sets it).
 #
 #   sh scripts/a11y.sh                    Preflight's front page and docs, WCAG 2.2 AA
 #   sh scripts/a11y.sh --site=DIR --pages='["index.html", "docs/**/*.html"]' \
@@ -69,6 +70,28 @@ fi
 
 CONFIG=$(printf '{"siteDir": "%s", "pages": %s, "tags": %s, "colorSchemes": %s, "widths": %s, "axeCoreVersion": "%s"}' \
   "$SITE" "$PAGES" "$TAGS" "$SCHEMES" "$WIDTHS" "$AXE_CORE")
+
+# A11Y_IN_IMAGE=1: in-image mode, for Preflight's own must-fail-a11y CI job,
+# which already runs inside the Playwright image, so there is no Docker there
+# to call. A developer never sets it. The .ps1 twin has no such mode: the
+# Playwright image has no PowerShell.
+if [ "${A11Y_IN_IMAGE:-}" = "1" ]; then
+  if [ -n "$REPORT" ]; then
+    mkdir -p "$REPORT"
+    REPORT_DIR=$(cd "$REPORT" && pwd)
+  else
+    REPORT_DIR=/tmp/preflight-a11y/out
+  fi
+  export A11Y_CONFIG="$CONFIG"
+  export A11Y_REPORT_DIR="$REPORT_DIR"
+  export A11Y_PLAYWRIGHT_VERSION="$PW"
+  export A11Y_AXE_PLAYWRIGHT_VERSION="$AXE_PW"
+  export A11Y_AXE_CORE_VERSION="$AXE_CORE"
+  if [ -n "$BASE_URL" ]; then
+    export A11Y_BASE_URL="$BASE_URL"
+  fi
+  exec sh scripts/a11y-container.sh
+fi
 
 # Git Bash on Windows rewrites absolute-looking arguments for native programs
 # (docker would turn -w /work into a Windows path). Turn that off and pass the

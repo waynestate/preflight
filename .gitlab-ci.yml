@@ -292,6 +292,29 @@ must-fail-squire-kit:
   script:
     - sh tests/check-squire-kit-fails.sh
 
+# The must-fail fixture for the a11y component: the check proves the checker
+# still passes a clean site and fails a bad one with each flaw named. Runs in
+# the component's own Playwright image, pinned by digest, so it needs no
+# Docker; the image is on Microsoft's registry, not Docker Hub, so it skips
+# the Dependency Proxy. npm downloads land in .npm-cache/ under a fixed key,
+# so repeat pipelines skip them.
+must-fail-a11y:
+  stage: test
+  image: mcr.microsoft.com/playwright:v1.65.0-noble@sha256:6e3fb709361521eb27161606e6da6d2674e5e89fa16516cb37d6fdd91372273d
+  interruptible: true
+  timeout: 30 minutes
+  cache:
+    key: preflight-must-fail-a11y
+    paths:
+      - .npm-cache/
+    when: always  # a failed job still keeps every package that finished downloading
+  variables:
+    A11Y_IN_IMAGE: "1"
+    NPM_CONFIG_UPDATE_NOTIFIER: "false"
+    NPM_CONFIG_CACHE: "$CI_PROJECT_DIR/.npm-cache"
+  script:
+    - sh tests/check-a11y.sh
+
 # The must-fail fixtures for the portability component: the check runs the
 # component's own probe (templates/portability/probe.sh, which the template
 # carries byte for byte) on the clean fixture, on nine flawed builds of it

@@ -1047,7 +1047,7 @@ fails rather than passes); `npm-audit` runs the template's own script on fixed l
 an `.npmrc` that turns the audit off still fails, a dev-only finding fails only with `omit_dev` false, and a clean
 lock, an app with no lock and an unreachable registry behave as the docs say (`tests/check-npm-audit-fails`, run in CI
 by `must-fail-npm-audit`); `a11y` checks the bad site in `tests/a11y-fixtures/bad`, which fails with each flaw named
-(`tests/check-a11y`; no CI job runs it yet); `portability` builds `tests/portability/app` once clean and once per flaw
+(`tests/check-a11y`, run in CI by `must-fail-a11y`); `portability` builds `tests/portability/app` once clean and once per flaw
 (needs root, writes outside its paths, fixed port, host-bound health, a baked `.env`, trusts any proxy, file logs, file
 sessions, no SIGTERM handler) and passes only when the clean build passes and each flaw fails the check it targets
 (`tests/check-portability`, run in CI by `must-fail-portability`); `php-test` runs PHPUnit on `tests/php-test-fails`,
@@ -1068,8 +1068,7 @@ CI by `must-fail-sbom`); `squire-kit` runs the template's own script against the
 naming the file, and a copy with no `.squire.json`, which must stop with exit 2 (`tests/check-squire-kit-fails`, run
 in CI by `must-fail-squire-kit`); and `package-publish`'s offline guards stop a non-semantic-version tag and a missing
 `composer.json` before any registry contact (`tests/check-package-publish-fails.sh`, run in CI by
-`must-fail-package-publish`). Still missing: `a11y`'s fixture runs only by hand, since no CI job runs
-`tests/check-a11y` yet; `package-publish`'s moved-version path needs a live registry and stays untested; `renovate` is
+`must-fail-package-publish`). Still missing: `package-publish`'s moved-version path needs a live registry and stays untested; `renovate` is
 a config, not a job, so it has nothing to fail.
 
 ### 7.3 Use the stack's own projects as the first users

@@ -17,15 +17,16 @@
 #
 # One result line per case goes to stdout; the checker's own output is kept
 # in a temp folder and printed only for a case that went wrong. POSIX sh, so
-# it runs on any Linux or macOS box and in Git Bash. Needs Docker. Its twin,
-# check-a11y.ps1, does the same on Windows.
+# it runs on any Linux or macOS box and in Git Bash. Needs Docker; with
+# A11Y_IN_IMAGE=1 (the must-fail-a11y job) it runs inside the Playwright
+# image with no Docker. Its twin, check-a11y.ps1, does the same on Windows.
 
 set -u
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 cd "$ROOT" || exit 1
 
-if ! command -v docker >/dev/null 2>&1; then
+if [ "${A11Y_IN_IMAGE:-}" != "1" ] && ! command -v docker >/dev/null 2>&1; then
   echo "docker is required" >&2
   exit 1
 fi
