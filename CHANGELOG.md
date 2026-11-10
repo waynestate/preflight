@@ -8,6 +8,7 @@ are Git tags.
 
 - Added: `tests/DocsInputTablesTest.php` (in `composer ci`) holds the docs to `contract/inputs.json`: the input table for every component in the README, the components reference and the component's guide must list each input with its contract type and default, and nothing else. A checklist is only as good as the airplane it was written for.
 - Docs: the README and the components reference get a `mysql56-migrate` section (it shipped in 0.6.0 with only a guide), php-test's `php_advisory_version` row, and portability's `setup_command`, `services` and `require_healthcheck` rows with the `healthcheck` check in the default `checks`; the README's opening line names npm audit, MySQL 5.6 migrations and the portability probe. Found by the new test.
+- Docs: the README art is current again. The checklist card's panel lists all fifteen components in two columns with the 0.7.0 tag said once in its header (fourteen in one column no longer fit), its description says freshness "is" coming soon, the components badge reads 15, the hero is a fresh capture of the 0.7.0 page, and the cast picks up the stack's newer marks. The art kit takes 0.7.0 as the tag every component ships in (it still read 0.5.0, so it refused the 0.7.0 placards), and it now allows Citadel by name in captured text, as the public docs do, while still refusing internal host names. The components reference lists the seven components with no card row in one table, with the release each arrived in.
 
 ## 0.7.0 (2026-11-10)
 

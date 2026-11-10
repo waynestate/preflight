@@ -38,10 +38,13 @@ const outDir = path.join(repoRoot, "docs", "readme");
 const castDir = path.join(outDir, "cast");
 
 const MAX_BYTES = 300 * 1024; // every file in docs/readme/ stays at or under this
-const FORBIDDEN = /noug[a]t|snu[.]gs|citadel/i; // internal names never ship in art
+// Internal host names never ship in art. Citadel by name is public (the front
+// page and the docs say it), so a placard that names Citadel's MySQL 5.6 is
+// fine; its server hosts are not.
+const FORBIDDEN = /noug[a]t|snu[.]gs|dockerhos[t]/i;
 
 // The tag every component ships in. The page's placards must agree with it.
-const COMPONENT_TAG = "0.5.0";
+const COMPONENT_TAG = "0.7.0";
 
 // Preflight's own palette, as declared in site/assets/preflight.css.
 const C = {
@@ -545,24 +548,35 @@ async function buildChecklist(page, templates) {
     ...unpaired.map((tp) => ({ job: tp.job, stage: tp.stage })),
   ];
   const stages = [...new Set(listed.map((it) => it.stage))].join(" · ");
-  // 23 units a row, closed up (never under 18, which still clears the 14 px
-  // names) when the list grows past the panel: fourteen components since
-  // 0.5.0. The overflow check below still catches a list that cannot fit.
-  const rowRoom = (panelY + panelH - 24 - jobsTop) / Math.max(1, listed.length - 1);
-  const rowGap = Math.max(18, Math.min(23, Math.floor(rowRoom)));
+  // Up to ten names fit one column, each with its tag on the right. Past
+  // that (fifteen components since 0.6.0) the list turns into two columns,
+  // read down then across like a cockpit's breaker panel, and the tag every
+  // one ships in moves up into the header line once instead of fifteen
+  // times. 23 units a row, closed up to no less than 18 (which still clears
+  // the 14 px names); the overflow check below still catches a list that
+  // cannot fit.
   const tagLabel = `IN ${COMPONENT_TAG}`.toUpperCase();
+  const listCols = listed.length > 10 ? 2 : 1;
+  const listRows = Math.ceil(listed.length / listCols);
+  const rowRoom = (panelY + panelH - 24 - jobsTop) / Math.max(1, listRows - 1);
+  const rowGap = Math.max(18, Math.min(23, Math.floor(rowRoom)));
+  const colW = (panelW - 2 * lampPadX) / listCols;
+  const header = listCols > 1 ? `INCLUDE: ${listed.length} COMPONENTS, ${tagLabel}` : `INCLUDE: ${listed.length} COMPONENTS`;
   const jobsSvg = [
-    `<text x="${panelX + lampPadX}" y="${jobsY}" font-family="${MONO}" font-weight="700" font-size="12" letter-spacing="1.2" fill="${C.glassText}">INCLUDE: ${listed.length} COMPONENTS</text>`,
+    `<text x="${panelX + lampPadX}" y="${jobsY}" font-family="${MONO}" font-weight="700" font-size="12" letter-spacing="1.2" fill="${C.glassText}">${esc(header)}</text>`,
     `<text x="${panelX + lampPadX}" y="${jobsY + 18}" font-family="${MONO}" font-weight="700" font-size="12" letter-spacing="1.2" fill="${C.glassText}">STAGE ${esc(stages.toUpperCase())}</text>`,
     ...listed.map((it, i) => {
-      const y = jobsTop + i * rowGap;
-      return (
-        `<text x="${panelX + lampPadX}" y="${y}" font-family="${MONO}" font-size="14" fill="${C.cream}"><tspan fill="${C.gold}">- </tspan>${esc(it.job)}</text>` +
-        `<text x="${panelX + panelW - lampPadX}" y="${y}" text-anchor="end" font-family="${MONO}" font-size="12" letter-spacing="0.6" fill="${C.lit}">${esc(tagLabel)}</text>`
-      );
+      const col = Math.floor(i / listRows);
+      const y = jobsTop + (i % listRows) * rowGap;
+      const x = panelX + lampPadX + col * colW;
+      const name = `<text x="${x}" y="${y}" font-family="${MONO}" font-size="14" fill="${C.cream}"><tspan fill="${C.gold}">- </tspan>${esc(it.job)}</text>`;
+      return listCols > 1
+        ? name
+        : name +
+            `<text x="${panelX + panelW - lampPadX}" y="${y}" text-anchor="end" font-family="${MONO}" font-size="12" letter-spacing="0.6" fill="${C.lit}">${esc(tagLabel)}</text>`;
     }),
   ].join("\n  ");
-  const jobsBottom = jobsTop + (listed.length - 1) * rowGap;
+  const jobsBottom = jobsTop + (listRows - 1) * rowGap;
 
   // ---- screws (simple geometry: the page's placards and instrument have them)
   const screw = (x, y) =>
@@ -580,10 +594,10 @@ async function buildChecklist(page, templates) {
     .filter((it) => it.tpl)
     .map((it) => `${it.name} (${it.tpl.job}): ${it.resp}`)
     .join("; ");
-  const desc = `Preflight's checklist card, "${d.title}". ${jobSummary}; then ${items.at(-1).name}: ${items.at(-1).resp}. Each item is ticked in turn and its lamp on the annunciator panel goes green; ${d.lamps
-    .filter((l) => l.soon)
-    .map((l) => l.face)
-    .join(", ")} are marked coming soon. ${d.foot}`;
+  const soon = d.lamps.filter((l) => l.soon).map((l) => l.face.charAt(0) + l.face.slice(1).toLowerCase());
+  const soonLine =
+    soon.length === 0 ? "" : ` ${soon.join(", ")} ${soon.length === 1 ? "is" : "are"} marked coming soon.`;
+  const desc = `Preflight's checklist card, "${d.title}". ${jobSummary}; then ${items.at(-1).name}: ${items.at(-1).resp}. Each item is ticked in turn and its lamp on the annunciator panel goes green.${soonLine} Below the lamps the panel lists all ${listed.length} components the include offers, every one in the ${COMPONENT_TAG} tag. ${d.foot}`;
   assertTextClean(desc, "checklist description");
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-labelledby="pf-title pf-desc">

@@ -14,7 +14,7 @@ Note
 
 Components are GA on the Free tier since GitLab 17.0. They work only within the same GitLab instance that hosts this project.
 
-![Preflight's before-takeoff checklist card. 1 PROCTOR, checked; 2 PHP tests, 8.3, 8.4 and 8.5 pass; 3 Composer audit, no advisories; 4 SBOM, validated; 5 Pint, clean; 6 PHPStan, no errors; 7 ESLint and Prettier, clean; 8 a11y with axe-core, no violations; 9 clearance, cleared for takeoff. Beside it the annunciator panel lights a green lamp per check, the contract lamp with the clearance and freshness marked coming soon, and lists all fourteen components, every one in the 0.5.0 tag.](https://preflight.apps.wayne.edu/docs/readme/checklist.svg)
+![Preflight's before-takeoff checklist card. 1 PROCTOR, checked; 2 PHP tests, 8.3, 8.4 and 8.5 pass; 3 Composer audit, no advisories; 4 SBOM, validated; 5 Pint, clean; 6 PHPStan, no errors; 7 ESLint and Prettier, clean; 8 a11y with axe-core, no violations; 9 clearance, cleared for takeoff. Beside it the annunciator panel lights a green lamp per check, the contract lamp and the clearance, with freshness marked coming soon, and lists all fifteen components in two columns, every one in the 0.7.0 tag.](https://preflight.apps.wayne.edu/docs/readme/checklist.svg)
 
 The checklist, item by item, with each item's job and timeout read from `templates/`:
 
@@ -28,31 +28,23 @@ The checklist, item by item, with each item's job and timeout read from `templat
 | 6 | PHPStan | `phpstan` | 10m |
 | 7 | ESLint and Prettier | `eslint` | 15m |
 
-The card runs the seven above and `a11y`; `squire-kit` and `portability` (in its one-job form) are on the panel's component list instead. All three have shipped since 0.2.0:
+The card runs the seven above and `a11y`:
 
 | # | Item | Job | Timeout |
 | --- | --- | --- | --- |
 | 8 | Accessibility, WCAG 2.1 AA by default | `a11y` | 30 minutes |
-| 9 | Squire deploy kit matches its release | `squire-kit` | 10 minutes |
-| 10 | Runs off Citadel: strict boot and six portability checks | `portability` | 30 minutes |
 
-New in 0.5.0, and not on the card:
+The panel below the lamps lists all fifteen components, two columns of names. The seven with no card row, because they guard something other than the code on every push (a deploy kit, the image, a release, a schedule), are:
 
-| # | Item | Job | Timeout |
-| --- | --- | --- | --- |
-| 11 | npm audit, high or critical in runtime dependencies by default | `npm-audit` | 10 minutes |
-
-New in 0.6.0, and not on the card:
-
-| # | Item | Job | Timeout |
-| --- | --- | --- | --- |
-| 12 | Migrations run on MySQL 5.6.51, Citadel's shared server | `mysql56-migrate` | 30 minutes |
-
-New in 0.7.0, and not on the card:
-
-| # | Item | Job | Timeout |
-| --- | --- | --- | --- |
-| 13 | Portability's `setup_command` input: a command run once, in its own container of the built image, before either replica starts | `portability` | 30 minutes |
+| Component | What it proves | Job | Timeout | Since |
+| --- | --- | --- | --- | --- |
+| `secret-detection` | No committed secret in the checked-out tree | `secret-detection` | 30 minutes | 0.2.0 |
+| `squire-kit` | The Squire deploy kit matches its release | `squire-kit` | 10 minutes | 0.2.0 |
+| `portability` | The image runs off Citadel: strict boot, six portability checks and the image's own HEALTHCHECK (0.6.0); `setup_command` runs once before the replicas start (0.7.0) | `portability` | 30 minutes | 0.2.0 (one-job form) |
+| `npm-audit` | No npm advisory at or above `audit_level` (high by default) in runtime dependencies | `npm-audit` | 10 minutes | 0.5.0 |
+| `mysql56-migrate` | Migrations run on MySQL 5.6.51, Citadel's shared server | `mysql56-migrate` | 30 minutes | 0.6.0 |
+| `package-publish` | A tag publishes the package to the instance's registry | `package-publish` | 30 minutes | 0.1.1 |
+| `renovate` | Scheduled dependency bumps, reviewed before they merge | `renovate` | 1 hour | 0.1.1 |
 
 Every job the templates define is `interruptible: true`. Every component takes a `job_name` input whose default is the job's usual name; set it when one project includes the same component more than once.
 

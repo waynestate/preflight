@@ -43,7 +43,7 @@
       <article class="docs-article"><h1 id="components"><span class="docs-heading-tail"><span>Components</span><a class="docs-heading-link" aria-label="Link to this section" href="#components">#</a></span></h1>
 <p>Every GitLab CI component Preflight ships, with its include example, its inputs and their defaults, and the jobs and timeouts each template defines. Add one include to your app's <code>.gitlab-ci.yml</code>, then follow the per-component guide for setup. Like a real pre-flight check, the point is to find the fault on the ground, where it is cheap to fix.</p>
 <aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>Components are GA on the Free tier since GitLab 17.0. They work only within the same GitLab instance that hosts this project.</p></aside>
-<p><img src="../readme/checklist.svg" alt="Preflight's before-takeoff checklist card. 1 PROCTOR, checked; 2 PHP tests, 8.3, 8.4 and 8.5 pass; 3 Composer audit, no advisories; 4 SBOM, validated; 5 Pint, clean; 6 PHPStan, no errors; 7 ESLint and Prettier, clean; 8 a11y with axe-core, no violations; 9 clearance, cleared for takeoff. Beside it the annunciator panel lights a green lamp per check, the contract lamp with the clearance and freshness marked coming soon, and lists all fourteen components, every one in the 0.5.0 tag." /></p>
+<p><img src="../readme/checklist.svg" alt="Preflight's before-takeoff checklist card. 1 PROCTOR, checked; 2 PHP tests, 8.3, 8.4 and 8.5 pass; 3 Composer audit, no advisories; 4 SBOM, validated; 5 Pint, clean; 6 PHPStan, no errors; 7 ESLint and Prettier, clean; 8 a11y with axe-core, no violations; 9 clearance, cleared for takeoff. Beside it the annunciator panel lights a green lamp per check, the contract lamp and the clearance, with freshness marked coming soon, and lists all fifteen components in two columns, every one in the 0.7.0 tag." /></p>
 <p>The checklist, item by item, with each item's job and timeout read from <code>templates/</code>:</p>
 <div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
 <thead>
@@ -99,7 +99,7 @@
 </tr>
 </tbody>
 </table></div>
-<p>The card runs the seven above and <code>a11y</code>; <code>squire-kit</code> and <code>portability</code> (in its one-job form) are on the panel's component list instead. All three have shipped since 0.2.0:</p>
+<p>The card runs the seven above and <code>a11y</code>:</p>
 <div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
 <thead>
 <tr>
@@ -116,74 +116,68 @@
 <td><code>a11y</code></td>
 <td>30 minutes</td>
 </tr>
+</tbody>
+</table></div>
+<p>The panel below the lamps lists all fifteen components, two columns of names. The seven with no card row, because they guard something other than the code on every push (a deploy kit, the image, a release, a schedule), are:</p>
+<div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
+<thead>
 <tr>
-<td>9</td>
-<td>Squire deploy kit matches its release</td>
+<th>Component</th>
+<th>What it proves</th>
+<th>Job</th>
+<th>Timeout</th>
+<th>Since</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>secret-detection</code></td>
+<td>No committed secret in the checked-out tree</td>
+<td><code>secret-detection</code></td>
+<td>30 minutes</td>
+<td>0.2.0</td>
+</tr>
+<tr>
+<td><code>squire-kit</code></td>
+<td>The Squire deploy kit matches its release</td>
 <td><code>squire-kit</code></td>
 <td>10 minutes</td>
+<td>0.2.0</td>
 </tr>
 <tr>
-<td>10</td>
-<td>Runs off Citadel: strict boot and six portability checks</td>
+<td><code>portability</code></td>
+<td>The image runs off Citadel: strict boot, six portability checks and the image's own HEALTHCHECK (0.6.0); <code>setup_command</code> runs once before the replicas start (0.7.0)</td>
 <td><code>portability</code></td>
 <td>30 minutes</td>
+<td>0.2.0 (one-job form)</td>
 </tr>
-</tbody>
-</table></div>
-<p>New in 0.5.0, and not on the card:</p>
-<div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
-<thead>
 <tr>
-<th>#</th>
-<th>Item</th>
-<th>Job</th>
-<th>Timeout</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>11</td>
-<td>npm audit, high or critical in runtime dependencies by default</td>
+<td><code>npm-audit</code></td>
+<td>No npm advisory at or above <code>audit_level</code> (high by default) in runtime dependencies</td>
 <td><code>npm-audit</code></td>
 <td>10 minutes</td>
+<td>0.5.0</td>
 </tr>
-</tbody>
-</table></div>
-<p>New in 0.6.0, and not on the card:</p>
-<div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
-<thead>
 <tr>
-<th>#</th>
-<th>Item</th>
-<th>Job</th>
-<th>Timeout</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>12</td>
+<td><code>mysql56-migrate</code></td>
 <td>Migrations run on MySQL 5.6.51, Citadel's shared server</td>
 <td><code>mysql56-migrate</code></td>
 <td>30 minutes</td>
+<td>0.6.0</td>
 </tr>
-</tbody>
-</table></div>
-<p>New in 0.7.0, and not on the card:</p>
-<div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
-<thead>
 <tr>
-<th>#</th>
-<th>Item</th>
-<th>Job</th>
-<th>Timeout</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>13</td>
-<td>Portability's <code>setup_command</code> input: a command run once, in its own container of the built image, before either replica starts</td>
-<td><code>portability</code></td>
+<td><code>package-publish</code></td>
+<td>A tag publishes the package to the instance's registry</td>
+<td><code>package-publish</code></td>
 <td>30 minutes</td>
+<td>0.1.1</td>
+</tr>
+<tr>
+<td><code>renovate</code></td>
+<td>Scheduled dependency bumps, reviewed before they merge</td>
+<td><code>renovate</code></td>
+<td>1 hour</td>
+<td>0.1.1</td>
 </tr>
 </tbody>
 </table></div>
