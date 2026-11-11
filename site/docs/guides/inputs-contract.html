@@ -58,7 +58,7 @@ template limits the value);</li>
 <pre tabindex="0"><code class="language-json">&quot;php-test&quot;: {
   &quot;inputs&quot;: [
     { &quot;name&quot;: &quot;php_versions&quot;, &quot;type&quot;: &quot;array&quot;, &quot;default&quot;: [&quot;8.3&quot;, &quot;8.4&quot;, &quot;8.5&quot;] },
-    { &quot;name&quot;: &quot;php_advisory_version&quot;, &quot;type&quot;: &quot;string&quot;, &quot;default&quot;: &quot;&quot;, &quot;regex&quot;: &quot;^$|^[0-9]+\\.[0-9]+([.][0-9A-Za-z]+)*$&quot; },
+    { &quot;name&quot;: &quot;php_advisory_version&quot;, &quot;type&quot;: &quot;string&quot;, &quot;default&quot;: &quot;&quot;, &quot;regex&quot;: &quot;^$|^[0-9]+\\.[0-9]+([.-][0-9A-Za-z]+)*$&quot; },
     { &quot;name&quot;: &quot;test_command&quot;, &quot;type&quot;: &quot;string&quot;, &quot;default&quot;: &quot;vendor/bin/phpunit&quot; },
     { &quot;name&quot;: &quot;working_dir&quot;, &quot;type&quot;: &quot;string&quot;, &quot;default&quot;: &quot;.&quot;, &quot;regex&quot;: &quot;^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$&quot; }
   ],
