@@ -323,10 +323,13 @@ A job timeout cannot exceed the runner's timeout.
 
 Sources: [GitLab: CI/CD YAML, `timeout` and `interruptible`](https://docs.gitlab.com/ci/yaml/).
 
-**How the stack holds it: Documented.** All fourteen templates set `interruptible: true` and a `timeout` of their own:
-`10m` for pint and phpstan, `10 minutes` for squire-kit and npm-audit, `15m` for eslint, `30 minutes` for composer-audit, package-publish, php-test, proctor,
-sbom, secret-detection, a11y and portability, and `1 hour` for renovate. What stays open is the cancellation half: whether a superseded pipeline is actually
-canceled still needs `workflow:auto_cancel` in the app's own file, which a component cannot force (see 3.1).
+**How the stack holds it: Checked.** All fifteen templates set `interruptible: true` and a `timeout` of their own:
+`10m` for pint and phpstan, `10 minutes` for squire-kit and npm-audit, `15m` for eslint, `30 minutes` for composer-audit,
+mysql56-migrate, package-publish, php-test, proctor, sbom, secret-detection, a11y and portability, and `1 hour` for
+renovate. `tests/TemplateJobsTest.php` (part of `composer ci`) fails if a job a consumer gets, its own keys or the
+hidden base job it `extends`, loses `interruptible: true` or has no timeout, or a timeout longer than 1 hour. What
+stays open is the cancellation half: whether a superseded pipeline is actually canceled still needs
+`workflow:auto_cancel` in the app's own file, which a component cannot force (see 3.1).
 
 ### 2.10 Make every job image an input
 `proctor` and `composer-audit` already take `image`. `php-test` builds its image from `php_versions` and has no way to
@@ -466,7 +469,7 @@ by a hostile `composer.json`, which is exactly what a contributed branch can car
 Sources: [GitLab: merge request pipelines](https://docs.gitlab.com/ci/pipelines/merge_request_pipelines/);
 [GitLab: CI/CD variables](https://docs.gitlab.com/ci/variables/).
 
-**How the stack holds it: Documented.** All fourteen templates use no secrets, which limits the harm, and the README
+**How the stack holds it: Documented.** The fifteen templates hold no secrets (5.1 says how that is checked), which limits the harm, and the README
 documents the rule: review a fork's `.gitlab-ci.yml` before running its pipeline, and never give it protected variables.
 
 ---
@@ -822,8 +825,12 @@ Sources: [GitLab: CI/CD variables](https://docs.gitlab.com/ci/variables/);
 [GitLab: pipeline security, secrets](https://docs.gitlab.com/ci/pipeline_security/);
 [OWASP CICD-SEC-6 Insufficient Credential Hygiene](https://owasp.org/www-project-top-10-ci-cd-security-risks/).
 
-**How the stack holds it: Documented.** The fourteen templates use no secrets, which is good. Nothing fails if a later
-template adds one. The repository's own pipeline runs GitLab's pipeline secret detection, and since 2026-11-10 the
+**How the stack holds it: Checked.** The fifteen templates hold no credential except `mysql56-migrate`'s
+`db_password`, a throwaway for a database that lives as long as the job's service container. `tests/TemplateJobsTest.php`
+(part of `composer ci`) fails if another one appears: a credential-named input (password, token, secret, key) must
+default to empty or to the name of a CI/CD variable, a job script may read only `CI_JOB_TOKEN` and
+`CI_DEPENDENCY_PROXY_PASSWORD` among credential-named variables, and no template may carry a `glpat-`, `ghp_` or
+`github_pat_` token or a private key block. The repository's own pipeline runs GitLab's pipeline secret detection, and since 2026-11-10 the
 `secret_detection` job blocks: it was advisory for a week of green runs from 2026-11-02. GitLab's template marks the
 job `allow_failure: true` itself, so `.gitlab-ci.yml` sets `allow_failure: false` on it, and
 `tests/check-secret-detection.sh` and its `.ps1` twin fail the `contract` job if that override goes missing or turns
@@ -835,7 +842,7 @@ Second pass: GitLab's pipeline secret detection is available on Free, Premium an
 `include: template: Jobs/Secret-Detection.gitlab-ci.yml`, and the error messages reference gitleaks. Limits: it needs a
 Linux runner with the Docker or Kubernetes executor, an amd64 CPU, and a `test` stage in the pipeline. On Free and
 Premium the findings are in the job's JSON output only, not in merge request reports. The page does not mention
-Community Edition, so whether it works on git.wayne.edu is unverified. GitLab's default variable visibility has been
+Community Edition; the green runs on git.wayne.edu above show that it works there. GitLab's default variable visibility has been
 Masked since 18.3, and a variable can be created as masked and hidden only at creation time. GitLab's components page
 also advises minimally scoped, short-lived tokens.
 

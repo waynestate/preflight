@@ -10,6 +10,7 @@
             <file>tests/ComponentsContractTest.php</file>
             <file>tests/DocsInputTablesTest.php</file>
             <file>tests/DocsEgressTest.php</file>
+            <file>tests/TemplateJobsTest.php</file>
         </testsuite>
     </testsuites>
     <source>
