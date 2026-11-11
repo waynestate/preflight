@@ -16,7 +16,7 @@ Goal: your app's test suite runs on each supported PHP version. The component ru
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
     inputs:
       test_command: vendor/bin/phpunit
 ```
@@ -90,7 +90,7 @@ Set `php_advisory_version` to a release candidate tag and the component adds a `
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
     inputs:
       test_command: vendor/bin/phpunit
       php_advisory_version: "8.6.0RC2"

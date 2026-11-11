@@ -49,7 +49,7 @@ what each input does, and how CREED's severity words map to npm's.</p>
 <p>Goal: your app's pipeline fails whenever a locked runtime npm package has a known high or critical advisory. Add the
 include to your app's <code>.gitlab-ci.yml</code>:</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@435665959434e5b5adca563c34762bd7061a6b8a # 0.7.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
     inputs:
       working_dir: .
 </code></pre>
