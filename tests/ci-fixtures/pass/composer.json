@@ -1,0 +1,9 @@
+{
+    "name": "waynestate/preflight-ci-pass",
+    "require": {
+        "php": "^8.3"
+    },
+    "scripts": {
+        "ci": "php -r \"echo 'ci-fixture-passed';\""
+    }
+}

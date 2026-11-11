@@ -78,6 +78,11 @@ include:
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/mysql56-migrate@$CI_COMMIT_SHA
     inputs:
       migrate_command: php tests/mysql56-migrate/migrate.php tests/mysql56-migrate/clean
+  # The composer-ci component at this commit, on the pass fixture: it must
+  # pass. The fixtures prove it, and must-fail-composer-ci proves it fails.
+  - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/composer-ci@$CI_COMMIT_SHA
+    inputs:
+      working_dir: tests/ci-fixtures/pass
   - template: Jobs/Secret-Detection.gitlab-ci.yml
 
 stages:

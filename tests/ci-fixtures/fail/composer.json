@@ -1,0 +1,9 @@
+{
+    "name": "waynestate/preflight-ci-fail",
+    "require": {
+        "php": "^8.3"
+    },
+    "scripts": {
+        "ci": "php -r \"fwrite(STDERR, 'ci-fixture-failed'); exit(1);\""
+    }
+}

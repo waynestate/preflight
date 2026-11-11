@@ -66,6 +66,12 @@ and `malware` must fail in every `abandoned` mode, `abandoned` only in `fail` mo
 run), so a run offline fails. The fixtures are pinned so the answers never move; if Packagist ever drops one (for
 example Aikido retires its test package), pick another permanent entry and update the expected name in the script.
 
+`tests/check-composer-ci-fails.sh` (and its `.ps1` twin) renders the `composer-ci` template's own script lines
+and runs them in its image on the fixtures in `tests/ci-fixtures`: `pass` must pass (naming
+`ci-fixture-passed`), `fail` must fail (naming `ci-fixture-failed`), and a broken copy of `pass` whose
+`composer.json` is invalid JSON must fail, so an install that cannot run never skips to green. The
+`must-fail-composer-ci` job runs it in CI. The fixtures carry no packages, so the check needs no network.
+
 `tests/squire-kit-fixture` is a deploy kit written by `squire init --target=raw`; Preflight's own pipeline runs the
 `squire-kit` component on it. Renovate moves it with each Squire release, like any kit. Never edit its files by hand:
 rewrite it with Squire (`squire update`, then `squire init`, on the folder) so it stays a kit that passes

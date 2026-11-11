@@ -1037,6 +1037,19 @@ docker run --rm -v "$(pwd):/app:ro" -w /app composer:2.11.1@sha256:8de2184c6de22
 pwsh -File tests/check-composer-audit-fails.ps1
 ```
 
+`tests/check-composer-ci-fails.sh` does the same for `composer-ci`: the pass fixture must pass (naming
+`ci-fixture-passed`), the fail fixture must fail (naming `ci-fixture-failed`), and a broken copy of the pass
+fixture (invalid `composer.json`) must fail, so an install that cannot run never skips to green. The fixtures
+carry no packages, so it needs no network. The `must-fail-composer-ci` job runs it in CI.
+
+```sh
+docker run --rm -v "$(pwd):/app:ro" -w /app composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 sh tests/check-composer-ci-fails.sh
+```
+
+```powershell
+pwsh -File tests/check-composer-ci-fails.ps1
+```
+
 `tests/check-npm-audit-fails.sh` does the same for `npm-audit`: a clean lock and an app with no lock must pass, and
 lodash 4.17.20 (GHSA-35jh-r3h4-6jhm) must fail at `high` and `medium` (and with an `.npmrc` that turns the audit off)
 and pass at `critical`; a dev-only finding fails only with `omit_dev: false`, and an unreachable registry fails a clean
