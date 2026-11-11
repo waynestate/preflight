@@ -25,10 +25,10 @@ spec:
       type: array
       default: ["8.3", "8.4", "8.5"]
     php_advisory_version:
-      description: "One more PHP version (for example a release candidate tag such as 8.6.0RC2) tested in a separate job that may fail. Empty: no advisory job."
+      description: "One more PHP version tested in a separate job that may fail, for example 8.6-rc (follows the newest release candidate) or 8.6.0RC5. Empty: no advisory job."
       type: string
       default: ""
-      regex: '^$|^[0-9]+\.[0-9]+([.][0-9A-Za-z]+)*$'
+      regex: '^$|^[0-9]+\.[0-9]+([.-][0-9A-Za-z]+)*$'
     composer_version:
       description: Composer version to install, 2.9.6 or later.
       type: string
