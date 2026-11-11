@@ -10,7 +10,7 @@ Every GitLab CI component Preflight ships, with its include example, its inputs 
 > [!NOTE]
 > Components are GA on the Free tier since GitLab 17.0. They work only within the same GitLab instance that hosts this project.
 
-![Preflight's before-takeoff checklist card. 1 PROCTOR, checked; 2 PHP tests, 8.3, 8.4 and 8.5 pass; 3 Composer audit, no advisories; 4 SBOM, validated; 5 Pint, clean; 6 PHPStan, no errors; 7 ESLint and Prettier, clean; 8 a11y with axe-core, no violations; 9 clearance, cleared for takeoff. Beside it the annunciator panel lights a green lamp per check, the contract lamp and the clearance, with freshness marked coming soon, and lists all fifteen components in two columns, every one in the 0.7.0 tag.](../readme/checklist.svg)
+![Preflight's before-takeoff checklist card. 1 PROCTOR, checked; 2 PHP tests, 8.3, 8.4 and 8.5 pass; 3 Composer audit, no advisories; 4 SBOM, validated; 5 Pint, clean; 6 PHPStan, no errors; 7 ESLint and Prettier, clean; 8 a11y with axe-core, no violations; 9 clearance, cleared for takeoff. Beside it the annunciator panel lights a green lamp per check, the contract lamp and the clearance, with freshness marked coming soon, and lists all fifteen components in two columns, every one in the 0.8.0 tag.](../readme/checklist.svg)
 
 The checklist, item by item, with each item's job and timeout read from `templates/`:
 
@@ -36,7 +36,7 @@ The panel below the lamps lists all fifteen components, two columns of names. Th
 |-----------|----------------|-----|---------|-------|
 | `secret-detection` | No committed secret in the checked-out tree | `secret-detection` | 30 minutes | 0.2.0 |
 | `squire-kit` | The Squire deploy kit matches its release | `squire-kit` | 10 minutes | 0.2.0 |
-| `portability` | The image runs off Citadel: strict boot, six portability checks and the image's own HEALTHCHECK (0.6.0); `setup_command` runs once before the replicas start (0.7.0) | `portability` | 30 minutes | 0.2.0 (one-job form) |
+| `portability` | The image runs off Citadel: strict boot, six portability checks and the image's own HEALTHCHECK (0.6.0); `setup_command` runs once before the replicas start (0.7.0); `session_header` sends one `Name: $VARIABLE` header on every session-hop request, read from the job's environment and never printed (0.8.0) | `portability` | 30 minutes | 0.2.0 (one-job form) |
 | `npm-audit` | No npm advisory at or above `audit_level` (high by default) in runtime dependencies | `npm-audit` | 10 minutes | 0.5.0 |
 | `mysql56-migrate` | Migrations run on MySQL 5.6.51, Citadel's shared server | `mysql56-migrate` | 30 minutes | 0.6.0 |
 | `package-publish` | A tag publishes the package to the instance's registry | `package-publish` | 30 minutes | 0.1.1 |
@@ -49,7 +49,7 @@ Every job the templates define is `interruptible: true`. Every component takes a
 The inputs and job names on this page are a promise, written down in `contract/inputs.json`: every input's name, type, default and allowed pattern, and every job each component adds. Preflight's own build fails when a template drifts from it (`tests/ComponentsContractTest.php` in `composer ci`, and the `contract` job), so a change reaches a tag only on purpose, with the file rewritten by `composer contract:update` in the same commit. An input or job is renamed or removed only in a release whose [Upgrading](../upgrading.md) section lists it under Breaking; before 1.0 that is a new minor, never a patch. To see exactly what moved between your pin and the next tag:
 
 ```
-git diff 0.6.0 0.7.0 -- contract/inputs.json
+git diff 0.7.0 0.8.0 -- contract/inputs.json
 ```
 
 [The inputs contract](../guides/inputs-contract.md) has the whole story: what counts as breaking, why defaults still move, and how to read the diff.
