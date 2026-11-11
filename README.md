@@ -435,7 +435,7 @@ sign-in route for `session-hop` and what each failure usually means.
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the portability job. |
 | `job_name` | string | `portability` | Name of the job. Set it when you include this component more than once. |
-| `image` | string | `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb` | Buildah image the job runs in. It builds the app image and runs the probe. |
+| `image` | string | `quay.io/buildah/stable:v1.45.1-immutable@sha256:e5a33092657823b0830186ea525054cf4cdeef29b6a44833444c59d86f561f29` | Buildah image the job runs in. It builds the app image and runs the probe. |
 | `dockerfile` | string | `Dockerfile` | Dockerfile to build, relative to the context. |
 | `context` | string | `.` | Build context, relative to the project root. |
 | `build_args` | array | `[]` | Build arguments as `NAME=value`; `$NAME` and `${NAME}` are replaced from the job's variables. |
@@ -971,7 +971,7 @@ namespace; it is not `--privileged`:
 
 ```sh
 docker run --rm --security-opt seccomp=unconfined -v "$(pwd):/src:ro" -w /src \
-  quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb \
+  quay.io/buildah/stable:v1.45.1-immutable@sha256:e5a33092657823b0830186ea525054cf4cdeef29b6a44833444c59d86f561f29 \
   sh tests/check-portability.sh
 ```
 

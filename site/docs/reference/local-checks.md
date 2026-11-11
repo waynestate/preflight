@@ -93,7 +93,7 @@ linux
 
 ```sh
 docker run --rm --security-opt seccomp=unconfined -v "$(pwd):/src:ro" -w /src \
-  quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb \
+  quay.io/buildah/stable:v1.45.1-immutable@sha256:e5a33092657823b0830186ea525054cf4cdeef29b6a44833444c59d86f561f29 \
   sh tests/check-portability.sh
 ```
 

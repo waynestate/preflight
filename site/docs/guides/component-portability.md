@@ -125,7 +125,7 @@ Before 0.5.0 an Apache image needed a `start_command` shim such as `exec setsid 
 | --- | --- | --- | --- |
 | `stage` | string | `test` | Pipeline stage for the portability job. |
 | `job_name` | string | `portability` | Name of the job. Set it when you include this component more than once. |
-| `image` | string | `quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb` | Buildah image the job runs in. It builds the app image and runs the probe, so it needs buildah, curl, awk and find. |
+| `image` | string | `quay.io/buildah/stable:v1.45.1-immutable@sha256:e5a33092657823b0830186ea525054cf4cdeef29b6a44833444c59d86f561f29` | Buildah image the job runs in. It builds the app image and runs the probe, so it needs buildah, curl, awk and find. |
 | `dockerfile` | string | `Dockerfile` | Dockerfile to build, relative to the context. |
 | `context` | string | `.` | Build context, relative to the project root. |
 | `build_args` | array | `[]` | Build arguments as `NAME=value`. `$NAME` and `${NAME}` in a value are replaced from the job's variables. |
