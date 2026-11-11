@@ -2,12 +2,13 @@
 
 Status: draft, checked against sources on 2026-10-27, with a second research pass the same day (see "Second pass
 (2026-10-27)" near the end). Applies to the Preflight components at the state of the repo today: the latest tag is
-0.5.0, and CHANGELOG.md names the release that added each component.
+0.8.0, and CHANGELOG.md names the release that added each component.
 
 ## What this covers
 
 Preflight is a set of GitLab CI/CD components that every stack project and WSU app includes with
-`include: component:`. Today it has fourteen: `php-test` (PHP versions through `parallel:matrix`), `composer-audit`, `npm-audit`,
+`include: component:`. Today it has fifteen: `php-test` (PHP versions through `parallel:matrix`), `mysql56-migrate` (the app's migrations
+against MySQL 5.6.51, Citadel's shared server), `composer-audit`, `npm-audit`,
 `proctor`, `sbom`, `pint`, `phpstan`, `eslint`, `secret-detection`, `a11y` (the accessibility suite, 6.5),
 `portability`, `package-publish`, `renovate` and `squire-kit` (a deploy kit still matches its Squire release). A contract
 suite, `contract/inputs.json`, holds the inputs and job names every template promises, and the `contract` job checks it
@@ -103,7 +104,7 @@ Why: the catalog gives typed discovery and lets consumers pin an exact or partia
 Sources: [GitLab: components, publishing](https://docs.gitlab.com/ci/components/).
 
 **How the stack holds it: Documented.** The layout is right (`templates/<name>/template.yml`, a README), and the tag-triggered `release` job now exists in this repository's own pipeline: pushing a protected tag creates the GitLab Release with the commit SHA in its notes, after the test and audit stages. The Catalog entry still depends on the first tag run, because the release job has not run for a tag yet.
-The README examples pin the latest release (0.5.0) for every component and the GitHub workflow.
+The README examples pin the latest release (0.8.0) for every component and the GitHub workflow.
 
 ### 1.4 Keep inputs and job names stable inside a major version
 Do not rename an input, change its type, or rename a job in a minor release.
@@ -149,7 +150,7 @@ Sources: [StepSecurity: tj-actions breach](https://www.stepsecurity.io/blog/when
 The tj-actions details above come from search summaries of these pages and the NVD record could not be read in this
 pass, so treat the exact counts and dates as unverified.
 
-**How the stack holds it: Documented.** Ten tags, `0.1.0` through `0.5.0`, exist, and MAINTAINING.md documents the release process,
+**How the stack holds it: Documented.** Thirteen tags, `0.1.0` through `0.8.0`, exist, and MAINTAINING.md documents the release process,
 including recording the tag's commit SHA in the CHANGELOG when a tag is cut. The tag-triggered `release` job now puts the
 commit SHA in the GitLab Release notes on every tag (the first run is still to come), so new releases carry the SHA from
 the start. Apps still pin the tag in their component includes, and nothing checks an app's includes.
@@ -245,7 +246,7 @@ Why: global keys leak into the consuming pipeline.
 
 Sources: [GitLab: component examples](https://docs.gitlab.com/ci/components/examples/).
 
-**How the stack holds it: Enforced.** All fourteen templates follow it. `tests/check-contract.sh` fails on any top-level
+**How the stack holds it: Enforced.** All fifteen templates follow it. `tests/check-contract.sh` fails on any top-level
 key that is not a job named in `contract/inputs.json`, so a template cannot add a global key. The README's "Which jobs
 may be allowed to fail" explains why `proctor`, `secret-detection`, `a11y` and `squire-kit` take `allow_failure`, and
 why the audit jobs take none.
@@ -362,12 +363,12 @@ exposes `name`, `sha`, `version` and `reference`, was beta in 18.6 and became GA
 Sources: [GitLab: components, `spec:component`](https://docs.gitlab.com/ci/components/);
 [GitLab: component examples, versioning with component context](https://docs.gitlab.com/ci/components/examples/).
 
-**How the stack holds it: Enforced.** All fourteen templates declare `component: [name, version, sha, reference]` under
+**How the stack holds it: Enforced.** All fifteen templates declare `component: [name, version, sha, reference]` under
 `spec:` and print the `Preflight component <name> <version> (ref <reference>, sha <sha>)` line as the first command of
 every job (for example `templates/proctor/template.yml:75`), and `tests/check-component-version.sh` (and its `.ps1` twin)
 fails the `contract` job if a template drops the declaration or stops printing the line first. The line needs GitLab
 18.7 or later; the version on git.wayne.edu is still unconfirmed (see 5.5), but PROCTOR's and CREED's pipelines include
-`preflight/proctor@0.5.0`, which carries the declaration, and run on it.
+`preflight/proctor@0.8.0`, which carries the declaration, and run on it.
 
 ---
 
@@ -1026,11 +1027,12 @@ Why: it exercises exactly what will be released.
 
 Sources: [GitLab: components, testing](https://docs.gitlab.com/ci/components/).
 
-**How the stack holds it: Checked.** `.gitlab-ci.yml` includes ten components at `$CI_COMMIT_SHA`: `proctor`, `php-test`,
+**How the stack holds it: Checked.** `.gitlab-ci.yml` includes eleven components at `$CI_COMMIT_SHA`: `proctor`, `php-test`,
 `composer-audit`, `pint` and `phpstan` against `tests/fixture-app`, `sbom` in the project root, `npm-audit` against the
 clean lock in `tests/npm-audit-fixtures/clean`, `a11y` against this repository's own `site` (the stack's floor, WCAG 2.2
-AA), `squire-kit` against the kit Squire wrote in `tests/squire-kit-fixture`, and `portability` against the clean build in
-`tests/portability/app`, plus a `contract` job running the `tests/check-*.sh` scripts.
+AA), `squire-kit` against the kit Squire wrote in `tests/squire-kit-fixture`, `portability` against the clean build in
+`tests/portability/app`, and `mysql56-migrate` against the clean migration in `tests/mysql56-migrate/clean` (on the
+runner tagged `amd64`, on the default branch and tags), plus a `contract` job running the `tests/check-*.sh` scripts.
 
 ### 7.2 Test the failing cases, and that the expected jobs exist
 Each component needs a fixture that must fail it: a failing test, an advisory, a policy violation. A test can also
@@ -1040,8 +1042,8 @@ Why: a component that never fails looks the same as one that works.
 
 Sources: [GitLab: components, testing](https://docs.gitlab.com/ci/components/).
 
-**How the stack holds it: Partly.** Eleven components carry a must-fail fixture that a `must-fail-` job in `.gitlab-ci.yml`
-runs, and `proctor`'s main fixture runs in the `contract` job (its lock fixture, `tests/check-proctor-lock-fails`, runs in
+**How the stack holds it: Partly.** Every component that runs as a job, fourteen of fifteen, carries a must-fail fixture.
+Thirteen run in a `must-fail-` job in `.gitlab-ci.yml`, and `proctor`'s main fixture runs in the `contract` job (its lock fixture, `tests/check-proctor-lock-fails`, runs in
 `must-fail-proctor-lock`): `proctor` runs the template's own `--record` guard and command line
 on `tests/proctor-fails`, a fake proctor that prints one blocker finding and exits 1, against the clean stubs in
 `tests/fixture-app` (no `--record`, like PROCTOR 0.10.0) and `tests/proctor-record` (with it), and proves `proctor.json`
@@ -1080,7 +1082,11 @@ in CI by `must-fail-squire-kit`); and `package-publish`'s offline guards stop a 
 `must-fail-package-publish`), and the same check runs the template's whole script against a fake registry serving
 GitLab's documented Composer shapes: a version published from another commit fails with no publish request, the
 same commit exits 0, and a new version is published once. Its first run showed the job had read the wrong keys and
-would have overwritten a moved version on GitLab. `renovate` is a config, not a job, so it has nothing to fail.
+would have overwritten a moved version on GitLab; and `mysql56-migrate` runs the fixture migrator against the same
+MySQL 5.6.51 service as the component, where the clean migration must pass and a JSON column (`tests/mysql56-migrate/json-column`)
+and a too-long utf8mb4 index (`tests/mysql56-migrate/long-index`) must fail with the server errors 5.6 reports, 1064
+and 1071 (`tests/check-mysql56-migrate.sh`, run in CI by `must-fail-mysql56-migrate` on the runner tagged `amd64`).
+`renovate` is a config, not a job, so it has nothing to fail.
 
 ### 7.3 Use the stack's own projects as the first users
 Each stack repo includes Preflight, pinned.
@@ -1117,7 +1123,7 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
 
 1. Done: 6.1: The `proctor` default command works without `--policy` since PROCTOR 0.2.1 (`PROCTOR_POLICY`, then the
    app's installed CREED policy, then the copy bundled with PROCTOR), and both PROCTOR's and CREED's pipelines include
-   `preflight/proctor@0.5.0`. 6.1 is `Checked`: this repository's pipeline runs the component on `tests/fixture-app`,
+   `preflight/proctor@0.8.0`. 6.1 is `Checked`: this repository's pipeline runs the component on `tests/fixture-app`,
    and the `contract` job runs `tests/check-proctor-fails`.
 2. Done: 7.2: `package-publish`'s moved-version path has its failing fixture: a fake registry in
    `tests/check-package-publish-fails.sh` (no live registry needed). Every component that runs as a job now has one.
@@ -1151,8 +1157,9 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
 14. Done: 3.4: The `workflow:rules` example is in the README's "When the components run" (README.md:709).
 15. Done: 2.5: Build job names from an input so one project can include a component twice.
 16. Done: 4.8: every Composer and npm component caches under a fixed key, kept in place by `tests/check-php-test-cache` and `tests/check-proctor-cache`.
-17. Done (advisory): 5.1: Added secret detection to Preflight's own pipeline as an advisory job (`allow_failure:
-    true`); it turns blocking after a week of green pipelines.
+17. Done: 5.1: Secret detection runs in Preflight's own pipeline and blocks it: it was advisory for a week of green
+    pipelines from 2026-11-02, and since 2026-11-10 `.gitlab-ci.yml` sets `allow_failure: false`, held by
+    `tests/check-secret-detection.sh` and its `.ps1` twin.
 18. Done: 5.2: Documented the job token allowlist rule in the README: list only the projects a private-package install
     really needs, use the fine-grained permissions where they fit, and review the list when a dependency is
     dropped; the allowlist is a project setting Preflight cannot create or check.
@@ -1165,7 +1172,9 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
     `composer ci`) and `tests/check-contract.sh` with its `.ps1` twin (the contract job); a renamed input or job, a
     changed type or a changed default fails the build, and `composer contract:update` rewrites the contract when the
     change was made on purpose.
-22. 2.3 and 2.6: Lint templates for global keys, and explain which components may be weakened.
+22. Done: 2.3 and 2.6: `tests/check-contract.sh` fails on any top-level template key that is not a job named in
+    `contract/inputs.json` (2.3), and the README's "Which jobs may be allowed to fail" names the four components that
+    take `allow_failure` and why the audit jobs take none (2.6).
 23. Done: 3.1: The "components do not force" limit is published in the README's "What the components cannot force"
     (README.md:735).
 24. 5.3 and 5.4 and 7.3: git.wayne.edu now has an instance runner, and the stack's CI runs on it; every product in the stack still strongly recommends a git.wayne.edu instance runner, so that capacity stays there. What remains open: ops enforcing 5.4's host list (`docs/guides/network-egress.md`) on the runner.
@@ -1209,8 +1218,8 @@ Added in the second pass (2026-10-27):
 42. Done: 2.11: Every template prints the `Preflight component <name> <version>` line first in every job
     (`templates/proctor/template.yml:75`), kept in place by `tests/check-component-version.sh` in the `contract` job
     (.gitlab-ci.yml:88).
-43. Done (advisory): 5.1 (updated): added GitLab secret detection to Preflight's pipeline. Still open: confirm
-    whether it runs on git.wayne.edu (Community Edition).
+43. Done: 5.1 (updated): GitLab secret detection runs in Preflight's pipeline on git.wayne.edu (Community Edition):
+    every `secret_detection` job there passed from 2026-11-09 to 2026-11-10, and the job now blocks (item 17).
 
 ## Sources
 
