@@ -35,6 +35,10 @@
           "path": "guides/component-composer-audit"
         },
         {
+          "title": "The composer-ci component",
+          "path": "guides/component-composer-ci"
+        },
+        {
           "title": "The npm-audit component",
           "path": "guides/component-npm-audit"
         },

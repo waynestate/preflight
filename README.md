@@ -7,7 +7,7 @@
 <div align="center">
   <img src="docs/readme/badges/php.svg" alt="php ^8.3">
   <img src="docs/readme/badges/license.svg" alt="license MIT">
-  <img src="docs/readme/badges/components.svg" alt="gitlab ci components: 15">
+  <img src="docs/readme/badges/components.svg" alt="gitlab ci components: 16">
 </div>
 
 **Every push is cleared for takeoff.**
@@ -197,6 +197,35 @@ nothing extra; it carries no `rules:` block, so it runs in scheduled
 pipelines like any other. Creating the schedule is a project setting, not a
 file in the app's repo, and someone with Maintainer rights on the app must
 do it. It is the one preflight check that books its own flight time.
+
+### composer-ci
+
+Runs `composer install` and then `composer ci`, and fails the pipeline when the
+lock file is not complete or is out of sync with `composer.json`. The nine stack
+repos that hand-write this job can replace their copies with one include.
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-ci@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+    inputs:
+      working_dir: .
+```
+
+| Input | Type | Default | What it does |
+|-------|------|---------|--------------|
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `composer-ci` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0` | Docker image for the job. |
+| `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
+| `working_dir` | string | `.` | Directory to run Composer in, relative to the project root. |
+
+The Composer image (`composer:2.11.1`, pinned by digest) already ships Composer,
+so the job installs the app's locked dependencies with
+`composer install --no-interaction --no-progress --prefer-dist` and then runs the
+project's own `composer ci`. That command's exit code decides the job, and there
+is no `allow_failure` input: a failing `composer ci` must fail the pipeline. The
+job is `interruptible: true` with a timeout of 30 minutes, and it caches Composer
+downloads in `.composer-cache/` under the fixed key `preflight-composer-ci`.
 
 ### npm-audit
 
