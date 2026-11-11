@@ -124,7 +124,7 @@
       "inputs": [
         { "name": "stage", "type": "string", "default": "test" },
         { "name": "job_name", "type": "string", "default": "portability", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
-        { "name": "image", "type": "string", "default": "quay.io/buildah/stable:v1.43.5-immutable@sha256:7c2b605262748ace2c5c57c5550942d0adad57aec82ede3070927722306c0ffb" },
+        { "name": "image", "type": "string", "default": "quay.io/buildah/stable:v1.45.1-immutable@sha256:e5a33092657823b0830186ea525054cf4cdeef29b6a44833444c59d86f561f29" },
         { "name": "dockerfile", "type": "string", "default": "Dockerfile" },
         { "name": "context", "type": "string", "default": "." },
         { "name": "build_args", "type": "array", "default": [] },
