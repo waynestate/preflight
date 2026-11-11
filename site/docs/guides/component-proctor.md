@@ -40,10 +40,26 @@ The install skips plugins and scripts on purpose: the job only inspects the app,
 | `proctor_command` | string | `vendor/bin/proctor check --format=codequality` | The proctor command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
 | `git_depth` | string | `"0"` | How many commits the job clones (GitLab's `GIT_DEPTH`); the default `0` clones the full history, so PROCTOR's override-approver check can see who wrote each override. |
+| `check_path` | string | `""` | Directory to run the proctor command in, relative to the project root, after the install. Empty (the default) runs it in `working_dir`; set it to `.` to install in a folder such as `deploy` and run the check from the project root. |
 
 Note
 
-The template adds regexes to four inputs: `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`, `composer_version` must match `^2\.(9\.([6-9]|[1-9][0-9]+)|[1-9][0-9]+\.[0-9]+)$`, `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$`, and `git_depth` must match `^[0-9]+$`.
+The template adds regexes to five inputs: `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`, `composer_version` must match `^2\.(9\.([6-9]|[1-9][0-9]+)|[1-9][0-9]+\.[0-9]+)$`, `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$`, `git_depth` must match `^[0-9]+$`, and `check_path` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)?$`.
+
+## Install in one folder, check from another [#](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html#install-in-one-folder-check-from-another)
+
+Goal: install PROCTOR in one folder (such as `deploy`) and run the check from the project root, so a scan such as PROCTOR's `wayneui.copies` sees `site/assets/wayne-ui` at the root instead of under `deploy`. Set `working_dir` to the install folder and `check_path` to `.`:
+
+```yaml
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@<tag>
+  inputs:
+    job_name: wayneui-copies
+    working_dir: deploy
+    check_path: .
+    proctor_command: deploy/vendor/bin/proctor check
+```
+
+With `check_path` empty (the default) the job runs the command in `working_dir`, exactly as before; nothing changes for an include that leaves it empty.
 
 ## What the job does [#](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html#what-the-job-does)
 
