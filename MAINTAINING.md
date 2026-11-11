@@ -32,7 +32,7 @@ copy (see "Same instance only" in the README).
 Each contract test comes as a `.sh` and `.ps1` pair that check the same thing (`check-contract`, `check-spec-keys`,
 `check-image-inputs`, `check-dependency-cache`, `check-php-test-cache`, `check-working-dir-regex`, `check-path-input-regex`, `check-github-workflow`,
 `check-proctor-install-flags`, `check-secret-detection`, `check-renovate-review`, `check-renovate-buildah`, `check-sha-pins`, `check-release-job`,
-`check-abandoned-input`, `check-component-version`, `check-input-interpolation`, `check-a11y-inline`, `check-portability-inline`, `check-renovate-squire-kit`, `check-squire-kit`). CI runs the `.sh` ones in the contract job.
+`check-abandoned-input`, `check-component-version`, `check-input-interpolation`, `check-a11y-inline`, `check-a11y-runner`, `check-portability-inline`, `check-renovate-squire-kit`, `check-squire-kit`). CI runs the `.sh` ones in the contract job.
 Keep both in step when you change one.
 
 `tests/check-portability.sh` runs the portability probe (`templates/portability/probe.sh`) on the fixture in
