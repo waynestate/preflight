@@ -37,7 +37,7 @@ Keep both in step when you change one.
 
 `tests/check-portability.sh` runs the portability probe (`templates/portability/probe.sh`) on the fixture in
 `tests/portability/app`, once clean and once per flaw (`ARG FLAW` in its Dockerfile), and passes only when the clean
-build passes every check and each flaw fails the check it targets. Two more builds, `reopens-stderr` and`nsignals-group`, are regression cases for the probe's launcher (stdio the uid owns, a session of its own) and must pass. It needs Buildah, so it runs inside the
+build passes every check and each flaw fails the check it targets. Two more builds, `reopens-stderr` and `signals-group`, are regression cases for the probe's launcher (stdio the uid owns, a session of its own) and must pass. It needs Buildah, so it runs inside the
 component's Buildah image: the `must-fail-portability` job runs it in CI, and `tests/check-portability.ps1` (or the
 `docker run` in the .sh header) runs it locally with `--security-opt seccomp=unconfined`, never `--privileged`.
 Preflight's pipeline also includes the component itself on the clean fixture. Change the probe in `probe.sh`, then run

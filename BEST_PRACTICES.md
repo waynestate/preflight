@@ -1117,9 +1117,14 @@ local runner is described there as deprecated.
 Sources: [Drupal gitlab_templates: test locally](https://project.pages.drupalcode.org/gitlab_templates/info/test-locally/);
 [Drupal: GitLab CI strategy](https://www.drupal.org/drupalorg/blog/gitlab-ci-drupals-strategy-to-empower-a-whole-ecosystem).
 
-**How the stack holds it: Documented.** The README has a "Local checks" section with two `docker run` commands for the
-fixture app. They are written as `sh` with `$(pwd)`, and this pass did not test them in PowerShell. They cover only the
-fixture, not an app's own checks.
+**How the stack holds it: Documented.** `composer ci` is the one command for this repository's gate, every check the
+`contract` job runs has a `.ps1` twin, and the README's "Local checks" gives each `docker run` line in `sh` and in
+PowerShell. Tested on Windows on 2026-11-11: the README's two PowerShell lines (`composer install`, then `composer ci`)
+passed as written on a Docker Desktop mount (51 tests), and all thirty `.ps1` twins of the `contract` job passed. That
+sweep found one twin out of step: `check-component-version.ps1` did not follow `extends:` (the `.sh` twin learned it
+when php-test moved its script into a hidden base job), so it failed php-test's real template on Windows; it follows
+it now. What stays open: no Windows runner runs the twins, so one can drift again until someone runs it, and the
+commands cover this repository and its fixtures, not an app's own checks.
 
 ---
 
@@ -1213,7 +1218,9 @@ Added in the second pass (2026-10-27):
     (`no_one_allowed`) and to keep fork merge requests away from protected variables (README.md:767).
 36. Done: 2.10: `php-test` takes an `image` input (default `php:${PHP_VERSION}-cli-trixie`,
     `templates/php-test/template.yml:16`), like every other component.
-37. 7.4: Add a cross-OS local run (Composer scripts first) and test the README's local commands in PowerShell.
+37. Done (partly): 7.4: `composer ci` is the cross-OS local run, every contract check has a `.ps1` twin, and the
+    README's PowerShell commands and all thirty twins passed on Windows on 2026-11-11. Still open: nothing runs the
+    twins on a schedule.
 38. Done: 6.4: `php-test` takes `php_advisory_version`, which adds a `<job_name>-advisory` job, advisory-only
     (`allow_failure: true`, `templates/php-test/template.yml:27,104`), and Preflight's own pipeline runs it on `8.6-rc`.
 39. Done: 6.5: WCAG 2.2 AA is named as the floor on the front page (site/index.html:841), the same floor Preflight's
