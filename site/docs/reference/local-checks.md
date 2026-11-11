@@ -82,7 +82,7 @@ Run the PHP fixture app separately:
 
 ```sh
 docker run --rm -v "$(pwd)/tests/fixture-app:/app" -v stack-composer-cache:/tmp/cache -w /app composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 composer install
-docker run --rm -v "$(pwd)/tests/fixture-app:/app" -w /app php:8.4-cli vendor/bin/phpunit
+docker run --rm -v "$(pwd)/tests/fixture-app:/app" -w /app php:8.4-cli-trixie vendor/bin/phpunit
 ```
 
 ## The portability fixtures [#](https://preflight.apps.wayne.edu/docs/reference/local-checks.html#the-portability-fixtures)
