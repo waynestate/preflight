@@ -26,6 +26,7 @@ This list covers Preflight's components only. Your app adds its own hosts: a pri
 | `proctor` | `unzip` and `git` with `apt-get`; Composer, by the official installer, checked against its signature; the app's dependencies | `deb.debian.org`, `getcomposer.org`, `composer.github.io`, `repo.packagist.org`, `api.github.com`, `codeload.github.com`, `github.com` |
 | `php-test` | The same as `proctor`, once per PHP version | `deb.debian.org`, `getcomposer.org`, `composer.github.io`, `repo.packagist.org`, `api.github.com`, `codeload.github.com`, `github.com` |
 | `composer-audit` | Package metadata and the advisory list; it installs nothing | `repo.packagist.org`, `packagist.org` |
+| `composer-ci` | The app's dependencies, installed from the lock file | `repo.packagist.org`, `packagist.org`, `api.github.com`, `codeload.github.com`, `github.com` |
 | `npm-audit` | npm's bulk advisory lookup; it installs nothing | `registry.npmjs.org` |
 | `sbom` | The app's dependencies and the CycloneDX Composer plugin | `repo.packagist.org`, `api.github.com`, `codeload.github.com`, `github.com` |
 | `pint` | The app's dependencies (Pint is one of them) | `repo.packagist.org`, `api.github.com`, `codeload.github.com`, `github.com` |

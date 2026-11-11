@@ -34,7 +34,7 @@ The card runs the seven above and `a11y`:
 | --- | --- | --- | --- |
 | 8 | Accessibility, WCAG 2.1 AA by default | `a11y` | 30 minutes |
 
-The panel below the lamps lists all fifteen components, two columns of names. The seven with no card row, because they guard something other than the code on every push (a deploy kit, the image, a release, a schedule), are:
+The panel below the lamps lists all sixteen components, two columns of names. The seven with no card row, because they guard something other than the code on every push (a deploy kit, the image, a release, a schedule), are:
 
 | Component | What it proves | Job | Timeout | Since |
 | --- | --- | --- | --- | --- |
@@ -157,6 +157,27 @@ From `templates/composer-audit/template.yml`: the Composer image (`composer:2.11
 ### Run it on a schedule [#](https://preflight.apps.wayne.edu/docs/reference/components.html#run-it-on-a-schedule)
 
 New advisories are published after code is merged, so a green pipeline today can be stale tomorrow. Create a weekly pipeline schedule on the default branch: project settings, Build, Pipeline schedules. The component needs nothing extra; it carries no `rules:` block, so it runs in scheduled pipelines like any other. Creating the schedule is a project setting, not a file in the app's repo, and someone with Maintainer rights on the app must do it. It is the one preflight check that books its own flight time.
+
+## composer-ci [#](https://preflight.apps.wayne.edu/docs/reference/components.html#composer-ci)
+
+Runs `composer install` and then `composer ci`, and fails the pipeline when either fails, for example on a lock file that is missing a package `composer.json` requires. The nine stack repos that hand-write this job can replace their copies with one include.
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-ci@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+    inputs:
+      working_dir: .
+```
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `test` | Pipeline stage for the job. |
+| `job_name` | string | `composer-ci` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0` | Docker image for the job. |
+| `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
+| `working_dir` | string | `.` | Directory to run Composer in, relative to the project root. |
+
+From `templates/composer-ci/template.yml`: the Composer image (`composer:2.11.1`, pinned by digest) already ships Composer, so there is no install step for the tool. The job changes into `working_dir`, runs `composer install --no-interaction --no-progress --prefer-dist`, and then `composer ci`, the project's own ci script, whose exit code decides the job. There is no `allow_failure` input: a failing `composer ci` must fail the pipeline. The Composer cache uses the fixed key `preflight-composer-ci` and the path `.composer-cache/`, saved with `when: always`. The job is `interruptible: true` with a timeout of 30 minutes.
 
 ## npm-audit [#](https://preflight.apps.wayne.edu/docs/reference/components.html#npm-audit)
 
@@ -489,6 +510,7 @@ From `templates/mysql56-migrate/template.yml`: the single job (named by `job_nam
 - [The proctor component](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html)
 - [The php-test component](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html)
 - [The composer-audit component](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html)
+- [The composer-ci component](https://preflight.apps.wayne.edu/docs/guides/component-composer-ci.html)
 - [The sbom component](https://preflight.apps.wayne.edu/docs/guides/component-sbom.html)
 - [The pint component](https://preflight.apps.wayne.edu/docs/guides/component-pint.html)
 - [The phpstan component](https://preflight.apps.wayne.edu/docs/guides/component-phpstan.html)

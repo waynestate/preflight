@@ -24,6 +24,7 @@ Every page below is Markdown. The HTML pages send the same Markdown to a client 
 - [Changelog | Preflight docs](https://preflight.apps.wayne.edu/docs/changelog.md): All notable changes to this project.
 - [The a11y component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-a11y.md): Opens the app's pages in a real browser and fails the pipeline on accessibility violations (axe-core in Playwright).
 - [The composer-audit component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.md): Runs `composer audit --locked` and fails on advisories.
+- [The composer-ci component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-composer-ci.md): Runs `composer install` and then `composer ci`, and fails the job when either fails.
 - [The eslint component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-eslint.md): Runs the app's own ESLint and Prettier and fails the pipeline on lint or format errors.
 - [The mysql56-migrate component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-mysql56-migrate.md): Runs the app's migrations against MySQL 5.6.51, the version of the shared server on Citadel.
 - [The npm-audit component | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.md): Runs `npm audit` on the app's lock file and fails on advisories at or above a severity.
