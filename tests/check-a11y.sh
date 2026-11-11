@@ -14,6 +14,8 @@
 #                                  dark.html fails in dark mode only
 #   good, a page that is missing   exit 1: HTTP 404
 #   good, a glob matching nothing  exit 2: a configuration error
+#   good, the root page ""         exit 0: "" is the site root, 1 page x 4 modes
+#   good, the root page "/"        exit 0: "/" is the site root, 1 page x 4 modes
 #
 # One result line per case goes to stdout; the checker's own output is kept
 # in a temp folder and printed only for a case that went wrong. POSIX sh, so
@@ -108,6 +110,26 @@ fi
 # nomatch: a glob that matches nothing is a configuration error.
 code=$(run nomatch --site=tests/a11y-fixtures/good --pages='["nope/**/*.html"]')
 expect nomatch 2 "$code"
+
+# root: the empty string is the site root, reported as "/".
+code=$(run root --site=tests/a11y-fixtures/good --pages='[""]')
+expect root 0 "$code"
+if ! grep -q 'tests="4" failures="0"' "$tmp/root/gl-a11y-junit.xml" 2>/dev/null; then
+  fail "root: the JUnit report does not show 4 checks and 0 failures"
+fi
+if ! grep -q 'name="/ light 320px"' "$tmp/root/gl-a11y-junit.xml" 2>/dev/null; then
+  fail "root: the JUnit report does not name the root /"
+fi
+
+# rootslash: "/" is the other spelling of the site root.
+code=$(run rootslash --site=tests/a11y-fixtures/good --pages='["/"]')
+expect rootslash 0 "$code"
+if ! grep -q 'tests="4" failures="0"' "$tmp/rootslash/gl-a11y-junit.xml" 2>/dev/null; then
+  fail "rootslash: the JUnit report does not show 4 checks and 0 failures"
+fi
+if ! grep -q 'name="/ light 320px"' "$tmp/rootslash/gl-a11y-junit.xml" 2>/dev/null; then
+  fail "rootslash: the JUnit report does not name the root /"
+fi
 
 if [ "$status" -eq 0 ]; then
   echo "check-a11y: ok"

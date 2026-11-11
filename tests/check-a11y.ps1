@@ -13,6 +13,8 @@
 #                                  dark.html fails in dark mode only
 #   good, a page that is missing   exit 1: HTTP 404
 #   good, a glob matching nothing  exit 2: a configuration error
+#   good, the root page ""         exit 0: "" is the site root, 1 page x 4 modes
+#   good, the root page "/"        exit 0: "/" is the site root, 1 page x 4 modes
 #
 # One result line per case goes to stdout; the checker's own output is kept
 # in a temp folder and printed only for a case that went wrong. Windows
@@ -123,6 +125,26 @@ try {
   # nomatch: a glob that matches nothing is a configuration error.
   $code = Invoke-Gate "nomatch" @{ Site = "tests/a11y-fixtures/good"; Pages = '["nope/**/*.html"]' }
   Test-Exit "nomatch" 2 $code
+
+  # root: the empty string is the site root, reported as "/".
+  $code = Invoke-Gate "root" @{ Site = "tests/a11y-fixtures/good"; Pages = '[""]' }
+  Test-Exit "root" 0 $code
+  if (-not (Read-Report "root" "gl-a11y-junit.xml").Contains('tests="4" failures="0"')) {
+    Fail "root: the JUnit report does not show 4 checks and 0 failures"
+  }
+  if (-not (Read-Report "root" "gl-a11y-junit.xml").Contains('name="/ light 320px"')) {
+    Fail "root: the JUnit report does not name the root /"
+  }
+
+  # rootslash: "/" is the other spelling of the site root.
+  $code = Invoke-Gate "rootslash" @{ Site = "tests/a11y-fixtures/good"; Pages = '["/"]' }
+  Test-Exit "rootslash" 0 $code
+  if (-not (Read-Report "rootslash" "gl-a11y-junit.xml").Contains('tests="4" failures="0"')) {
+    Fail "rootslash: the JUnit report does not show 4 checks and 0 failures"
+  }
+  if (-not (Read-Report "rootslash" "gl-a11y-junit.xml").Contains('name="/ light 320px"')) {
+    Fail "rootslash: the JUnit report does not name the root /"
+  }
 } finally {
   [IO.Directory]::Delete($Tmp, $true)
 }
