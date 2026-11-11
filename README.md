@@ -200,8 +200,8 @@ do it. It is the one preflight check that books its own flight time.
 
 ### composer-ci
 
-Runs `composer install` and then `composer ci`, and fails the pipeline when the
-lock file is not complete or is out of sync with `composer.json`. The nine stack
+Runs `composer install` and then `composer ci`, and fails the pipeline when either
+fails, for example on a lock file that is missing a package `composer.json` requires. The nine stack
 repos that hand-write this job can replace their copies with one include.
 
 ```yaml

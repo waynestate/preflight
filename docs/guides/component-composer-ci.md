@@ -1,11 +1,11 @@
 ---
 title: The composer-ci component
-description: Runs `composer install` and then `composer ci`, and fails on a lock that is not complete or in sync.
+description: Runs `composer install` and then `composer ci`, and fails the job when either fails.
 ---
 
 # The composer-ci component
 
-The lock file is the contract: this component runs `composer install` and then `composer ci`, and fails the pipeline when the lock file is not complete or is out of sync with `composer.json`. Nine stack repos hand-write this same job today; this page shows how to replace that copy with one include.
+The lock file is the contract: this component runs `composer install` and then `composer ci`, and fails the pipeline when either fails, for example on a lock file that is missing a package `composer.json` requires. Nine stack repos hand-write this same job today; this page shows how to replace that copy with one include.
 
 ## Include the component
 
@@ -33,7 +33,7 @@ include:
 
 ## What the job does
 
-The Composer image (`composer:2.11.1`, pinned by digest) already ships Composer, so no install step for the tool is needed. The job is `interruptible: true` with a `timeout: 30 minutes`. Its script changes into `working_dir`, runs `composer install --no-interaction --no-progress --prefer-dist`, and then `composer ci`, the project's own ci script. That command's exit code decides the job: a lock that is missing packages, or one that is out of sync with `composer.json`, fails the pipeline.
+The Composer image (`composer:2.11.1`, pinned by digest) already ships Composer, so no install step for the tool is needed. The job is `interruptible: true` with a `timeout: 30 minutes`. Its script changes into `working_dir`, runs `composer install --no-interaction --no-progress --prefer-dist`, and then `composer ci`, the project's own ci script. That command's exit code decides the job: a lock that is missing a required package fails the pipeline (a lock whose hash is merely stale only warns, unless the project's `composer ci` runs `composer validate`).
 
 The job caches Composer downloads in `.composer-cache/` under the fixed key `preflight-composer-ci` (policy `pull-push`, saved with `when: always`), and sets `COMPOSER_CACHE_DIR` to `$CI_PROJECT_DIR/.composer-cache`, so repeat runs do not re-download every package and a retry after a dropped download fetches only what is missing.
 
