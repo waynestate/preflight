@@ -1618,6 +1618,8 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ### Unreleased [#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Changed: Preflight's own pipeline runs `php-test-advisory` on `8.6-rc`, the newest PHP 8.6 release candidate, so `php_advisory_version` is proven in a real pipeline (BEST_PRACTICES 6.4 is `Checked`). Its first look found the 8.6 candidate image built without `mbstring`, which PHPUnit needs: the job fails, allowed, and nothing else changes. The php-test guide says which tags the input takes (`8.6-rc` follows the newest candidate, `8.6.0RC5` stays put).
+- Docs: BEST_PRACTICES matches 0.8.0. It counted fourteen components and called 0.5.0 the latest tag; it now lists fifteen with `mysql56-migrate`, counts thirteen tags, has `mysql56-migrate` in 7.1 (eleven components tested at the commit under review) and 7.2 (fourteen of fifteen carry a must-fail fixture), says PROCTOR and CREED fly `proctor@0.8.0`, and marks backlog items 17, 22 and 43 Done.
 - Site: the front page pins 0.8.0. The quick start, every placard, the flight plan and the GitHub workflow pin the 0.8.0 tag commit (they still pinned 0.7.0's), the placards say "in 0.8.0", the components note says what is new in 0.8.0 (`session_header`, and `package-publish` refusing a moved version on GitLab) and keeps 0.7.0 and 0.6.0 as "Since" notes, and the type certificate data sheet is amended to 0.8.0: the change bar moves to `session_header`, the log of amendments gains its 0.8.0 line, and the diff example reads `git diff 0.7.0 0.8.0`.
 
 ### 0.8.0 (2026-11-10) [#](https://preflight.apps.wayne.edu/docs/changelog.html#0-8-0-2026-11-10)
@@ -2478,10 +2480,12 @@ include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
     inputs:
       test_command: vendor/bin/phpunit
-      php_advisory_version: "8.6.0RC2"
+      php_advisory_version: "8.6-rc"
 ```
 
-The job warns, it never blocks; move the version into `php_versions` only once it is a final, supported release.
+The value goes into the image tag, `php:<version>-cli-trixie`, so any tag the official `php` image publishes works: `8.6-rc` follows the newest release candidate, and an exact one such as `8.6.0RC5` stays put. The job warns, it never blocks; move the version into `php_versions` only once it is a final, supported release.
+
+Preflight's own pipeline runs this job on `8.6-rc` against its fixture app. Its first look, on 2026-11-11, found the 8.6 candidate image built without the `mbstring` extension, which PHPUnit needs, so the job stops before the first test. That is the point of the job: you hear about it from a yellow warning, well before it could turn a required job red.
 
 ### Related [#](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html#related)
 

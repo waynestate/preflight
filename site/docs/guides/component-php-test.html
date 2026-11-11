@@ -157,9 +157,15 @@ php-test-next:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
     inputs:
       test_command: vendor/bin/phpunit
-      php_advisory_version: &quot;8.6.0RC2&quot;
+      php_advisory_version: &quot;8.6-rc&quot;
 </code></pre>
-<p>The job warns, it never blocks; move the version into <code>php_versions</code> only once it is a final, supported release.</p>
+<p>The value goes into the image tag, <code>php:&lt;version&gt;-cli-trixie</code>, so any tag the official <code>php</code> image publishes works:
+<code>8.6-rc</code> follows the newest release candidate, and an exact one such as <code>8.6.0RC5</code> stays put. The job warns, it never
+blocks; move the version into <code>php_versions</code> only once it is a final, supported release.</p>
+<p>Preflight's own pipeline runs this job on <code>8.6-rc</code> against its fixture app. Its first look, on 2026-11-11, found the
+8.6 candidate image built without the <code>mbstring</code> extension, which PHPUnit needs, so the job stops before the first
+test. That is the point of the job: you hear about it from a yellow warning, well before it could turn a required
+job red.</p>
 <h2 id="related"><span class="docs-heading-tail"><span>Related</span><a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></span></h2>
 <ul>
 <li><a href="component-proctor.html">The proctor component</a></li>
