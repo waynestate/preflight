@@ -44,7 +44,7 @@ const MAX_BYTES = 300 * 1024; // every file in docs/readme/ stays at or under th
 const FORBIDDEN = /noug[a]t|snu[.]gs|dockerhos[t]/i;
 
 // The tag every component ships in. The page's placards must agree with it.
-const COMPONENT_TAG = "0.7.0";
+const COMPONENT_TAG = "0.8.0";
 
 // Preflight's own palette, as declared in site/assets/preflight.css.
 const C = {
