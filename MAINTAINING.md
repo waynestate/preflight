@@ -71,6 +71,24 @@ example Aikido retires its test package), pick another permanent entry and updat
 rewrite it with Squire (`squire update`, then `squire init`, on the folder) so it stays a kit that passes
 `squire init --check`. Pint and PHPStan skip it.
 
+`tests/check-mysql56-migrate.sh` runs the fixture migrator in `tests/mysql56-migrate/migrate.php` against a real
+MySQL 5.6.51, the server Citadel shares: `clean` must pass, and `json-column` and `long-index` must fail with the
+errors 5.6 reports (1064 and 1071). In CI the `must-fail-mysql56-migrate` job runs it with MySQL as a service, on the
+runner tagged `amd64` (the official 5.6 images are amd64 only; on an Apple Silicon Mac add `--platform linux/amd64`
+to both `docker run` lines and expect it to be slow). It has no `.ps1` twin because it is not a script you run
+directly; locally, give it the same service on a Docker network:
+
+```sh
+docker network create pf-mysql56
+docker run -d --rm --name pf-mysql56 --network pf-mysql56 --network-alias mysql -e MYSQL_ROOT_PASSWORD=preflight-mysql56-ci -e MYSQL_DATABASE=app -e MYSQL_USER=app -e MYSQL_PASSWORD=preflight-mysql56-ci mysql:5.6.51
+docker run --rm --network pf-mysql56 -v "$(pwd):/app:ro" -w /app -e DB_HOST=mysql -e DB_DATABASE=app -e DB_USERNAME=app -e DB_PASSWORD=preflight-mysql56-ci -e MYSQL_ROOT_PASSWORD=preflight-mysql56-ci php:8.3-cli-trixie sh -c "docker-php-ext-install pdo_mysql > /dev/null 2>&1 && sh tests/check-mysql56-migrate.sh"
+docker stop pf-mysql56 && docker network rm pf-mysql56
+```
+
+In PowerShell the lines are the same with `${PWD}` in place of `$(pwd)`. The password is a throwaway for a database
+that lives as long as the container. A pass prints one `ok` line per case; a 5.6 that suddenly accepts a JSON column
+means the image is not 5.6, so check the tag before you check the fixture.
+
 With only Docker:
 
 ```
