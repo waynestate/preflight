@@ -13,6 +13,8 @@ are Git tags.
 
 ## Unreleased
 
+- Site: the front page pins 0.8.0. The quick start, every placard, the flight plan and the GitHub workflow pin the 0.8.0 tag commit (they still pinned 0.7.0's), the placards say "in 0.8.0", the components note says what is new in 0.8.0 (`session_header`, and `package-publish` refusing a moved version on GitLab) and keeps 0.7.0 and 0.6.0 as "Since" notes, and the type certificate data sheet is amended to 0.8.0: the change bar moves to `session_header`, the log of amendments gains its 0.8.0 line, and the diff example reads `git diff 0.7.0 0.8.0`.
+
 ## 0.8.0 (2026-11-10)
 
 One new portability input. `session_header` sends one `Name: $VARIABLE` header on every session-hop request, so a

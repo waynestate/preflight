@@ -46,6 +46,9 @@
 <a rel="noopener" href="https://keepachangelog.com/en/1.1.0/">Keep a Changelog</a>; released versions
 are Git tags.</p>
 <h2 id="unreleased"><span class="docs-heading-tail"><span>Unreleased</span><a class="docs-heading-link" aria-label="Link to this section" href="#unreleased">#</a></span></h2>
+<ul>
+<li>Site: the front page pins 0.8.0. The quick start, every placard, the flight plan and the GitHub workflow pin the 0.8.0 tag commit (they still pinned 0.7.0's), the placards say &quot;in 0.8.0&quot;, the components note says what is new in 0.8.0 (<code>session_header</code>, and <code>package-publish</code> refusing a moved version on GitLab) and keeps 0.7.0 and 0.6.0 as &quot;Since&quot; notes, and the type certificate data sheet is amended to 0.8.0: the change bar moves to <code>session_header</code>, the log of amendments gains its 0.8.0 line, and the diff example reads <code>git diff 0.7.0 0.8.0</code>.</li>
+</ul>
 <h2 id="0-8-0-2026-11-10">0.8.0 <span class="docs-heading-tail"><span>(2026-11-10)</span><a class="docs-heading-link" aria-label="Link to this section" href="#0-8-0-2026-11-10">#</a></span></h2>
 <p>One new portability input. <code>session_header</code> sends one <code>Name: $VARIABLE</code> header on every session-hop request, so a
 probe sign-in route can require a per-job secret, and <code>package-publish</code> now really refuses a moved version on
