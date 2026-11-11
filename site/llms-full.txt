@@ -1648,6 +1648,7 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ### Unreleased [#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Added: the consumer a11y kit (`templates/a11y/consumer/`: one runner pair, its pin manifest and the checker), the single local a11y runner every stack repo copies (D-110).
 - Added: the `composer-ci` component (sixteenth): the hand-written install-and-ci job nine stack repos carry, as one include. It runs the Composer image by digest with the shared Composer cache (fixed key `preflight-composer-ci`), `composer install --no-interaction --no-progress --prefer-dist`, then `composer ci`; that command's exit code decides the job, and there is no `allow_failure` input, because a failing `composer ci` must fail the pipeline. No input was renamed or removed.
 - Added: the proctor component's `check_path` input (default empty) changes the command's working directory after the install, so a repo that installs PROCTOR in `deploy` can run `deploy/vendor/bin/proctor check --path=.` from the project root and have the `wayneui.copies` scan see `site/assets/wayne-ui` at the root. Empty keeps today's behaviour (the command runs in `working_dir`); no input was renamed or removed.
 - Added: `tests/TemplateJobsTest.php`, part of `composer ci`, holds two practices that were only written down. Every job a consumer gets must keep `interruptible: true` and a timeout of 1 hour or less, directly or through the hidden job it extends (BEST_PRACTICES 2.9), and no template may gain a credential: a password, token, secret or key input defaults to empty or a variable name, a script reads no credential variable but `CI_JOB_TOKEN` and `CI_DEPENDENCY_PROXY_PASSWORD`, and no token or private key appears (5.1). `mysql56-migrate`'s throwaway `db_password` is the one named exception. Both practices move to `Checked`
@@ -2062,6 +2063,26 @@ Preflight does not sign in for the app, because the app owns its own sign-in and
 ### Run it on your desk [#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#run-it-on-your-desk)
 
 Preflight's own repository runs this checker locally with `scripts/a11y.sh` (Linux and macOS) or `scripts/a11y.ps1` (Windows), in Docker, with the image and versions pinned in the template. See [Local checks](https://preflight.apps.wayne.edu/docs/reference/local-checks.html).
+
+### Run it locally in your repo [#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#run-it-locally-in-your-repo)
+
+Preflight owns the local a11y run (D-110): every stack repo copies one runner pair into its own `tools/a11y/`, and nothing else runs axe-core on a developer's machine. The kit is the `templates/a11y/consumer/` folder of the pinned Preflight release, copied over whole:
+
+```
+git clone --depth 1 --branch 0.8.0 https://github.com/waynestate/preflight /tmp/preflight
+mkdir -p tools/a11y
+cp /tmp/preflight/templates/a11y/consumer/* tools/a11y/
+```
+
+That gives you `a11y.sh` (Linux and macOS), `a11y.ps1` (Windows), `a11y-pin.json` (the Preflight release, the Playwright image by digest, and the axe versions that release pinned) and `check.mjs` (the component's own checker). Run it from the repo root:
+
+```
+sh tools/a11y/a11y.sh          # or: pwsh tools/a11y/a11y.ps1
+```
+
+The defaults match what the pipeline checks: the `site` folder, `**/*.html`, the five WCAG tags (2.0 A and AA, 2.1 A and AA, 2.2 AA), light and dark at 320 px and 1280 px, reports in `build/a11y`. Override with `--site=`, `--pages=`, `--tags=`, `--report=` or `--base-url=` (and `-Site` and friends in PowerShell); `A11Y_BASE_URL` sets the base URL without a flag. Exit codes are 0 clean, 1 a violation or a page that did not load, 2 a tool or configuration error.
+
+Do not edit the four files. They carry a "Copied from Preflight" header, and when Preflight moves its pins the copy step is the only change a consumer makes. Keep a pin test next to them that asserts `tools/a11y/` still matches the pinned Preflight release, so a hand-edited pin fails CI instead of drifting.
 
 ### Verify [#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#verify)
 

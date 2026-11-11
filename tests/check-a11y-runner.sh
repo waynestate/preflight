@@ -1,15 +1,19 @@
 #!/bin/sh
-# check-a11y-runner.sh: does the local a11y runner keep reading its pins from
-# the component?
+# check-a11y-runner.sh: do the local a11y runners keep reading their pins
+# from the component?
 #
 # scripts/a11y.sh and scripts/a11y.ps1 run the a11y component's own checker
 # (templates/a11y/check.mjs) locally, in Docker, so no host browser is needed.
 # Their whole point is that the Playwright image and the axe versions are NOT
 # written in them: they are read at run time from the defaults in
 # templates/a11y/template.yml, so a local run and a pipeline run check the
-# same way. This test fails when a runner grows its own pin (a hard-coded
-# image or version), stops reading an input from the template, drops an option
-# a consumer passes, or changes the line endings that make it run on its OS.
+# same way. The consumer kit (templates/a11y/consumer/) is the single local
+# runner every stack repo copies into tools/a11y/ (D-110); its runners read
+# the same pins from a11y-pin.json instead of the template, and this test
+# holds that manifest to the template's own defaults through the generator.
+# This test fails when a runner grows its own pin (a hard-coded image or
+# version), stops reading an input from the template, drops an option a
+# consumer passes, or changes the line endings that make it run on its OS.
 #
 #   sh tests/check-a11y-runner.sh    check (exit 0 in step, 1 drifted)
 #
@@ -112,6 +116,79 @@ fi
 # it; the final record may lack a terminator.
 if awk 'NR > 1 && prev !~ /\r$/ { bad = 1 } { prev = $0 } END { exit bad ? 0 : 1 }' "$PS"; then
   fail "scripts/a11y.ps1 does not have CRLF on every line"
+fi
+
+# 8. The consumer kit (templates/a11y/consumer/) is fresh and shaped like the
+# component: the generator agrees with the committed files, the pin names the
+# newest released version, the checker is the component's checker, and the
+# runners keep their options and line endings.
+KDIR="$ROOT/templates/a11y/consumer"
+KF_SH="$KDIR/a11y.sh"
+KF_PS="$KDIR/a11y.ps1"
+for f in "$KF_SH" "$KF_PS" "$KDIR/a11y-pin.json" "$KDIR/check.mjs"; do
+  if [ ! -f "$f" ]; then
+    fail "missing ${f#"$ROOT"/}"
+  fi
+done
+if [ "$status" -eq 0 ]; then
+  # 8a. The generator reports the kit fresh: the pin manifest, the checker
+  # copy and both runner headers match the component's own pins.
+  if ! kit_check=$(sh "$ROOT/scripts/a11y-consumer-kit.sh" --check); then
+    fail "templates/a11y/consumer/ is stale; run sh scripts/a11y-consumer-kit.sh"
+  fi
+
+  # 8b. The pin names the newest released version in CHANGELOG.md.
+  want_version=$(awk '/^## / && $2 ~ /^[0-9]+\.[0-9]+\.[0-9]+$/ { print $2; exit }' "$ROOT/CHANGELOG.md")
+  got_version=$(awk -F'"' '$2 == "preflight" { print $4 }' "$KDIR/a11y-pin.json" | head -n 1)
+  if [ "$got_version" != "$want_version" ]; then
+    fail "the consumer pin says Preflight $got_version, but the changelog releases $want_version"
+  fi
+
+  # 8c. The checker is the component's checker, byte for byte.
+  if ! cmp -s "$ROOT/templates/a11y/check.mjs" "$KDIR/check.mjs"; then
+    fail "templates/a11y/consumer/check.mjs differs from templates/a11y/check.mjs"
+  fi
+
+  # 8d. A consumer runner grows no pin of its own.
+  cpins=$(awk -v root="$ROOT" '
+    {
+      sub(/\r$/, "")
+      fname = FILENAME
+      pre = root "/"
+      if (index(fname, pre) == 1) { fname = substr(fname, length(pre) + 1) }
+      if ($0 ~ /^[[:space:]]*#/) next
+      if ($0 ~ /mcr\.microsoft\.com\/playwright:v/) { print fname ":" FNR ": " $0; next }
+      if ($0 ~ /axe-core@[0-9]/) { print fname ":" FNR ": " $0; next }
+      if ($0 ~ /@axe-core\/playwright@[0-9]/) { print fname ":" FNR ": " $0; next }
+      if ($0 ~ /playwright@[0-9]/) { print fname ":" FNR ": " $0 }
+    }
+  ' "$KF_SH" "$KF_PS")
+  if [ -n "$cpins" ]; then
+    while IFS= read -r pin; do
+      [ -n "$pin" ] || continue
+      fail "a consumer runner hard-codes a pin instead of reading it from a11y-pin.json: $pin"
+    done <<EOF
+$cpins
+EOF
+  fi
+
+  # 8e. The consumer runners read the manifest and still offer the five
+  # options, with the .sh on LF and the .ps1 on CRLF.
+  grep -qF "a11y-pin.json" "$KF_SH" || fail "consumer a11y.sh does not read a11y-pin.json"
+  grep -qF "a11y-pin.json" "$KF_PS" || fail "consumer a11y.ps1 does not read a11y-pin.json"
+  cusage=$(grep -F 'usage:' "$KF_SH" | grep -F -- '--site=' | grep -F -- '--pages=' | grep -F -- '--tags=' | grep -F -- '--report=' | grep -F -- '--base-url=')
+  if [ -z "$cusage" ]; then
+    fail "the usage line of consumer a11y.sh does not offer --site, --pages, --tags, --report and --base-url"
+  fi
+  for param in Site Pages Tags Report BaseUrl; do
+    grep -qF "[string]\$$param" "$KF_PS" || fail "consumer a11y.ps1 no longer takes -$param"
+  done
+  if awk '/\r/ { found = 1 } END { exit found ? 0 : 1 }' "$KF_SH"; then
+    fail "consumer a11y.sh contains a carriage return"
+  fi
+  if awk 'NR > 1 && prev !~ /\r$/ { bad = 1 } { prev = $0 } END { exit bad ? 0 : 1 }' "$KF_PS"; then
+    fail "consumer a11y.ps1 does not have CRLF on every line"
+  fi
 fi
 
 if [ "$status" -eq 0 ]; then

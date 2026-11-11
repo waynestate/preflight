@@ -197,6 +197,32 @@ credentials; for pages that need no sign-in, see [Check a running site](#check-a
 Preflight's own repository runs this checker locally with `scripts/a11y.sh` (Linux and macOS) or `scripts/a11y.ps1`
 (Windows), in Docker, with the image and versions pinned in the template. See [Local checks](../reference/local-checks.md).
 
+## Run it locally in your repo
+
+Preflight owns the local a11y run (D-110): every stack repo copies one runner pair into its own `tools/a11y/`, and
+nothing else runs axe-core on a developer's machine. The kit is the `templates/a11y/consumer/` folder of the pinned
+Preflight release, copied over whole:
+
+    git clone --depth 1 --branch 0.8.0 https://github.com/waynestate/preflight /tmp/preflight
+    mkdir -p tools/a11y
+    cp /tmp/preflight/templates/a11y/consumer/* tools/a11y/
+
+That gives you `a11y.sh` (Linux and macOS), `a11y.ps1` (Windows), `a11y-pin.json` (the Preflight release, the
+Playwright image by digest, and the axe versions that release pinned) and `check.mjs` (the component's own checker).
+Run it from the repo root:
+
+    sh tools/a11y/a11y.sh          # or: pwsh tools/a11y/a11y.ps1
+
+The defaults match what the pipeline checks: the `site` folder, `**/*.html`, the five WCAG tags (2.0 A and AA,
+2.1 A and AA, 2.2 AA), light and dark at 320 px and 1280 px, reports in `build/a11y`. Override with `--site=`,
+`--pages=`, `--tags=`, `--report=` or `--base-url=` (and `-Site` and friends in PowerShell); `A11Y_BASE_URL` sets
+the base URL without a flag. Exit codes are 0 clean, 1 a violation or a page that did not load, 2 a tool or
+configuration error.
+
+Do not edit the four files. They carry a "Copied from Preflight" header, and when Preflight moves its pins the copy
+step is the only change a consumer makes. Keep a pin test next to them that asserts `tools/a11y/` still matches the
+pinned Preflight release, so a hand-edited pin fails CI instead of drifting.
+
 ## Verify
 
 Push the change. The `a11y` job lands in the `test` stage by default, and its last line reads `a11y: clean` when every

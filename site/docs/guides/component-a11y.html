@@ -266,6 +266,27 @@ credentials; for pages that need no sign-in, see <a href="#check-a-running-site"
 <h2 id="run-it-on-your-desk">Run it on your <span class="docs-heading-tail"><span>desk</span><a class="docs-heading-link" aria-label="Link to this section" href="#run-it-on-your-desk">#</a></span></h2>
 <p>Preflight's own repository runs this checker locally with <code>scripts/a11y.sh</code> (Linux and macOS) or <code>scripts/a11y.ps1</code>
 (Windows), in Docker, with the image and versions pinned in the template. See <a href="../reference/local-checks.html">Local checks</a>.</p>
+<h2 id="run-it-locally-in-your-repo">Run it locally in your <span class="docs-heading-tail"><span>repo</span><a class="docs-heading-link" aria-label="Link to this section" href="#run-it-locally-in-your-repo">#</a></span></h2>
+<p>Preflight owns the local a11y run (D-110): every stack repo copies one runner pair into its own <code>tools/a11y/</code>, and
+nothing else runs axe-core on a developer's machine. The kit is the <code>templates/a11y/consumer/</code> folder of the pinned
+Preflight release, copied over whole:</p>
+<pre tabindex="0"><code>git clone --depth 1 --branch 0.8.0 https://github.com/waynestate/preflight /tmp/preflight
+mkdir -p tools/a11y
+cp /tmp/preflight/templates/a11y/consumer/* tools/a11y/
+</code></pre>
+<p>That gives you <code>a11y.sh</code> (Linux and macOS), <code>a11y.ps1</code> (Windows), <code>a11y-pin.json</code> (the Preflight release, the
+Playwright image by digest, and the axe versions that release pinned) and <code>check.mjs</code> (the component's own checker).
+Run it from the repo root:</p>
+<pre tabindex="0"><code>sh tools/a11y/a11y.sh          # or: pwsh tools/a11y/a11y.ps1
+</code></pre>
+<p>The defaults match what the pipeline checks: the <code>site</code> folder, <code>**/*.html</code>, the five WCAG tags (2.0 A and AA,
+2.1 A and AA, 2.2 AA), light and dark at 320 px and 1280 px, reports in <code>build/a11y</code>. Override with <code>--site=</code>,
+<code>--pages=</code>, <code>--tags=</code>, <code>--report=</code> or <code>--base-url=</code> (and <code>-Site</code> and friends in PowerShell); <code>A11Y_BASE_URL</code> sets
+the base URL without a flag. Exit codes are 0 clean, 1 a violation or a page that did not load, 2 a tool or
+configuration error.</p>
+<p>Do not edit the four files. They carry a &quot;Copied from Preflight&quot; header, and when Preflight moves its pins the copy
+step is the only change a consumer makes. Keep a pin test next to them that asserts <code>tools/a11y/</code> still matches the
+pinned Preflight release, so a hand-edited pin fails CI instead of drifting.</p>
 <h2 id="verify"><span class="docs-heading-tail"><span>Verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#verify">#</a></span></h2>
 <p>Push the change. The <code>a11y</code> job lands in the <code>test</code> stage by default, and its last line reads <code>a11y: clean</code> when every
 page passes. Open the merge request's test summary to see each page and mode.</p>
@@ -283,7 +304,7 @@ token and no Docker socket.</p></aside>
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../../docs/guides/component-portability.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">The portability component</span></a><a class="docs-pager__link docs-pager__link--next" href="../../docs/guides/component-squire-kit.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">The squire-kit component</span></a></nav>
   </div>
-  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#what-the-job-checks">What the job checks</a></li><li class="docs-toc__item"><a href="#include-the-component">Include the component</a></li><li class="docs-toc__item"><a href="#inputs">Inputs</a></li><li class="docs-toc__item"><a href="#how-the-job-works">How the job works</a></li><li class="docs-toc__item"><a href="#reports">Reports</a></li><li class="docs-toc__item"><a href="#roll-it-out-on-a-site-with-findings">Roll it out on a site with findings</a></li><li class="docs-toc__item"><a href="#check-a-running-site">Check a running site</a></li><li class="docs-toc__item"><a href="#pages-behind-a-sign-in">Pages behind a sign-in</a></li><li class="docs-toc__item"><a href="#run-it-on-your-desk">Run it on your desk</a></li><li class="docs-toc__item"><a href="#verify">Verify</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#what-the-job-checks">What the job checks</a></li><li class="docs-toc__item"><a href="#include-the-component">Include the component</a></li><li class="docs-toc__item"><a href="#inputs">Inputs</a></li><li class="docs-toc__item"><a href="#how-the-job-works">How the job works</a></li><li class="docs-toc__item"><a href="#reports">Reports</a></li><li class="docs-toc__item"><a href="#roll-it-out-on-a-site-with-findings">Roll it out on a site with findings</a></li><li class="docs-toc__item"><a href="#check-a-running-site">Check a running site</a></li><li class="docs-toc__item"><a href="#pages-behind-a-sign-in">Pages behind a sign-in</a></li><li class="docs-toc__item"><a href="#run-it-on-your-desk">Run it on your desk</a></li><li class="docs-toc__item"><a href="#run-it-locally-in-your-repo">Run it locally in your repo</a></li><li class="docs-toc__item"><a href="#verify">Verify</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
   <span>Documents Preflight <span data-docs-version>0.8.0</span></span>

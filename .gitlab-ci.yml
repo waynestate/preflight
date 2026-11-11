@@ -127,6 +127,7 @@ contract:
     - sh tests/check-release-job.sh
     - sh tests/check-a11y-inline.sh
     - sh tests/check-a11y-runner.sh
+    - sh scripts/a11y-consumer-kit.sh --check
     - sh tests/check-portability-inline.sh
     - sh tests/check-renovate-squire-kit.sh
     - sh tests/check-squire-kit.sh
