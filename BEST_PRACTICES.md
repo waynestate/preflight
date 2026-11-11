@@ -990,9 +990,15 @@ Why: the Docker Official Image README already lists PHP 8.6 release candidates o
 warning. An advisory job must not become a gate: only a final, supported version belongs in the required matrix.
 
 Sources: [Docker Official Image: php](https://github.com/docker-library/docs/blob/master/php/README.md);
-[PHP supported versions](https://www.php.net/supported-versions.php). The tag names for release candidates were not checked.
+[PHP supported versions](https://www.php.net/supported-versions.php). Release candidate tags checked on Docker Hub on
+2026-11-11: `8.6.0RC5-cli-trixie` (exact) and `8.6-rc-cli-trixie` (follows the newest candidate).
 
-**How the stack holds it: Documented.** `php-test` takes `php_advisory_version`, which adds a `<job_name>-advisory` job with `allow_failure: true` (`templates/php-test/template.yml`); nothing yet proves the job in a pipeline.
+**How the stack holds it: Checked.** `php-test` takes `php_advisory_version`, which adds a `<job_name>-advisory` job with
+`allow_failure: true` (`templates/php-test/template.yml`), and Preflight's own pipeline sets it to `8.6-rc`, so every
+pipeline runs the fixture app's tests on the newest 8.6 release candidate and warns, without failing, when they break.
+It found something on its first run (2026-11-11, the job's script run by hand in `php:8.6.0RC5-cli-trixie`): the 8.6
+candidate image is built without `mbstring` (and with ZTS), so PHPUnit refuses to start. An app whose matrix took 8.6
+today would go red on every job; the advisory job is where that news belongs.
 
 ### 6.5 Aim the future accessibility component at WCAG 2.2 AA
 When Preflight gets an accessibility suite, use WCAG 2.2 Level AA as the floor, and keep a manual review step.
@@ -1209,7 +1215,7 @@ Added in the second pass (2026-10-27):
     `templates/php-test/template.yml:16`), like every other component.
 37. 7.4: Add a cross-OS local run (Composer scripts first) and test the README's local commands in PowerShell.
 38. Done: 6.4: `php-test` takes `php_advisory_version`, which adds a `<job_name>-advisory` job, advisory-only
-    (`allow_failure: true`, `templates/php-test/template.yml:27,104`).
+    (`allow_failure: true`, `templates/php-test/template.yml:27,104`), and Preflight's own pipeline runs it on `8.6-rc`.
 39. Done: 6.5: WCAG 2.2 AA is named as the floor on the front page (site/index.html:841), the same floor Preflight's
     own `a11y` job passes as `wcag_tags` (.gitlab-ci.yml:44).
 40. 1.8: Write a retirement policy for components, and test whether SHA pins survive a Catalog unpublish.

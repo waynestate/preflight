@@ -6,6 +6,7 @@ are Git tags.
 
 ## Unreleased
 
+- Changed: Preflight's own pipeline runs `php-test-advisory` on `8.6-rc`, the newest PHP 8.6 release candidate, so `php_advisory_version` is proven in a real pipeline (BEST_PRACTICES 6.4 is `Checked`). Its first look found the 8.6 candidate image built without `mbstring`, which PHPUnit needs: the job fails, allowed, and nothing else changes. The php-test guide says which tags the input takes (`8.6-rc` follows the newest candidate, `8.6.0RC5` stays put).
 - Site: the front page pins 0.8.0. The quick start, every placard, the flight plan and the GitHub workflow pin the 0.8.0 tag commit (they still pinned 0.7.0's), the placards say "in 0.8.0", the components note says what is new in 0.8.0 (`session_header`, and `package-publish` refusing a moved version on GitLab) and keeps 0.7.0 and 0.6.0 as "Since" notes, and the type certificate data sheet is amended to 0.8.0: the change bar moves to `session_header`, the log of amendments gains its 0.8.0 line, and the diff example reads `git diff 0.7.0 0.8.0`.
 
 ## 0.8.0 (2026-11-10)

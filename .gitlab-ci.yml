@@ -11,10 +11,20 @@ include:
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/proctor@$CI_COMMIT_SHA
     inputs:
       working_dir: tests/fixture-app
+  # php_advisory_version adds php-test-advisory: the fixture's tests on the
+  # next PHP's newest release candidate (the floating 8.6-rc tag), in a job
+  # that may fail. It proves the input in a real pipeline (BEST_PRACTICES
+  # 6.4) and gives the stack its first look at 8.6 before the matrix takes
+  # it. First look, 2026-11-11: php:8.6.0RC5-cli-trixie is built without
+  # mbstring (and with ZTS), so PHPUnit refuses to start and the job fails,
+  # allowed. That is the job doing its work. When 8.6.0 ships, move 8.6 into
+  # the php_versions default and empty this line: a release candidate is a
+  # practice approach, not the landing.
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/php-test@$CI_COMMIT_SHA
     inputs:
       working_dir: tests/fixture-app
       test_command: vendor/bin/phpunit
+      php_advisory_version: "8.6-rc"
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/composer-audit@$CI_COMMIT_SHA
     inputs:
       stage: audit

@@ -89,10 +89,17 @@ include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
     inputs:
       test_command: vendor/bin/phpunit
-      php_advisory_version: "8.6.0RC2"
+      php_advisory_version: "8.6-rc"
 ```
 
-The job warns, it never blocks; move the version into `php_versions` only once it is a final, supported release.
+The value goes into the image tag, `php:<version>-cli-trixie`, so any tag the official `php` image publishes works:
+`8.6-rc` follows the newest release candidate, and an exact one such as `8.6.0RC5` stays put. The job warns, it never
+blocks; move the version into `php_versions` only once it is a final, supported release.
+
+Preflight's own pipeline runs this job on `8.6-rc` against its fixture app. Its first look, on 2026-11-11, found the
+8.6 candidate image built without the `mbstring` extension, which PHPUnit needs, so the job stops before the first
+test. That is the point of the job: you hear about it from a yellow warning, well before it could turn a required
+job red.
 
 ## Related
 
