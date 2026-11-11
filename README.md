@@ -96,6 +96,7 @@ include:
 | `proctor_command` | string | `vendor/bin/proctor check --format=codequality` | The proctor command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
 | `git_depth` | string | `"0"` | How many commits the job clones (GitLab's `GIT_DEPTH`); the default `0` clones the full history, so PROCTOR's override-approver check can see who wrote each override. |
+| `check_path` | string | `""` | Directory to run the proctor command in, relative to the project root, after the install. Empty (the default) runs it in `working_dir`; set it to `.` to install in a folder such as `deploy` and run the check from the project root. |
 
 The job also keeps PROCTOR's JSON report (what `--format=json` prints) as
 `proctor.json` in its artifact, for 30 days, whether it passed or failed.

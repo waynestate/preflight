@@ -45,6 +45,11 @@ spec:
       type: string
       default: "0"
       regex: '^[0-9]+$'
+    check_path:
+      description: "Directory to run the proctor command in, relative to the project root, after the install. Empty (the default) runs it in working_dir. Set it to . to install in a folder such as deploy and run the check from the project root."
+      type: string
+      default: ""
+      regex: '^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)?$'
 ---
 "$[[ inputs.job_name ]]":
   stage: $[[ inputs.stage ]]
@@ -68,6 +73,8 @@ spec:
     COMPOSER_CACHE_DIR: "$CI_PROJECT_DIR/.composer-cache"
     # Full history by default: override-approver reads git blame (0 means no depth limit).
     GIT_DEPTH: "$[[ inputs.git_depth ]]"
+    # Where the check runs after the install; empty keeps working_dir.
+    PREFLIGHT_PROCTOR_CHECK_PATH: "$[[ inputs.check_path ]]"
     # The command as text, read only by the --record guard in the script.
     # GitLab fills it in as a value, so quotes in the command cannot break it.
     PREFLIGHT_PROCTOR_COMMAND: $[[ inputs.proctor_command ]]
@@ -94,6 +101,10 @@ spec:
     # PHP version and extensions are not required here: an app locked to
     # PHP 7, or needing gd or oci8, still gets its report.
     - composer install --no-interaction --no-progress --no-plugins --no-scripts --ignore-platform-reqs
+    # The install ran in working_dir, but the check can run elsewhere: when
+    # check_path is set (say . to scan from the project root), move there so
+    # the wayneui.copies scan sees site/assets/wayne-ui at the root.
+    - if [ -n "$PREFLIGHT_PROCTOR_CHECK_PATH" ]; then cd "$CI_PROJECT_DIR/$PREFLIGHT_PROCTOR_CHECK_PATH"; fi
     # The --record guard. PROCTOR 0.11.0 and later can also write the JSON
     # report (what --format=json prints) to a file, whatever --format says;
     # Rollcall reads that file from this job's artifact. PROCTOR 0.10.0 and
@@ -109,6 +120,7 @@ spec:
     # The help run uses the command only up to "proctor check": Symfony's
     # help has its own --format, so "check --format=codequality --help"
     # fails with Unsupported format instead of printing the options.
+    # It now runs from the check path, so a relative command such as deploy/vendor/bin/proctor check resolves there too.
     # Nothing here can change the job's result: the help run's exit code is
     # ignored, and the proctor line below still decides pass or fail.
     - |
