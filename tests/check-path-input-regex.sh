@@ -11,7 +11,9 @@
 # semicolons and $(...). memory_limit takes a PHP size such as 1G, 512M or
 # -1. A value outside the regex stops the pipeline at creation. The pattern
 # still allows a/../b; that is a later slice (same as working_dir), so this
-# test pins the exact regex lines instead of re-deriving the rule.
+# test pins the exact regex lines instead of re-deriving the rule. The
+# proctor check_path input is checked here too: the job cds into it after
+# the install, so it must stay a relative path or be empty.
 #
 # test_command, proctor_command and eslint_args stay free on purpose: they
 # are arbitrary commands by design.
@@ -34,6 +36,7 @@ fail() {
 # The expected regex lines, exactly as they must appear in the templates.
 path_regex_line="      regex: '^[A-Za-z0-9_-][A-Za-z0-9._/-]*$'"
 memory_regex_line="      regex: '^(-1|[0-9]+[KkMmGg]?)$'"
+check_path_regex_line="      regex: '^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)?$'"
 
 # check_input <template> <input name> <expected regex line>
 check_input() {
@@ -96,6 +99,9 @@ for tpl in "$ROOT"/templates/*/template.yml; do
     pint)
       check_input "$tpl" config "$path_regex_line"
       ;;
+    proctor)
+      check_input "$tpl" check_path "$check_path_regex_line"
+      ;;
     sbom)
       check_input "$tpl" output "$path_regex_line"
       ;;
@@ -114,6 +120,21 @@ done
 for bad in /etc/passwd ../x .hidden 'a b' 'a;b' '$(id)'; do
   if printf '%s\n' "$bad" | grep -qE "$path_pattern"; then
     fail "path regex: $bad must not match"
+  fi
+done
+
+# The check_path pattern accepts the samples.
+check_path_pattern='^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)?$'
+for good in . deploy a_b-c/d tests/fixture-app ''; do
+  if ! printf '%s\n' "$good" | grep -qE "$check_path_pattern"; then
+    fail "check_path regex: $good should match"
+  fi
+done
+
+# The check_path pattern rejects the samples.
+for bad in /etc ../x .. .hidden 'a b' 'a;b' '$(id)' 'deploy/..;id'; do
+  if printf '%s\n' "$bad" | grep -qE "$check_path_pattern"; then
+    fail "check_path regex: $bad must not match"
   fi
 done
 

@@ -10,7 +10,9 @@
 # semicolons and $(...). memory_limit takes a PHP size such as 1G, 512M or
 # -1. A value outside the regex stops the pipeline at creation. The pattern
 # still allows a/../b; that is a later slice (same as working_dir), so this
-# test pins the exact regex lines instead of re-deriving the rule.
+# test pins the exact regex lines instead of re-deriving the rule. The
+# proctor check_path input is checked here too: the job cds into it after
+# the install, so it must stay a relative path or be empty.
 #
 # test_command, proctor_command and eslint_args stay free on purpose: they
 # are arbitrary commands by design.
@@ -31,6 +33,7 @@ function Fail([string]$message) {
 # The expected regex lines, exactly as they must appear in the templates.
 $pathRegexLine = "      regex: '^[A-Za-z0-9_-][A-Za-z0-9._/-]*$'"
 $memoryRegexLine = "      regex: '^(-1|[0-9]+[KkMmGg]?)$'"
+$checkPathRegexLine = "      regex: '^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)?$'"
 
 function Get-InputBlock([string[]]$spec, [string]$key) {
   $block = @()
@@ -105,6 +108,7 @@ function Check-Input([string]$name, [string]$tpl, [string]$inputName, [string]$e
 Check-Input "phpstan" (Join-Path $Root "templates/phpstan/template.yml") "config" $pathRegexLine
 Check-Input "phpstan" (Join-Path $Root "templates/phpstan/template.yml") "memory_limit" $memoryRegexLine
 Check-Input "pint" (Join-Path $Root "templates/pint/template.yml") "config" $pathRegexLine
+Check-Input "proctor" (Join-Path $Root "templates/proctor/template.yml") "check_path" $checkPathRegexLine
 Check-Input "sbom" (Join-Path $Root "templates/sbom/template.yml") "output" $pathRegexLine
 
 # The path pattern accepts the samples.
@@ -119,6 +123,21 @@ foreach ($good in @('phpstan.neon', 'config/phpstan.neon', 'sbom.cdx.json', 'a_b
 foreach ($bad in @('/etc/passwd', '../x', '.hidden', 'a b', 'a;b', '$(id)')) {
   if ($bad -match $pathPattern) {
     Fail "path regex: $bad must not match"
+  }
+}
+
+# The check_path pattern accepts the samples.
+$checkPathPattern = '^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)?$'
+foreach ($good in @('.', 'deploy', 'a_b-c/d', 'tests/fixture-app', '')) {
+  if ($good -notmatch $checkPathPattern) {
+    Fail "check_path regex: $good should match"
+  }
+}
+
+# The check_path pattern rejects the samples.
+foreach ($bad in @('/etc', '../x', '..', '.hidden', 'a b', 'a;b', '$(id)', 'deploy/..;id')) {
+  if ($bad -match $checkPathPattern) {
+    Fail "check_path regex: $bad must not match"
   }
 }
 
