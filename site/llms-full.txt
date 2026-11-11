@@ -1991,6 +1991,40 @@ include:
 
 `base_url` goes into a job variable, so GitLab expands CI variables in it. Pages are paths under it. Globs still expand in `site_dir`, so with `base_url` and no local folder, list the pages by hand. The job must be able to reach the URL; put it in a stage after the deploy.
 
+### Pages behind a sign-in [#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#pages-behind-a-sign-in)
+
+The job opens pages anonymously, so a page that needs a sign-in answers with its login or access-denied screen instead of the app. For a signed-in app, have the app's own job sign in, save the rendered signed-in pages as static HTML into a folder, and point the component at that snapshot:
+
+```yaml
+# .gitlab-ci.yml (all values are placeholders; swap in your app's host, paths and user)
+stages: [build, test]
+
+a11y-pages:
+  stage: build
+  script:
+    # Sign in once, keep the session in a cookie jar, then fetch each page into a11y-snapshot/.
+    - mkdir -p a11y-snapshot
+    - curl -sS -c cookies.txt -X POST -d "user=ci-user@example.test&password=$SNAPSHOT_PASSWORD" "https://app.example.test/sign-in"
+    - curl -sS -b cookies.txt -o a11y-snapshot/index.html "https://app.example.test/"
+    - curl -sS -b cookies.txt -o a11y-snapshot/about.html "https://app.example.test/about"
+  artifacts:
+    paths:
+      - a11y-snapshot/
+
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+    inputs:
+      stage: test
+      site_dir: a11y-snapshot
+      pages: ["**/*.html"]
+```
+
+A component cannot take a `needs` override, so the component job cannot be wired straight onto `a11y-pages`. Order the two jobs by stage instead: put `a11y-pages` in an earlier stage (here `build`) and set the component's `stage:` input to the stage after it (here `test`). Later stages start only after earlier ones finish, so the snapshot artifact is on disk when the checker runs.
+
+The app's allowlist rejects the pipeline's fake user, so the snapshot job must sign in as a user the allowlist accepts, for example an allowlist entry that exists only in CI. Otherwise the snapshot holds the "not allowed" page, and a green job has only proved that the wrong screen is accessible. Open one saved file and look for your real heading before you trust it.
+
+Preflight does not sign in for the app, because the app owns its own sign-in and no Preflight input can carry its credentials; for pages that need no sign-in, see [Check a running site](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#check-a-running-site).
+
 ### Run it on your desk [#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#run-it-on-your-desk)
 
 Preflight's own repository runs this checker locally with `scripts/a11y.sh` (Linux and macOS) or `scripts/a11y.ps1` (Windows), in Docker, with the image and versions pinned in the template. See [Local checks](https://preflight.apps.wayne.edu/docs/reference/local-checks.html).
