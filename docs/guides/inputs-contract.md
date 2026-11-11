@@ -26,7 +26,7 @@ An entry looks like this (php-test, abridged):
 "php-test": {
   "inputs": [
     { "name": "php_versions", "type": "array", "default": ["8.3", "8.4", "8.5"] },
-    { "name": "php_advisory_version", "type": "string", "default": "", "regex": "^$|^[0-9]+\\.[0-9]+([.][0-9A-Za-z]+)*$" },
+    { "name": "php_advisory_version", "type": "string", "default": "", "regex": "^$|^[0-9]+\\.[0-9]+([.-][0-9A-Za-z]+)*$" },
     { "name": "test_command", "type": "string", "default": "vendor/bin/phpunit" },
     { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" }
   ],
