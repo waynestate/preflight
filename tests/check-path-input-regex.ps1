@@ -12,7 +12,10 @@
 # still allows a/../b; that is a later slice (same as working_dir), so this
 # test pins the exact regex lines instead of re-deriving the rule. The
 # proctor check_path input is checked here too: the job cds into it after
-# the install, so it must stay a relative path or be empty.
+# the install, so it must stay a relative path or be empty. The
+# secret-detection config_path input is checked here too: the job hands it
+# to gitleaks --config, so it must stay a relative path or be empty, with
+# one leading dot allowed for .gitleaks.toml.
 #
 # test_command, proctor_command and eslint_args stay free on purpose: they
 # are arbitrary commands by design.
@@ -34,6 +37,7 @@ function Fail([string]$message) {
 $pathRegexLine = "      regex: '^[A-Za-z0-9_-][A-Za-z0-9._/-]*$'"
 $memoryRegexLine = "      regex: '^(-1|[0-9]+[KkMmGg]?)$'"
 $checkPathRegexLine = "      regex: '^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)?$'"
+$configPathRegexLine = "      regex: '^(\.?[A-Za-z0-9_-][A-Za-z0-9._/-]*)?$'"
 
 function Get-InputBlock([string[]]$spec, [string]$key) {
   $block = @()
@@ -110,6 +114,7 @@ Check-Input "phpstan" (Join-Path $Root "templates/phpstan/template.yml") "memory
 Check-Input "pint" (Join-Path $Root "templates/pint/template.yml") "config" $pathRegexLine
 Check-Input "proctor" (Join-Path $Root "templates/proctor/template.yml") "check_path" $checkPathRegexLine
 Check-Input "sbom" (Join-Path $Root "templates/sbom/template.yml") "output" $pathRegexLine
+Check-Input "secret-detection" (Join-Path $Root "templates/secret-detection/template.yml") "config_path" $configPathRegexLine
 
 # The path pattern accepts the samples.
 $pathPattern = '^[A-Za-z0-9_-][A-Za-z0-9._/-]*$'
@@ -138,6 +143,21 @@ foreach ($good in @('.', 'deploy', 'a_b-c/d', 'tests/fixture-app', '')) {
 foreach ($bad in @('/etc', '../x', '..', '.hidden', 'a b', 'a;b', '$(id)', 'deploy/..;id')) {
   if ($bad -match $checkPathPattern) {
     Fail "check_path regex: $bad must not match"
+  }
+}
+
+# The config_path pattern accepts the samples.
+$configPathPattern = '^(\.?[A-Za-z0-9_-][A-Za-z0-9._/-]*)?$'
+foreach ($good in @('.gitleaks.toml', 'gitleaks.toml', 'config/gitleaks.toml', '.config/gitleaks.toml', '')) {
+  if ($good -notmatch $configPathPattern) {
+    Fail "config_path regex: $good should match"
+  }
+}
+
+# The config_path pattern rejects the samples.
+foreach ($bad in @('/etc/gitleaks.toml', '../gitleaks.toml', '..gitleaks.toml', 'a b.toml', 'x;y', '$(id)')) {
+  if ($bad -match $configPathPattern) {
+    Fail "config_path regex: $bad must not match"
   }
 }
 
