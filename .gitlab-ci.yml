@@ -138,7 +138,7 @@ contract:
 # no Docker.
 must-fail-php-test:
   stage: test
-  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/php:8.3-cli-trixie@sha256:628102249d93494233b54490b785f12db9cd60f4dc89416dfca15973f2125f10
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/php:8.5-cli-trixie@sha256:50956f094e90a716d43bea28087d447555ad80510e386ab8c9c10d8c70d781a9
   script:
     - sh tests/check-php-test-fails.sh
 
@@ -363,7 +363,7 @@ must-fail-portability:
 # add ungated load to the small shared amd64 host.
 must-fail-mysql56-migrate:
   stage: test
-  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/php:8.3-cli-trixie@sha256:628102249d93494233b54490b785f12db9cd60f4dc89416dfca15973f2125f10
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/php:8.5-cli-trixie@sha256:50956f094e90a716d43bea28087d447555ad80510e386ab8c9c10d8c70d781a9
   services:
     - name: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/mysql:5.6.51@sha256:20575ecebe6216036d25dab5903808211f1e9ba63dc7825ac20cb975e34cfcae
       alias: mysql
