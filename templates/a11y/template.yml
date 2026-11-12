@@ -39,7 +39,7 @@ spec:
       regex: '^[A-Za-z0-9_][A-Za-z0-9_.-]*$'
     image:
       type: string
-      default: mcr.microsoft.com/playwright:v1.65.0-noble@sha256:6e3fb709361521eb27161606e6da6d2674e5e89fa16516cb37d6fdd91372273d
+      default: mcr.microsoft.com/playwright:v1.65.0-noble@sha256:9beb546099e11f52d62e505537914870e01a67e0e6b00ae41da4775324e73dbe
       description: "Playwright image the job runs in. It carries Node and Chromium; its tag (vX.Y.Z) sets the playwright npm version unless playwright_version is set."
     allow_failure:
       type: boolean
