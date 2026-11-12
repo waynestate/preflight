@@ -13,7 +13,10 @@
 # still allows a/../b; that is a later slice (same as working_dir), so this
 # test pins the exact regex lines instead of re-deriving the rule. The
 # proctor check_path input is checked here too: the job cds into it after
-# the install, so it must stay a relative path or be empty.
+# the install, so it must stay a relative path or be empty. The
+# secret-detection config_path input is checked here too: the job hands it
+# to gitleaks --config, so it must stay a relative path or be empty, with
+# one leading dot allowed for .gitleaks.toml.
 #
 # test_command, proctor_command and eslint_args stay free on purpose: they
 # are arbitrary commands by design.
@@ -37,6 +40,7 @@ fail() {
 path_regex_line="      regex: '^[A-Za-z0-9_-][A-Za-z0-9._/-]*$'"
 memory_regex_line="      regex: '^(-1|[0-9]+[KkMmGg]?)$'"
 check_path_regex_line="      regex: '^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)?$'"
+config_path_regex_line="      regex: '^(\.?[A-Za-z0-9_-][A-Za-z0-9._/-]*)?$'"
 
 # check_input <template> <input name> <expected regex line>
 check_input() {
@@ -105,6 +109,9 @@ for tpl in "$ROOT"/templates/*/template.yml; do
     sbom)
       check_input "$tpl" output "$path_regex_line"
       ;;
+    secret-detection)
+      check_input "$tpl" config_path "$config_path_regex_line"
+      ;;
   esac
 done
 
@@ -135,6 +142,21 @@ done
 for bad in /etc ../x .. .hidden 'a b' 'a;b' '$(id)' 'deploy/..;id'; do
   if printf '%s\n' "$bad" | grep -qE "$check_path_pattern"; then
     fail "check_path regex: $bad must not match"
+  fi
+done
+
+# The config_path pattern accepts the samples.
+config_path_pattern='^(\.?[A-Za-z0-9_-][A-Za-z0-9._/-]*)?$'
+for good in .gitleaks.toml gitleaks.toml config/gitleaks.toml .config/gitleaks.toml ''; do
+  if ! printf '%s\n' "$good" | grep -qE "$config_path_pattern"; then
+    fail "config_path regex: $good should match"
+  fi
+done
+
+# The config_path pattern rejects the samples.
+for bad in /etc/gitleaks.toml ../gitleaks.toml ..gitleaks.toml 'a b.toml' 'x;y' '$(id)'; do
+  if printf '%s\n' "$bad" | grep -qE "$config_path_pattern"; then
+    fail "config_path regex: $bad must not match"
   fi
 done
 

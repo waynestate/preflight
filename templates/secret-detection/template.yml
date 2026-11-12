@@ -24,7 +24,7 @@ spec:
       description: Path to a .gitleaks.toml config file, relative to the project root. Empty uses the built-in rules plus a path allowlist for vendor/ and node_modules/. When set, your file replaces the default, so add the same vendor and node_modules path allowlist to it.
       type: string
       default: ""
-      regex: '^([A-Za-z0-9_-][A-Za-z0-9._/-]*)?$'
+      regex: '^(\.?[A-Za-z0-9_-][A-Za-z0-9._/-]*)?$'
     allow_failure:
       description: Whether the secret-detection job can fail without failing the pipeline.
       type: boolean
