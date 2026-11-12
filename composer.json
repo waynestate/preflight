@@ -22,7 +22,7 @@
         "league/commonmark": "^2.10",
         "phpstan/phpstan": "^2.3",
         "phpunit/phpunit": "^12.0",
-        "waynestate/pinstripe": "^0.3"
+        "waynestate/pinstripe": "^0.4"
     },
     "autoload": {
         "psr-4": {
