@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7157cd17b8d332b371937bc174af7236",
+    "content-hash": "8cd83697afa7ce3a3b1770dce533ce3b",
     "packages": [
         {
             "name": "symfony/deprecation-contracts",
@@ -699,8 +699,7 @@
                 "issues": "https://github.com/nette/neon/issues",
                 "source": "https://github.com/nette/neon/tree/v3.4.10"
             },
-            "time": "2026-10-25T22:35:03+00:00",
-            "published-time": "2026-10-25T23:02:33+00:00"
+            "time": "2026-10-25T22:35:03+00:00"
         },
         {
             "name": "nette/schema",
@@ -1081,8 +1080,7 @@
                 "issues": "https://github.com/phpstan/extension-installer/issues",
                 "source": "https://github.com/phpstan/extension-installer/tree/1.4.3"
             },
-            "time": "2024-09-04T20:21:43+00:00",
-            "published-time": "2024-09-04T20:22:27+00:00"
+            "time": "2024-09-04T20:21:43+00:00"
         },
         {
             "name": "phpstan/phpstan",
@@ -1197,8 +1195,7 @@
                 "issues": "https://github.com/phpstan/phpstan-deprecation-rules/issues",
                 "source": "https://github.com/phpstan/phpstan-deprecation-rules/tree/2.0.5"
             },
-            "time": "2026-07-22T06:50:43+00:00",
-            "published-time": "2026-07-27T15:18:00+00:00"
+            "time": "2026-07-22T06:50:43+00:00"
         },
         {
             "name": "phpstan/phpstan-strict-rules",
@@ -1250,8 +1247,7 @@
                 "issues": "https://github.com/phpstan/phpstan-strict-rules/issues",
                 "source": "https://github.com/phpstan/phpstan-strict-rules/tree/2.1.1"
             },
-            "time": "2026-11-02T08:16:15+00:00",
-            "published-time": "2026-11-02T10:55:07+00:00"
+            "time": "2026-11-02T08:16:15+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
@@ -2748,8 +2744,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-10-13T00:31:30+00:00",
-            "published-time": "2026-10-13T00:56:49+00:00"
+            "time": "2026-10-13T00:31:30+00:00"
         },
         {
             "name": "staabm/side-effects-detector",
@@ -2939,16 +2934,16 @@
         },
         {
             "name": "waynestate/pinstripe",
-            "version": "0.3.0",
+            "version": "0.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/waynestate/pinstripe.git",
-                "reference": "46963d88a179ddeaa899c39a04616267ca9527d3"
+                "reference": "8572c46f2dc0f627664c05ea3412ad7fedf2196c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/waynestate/pinstripe/zipball/46963d88a179ddeaa899c39a04616267ca9527d3",
-                "reference": "46963d88a179ddeaa899c39a04616267ca9527d3",
+                "url": "https://api.github.com/repos/waynestate/pinstripe/zipball/8572c46f2dc0f627664c05ea3412ad7fedf2196c",
+                "reference": "8572c46f2dc0f627664c05ea3412ad7fedf2196c",
                 "shasum": ""
             },
             "require": {
@@ -2970,7 +2965,7 @@
             },
             "suggest": {
                 "larastan/larastan": "^3.13 (Laravel apps: include phpstan/laravel.neon)",
-                "rector/rector": "^2.8 (apps: use rector/base.php from your rector.php)"
+                "rector/rector": "^2.8 (apps: use rector/base.php from your rector.php, rector/strict-types.php to declare strict types file by file, and rector/levels.php to climb one rule level at a time)"
             },
             "bin": [
                 "bin/pinstripe-baseline"
@@ -2990,14 +2985,13 @@
             "license": [
                 "MIT"
             ],
-            "description": "The coding standard for the Wayne State app stack: shared Pint and PHPStan presets.",
+            "description": "The coding standard for the Wayne State app stack: shared Pint, PHPStan and Rector presets, and banned calls.",
             "homepage": "https://pinstripe.apps.wayne.edu/",
             "support": {
                 "issues": "https://git.wayne.edu/enterprise-apps/pinstripe/-/issues",
                 "source": "https://github.com/waynestate/pinstripe"
             },
-            "time": "2026-11-09T05:15:21+00:00",
-            "published-time": "2026-11-09T21:53:38+00:00"
+            "time": "2026-11-11T12:38:31+00:00"
         }
     ],
     "aliases": [],
@@ -3012,5 +3006,5 @@
     "platform-overrides": {
         "php": "8.3.0"
     },
-    "plugin-api-version": "2.11.0"
+    "plugin-api-version": "2.9.0"
 }
