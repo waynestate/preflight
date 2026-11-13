@@ -1,4 +1,4 @@
-# Copied from Preflight 0.8.0; do not edit; refresh with the copy step in
+# Copied from Preflight 0.9.0; do not edit; refresh with the copy step in
 # docs/guides/component-a11y.md.
 #
 # The local accessibility gate (axe-core in Playwright), run in Docker so no
