@@ -183,6 +183,20 @@ windows
 pwsh -File tests/check-composer-audit-fails.ps1
 ```
 
+`tests/check-composer-ci-fails.sh` (and its `.ps1` twin) does the same for `composer-ci`. It asserts the job has no `allow_failure`, no `--no-scripts` or `--ignore-platform-reqs` on the install, no swallowed exit code on the `composer ci` line, and keeps `interruptible: true` and a `timeout:`, then renders the template's own script lines with each case's inputs and runs them on copies of the fixtures in `tests/ci-fixtures`: `pass` (must pass, naming `ci-fixture-passed`), `fail` (must fail, naming `ci-fixture-failed`) and a broken copy of `pass` whose `composer.json` is invalid JSON (must fail, so an install that cannot run never skips to green). The fixtures carry no packages, so the check needs no network. The `must-fail-composer-ci` job runs it in CI.
+
+linux
+
+```sh
+docker run --rm -v "$(pwd):/app:ro" -w /app composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 sh tests/check-composer-ci-fails.sh
+```
+
+windows
+
+```powershell
+pwsh -File tests/check-composer-ci-fails.ps1
+```
+
 `tests/check-npm-audit-fails.sh` (and its `.ps1` twin) does the same for `npm-audit`. It asserts the job has no `allow_failure`, keeps the gate's exit code, carries `--audit=true --offline=false` and has no `|| true` outside the full report, renders the template's own script with each case's inputs, and runs it on copies of `tests/npm-audit-fails` (lodash 4.17.20, GHSA-35jh-r3h4-6jhm: must fail at `high`, at `medium` and with an `.npmrc` that turns the audit off, and pass at `critical`) and `tests/npm-audit-fixtures`: `clean` (must pass), `dev-only` (passes with `omit_dev` true while the full report names the advisory, fails with `false`) and `no-lock` (passes with "nothing to audit"). A last case points npm at a closed local port and must fail the clean lock. npm audit asks the registry, so it needs the network; offline, the clean case fails, so it never passes by accident. The `must-fail-npm-audit` job runs it in CI.
 
 linux

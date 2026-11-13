@@ -103,7 +103,7 @@
         { "name": "job_name", "type": "string", "default": "secret-detection", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
         { "name": "image", "type": "string", "default": "zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f" },
         { "name": "image_prefix", "type": "string", "default": "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}", "regex": "^[^/\\s](\\S*[^/\\s])?$" },
-        { "name": "config_path", "type": "string", "default": "", "regex": "^([A-Za-z0-9_-][A-Za-z0-9._/-]*)?$" },
+        { "name": "config_path", "type": "string", "default": "", "regex": "^(\\.?[A-Za-z0-9_-][A-Za-z0-9._/-]*)?$" },
         { "name": "allow_failure", "type": "boolean", "default": false }
       ],
       "jobs": ["secret-detection"]

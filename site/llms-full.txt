@@ -1026,6 +1026,19 @@ docker run --rm -v "$(pwd):/app:ro" -w /app composer:2.11.1@sha256:8de2184c6de22
 pwsh -File tests/check-composer-audit-fails.ps1
 ```
 
+`tests/check-composer-ci-fails.sh` does the same for `composer-ci`: the pass fixture must pass (naming
+`ci-fixture-passed`), the fail fixture must fail (naming `ci-fixture-failed`), and a broken copy of the pass
+fixture (invalid `composer.json`) must fail, so an install that cannot run never skips to green. The fixtures
+carry no packages, so it needs no network. The `must-fail-composer-ci` job runs it in CI.
+
+```sh
+docker run --rm -v "$(pwd):/app:ro" -w /app composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 sh tests/check-composer-ci-fails.sh
+```
+
+```powershell
+pwsh -File tests/check-composer-ci-fails.ps1
+```
+
 `tests/check-npm-audit-fails.sh` does the same for `npm-audit`: a clean lock and an app with no lock must pass, and
 lodash 4.17.20 (GHSA-35jh-r3h4-6jhm) must fail at `high` and `medium` (and with an `.npmrc` that turns the audit off)
 and pass at `critical`; a dev-only finding fails only with `omit_dev: false`, and an unreachable registry fails a clean
@@ -1650,12 +1663,14 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 - Added: the consumer a11y kit (`templates/a11y/consumer/`: one runner pair, its pin manifest and the checker), the single local a11y runner every stack repo copies (D-110).
 - Added: the `composer-ci` component (sixteenth): the hand-written install-and-ci job nine stack repos carry, as one include. It runs the Composer image by digest with the shared Composer cache (fixed key `preflight-composer-ci`), `composer install --no-interaction --no-progress --prefer-dist`, then `composer ci`; that command's exit code decides the job, and there is no `allow_failure` input, because a failing `composer ci` must fail the pipeline. No input was renamed or removed.
+- Added: the `composer-ci` must-fail check (`tests/check-composer-ci-fails.sh` and its `.ps1` twin) and the two Preflight jobs that prove it: the pipeline includes the component on `tests/ci-fixtures/pass` (must pass), and `must-fail-composer-ci` runs the check in the template's own image, proving the pass fixture passes naming `ci-fixture-passed`, the fail fixture fails naming `ci-fixture-failed`, and a broken copy of the pass fixture (invalid `composer.json`) fails, so an install that cannot run never skips to green. The fixtures carry no packages, so the check needs no network (BEST_PRACTICES 7.2).
 - Added: the proctor component's `check_path` input (default empty) changes the command's working directory after the install, so a repo that installs PROCTOR in `deploy` can run `deploy/vendor/bin/proctor check --path=.` from the project root and have the `wayneui.copies` scan see `site/assets/wayne-ui` at the root. Empty keeps today's behaviour (the command runs in `working_dir`); no input was renamed or removed.
 - Added: `tests/TemplateJobsTest.php`, part of `composer ci`, holds two practices that were only written down. Every job a consumer gets must keep `interruptible: true` and a timeout of 1 hour or less, directly or through the hidden job it extends (BEST_PRACTICES 2.9), and no template may gain a credential: a password, token, secret or key input defaults to empty or a variable name, a script reads no credential variable but `CI_JOB_TOKEN` and `CI_DEPENDENCY_PROXY_PASSWORD`, and no token or private key appears (5.1). `mysql56-migrate`'s throwaway `db_password` is the one named exception. Both practices move to `Checked`
 - Added: `tests/check-a11y-runner` (sh and PowerShell) pins the local a11y runner to the component's own image and versions.
 - Changed: Preflight's own pipeline runs `php-test-advisory` on `8.6-rc`, the newest PHP 8.6 release candidate, so `php_advisory_version` is proven in a real pipeline (BEST_PRACTICES 6.4 is `Checked`). Its first look found the 8.6 candidate image built without `mbstring`, which PHPUnit needs: the job fails, allowed, and nothing else changes. The php-test guide says which tags the input takes (`8.6-rc` follows the newest candidate, `8.6.0RC5` stays put).
 - Fixed: `tests/check-component-version.ps1` follows `extends:` like its `.sh` twin, so it passes php-test's real template on Windows again (its two visible jobs take their script from a hidden base job, and the PowerShell twin reported both as having no script). Found by running all thirty `contract` twins in PowerShell; the other twenty-nine pass, and so do the README's PowerShell `composer install` and `composer ci` lines. BEST_PRACTICES 7.4 records the run; MAINTAINING loses a stray `` `n `` in the portability paragraph.
 - Fixed: the main pipeline refused the `8.6-rc` value for `php_advisory_version` that its own docs recommend: the input's regex only allowed dots between parts, so the floating candidate tag failed at pipeline creation. The regex now allows a dot or a hyphen between parts (`8.6-rc` and `8.6.0RC5` both pass), and `tests/PipelineInputsTest.php` (in `composer ci`) checks every input of Preflight's own pipeline against its component's spec, so this cannot ship again.
+- Fixed: secret-detection's `config_path` now accepts a leading-dot path such as `.gitleaks.toml`, the file name Gitleaks itself uses and the one the input's description names: the regex forbade a leading dot, so a consumer passing `config_path: .gitleaks.toml` had GitLab refuse the whole pipeline config at creation. It still refuses absolute paths, parent references, spaces, semicolons and command substitution, and `tests/check-path-input-regex` (sh and PowerShell) pins the new line and the accept and reject samples.
 - Docs: MAINTAINING says how to run the `mysql56-migrate` must-fail check on your own computer: a MySQL 5.6.51 container on a Docker network and the check in `php:8.3-cli-trixie`, the same three cases CI runs (`clean` passes, `json-column` and `long-index` fail with 1064 and 1071), in `sh` and PowerShell, both tried on Windows.
 - Docs: the README and Local checks run the fixture app's PHPUnit in `php:8.4-cli-trixie` (they said the bare `php:8.4-cli`), the Debian-named tag the components use (BEST_PRACTICES 4.10); both lines were run as written.
 - Docs: the README art flies 0.8.0. The checklist card panel says "15 components, in 0.8.0" (it still said 0.7.0) and the hero shows the 0.8.0 pin; the art kit checks every placard against the new tag.
@@ -4944,6 +4959,20 @@ windows
 
 ```powershell
 pwsh -File tests/check-composer-audit-fails.ps1
+```
+
+`tests/check-composer-ci-fails.sh` (and its `.ps1` twin) does the same for `composer-ci`. It asserts the job has no `allow_failure`, no `--no-scripts` or `--ignore-platform-reqs` on the install, no swallowed exit code on the `composer ci` line, and keeps `interruptible: true` and a `timeout:`, then renders the template's own script lines with each case's inputs and runs them on copies of the fixtures in `tests/ci-fixtures`: `pass` (must pass, naming `ci-fixture-passed`), `fail` (must fail, naming `ci-fixture-failed`) and a broken copy of `pass` whose `composer.json` is invalid JSON (must fail, so an install that cannot run never skips to green). The fixtures carry no packages, so the check needs no network. The `must-fail-composer-ci` job runs it in CI.
+
+linux
+
+```sh
+docker run --rm -v "$(pwd):/app:ro" -w /app composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0 sh tests/check-composer-ci-fails.sh
+```
+
+windows
+
+```powershell
+pwsh -File tests/check-composer-ci-fails.ps1
 ```
 
 `tests/check-npm-audit-fails.sh` (and its `.ps1` twin) does the same for `npm-audit`. It asserts the job has no `allow_failure`, keeps the gate's exit code, carries `--audit=true --offline=false` and has no `|| true` outside the full report, renders the template's own script with each case's inputs, and runs it on copies of `tests/npm-audit-fails` (lodash 4.17.20, GHSA-35jh-r3h4-6jhm: must fail at `high`, at `medium` and with an `.npmrc` that turns the audit off, and pass at `critical`) and `tests/npm-audit-fixtures`: `clean` (must pass), `dev-only` (passes with `omit_dev` true while the full report names the advisory, fails with `false`) and `no-lock` (passes with "nothing to audit"). A last case points npm at a closed local port and must fail the clean lock. npm audit asks the registry, so it needs the network; offline, the clean case fails, so it never passes by accident. The `must-fail-npm-audit` job runs it in CI.
