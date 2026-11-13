@@ -9,6 +9,51 @@ This page is the checklist for moving an app from one Preflight pin to the next,
 
 Every input and job name a component offers is recorded in `contract/inputs.json`, and Preflight's build fails when a template drifts from it, so the file is the exact list of what moved. Before you move a pin, diff it between your tag and the next one (for example `git diff 0.4.0 0.5.0 -- contract/inputs.json` in a clone of Preflight) and check each line against that version's Breaking and Steps below. [The inputs contract](guides/inputs-contract.md) explains what each kind of change means for your include.
 
+## 0.9.0
+
+Released 2026-11-12. A sixteenth component, `composer-ci`, one new input on `proctor`, the consumer a11y kit, and two
+input regexes that now accept the values their own docs name. No input or job was renamed or removed. Same aircraft,
+a longer checklist, and the paperwork finally matches the plane.
+
+### Breaking
+
+- None. `check_path` defaults to empty, which keeps today's behavior, and both regex changes only accept more.
+
+### New: composer-ci
+
+The job most stack repos wrote by hand, as one include: `composer install`, then `composer ci`, and that command's exit
+code decides the job. There is no `allow_failure` input on purpose. See
+[the composer-ci guide](guides/component-composer-ci.md).
+
+```yaml
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-ci@<0.9.0 commit SHA> # 0.9.0
+```
+
+### New: proctor check_path
+
+A repo that installs PROCTOR in `deploy/` can run the check from the project root with `check_path`, so the
+`wayneui.copies` scan sees `site/assets/wayne-ui`. See [the proctor guide](guides/component-proctor.md).
+
+### Fixed: config_path and php_advisory_version
+
+- `secret-detection`'s `config_path` accepts a leading-dot path, so `config_path: .gitleaks.toml` (the name Gitleaks
+  itself uses) no longer makes GitLab refuse the pipeline. A repo that renamed its file to dodge the old regex can
+  rename it back.
+- `php-test`'s `php_advisory_version` accepts `8.6-rc` as well as `8.6.0RC5`.
+
+### Steps
+
+1. Move every Preflight include to the 0.9.0 tag's full commit SHA, with `# 0.9.0` in a trailing comment.
+2. A repo with its own install-and-ci job can replace it with the `composer-ci` include.
+3. A repo that keeps a local a11y wrapper can copy `templates/a11y/consumer/` from the 0.9.0 tag into `tools/a11y/`
+   (see [the a11y guide](guides/component-a11y.md)).
+4. Nothing else changes.
+
+### How to verify
+
+- The pipeline is created (a refused input stops it before any job runs) and every job keeps its name.
+- With `config_path: .gitleaks.toml`, the `secret-detection` job runs and reads that file.
+
 ## 0.8.0
 
 Released 2026-11-10. One new input on the portability component, `session_header`, for an app whose probe sign-in

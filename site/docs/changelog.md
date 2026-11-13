@@ -12,6 +12,10 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ## Unreleased [#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+## 0.9.0 (2026-11-12) [#](https://preflight.apps.wayne.edu/docs/changelog.html#0-9-0-2026-11-12)
+
+One new component, `composer-ci`, the install-and-ci job nine stack repos wrote by hand; a `check_path` input on `proctor`; the consumer a11y kit every stack repo copies; and two input regexes that refused values their own docs recommend (`config_path: .gitleaks.toml` and `php_advisory_version: 8.6-rc`). No input or job was renamed or removed.
+
 - Added: the consumer a11y kit (`templates/a11y/consumer/`: one runner pair, its pin manifest and the checker), the single local a11y runner every stack repo copies (D-110).
 - Added: the `composer-ci` component (sixteenth): the hand-written install-and-ci job nine stack repos carry, as one include. It runs the Composer image by digest with the shared Composer cache (fixed key `preflight-composer-ci`), `composer install --no-interaction --no-progress --prefer-dist`, then `composer ci`; that command's exit code decides the job, and there is no `allow_failure` input, because a failing `composer ci` must fail the pipeline. No input was renamed or removed.
 - Added: the `composer-ci` must-fail check (`tests/check-composer-ci-fails.sh` and its `.ps1` twin) and the two Preflight jobs that prove it: the pipeline includes the component on `tests/ci-fixtures/pass` (must pass), and `must-fail-composer-ci` runs the check in the template's own image, proving the pass fixture passes naming `ci-fixture-passed`, the fail fixture fails naming `ci-fixture-failed`, and a broken copy of the pass fixture (invalid `composer.json`) fails, so an install that cannot run never skips to green. The fixtures carry no packages, so the check needs no network (BEST_PRACTICES 7.2).
