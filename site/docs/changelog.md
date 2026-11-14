@@ -12,6 +12,8 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ## Unreleased [#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Docs: three gap-list citations in BEST_PRACTICES point at the lines they name again.
+
 ## 0.9.0 (2026-11-12) [#](https://preflight.apps.wayne.edu/docs/changelog.html#0-9-0-2026-11-12)
 
 One new component, `composer-ci`, the install-and-ci job nine stack repos wrote by hand; a `check_path` input on `proctor`; the consumer a11y kit every stack repo copies; and two input regexes that refused values their own docs recommend (`config_path: .gitleaks.toml` and `php_advisory_version: 8.6-rc`). No input or job was renamed or removed.
