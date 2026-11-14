@@ -13,6 +13,7 @@ are Git tags.
 
 ## Unreleased
 
+- Changed: `deploy/` requires PROCTOR `^0.16` (was `^0.15`, which does not allow 0.16), whose `ci-pipelines` check no longer asks for a GitHub workflow (D-069).
 - Docs: three gap-list citations in BEST_PRACTICES point at the lines they name again.
 - Docs: the README, guides and examples pin 0.9.0 (commit fb73b53).
 
