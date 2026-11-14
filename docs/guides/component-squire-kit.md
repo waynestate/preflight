@@ -41,7 +41,7 @@ Add the include to the app's `.gitlab-ci.yml`, pinned to a full commit SHA with 
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
     inputs:
       working_dir: deploy
 ```
@@ -92,7 +92,7 @@ To include the component before the kit is clean, let the job fail without faili
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
     inputs:
       working_dir: deploy
       allow_failure: true # until 2026-12-01: kit cleanup

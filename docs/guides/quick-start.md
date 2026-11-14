@@ -18,7 +18,7 @@ include, pinned to a commit SHA.
 
    ```yaml
    include:
-     - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+     - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
      inputs:
        test_command: vendor/bin/phpunit
    ```
