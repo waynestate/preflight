@@ -45,7 +45,7 @@
 <h2 id="include-the-component">Include the <span class="docs-heading-tail"><span>component</span><a class="docs-heading-link" aria-label="Link to this section" href="#include-the-component">#</a></span></h2>
 <p>Goal: your app's test suite runs on each supported PHP version. The component runs the test command on each supported PHP version through <code>parallel:matrix</code>. Add the include to your app's <code>.gitlab-ci.yml</code>:</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
     inputs:
       test_command: vendor/bin/phpunit
 </code></pre>
@@ -154,7 +154,7 @@ php-test-next:
 <h2 id="testing-the-next-php-release">Testing the next PHP <span class="docs-heading-tail"><span>release</span><a class="docs-heading-link" aria-label="Link to this section" href="#testing-the-next-php-release">#</a></span></h2>
 <p>Set <code>php_advisory_version</code> to a release candidate tag and the component adds a <code>&lt;job_name&gt;-advisory</code> job that runs your tests on that version:</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
     inputs:
       test_command: vendor/bin/phpunit
       php_advisory_version: &quot;8.6-rc&quot;

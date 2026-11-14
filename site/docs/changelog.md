@@ -13,6 +13,7 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 ## Unreleased [#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
 - Docs: three gap-list citations in BEST_PRACTICES point at the lines they name again.
+- Docs: the README, guides and examples pin 0.9.0 (commit fb73b53).
 
 ## 0.9.0 (2026-11-12) [#](https://preflight.apps.wayne.edu/docs/changelog.html#0-9-0-2026-11-12)
 

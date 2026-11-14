@@ -32,7 +32,7 @@ Add the include to the app's `.gitlab-ci.yml`, pinned to a full commit SHA with 
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
 ```
 
 With no inputs, the job serves the `site/` folder on a local port and checks every `.html` file in it at WCAG 2.1 AA.
@@ -45,7 +45,7 @@ To hold the stack's floor, WCAG 2.2 AA, and to name the pages:
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
     inputs:
       site_dir: site
       pages: ["index.html", "docs/**/*.html"]
@@ -98,7 +98,7 @@ A site that has never been checked usually has a few findings. Land the gate fir
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
     inputs:
       allow_failure: true
 ```
@@ -111,7 +111,7 @@ For pages a static folder cannot hold (a Laravel or raw-PHP app), point the job 
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
     inputs:
       base_url: $CI_ENVIRONMENT_URL
       pages: ["/", "about", "apply"]
@@ -140,7 +140,7 @@ a11y-pages:
       - a11y-snapshot/
 
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
     inputs:
       stage: test
       site_dir: a11y-snapshot
@@ -162,7 +162,7 @@ Preflight's own repository runs this checker locally with `scripts/a11y.sh` (Lin
 Preflight owns the local a11y run (D-110): every stack repo copies one runner pair into its own `tools/a11y/`, and nothing else runs axe-core on a developer's machine. The kit is the `templates/a11y/consumer/` folder of the pinned Preflight release, copied over whole:
 
 ```
-git clone --depth 1 --branch 0.8.0 https://github.com/waynestate/preflight /tmp/preflight
+git clone --depth 1 --branch 0.9.0 https://github.com/waynestate/preflight /tmp/preflight
 mkdir -p tools/a11y
 cp /tmp/preflight/templates/a11y/consumer/* tools/a11y/
 ```

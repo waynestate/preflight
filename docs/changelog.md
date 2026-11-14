@@ -14,6 +14,7 @@ are Git tags.
 ## Unreleased
 
 - Docs: three gap-list citations in BEST_PRACTICES point at the lines they name again.
+- Docs: the README, guides and examples pin 0.9.0 (commit fb73b53).
 
 ## 0.9.0 (2026-11-12)
 

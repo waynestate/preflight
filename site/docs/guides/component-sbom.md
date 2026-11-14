@@ -16,7 +16,7 @@ Add the include to the app's `.gitlab-ci.yml`, pinned to a commit SHA with the t
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
     inputs:
       output: sbom.cdx.json
 ```

@@ -57,7 +57,7 @@ on:
 
 jobs:
   ci:
-    uses: waynestate/preflight/.github/workflows/php-package.yml@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+    uses: waynestate/preflight/.github/workflows/php-package.yml@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
 </code></pre>
 <h2 id="pin-the-include-to-a-commit-sha">Pin the include to a commit <span class="docs-heading-tail"><span>SHA</span><a class="docs-heading-link" aria-label="Link to this section" href="#pin-the-include-to-a-commit-sha">#</a></span></h2>
 <p>This workflow ships in the <code>0.1.1</code> tag, so pin the full commit SHA of the release tag and keep the tag in a trailing comment. A tag or branch can move; a SHA cannot. PROCTOR's <code>preflight-pinned</code> check warns when an include is not pinned to a commit SHA. The Renovate preset (see the Renovate section) proposes the bumps, and they wait for review (the <code>needs-review</code> label).</p>

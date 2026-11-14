@@ -14,7 +14,7 @@ Note
 
 Components are GA on the Free tier since GitLab 17.0. They work only within the same GitLab instance that hosts this project.
 
-![Preflight's before-takeoff checklist card. 1 PROCTOR, checked; 2 PHP tests, 8.3, 8.4 and 8.5 pass; 3 Composer audit, no advisories; 4 SBOM, validated; 5 Pint, clean; 6 PHPStan, no errors; 7 ESLint and Prettier, clean; 8 a11y with axe-core, no violations; 9 clearance, cleared for takeoff. Beside it the annunciator panel lights a green lamp per check, the contract lamp and the clearance, with freshness marked coming soon, and lists all fifteen components in two columns, every one in the 0.8.0 tag.](https://preflight.apps.wayne.edu/docs/readme/checklist.svg)
+![Preflight's before-takeoff checklist card. 1 PROCTOR, checked; 2 PHP tests, 8.3, 8.4 and 8.5 pass; 3 Composer audit, no advisories; 4 SBOM, validated; 5 Pint, clean; 6 PHPStan, no errors; 7 ESLint and Prettier, clean; 8 a11y with axe-core, no violations; 9 clearance, cleared for takeoff. Beside it the annunciator panel lights a green lamp per check, the contract lamp and the clearance, with freshness marked coming soon, and lists all fifteen components in two columns, every one in the 0.9.0 tag.](https://preflight.apps.wayne.edu/docs/readme/checklist.svg)
 
 The checklist, item by item, with each item's job and timeout read from `templates/`:
 
@@ -53,7 +53,7 @@ Every job the templates define is `interruptible: true`. Every component takes a
 The inputs and job names on this page are a promise, written down in `contract/inputs.json`: every input's name, type, default and allowed pattern, and every job each component adds. Preflight's own build fails when a template drifts from it (`tests/ComponentsContractTest.php` in `composer ci`, and the `contract` job), so a change reaches a tag only on purpose, with the file rewritten by `composer contract:update` in the same commit. An input or job is renamed or removed only in a release whose [Upgrading](https://preflight.apps.wayne.edu/docs/upgrading.html) section lists it under Breaking; before 1.0 that is a new minor, never a patch. To see exactly what moved between your pin and the next tag:
 
 ```
-git diff 0.7.0 0.8.0 -- contract/inputs.json
+git diff 0.8.0 0.9.0 -- contract/inputs.json
 ```
 
 [The inputs contract](https://preflight.apps.wayne.edu/docs/guides/inputs-contract.html) has the whole story: what counts as breaking, why defaults still move, and how to read the diff.
@@ -64,7 +64,7 @@ Runs `vendor/bin/proctor check --format=codequality` and publishes the result as
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
     inputs:
       proctor_command: vendor/bin/proctor check --format=codequality
 ```
@@ -90,7 +90,7 @@ Runs the test command on each supported PHP version through `parallel:matrix`.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
     inputs:
       test_command: vendor/bin/phpunit
 ```
@@ -138,7 +138,7 @@ Runs `composer audit --locked` and fails on advisories.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
     inputs:
       working_dir: .
 ```
@@ -164,7 +164,7 @@ Runs `composer install` and then `composer ci`, and fails the pipeline when eith
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-ci@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-ci@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
     inputs:
       working_dir: .
 ```
@@ -185,7 +185,7 @@ Runs `npm audit` on the app's `package-lock.json` and fails on advisories at or 
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
     inputs:
       audit_level: high
 ```
@@ -208,7 +208,7 @@ Generates a CycloneDX SBOM with `cyclonedx/cyclonedx-php-composer`, validates it
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
     inputs:
       output: sbom.cdx.json
 ```
@@ -232,7 +232,7 @@ Runs the app's own [Laravel Pint](https://laravel.com/docs/12.x/pint) in test mo
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
     inputs:
       config: pint.json
 ```
@@ -256,7 +256,7 @@ Runs the app's own [PHPStan](https://phpstan.org/) and fails the pipeline on sta
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
     inputs:
       config: phpstan.neon
       memory_limit: 1G
@@ -282,7 +282,7 @@ Runs the app's own [ESLint](https://eslint.org/) (and [Prettier](https://prettie
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
     inputs:
       eslint_args: .
 ```
@@ -307,7 +307,7 @@ Runs [Gitleaks](https://github.com/gitleaks/gitleaks) over the checked-out tree 
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/secret-detection@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/secret-detection@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
 ```
 
 | Input | Type | Default | What it does |
@@ -329,7 +329,7 @@ Publishes a semantic version tag to the GitLab group's built-in Composer registr
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
     inputs:
       group_id: "<your group id>"
 ```
@@ -355,7 +355,7 @@ Runs [Renovate](https://docs.renovatebot.com/) as a scheduled or manual job that
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
     inputs:
       git_author: "Preflight Bot <preflight-bot@example.com>"
 ```
@@ -378,7 +378,7 @@ Proves the app image runs the way OpenShift, Coolify and plain Docker run it, no
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
     inputs:
       env: ["APP_KEY=${PORTABILITY_APP_KEY}", "APP_URL=https://myapp.example.edu"]
       session_login_path: /_portability/login
@@ -429,7 +429,7 @@ Opens the app's pages in a real Chromium browser with Playwright and runs axe-co
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
     inputs:
       pages: ["index.html", "docs/**/*.html"]
       wcag_tags: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]
@@ -461,7 +461,7 @@ Installs the Squire release a deploy kit records in its `.squire.json` and runs 
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
     inputs:
       working_dir: deploy
 ```
@@ -484,7 +484,7 @@ Runs the app's migrations against MySQL 5.6.51, the version of Citadel's shared 
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/mysql56-migrate@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/mysql56-migrate@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
 ```
 
 mysql56-migrate ships in 0.6.0. A raw PHP app sets `migrate_command` to its own script.

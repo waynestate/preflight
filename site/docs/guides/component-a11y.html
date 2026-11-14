@@ -72,14 +72,14 @@ person. The report counts the items axe-core could not decide (&quot;to review b
 <h2 id="include-the-component">Include the <span class="docs-heading-tail"><span>component</span><a class="docs-heading-link" aria-label="Link to this section" href="#include-the-component">#</a></span></h2>
 <p>Add the include to the app's <code>.gitlab-ci.yml</code>, pinned to a full commit SHA with the tag in a trailing comment:</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
 </code></pre>
 <p>With no inputs, the job serves the <code>site/</code> folder on a local port and checks every <code>.html</code> file in it at WCAG 2.1 AA.</p>
 <aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>The a11y component ships in Preflight 0.2.0; 0.1.4 does not include it. Pin that tag's full commit SHA, or the full
 commit SHA of a commit at or after it.</p></aside>
 <p>To hold the stack's floor, WCAG 2.2 AA, and to name the pages:</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
     inputs:
       site_dir: site
       pages: [&quot;index.html&quot;, &quot;docs/**/*.html&quot;]
@@ -208,7 +208,7 @@ text.</p>
 <p>A site that has never been checked usually has a few findings. Land the gate first, fix the findings, then make it
 blocking:</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
     inputs:
       allow_failure: true
 </code></pre>
@@ -219,7 +219,7 @@ not become wallpaper.</p>
 <p>For pages a static folder cannot hold (a Laravel or raw-PHP app), point the job at a running copy, such as a review app
 or a pre-production deploy, and list the paths:</p>
 <pre tabindex="0"><code class="language-yaml">include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
     inputs:
       base_url: $CI_ENVIRONMENT_URL
       pages: [&quot;/&quot;, &quot;about&quot;, &quot;apply&quot;]
@@ -247,7 +247,7 @@ a11y-pages:
       - a11y-snapshot/
 
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
     inputs:
       stage: test
       site_dir: a11y-snapshot
@@ -270,7 +270,7 @@ credentials; for pages that need no sign-in, see <a href="#check-a-running-site"
 <p>Preflight owns the local a11y run (D-110): every stack repo copies one runner pair into its own <code>tools/a11y/</code>, and
 nothing else runs axe-core on a developer's machine. The kit is the <code>templates/a11y/consumer/</code> folder of the pinned
 Preflight release, copied over whole:</p>
-<pre tabindex="0"><code>git clone --depth 1 --branch 0.8.0 https://github.com/waynestate/preflight /tmp/preflight
+<pre tabindex="0"><code>git clone --depth 1 --branch 0.9.0 https://github.com/waynestate/preflight /tmp/preflight
 mkdir -p tools/a11y
 cp /tmp/preflight/templates/a11y/consumer/* tools/a11y/
 </code></pre>
