@@ -6,6 +6,8 @@ are Git tags.
 
 ## Unreleased
 
+- Docs: the README, guides and examples pin 0.9.0 (commit fb73b53).
+
 ## 0.9.0 (2026-11-12)
 
 One new component, `composer-ci`, the install-and-ci job nine stack repos wrote by hand; a `check_path` input on

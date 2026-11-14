@@ -2,7 +2,7 @@
 
 Status: draft, checked against sources on 2026-10-27, with a second research pass the same day (see "Second pass
 (2026-10-27)" near the end). Applies to the Preflight components at the state of the repo today: the latest tag is
-0.8.0, and CHANGELOG.md names the release that added each component.
+0.9.0, and CHANGELOG.md names the release that added each component.
 
 ## What this covers
 
@@ -104,7 +104,7 @@ Why: the catalog gives typed discovery and lets consumers pin an exact or partia
 Sources: [GitLab: components, publishing](https://docs.gitlab.com/ci/components/).
 
 **How the stack holds it: Documented.** The layout is right (`templates/<name>/template.yml`, a README), and the tag-triggered `release` job now exists in this repository's own pipeline: pushing a protected tag creates the GitLab Release with the commit SHA in its notes, after the test and audit stages. The Catalog entry still depends on the first tag run, because the release job has not run for a tag yet.
-The README examples pin the latest release (0.8.0) for every component and the GitHub workflow.
+The README examples pin the latest release (0.9.0) for every component and the GitHub workflow.
 
 ### 1.4 Keep inputs and job names stable inside a major version
 Do not rename an input, change its type, or rename a job in a minor release.
@@ -150,7 +150,7 @@ Sources: [StepSecurity: tj-actions breach](https://www.stepsecurity.io/blog/when
 The tj-actions details above come from search summaries of these pages and the NVD record could not be read in this
 pass, so treat the exact counts and dates as unverified.
 
-**How the stack holds it: Documented.** Thirteen tags, `0.1.0` through `0.8.0`, exist, and MAINTAINING.md documents the release process,
+**How the stack holds it: Documented.** Fourteen tags, `0.1.0` through `0.9.0`, exist, and MAINTAINING.md documents the release process,
 including recording the tag's commit SHA in the CHANGELOG when a tag is cut. The tag-triggered `release` job now puts the
 commit SHA in the GitLab Release notes on every tag (the first run is still to come), so new releases carry the SHA from
 the start. Apps still pin the tag in their component includes, and nothing checks an app's includes.
@@ -371,7 +371,7 @@ Sources: [GitLab: components, `spec:component`](https://docs.gitlab.com/ci/compo
 every job (for example `templates/proctor/template.yml:75`), and `tests/check-component-version.sh` (and its `.ps1` twin)
 fails the `contract` job if a template drops the declaration or stops printing the line first. The line needs GitLab
 18.7 or later; the version on git.wayne.edu is still unconfirmed (see 5.5), but PROCTOR's and CREED's pipelines include
-`preflight/proctor@0.8.0`, which carries the declaration, and run on it.
+`preflight/proctor@0.9.0`, which carries the declaration, and run on it.
 
 ---
 
@@ -1141,7 +1141,7 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
 
 1. Done: 6.1: The `proctor` default command works without `--policy` since PROCTOR 0.2.1 (`PROCTOR_POLICY`, then the
    app's installed CREED policy, then the copy bundled with PROCTOR), and both PROCTOR's and CREED's pipelines include
-   `preflight/proctor@0.8.0`. 6.1 is `Checked`: this repository's pipeline runs the component on `tests/fixture-app`,
+   `preflight/proctor@0.9.0`. 6.1 is `Checked`: this repository's pipeline runs the component on `tests/fixture-app`,
    and the `contract` job runs `tests/check-proctor-fails`.
 2. Done: 7.2: `package-publish`'s moved-version path has its failing fixture: a fake registry in
    `tests/check-package-publish-fails.sh` (no live registry needed). Every component that runs as a job now has one.
