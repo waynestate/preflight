@@ -6,6 +6,8 @@ are Git tags.
 
 ## Unreleased
 
+- Docs: three gap-list citations in BEST_PRACTICES point at the lines they name again.
+
 ## 0.9.0 (2026-11-12)
 
 One new component, `composer-ci`, the install-and-ci job nine stack repos wrote by hand; a `check_path` input on

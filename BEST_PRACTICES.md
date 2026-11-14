@@ -1170,7 +1170,7 @@ Practices tagged `Not yet` or `Documented`, each one line. Highest value first.
 12. Done: 4.2: Every Docker Hub image goes through the Dependency Proxy: each component takes an `image_prefix` input
     (default `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}`), kept in place by `tests/check-dependency-cache.sh`.
 13. Done: 3.2: Branch and CI-file protection for app repos is recommended in the README's "Protection checklist"
-    (README.md:755): a protected default branch with a required merge request, protected release tags, merge request
+    (README.md:834): a protected default branch with a required merge request, protected release tags, merge request
     approvals of at least one, `no_one_allowed` pipeline variables, and no protected variables in fork pipelines.
 14. Done: 3.4: The `workflow:rules` example is in the README's "When the components run" (README.md:709).
 15. Done: 2.5: Build job names from an input so one project can include a component twice.
@@ -1229,8 +1229,9 @@ Added in the second pass (2026-10-27):
     README's PowerShell commands and all thirty twins passed on Windows on 2026-11-11. Still open: nothing runs the
     twins on a schedule.
 38. Done: 6.4: `php-test` takes `php_advisory_version`, which adds a `<job_name>-advisory` job, advisory-only
-    (`allow_failure: true`, `templates/php-test/template.yml:27,104`), and Preflight's own pipeline runs it on `8.6-rc`.
-39. Done: 6.5: WCAG 2.2 AA is named as the floor on the front page (site/index.html:841), the same floor Preflight's
+    (`allow_failure: true`, `templates/php-test/template.yml:27, 101-106`), and Preflight's own pipeline runs it on
+    `8.6-rc`.
+39. Done: 6.5: WCAG 2.2 AA is named as the floor on the front page (site/index.html:867), the same floor Preflight's
     own `a11y` job passes as `wcag_tags` (.gitlab-ci.yml:44).
 40. 1.8: Write a retirement policy for components, and test whether SHA pins survive a Catalog unpublish.
 41. Done: 4.12: The install-scripts rule is recorded in the README's "Shared conventions": JavaScript components
