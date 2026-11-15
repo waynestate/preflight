@@ -301,8 +301,8 @@
     <div class="wsu-container">
       <div class="section__head">
         <p class="eyebrow">Cockpit placards</p>
-        <h2 id="components-title">Nine checks, one include each</h2>
-        <p>Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All nine are in the 0.9.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Six more components ship in the same tag, and the docs cover each one: <code>secret-detection</code>, <code>squire-kit</code>, <code>portability</code>, <code>package-publish</code>, <code>renovate</code> and <code>npm-audit</code>. New in 0.9.0: <code>composer-ci</code>, the install-and-<code>composer ci</code> job nine stack repos wrote by hand, as one include. <code>proctor</code> takes a <code>check_path</code>, so a repo that installs PROCTOR in <code>deploy</code> can still check from the project root. And two patterns now take the values their own docs recommend: <code>secret-detection</code>'s <code>config_path</code> accepts <code>.gitleaks.toml</code>, and <code>php-test</code>'s <code>php_advisory_version</code> accepts <code>8.6-rc</code>. Nothing renamed, nothing removed. Since 0.8.0: <code>portability</code>'s <code>session_header</code>, one <code>Name: $VARIABLE</code> header on every <code>session-hop</code> request, read from the job's environment and never printed. Since 0.7.0: its <code>setup_command</code>, run once before either replica starts, so the app can migrate a shared database before <code>session-hop</code> takes off. Every input on these placards is held to <a href="#contract">a written contract</a>.</p>
+        <h2 id="components-title">Ten checks, one include each</h2>
+        <p>Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All ten are in the 0.9.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Six more components ship in the same tag, and the docs cover each one: <code>secret-detection</code>, <code>squire-kit</code>, <code>portability</code>, <code>package-publish</code>, <code>renovate</code> and <code>npm-audit</code>. New in 0.9.0: <code>composer-ci</code>, the tenth placard, the install-and-<code>composer ci</code> job nine stack repos wrote by hand, as one include. <code>proctor</code> takes a <code>check_path</code>, so a repo that installs PROCTOR in <code>deploy</code> can still check from the project root. And two patterns now take the values their own docs recommend: <code>secret-detection</code>'s <code>config_path</code> accepts <code>.gitleaks.toml</code>, and <code>php-test</code>'s <code>php_advisory_version</code> accepts <code>8.6-rc</code>. Nothing renamed, nothing removed. Since 0.8.0: <code>portability</code>'s <code>session_header</code>, one <code>Name: $VARIABLE</code> header on every <code>session-hop</code> request, read from the job's environment and never printed. Since 0.7.0: its <code>setup_command</code>, run once before either replica starts, so the app can migrate a shared database before <code>session-hop</code> takes off. Every input on these placards is held to <a href="#contract">a written contract</a>.</p>
       </div>
 
       <div class="placards">
@@ -315,7 +315,7 @@
           <p class="placard__line">Runs PROCTOR's checks, publishes a Code Quality report and, since 0.5.0, keeps <code>proctor.json</code> for Rollcall.</p>
 <pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0</code></pre>
           <details class="placard__inputs">
-            <summary>6 inputs</summary>
+            <summary>7 inputs</summary>
             <dl>
               <dt>stage</dt><dd><code>test</code></dd>
               <dt>image</dt><dd><code>php:8.4-cli-trixie@sha256:…</code></dd>
@@ -323,6 +323,7 @@
               <dt>allow_failure</dt><dd><code>false</code></dd>
               <dt>proctor_command</dt><dd><code>vendor/bin/proctor check --format=codequality</code></dd>
               <dt>working_dir</dt><dd><code>.</code></dd>
+              <dt>check_path</dt><dd><code>""</code></dd>
             </dl>
           </details>
         </article>
@@ -478,6 +479,25 @@
           </details>
         </article>
 
+        <!-- The tenth check, new in 0.9.0: the job nine stack repos wrote by hand. It sits
+             beside php-package.yml on purpose: the same composer ci, one placard per cockpit. -->
+        <article class="placard">
+          <span class="placard__screws" aria-hidden="true"></span>
+          <p class="placard__tag">in 0.9.0</p>
+          <h3 class="placard__name">composer-ci</h3>
+          <p class="placard__aside">Your checklist, flown as written.</p>
+          <p class="placard__line"><code>composer install</code>, then the project's own <code>composer ci</code>, whose exit code decides the job. There is no <code>allow_failure</code> input: a red <code>composer ci</code> holds the pipeline.</p>
+<pre class="placard__code"><code>- component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-ci@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0</code></pre>
+          <details class="placard__inputs">
+            <summary>3 inputs</summary>
+            <dl>
+              <dt>stage</dt><dd><code>test</code></dd>
+              <dt>image</dt><dd><code>composer:2.11.1@sha256:…</code></dd>
+              <dt>working_dir</dt><dd><code>.</code></dd>
+            </dl>
+          </details>
+        </article>
+
         <!-- Not a component: the reusable workflow for GitHub mirrors. -->
         <article class="placard placard--alt">
           <span class="placard__screws" aria-hidden="true"></span>
@@ -586,7 +606,7 @@
         <article class="plan__box plan__box--route">
           <p class="plan__field"><span class="plan__num">1</span> Route · <code>.gitlab-ci.yml</code></p>
           <h3>Include the components</h3>
-          <p>The <code>workflow:rules</code> block has to live in the app's own file: a component cannot set when the pipeline runs.</p>
+          <p>The <code>workflow:rules</code> block has to live in the app's own file: a component cannot set when the pipeline runs. Already keep your checks in a <code>composer ci</code> script? Add <code>composer-ci</code> to the block and it runs that script as written.</p>
           <div class="codebox">
 <pre id="route-yaml" tabindex="0" aria-label=".gitlab-ci.yml for an app"><code>workflow:
   rules:
