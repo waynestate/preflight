@@ -20,7 +20,7 @@ Preflight is a set of GitLab CI/CD components. Add them to the `include:` block 
 
 ```
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
 ```
 
 Already included in [WELD](https://weld.apps.wayne.edu/) and in every [Sourdough](https://sourdough.apps.wayne.edu/) app. Use Preflight on its own to give a GitLab project you already have the stack's CI checks.
@@ -86,11 +86,11 @@ Makes the Composer audit fail, to show the pipeline holding short.
 
 Cockpit placards
 
-## Nine checks, one include each
+## Ten checks, one include each
 
-Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All nine are in the 0.8.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Six more components ship in the same tag, and the docs cover each one: `secret-detection`, `squire-kit`, `portability`, `package-publish`, `renovate` and `npm-audit`. New in 0.8.0: `portability` takes a `session_header`, one `Name: $VARIABLE` header sent on every `session-hop` request, read from the job's environment and never printed, so a probe sign-in route can require a per-job secret. And `package-publish` really refuses a moved version on GitLab now. Nothing renamed, nothing removed. Since 0.7.0: `portability`'s `setup_command`, run once in its own container of the built image after any `services` are up and before either replica starts, so the app can migrate a shared database before `session-hop` takes off; a non-zero exit fails the job with `setup: FAIL`. Since 0.6.0: `mysql56-migrate`, a `healthcheck` check that runs the image's own `HEALTHCHECK` in a booted replica, and the `services` input that starts a database both replicas share. Every input on these placards is held to [a written contract](https://preflight.apps.wayne.edu/#contract).
+Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All ten are in the 0.9.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Six more components ship in the same tag, and the docs cover each one: `secret-detection`, `squire-kit`, `portability`, `package-publish`, `renovate` and `npm-audit`. New in 0.9.0: `composer-ci`, the job nine stack repos wrote by hand; `proctor`'s `check_path`; and two patterns that now take `.gitleaks.toml` and `8.6-rc`, as their own docs always said. Nothing renamed, nothing removed. Since 0.8.0: `portability`'s `session_header`; since 0.7.0, its `setup_command`. Every input on these placards is held to [a written contract](https://preflight.apps.wayne.edu/#contract).
 
-in 0.8.0
+in 0.9.0
 
 ### proctor
 
@@ -99,10 +99,10 @@ Watches the cabin.
 Runs PROCTOR's checks, publishes a Code Quality report and, since 0.5.0, keeps `proctor.json` for Rollcall.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
 ```
 
-**6 inputs**
+**7 inputs**
 
 - **stage**: `test`
 - **image**: `php:8.4-cli-trixie@sha256:…`
@@ -110,8 +110,9 @@ Runs PROCTOR's checks, publishes a Code Quality report and, since 0.5.0, keeps `
 - **allow_failure**: `false`
 - **proctor_command**: `vendor/bin/proctor check --format=codequality`
 - **working_dir**: `.`
+- **check_path**: `""`
 
-in 0.8.0
+in 0.9.0
 
 ### php-test
 
@@ -120,7 +121,7 @@ Three engines, all running.
 The test command on each supported PHP version, one job per version.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
 ```
 
 **6 inputs**
@@ -132,7 +133,7 @@ The test command on each supported PHP version, one job per version.
 - **test_command**: `vendor/bin/phpunit`
 - **working_dir**: `.`
 
-in 0.8.0
+in 0.9.0
 
 ### mysql56-migrate
 
@@ -141,7 +142,7 @@ Practice on the runway you land on.
 Runs the app's migrations against a real MySQL 5.6.51, the version of Citadel's shared server, on the runner tagged `amd64`. SQLite waves through a `JSON` column or a too-long utf8mb4 index; 5.6 does not.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/mysql56-migrate@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/mysql56-migrate@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
 ```
 
 **6 inputs**
@@ -153,7 +154,7 @@ Runs the app's migrations against a real MySQL 5.6.51, the version of Citadel's 
 - **tags**: `["amd64"]`
 - **php_extensions**: `["pdo_mysql"]`
 
-in 0.8.0
+in 0.9.0
 
 ### composer-audit
 
@@ -162,7 +163,7 @@ Checks the passenger list.
 `composer audit --locked`, failing on any advisory.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
 ```
 
 **3 inputs**
@@ -171,7 +172,7 @@ Checks the passenger list.
 - **image**: `composer:2.11.1@sha256:…`
 - **working_dir**: `.`
 
-in 0.8.0
+in 0.9.0
 
 ### sbom
 
@@ -180,7 +181,7 @@ The cargo manifest.
 A validated CycloneDX SBOM, published as an artifact. The plugin installs globally, so the app's files stay as they are.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
 ```
 
 **4 inputs**
@@ -190,7 +191,7 @@ A validated CycloneDX SBOM, published as an artifact. The plugin installs global
 - **omit_dev**: `true`
 - **output**: `sbom.cdx.json`
 
-in 0.8.0
+in 0.9.0
 
 ### pint
 
@@ -199,7 +200,7 @@ Uniform pressed.
 The app's own Laravel Pint in test mode. The app requires `laravel/pint` and ships a `pint.json`.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
 ```
 
 **4 inputs**
@@ -209,7 +210,7 @@ The app's own Laravel Pint in test mode. The app requires `laravel/pint` and shi
 - **config**: `pint.json`
 - **working_dir**: `.`
 
-in 0.8.0
+in 0.9.0
 
 ### phpstan
 
@@ -218,7 +219,7 @@ Instruments cross-checked.
 The app's own PHPStan, with a Code Quality report. The app requires `phpstan/phpstan` and ships a `phpstan.neon`.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
 ```
 
 **5 inputs**
@@ -229,7 +230,7 @@ The app's own PHPStan, with a Code Quality report. The app requires `phpstan/php
 - **memory_limit**: `1G`
 - **working_dir**: `.`
 
-in 0.8.0
+in 0.9.0
 
 ### eslint
 
@@ -238,7 +239,7 @@ The front cabin, too.
 The app's own ESLint and Prettier. The app requires `@waynestate/pinstripe`, `eslint` and `prettier`.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
 ```
 
 **5 inputs**
@@ -249,7 +250,7 @@ The app's own ESLint and Prettier. The app requires `@waynestate/pinstripe`, `es
 - **eslint_args**: `.`
 - **prettier**: `true`
 
-in 0.8.0
+in 0.9.0
 
 ### a11y
 
@@ -258,7 +259,7 @@ Boarding for every passenger.
 Opens the pages in Chromium and fails on any axe-core violation, with the reflow check at 320 px. It serves a static `site_dir`, or checks a running app at `base_url`.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
 ```
 
 **6 inputs**
@@ -270,7 +271,25 @@ Opens the pages in Chromium and fails on any axe-core violation, with the reflow
 - **base_url**: `""`
 - **wcag_tags**: `wcag21aa` and below
 
-in 0.8.0
+in 0.9.0
+
+### composer-ci
+
+Your checklist, flown as written.
+
+`composer install`, then the project's own `composer ci`, whose exit code decides the job. There is no `allow_failure` input: a red `composer ci` holds the pipeline.
+
+```
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-ci@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
+```
+
+**3 inputs**
+
+- **stage**: `test`
+- **image**: `composer:2.11.1@sha256:…`
+- **working_dir**: `.`
+
+in 0.9.0
 
 ### php-package.yml
 
@@ -279,7 +298,7 @@ Two cockpits, one checklist.
 Components stay inside one GitLab instance, so GitHub mirrors call this reusable workflow instead: `composer ci` on each PHP version, then a Composer audit.
 
 ```
-uses: waynestate/preflight/.github/workflows/php-package.yml@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+uses: waynestate/preflight/.github/workflows/php-package.yml@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
 ```
 
 **3 inputs**
@@ -302,33 +321,39 @@ Your `include:` lines lean on names: an input like `php_versions`, a job called 
 
 Type certificate data sheet
 
-`portability`
+`proctor`
 
-**portability inputs in contract/inputs.json, abridged. The row marked revised changed from 0.7.0 to 0.8.0.**
+**proctor inputs in contract/inputs.json, abridged. The row marked revised was added from 0.8.0 to 0.9.0.**
 
 | Input | Type | Default |
 | --- | --- | --- |
 | `stage` | string | `test` |
-| `dockerfile` | string | `Dockerfile` |
-| `port` | number | `8080` |
-| `health_path` | string | `/up` |
-| `uid` | number | `100123` |
-| `setup_command` | string | `""` |
-| `env` | array | `[]` |
-| `services` | array | `[]` |
-| `boot_timeout` | number | `60` |
-| `session_header` Added: one `Name: $VARIABLE` header on every `session-hop` request, never printed | string | `""` |
-| `require_healthcheck` | boolean | `false` |
-| `checks` | array | `health` `env-only` `forwarded-headers` `logs` `session-hop` `sigterm` `healthcheck` |
+| `image` | string | `php:8.4-cli-trixie@sha256:…` |
+| `composer_version` | string | `2.11.1` |
+| `allow_failure` | boolean | `false` |
+| `proctor_command` | string | `vendor/bin/proctor check` `--format=codequality` |
+| `working_dir` | string | `.` |
+| `git_depth` | string | `0` |
+| `check_path` Added: where the command runs after the install, so PROCTOR installed in `deploy` still checks the root | string | `""` |
+
+Patterns widened on other entries
+
+**Two inputs on other entries whose patterns were widened from 0.8.0 to 0.9.0, each with a value it now accepts.**
+
+| Input | Type | Now takes |
+| --- | --- | --- |
+| `config_path` On `secret-detection`: a leading dot, the file name Gitleaks itself uses | string | `.gitleaks.toml` |
+| `php_advisory_version` On `php-test`: a hyphen between parts, for the floating candidate tag | string | `8.6-rc` |
 
 Log of amendments
 
-1. **0.2.0** Entered on the sheet: 23 inputs and six checks that boot the image twice, side by side, as a uid with no name.
-2. **0.6.0** Added `services` and `require_healthcheck`; `checks` gains `healthcheck`, the one breaking change. Nothing renamed, nothing removed.
-3. **0.7.0** Added `setup_command`. Nothing renamed, nothing removed.
-4. **0.8.0** Added `session_header`. Nothing renamed, nothing removed.
+1. **0.1.0** Entered on the sheet: six inputs, and the first item on the checklist.
+2. **0.1.4** Added `job_name`, so the job can be included twice.
+3. **0.3.0** Added `image_prefix`: images come through the Dependency Proxy.
+4. **0.4.0** Added `git_depth`: a full clone by default, so PROCTOR can see who wrote each override.
+5. **0.9.0** Added `check_path`. Nothing renamed, nothing removed.
 
-One of fifteen entries on main, abridged. A bar in the margin marks a line revised from 0.7.0 to 0.8.0. Four tags without a change bar on this sheet, three bars at once in 0.6.0, and since then short hops: one bar in 0.7.0, one in 0.8.0, one more item on the checklist each time.
+One of sixteen entries on main, abridged. A bar in the margin marks a line revised from 0.8.0 to 0.9.0: one input added on this sheet, and two patterns on other entries that now take what their own docs recommend. A wider pattern needs no notice; a tighter one would. Four additions in fourteen tags, and not one rename: a well-kept logbook.
 
 1. **Renames are announced.** An input or job is renamed or removed only in a release whose Upgrading notes list it under Breaking. Before 1.0 that is a new minor, never a patch.
 2. **Tighter counts too.** A pattern that stops a value you used to pass is breaking, and gets the same notice.
@@ -337,7 +362,19 @@ One of fifteen entries on main, abridged. A bar in the margin marks a line revis
 Before you move a pin, read the diff:
 
 ```
-$ git diff 0.7.0 0.8.0 -- contract/inputs.json
+$ git diff -U0 0.8.0 0.9.0 -- contract/inputs.json
+@@ -14 +14,2 @@
+-        { "name": "git_depth", "type": "string", "default": "0", "regex": "^[0-9]+$" }
++        { "name": "git_depth", "type": "string", "default": "0", "regex": "^[0-9]+$" },
++        { "name": "check_path", "type": "string", "default": "", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)?$" }
+@@ -25 +26 @@
+-        { "name": "php_advisory_version", "type": "string", "default": "", "regex": "^$|^[0-9]+\\.[0-9]+([.][0-9A-Za-z]+)*$" },
++        { "name": "php_advisory_version", "type": "string", "default": "", "regex": "^$|^[0-9]+\\.[0-9]+([.-][0-9A-Za-z]+)*$" },
+[folded: the composer-ci entry, ten lines]
+@@ -95 +106 @@
+-        { "name": "config_path", "type": "string", "default": "", "regex": "^([A-Za-z0-9_-][A-Za-z0-9._/-]*)?$" },
++        { "name": "config_path", "type": "string", "default": "", "regex": "^(\\.?[A-Za-z0-9_-][A-Za-z0-9._/-]*)?$" },
+[folded: two image defaults Renovate moved]
 ```
 
 [The inputs contract, in full](https://preflight.apps.wayne.edu/docs/guides/inputs-contract.html) [Upgrading](https://preflight.apps.wayne.edu/docs/upgrading.html)
@@ -352,7 +389,7 @@ Box 1 is the one every app needs: after it, merge requests and pushes to the def
 
 ### Include the components
 
-The `workflow:rules` block has to live in the app's own file: a component cannot set when the pipeline runs.
+The `workflow:rules` block has to live in the app's own file: a component cannot set when the pipeline runs. Already keep your checks in a `composer ci` script? Add `composer-ci` to the block and it runs that script as written.
 
 ```
 workflow:
@@ -361,13 +398,13 @@ workflow:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
 ```
 
 2 Switches · project settings
@@ -398,7 +435,7 @@ on:
 
 jobs:
   ci:
-    uses: waynestate/preflight/.github/workflows/php-package.yml@28d9c5994d06c633850d431dcf6ca56c48a96055 # 0.8.0
+    uses: waynestate/preflight/.github/workflows/php-package.yml@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
 ```
 
 4 Ground check · your machine
