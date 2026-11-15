@@ -999,7 +999,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
 .sheet__table tbody th { font-weight: 400; }
 .sheet__table tbody th > code { font-weight: 700; color: var(--green); background: none; padding: 0; }
 .sheet__table td { color: var(--ink-muted); }
-.sheet__table td code { white-space: normal; overflow-wrap: anywhere; }
+.sheet__table td code { white-space: nowrap; }
 .sheet__table td:nth-child(2) { font-family: var(--mono); font-size: .82rem; }
 .sheet__note { display: block; margin-top: .15rem; font-size: .8rem; color: var(--blue-deep); }
 .sheet__note code { font-size: .92em; }
@@ -1062,7 +1062,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
 .sheet__sub { margin: 1.1rem 0 .1rem; padding-top: .55rem; border-top: 1px solid var(--ink); font-family: var(--mono); font-size: .7rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-muted); }
 .sheet__table--widened thead th { padding-top: .3rem; }
 /* the same fixed columns on both tables, so type and default line up down the whole sheet;
-   a long default wraps instead of pushing its column wider */
+   a long default breaks between its code tokens, never inside one */
 .sheet__table { table-layout: fixed; }
 .sheet__table thead th:first-child { width: 42%; }
 .sheet__table thead th:nth-child(2) { width: 14%; }
