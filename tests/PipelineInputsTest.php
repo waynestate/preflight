@@ -45,7 +45,7 @@ final class PipelineInputsTest extends TestCase
                     if (str_contains($scalar, '$')) {
                         continue;
                     }
-                    if (@preg_match('/' . $regex . '/', $scalar) !== 1) {
+                    if (@preg_match('~' . str_replace('~', '\~', $regex) . '~', $scalar) !== 1) {
                         $problems[] = "{$component}: input {$input} value '{$scalar}' does not match the spec's regex {$regex}";
                     }
                 }
