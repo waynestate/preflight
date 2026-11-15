@@ -543,39 +543,47 @@
         <figure class="sheet" aria-labelledby="sheet-cap">
           <div class="sheet__head">
             <p class="sheet__kicker">Type certificate data sheet</p>
-            <p class="sheet__title"><code>portability</code></p>
-            <p class="sheet__rev" aria-hidden="true">Amdt<br><b>0.8.0</b></p>
+            <p class="sheet__title"><code>proctor</code></p>
+            <p class="sheet__rev" aria-hidden="true">Amdt<br><b>0.9.0</b></p>
           </div>
           <table class="sheet__table">
-            <caption class="wsu-sr-only">portability inputs in contract/inputs.json, abridged. The row marked revised changed from 0.7.0 to 0.8.0.</caption>
+            <caption class="wsu-sr-only">proctor inputs in contract/inputs.json, abridged. The row marked revised was added from 0.8.0 to 0.9.0.</caption>
             <thead>
               <tr><th scope="col">Input</th><th scope="col">Type</th><th scope="col">Default</th></tr>
             </thead>
             <tbody>
               <tr><th scope="row"><code>stage</code></th><td>string</td><td><code>test</code></td></tr>
-              <tr><th scope="row"><code>dockerfile</code></th><td>string</td><td><code>Dockerfile</code></td></tr>
-              <tr><th scope="row"><code>port</code></th><td>number</td><td><code>8080</code></td></tr>
-              <tr><th scope="row"><code>health_path</code></th><td>string</td><td><code>/up</code></td></tr>
-              <tr><th scope="row"><code>uid</code></th><td>number</td><td><code>100123</code></td></tr>
-              <tr><th scope="row"><code>setup_command</code></th><td>string</td><td><code>""</code></td></tr>
-              <tr><th scope="row"><code>env</code></th><td>array</td><td><code>[]</code></td></tr>
-              <tr><th scope="row"><code>services</code></th><td>array</td><td><code>[]</code></td></tr>
-              <tr><th scope="row"><code>boot_timeout</code></th><td>number</td><td><code>60</code></td></tr>
-              <tr class="is-amended" style="--bar: 0"><th scope="row"><code>session_header</code><span class="sheet__note">Added: one <code>Name: $VARIABLE</code> header on every <code>session-hop</code> request, never printed</span></th><td>string</td><td><code>""</code></td></tr>
-              <tr><th scope="row"><code>require_healthcheck</code></th><td>boolean</td><td><code>false</code></td></tr>
-              <tr><th scope="row"><code>checks</code></th><td>array</td><td><code>health</code> <code>env-only</code> <code>forwarded-headers</code> <code>logs</code> <code>session-hop</code> <code>sigterm</code> <code>healthcheck</code></td></tr>
+              <tr><th scope="row"><code>image</code></th><td>string</td><td><code>php:8.4-cli-trixie@sha256:…</code></td></tr>
+              <tr><th scope="row"><code>composer_version</code></th><td>string</td><td><code>2.11.1</code></td></tr>
+              <tr><th scope="row"><code>allow_failure</code></th><td>boolean</td><td><code>false</code></td></tr>
+              <tr><th scope="row"><code>proctor_command</code></th><td>string</td><td><code>vendor/bin/proctor check</code> <code>--format=codequality</code></td></tr>
+              <tr><th scope="row"><code>working_dir</code></th><td>string</td><td><code>.</code></td></tr>
+              <tr><th scope="row"><code>git_depth</code></th><td>string</td><td><code>0</code></td></tr>
+              <tr class="is-amended" style="--bar: 0"><th scope="row"><code>check_path</code><span class="sheet__note">Added: where the command runs after the install, so PROCTOR installed in <code>deploy</code> still checks the root</span></th><td>string</td><td><code>""</code></td></tr>
+            </tbody>
+          </table>
+          <p class="sheet__sub" id="sheet-sub">Patterns widened on other entries</p>
+          <table class="sheet__table sheet__table--widened" aria-describedby="sheet-sub">
+            <caption class="wsu-sr-only">Two inputs on other entries whose patterns were widened from 0.8.0 to 0.9.0, each with a value it now accepts.</caption>
+            <thead>
+              <tr><th scope="col">Input</th><th scope="col">Type</th><th scope="col">Now takes</th></tr>
+            </thead>
+            <tbody>
+              <tr class="is-amended" style="--bar: 1"><th scope="row"><code>config_path</code><span class="sheet__note">On <code>secret-detection</code>: a leading dot, the file name Gitleaks itself uses</span></th><td>string</td><td><code>.gitleaks.toml</code></td></tr>
+              <tr class="is-amended" style="--bar: 2"><th scope="row"><code>php_advisory_version</code><span class="sheet__note">On <code>php-test</code>: a hyphen between parts, for the floating candidate tag</span></th><td>string</td><td><code>8.6-rc</code></td></tr>
             </tbody>
           </table>
           <div class="sheet__log">
             <p class="sheet__log-title">Log of amendments</p>
             <ol>
-              <li><b>0.2.0</b> <span>Entered on the sheet: 23 inputs and six checks that boot the image twice, side by side, as a uid with no name.</span></li>
-              <li><b>0.6.0</b> <span>Added <code>services</code> and <code>require_healthcheck</code>; <code>checks</code> gains <code>healthcheck</code>, the one breaking change. Nothing renamed, nothing removed.</span></li>
-              <li><b>0.7.0</b> <span>Added <code>setup_command</code>. Nothing renamed, nothing removed.</span></li>
-              <li class="is-latest"><b>0.8.0</b> <span>Added <code>session_header</code>. Nothing renamed, nothing removed.</span></li>
+              <li><b>0.1.0</b> <span>Entered on the sheet: six inputs, and the first item on the checklist.</span></li>
+              <li><b>0.1.4</b> <span>Added <code>job_name</code>, so the job can be included twice.</span></li>
+              <li><b>0.3.0</b> <span>Added <code>image_prefix</code>: images come through the Dependency Proxy.</span></li>
+              <li><b>0.4.0</b> <span>Added <code>git_depth</code>: a full clone by default, so PROCTOR can see who wrote each override.</span></li>
+              <li class="is-latest"><b>0.9.0</b> <span>Added <code>check_path</code>. Nothing renamed, nothing removed.</span></li>
             </ol>
           </div>
-          <figcaption class="sheet__foot" id="sheet-cap">One of fifteen entries on main, abridged. A bar in the margin marks a line revised from 0.7.0 to 0.8.0. Four tags without a change bar on this sheet, three bars at once in 0.6.0, and since then short hops: one bar in 0.7.0, one in 0.8.0, one more item on the checklist each time.</figcaption>
+          <figcaption class="sheet__foot" id="sheet-cap">One of sixteen entries on main, abridged. A bar in the margin marks a line revised from 0.8.0 to 0.9.0: one input added on this sheet, and two patterns on other entries that now take what their own docs recommend. A wider pattern needs no notice; a tighter one would. Four additions in fourteen tags, and not one rename: a well-kept logbook.</figcaption>
         </figure>
 
         <div class="contract__terms">
@@ -585,7 +593,19 @@
             <li><b>Defaults move in the open.</b> Image digests are defaults, and Renovate moves them. Leave an input unset and you get the new default when you move the pin.</li>
           </ol>
           <p class="contract__lede">Before you move a pin, read the diff:</p>
-<pre class="term"><code><span class="t-dim">$</span> git diff 0.7.0 0.8.0 -- contract/inputs.json</code></pre>
+<pre class="term term--diff"><code><span class="t-dim">$</span> git diff -U0 0.8.0 0.9.0 -- contract/inputs.json
+<span class="t-hunk">@@ -14 +14,2 @@</span>
+<span class="t-del">-        { "name": "git_depth", "type": "string", "default": "0", "regex": "^[0-9]+$" }</span>
+<span class="t-add">+        { "name": "git_depth", "type": "string", "default": "0", "regex": "^[0-9]+$" },</span>
+<span class="t-add">+        { "name": "check_path", "type": "string", "default": "", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)?$" }</span>
+<span class="t-hunk">@@ -25 +26 @@</span>
+<span class="t-del">-        { "name": "php_advisory_version", "type": "string", "default": "", "regex": "^$|^[0-9]+\\.[0-9]+([.][0-9A-Za-z]+)*$" },</span>
+<span class="t-add">+        { "name": "php_advisory_version", "type": "string", "default": "", "regex": "^$|^[0-9]+\\.[0-9]+([.-][0-9A-Za-z]+)*$" },</span>
+<span class="t-dim">[folded: the composer-ci entry, ten lines]</span>
+<span class="t-hunk">@@ -95 +106 @@</span>
+<span class="t-del">-        { "name": "config_path", "type": "string", "default": "", "regex": "^([A-Za-z0-9_-][A-Za-z0-9._/-]*)?$" },</span>
+<span class="t-add">+        { "name": "config_path", "type": "string", "default": "", "regex": "^(\\.?[A-Za-z0-9_-][A-Za-z0-9._/-]*)?$" },</span>
+<span class="t-dim">[folded: two image defaults Renovate moved]</span></code></pre>
           <p class="contract__more"><a href="docs/guides/inputs-contract.html">The inputs contract, in full</a> <span aria-hidden="true">·</span> <a href="docs/upgrading.html">Upgrading</a></p>
         </div>
       </div>

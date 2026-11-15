@@ -999,7 +999,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
 .sheet__table tbody th { font-weight: 400; }
 .sheet__table tbody th > code { font-weight: 700; color: var(--green); background: none; padding: 0; }
 .sheet__table td { color: var(--ink-muted); }
-.sheet__table td code { white-space: nowrap; }
+.sheet__table td code { white-space: normal; overflow-wrap: anywhere; }
 .sheet__table td:nth-child(2) { font-family: var(--mono); font-size: .82rem; }
 .sheet__note { display: block; margin-top: .15rem; font-size: .8rem; color: var(--blue-deep); }
 .sheet__note code { font-size: .92em; }
@@ -1057,6 +1057,15 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
   background: var(--blue);
 }
 .sheet__foot { margin: .8rem 0 0; font-size: .85rem; color: var(--ink-muted); }
+/* a second, shorter table under the entry: rows amended on other entries in the same release,
+   typed under a thin rule like a continuation slip stapled to the sheet */
+.sheet__sub { margin: 1.1rem 0 .1rem; padding-top: .55rem; border-top: 1px solid var(--ink); font-family: var(--mono); font-size: .7rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-muted); }
+.sheet__table--widened thead th { padding-top: .3rem; }
+/* the same fixed columns on both tables, so type and default line up down the whole sheet;
+   a long default wraps instead of pushing its column wider */
+.sheet__table { table-layout: fixed; }
+.sheet__table thead th:first-child { width: 42%; }
+.sheet__table thead th:nth-child(2) { width: 14%; }
 
 .contract__terms { min-width: 0; }
 .terms { list-style: none; margin: 0; padding: 0; counter-reset: term; border-top: 2px solid var(--green); }
@@ -1097,6 +1106,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
   .sheet__table tbody td:nth-child(2) { display: none; }
   .sheet__table tbody td { margin-top: .2rem; }
   .sheet__table tbody td::before { content: "default "; font-family: var(--mono); font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; }
+  .sheet__table--widened tbody td::before { content: "now takes "; }
   .sheet__table tr.is-amended th { position: static; }
   .sheet__table tr.is-amended th::before { left: -.45rem; }
   .sheet__table code { overflow-wrap: anywhere; }
@@ -1188,6 +1198,11 @@ a:focus-visible, button:focus-visible, summary:focus-visible, [tabindex]:focus-v
 }
 .term--light { background: rgba(14, 90, 125, .08); color: var(--blue-deep); }
 .t-dim { color: #8FB3AA; user-select: none; }
+/* a diff in the terminal: the lines the change bars stand for, in the two colors every reviewer reads */
+.term--diff { font-size: .74rem; line-height: 1.6; }
+.term--diff .t-hunk { color: #8FC9E6; }
+.term--diff .t-add { color: var(--lit); }
+.term--diff .t-del { color: #FFB1A6; }
 .term--light .t-dim { color: #4A6F7F; }
 
 .os-tabs { margin-top: 1rem; }
