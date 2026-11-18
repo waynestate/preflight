@@ -33,7 +33,7 @@ The install skips plugins and scripts on purpose: the job only inspects the app,
 | --- | --- | --- | --- |
 | `stage` | string | `test` | Pipeline stage for the job. |
 | `job_name` | string | `proctor` | Name of the job. Set it when you include this component more than once. |
-| `image` | string | `php:8.4-cli-trixie@sha256:9cf851bc2c1b37c3e59dfd677a3c3e56d485af5a47c93f629424bb039eafcb69` | Docker image for the job. |
+| `image` | string | `php:8.5-cli-trixie@sha256:50956f094e90a716d43bea28087d447555ad80510e386ab8c9c10d8c70d781a9` | Docker image for the job. |
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `composer_version` | string | `2.11.1` | Composer version to install, 2.9.6 or later. |
 | `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline. |
@@ -65,7 +65,7 @@ With `check_path` empty (the default) the job runs the command in `working_dir`,
 
 The job is `interruptible: true` with a `timeout: 30 minutes`. Its script:
 
-1. Installs `unzip` and `git` with `apt-get`, because the `php:8.4-cli-trixie` image does not ship them (the image is Debian-based, so `apt` is used).
+1. Installs `unzip` and `git` with `apt-get`, because the `php:8.5-cli-trixie` image does not ship them (the image is Debian-based, so `apt` is used).
 2. Copies the official Composer installer from `getcomposer.org` and verifies its SHA-384 against the signature fetched at runtime from `composer.github.io/installer.sig`. On a mismatch the check deletes the installer and exits 1. No `$` variables appear in the `php -r` code, so GitLab CI variable expansion cannot corrupt it.
 3. Runs the installer quietly with `--install-dir=/usr/local/bin --filename=composer` and the pinned `composer_version`, so Composer lands on PATH, then removes `composer-setup.php`.
 4. Changes into `working_dir` and runs `composer install --no-interaction --no-progress --no-plugins --no-scripts --ignore-platform-reqs`.

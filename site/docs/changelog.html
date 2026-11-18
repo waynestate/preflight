@@ -47,6 +47,9 @@
 are Git tags.</p>
 <h2 id="unreleased"><span class="docs-heading-tail"><span>Unreleased</span><a class="docs-heading-link" aria-label="Link to this section" href="#unreleased">#</a></span></h2>
 <ul>
+<li>Changed: the <code>proctor</code> and <code>mysql56-migrate</code> components default to PHP 8.5 (<code>php:8.5-cli-trixie</code>, pinned by digest), the stack's default PHP line (D-113); both still run on PHP 8.3 or later through the <code>image</code> input.</li>
+<li>Changed: the <code>a11y</code> component's default Playwright image is the new v1.65.0-noble digest; the README, the a11y guide and the components reference show it.</li>
+<li>Changed: the <code>renovate</code> component's default Renovate image is 44.251.0 (pinned by digest); the README, the renovate guide and the components reference show it.</li>
 <li>Changed: <code>deploy/</code> requires PROCTOR <code>^0.16</code> (was <code>^0.15</code>, which does not allow 0.16), whose <code>ci-pipelines</code> check no longer asks for a GitHub workflow (D-069).</li>
 <li>Docs: three gap-list citations in BEST_PRACTICES point at the lines they name again.</li>
 <li>Changed: the deploy kit is Squire 0.11.1 (was 0.10.7): the release script, parity scripts, HAProxy pin and fallback base follow the new templates; the <code>squire-kit</code> fixture keeps its own track.</li>
