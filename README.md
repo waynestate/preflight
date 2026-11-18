@@ -89,7 +89,7 @@ include:
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the job. |
 | `job_name` | string | `proctor` | Name of the job. Set it when you include this component more than once. |
-| `image` | string | `php:8.4-cli-trixie@sha256:9cf851bc2c1b37c3e59dfd677a3c3e56d485af5a47c93f629424bb039eafcb69` | Docker image for the job. |
+| `image` | string | `php:8.5-cli-trixie@sha256:50956f094e90a716d43bea28087d447555ad80510e386ab8c9c10d8c70d781a9` | Docker image for the job. |
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `composer_version` | string | `2.11.1` | Composer version to install. |
 | `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline. |
@@ -413,7 +413,7 @@ include:
 | Input | Type | Default | What it does |
 |-------|------|---------|--------------|
 | `job_name` | string | `renovate` | Name of the job. Set it when you include this component more than once. |
-| `image` | string | `renovate/renovate:44.229.0@sha256:3cbb11917cc72ad4caf0ad96ade546447656310f2057e33e24a4398779d9330c` | Docker image for the job. |
+| `image` | string | `renovate/renovate:44.251.0@sha256:64adaabe8ee3e34820c2b044b5f87e281aa278bf53e5d76df2ce800f9cc9407a` | Docker image for the job. |
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `autodiscover_filter` | string | `$CI_PROJECT_NAMESPACE/*` | Glob limiting which projects Renovate discovers, relative to the runner project's namespace. |
 | `dry_run` | string | `"null"` | Dry run mode: `null` (disabled), `lookup` or `full`. |
@@ -521,7 +521,7 @@ a11y ships in 0.2.0 (0.1.4 does not include it). While a site fixes its first fi
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the job. |
 | `job_name` | string | `a11y` | Name of the job. Set it when you include this component more than once. |
-| `image` | string | `mcr.microsoft.com/playwright:v1.65.0-noble@sha256:6e3fb709361521eb27161606e6da6d2674e5e89fa16516cb37d6fdd91372273d` | Playwright image the job runs in (amd64 and arm64). Its `vX.Y.Z` tag sets the playwright npm version. |
+| `image` | string | `mcr.microsoft.com/playwright:v1.65.0-noble@sha256:9beb546099e11f52d62e505537914870e01a67e0e6b00ae41da4775324e73dbe` | Playwright image the job runs in (amd64 and arm64). Its `vX.Y.Z` tag sets the playwright npm version. |
 | `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline, for a site fixing its first findings. |
 | `site_dir` | string | `site` | Static folder to serve, relative to the project root. Page globs expand in it. |
 | `pages` | array | `["**/*.html"]` | Pages to check, relative to the site root: paths (`index.html`, `docs/`) or globs (`docs/**/*.html`). A glob must match at least one file. |
@@ -593,7 +593,7 @@ never runs on schedules.
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the mysql56-migrate job. |
 | `job_name` | string | `mysql56-migrate` | Name of the job. Set it when you include this component more than once. |
-| `image` | string | `php:8.3-cli-trixie@sha256:628102249d93494233b54490b785f12db9cd60f4dc89416dfca15973f2125f10` | Container image for the job. It needs PHP 8.3 or later; the job installs any missing `php_extensions` itself. |
+| `image` | string | `php:8.5-cli-trixie@sha256:50956f094e90a716d43bea28087d447555ad80510e386ab8c9c10d8c70d781a9` | Container image for the job. It needs PHP 8.3 or later; the job installs any missing `php_extensions` itself. |
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path put in front of the image and service_image values. The default is this group's GitLab Dependency Proxy, so Docker Hub images are pulled once and then served from GitLab's cache. On a GitLab or group without the proxy, set it to `docker.io`. No trailing slash. |
 | `service_image` | string | `mysql:5.6.51@sha256:20575ecebe6216036d25dab5903808211f1e9ba63dc7825ac20cb975e34cfcae` | MySQL 5.6.51 service image, the same pin Squire runs locally. |
 | `db_name` | string | `app` | Database name created by the service. |

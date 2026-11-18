@@ -70,7 +70,7 @@ include:
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the job. |
 | `job_name` | string | `a11y` | Name of the job. Set it when you include this component more than once. |
-| `image` | string | `mcr.microsoft.com/playwright:v1.65.0-noble@sha256:6e3fb709361521eb27161606e6da6d2674e5e89fa16516cb37d6fdd91372273d` | Playwright image the job runs in (amd64 and arm64). It carries Node and Chromium; its `vX.Y.Z` tag sets the playwright npm version. |
+| `image` | string | `mcr.microsoft.com/playwright:v1.65.0-noble@sha256:9beb546099e11f52d62e505537914870e01a67e0e6b00ae41da4775324e73dbe` | Playwright image the job runs in (amd64 and arm64). It carries Node and Chromium; its `vX.Y.Z` tag sets the playwright npm version. |
 | `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline. Set it to `true` while a site fixes its first findings. |
 | `site_dir` | string | `site` | Static folder to serve, relative to the project root. Page globs expand in it. A relative path; GitLab refuses the pipeline at creation if it is not. |
 | `pages` | array | `["**/*.html"]` | Pages to check, relative to the site root: paths (`index.html`, `docs/`) or globs (`docs/**/*.html`). A glob must match at least one file. |

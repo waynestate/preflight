@@ -27,7 +27,7 @@ Pin the full commit SHA of the release tag you use.
 |-------|------|---------|--------------|
 | `stage` | string | `test` | Pipeline stage for the mysql56-migrate job. |
 | `job_name` | string | `mysql56-migrate` | Name of the job. Set it when you include this component more than once. |
-| `image` | string | `php:8.3-cli-trixie@sha256:628102249d93494233b54490b785f12db9cd60f4dc89416dfca15973f2125f10` | Container image for the job. It needs PHP 8.3 or later; the job installs any missing `php_extensions` itself. |
+| `image` | string | `php:8.5-cli-trixie@sha256:50956f094e90a716d43bea28087d447555ad80510e386ab8c9c10d8c70d781a9` | Container image for the job. It needs PHP 8.3 or later; the job installs any missing `php_extensions` itself. |
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path put in front of the image and service_image values. The default is this group's GitLab Dependency Proxy, so Docker Hub images are pulled once and then served from GitLab's cache. On a GitLab or group without the proxy, set it to `docker.io`. No trailing slash. |
 | `service_image` | string | `mysql:5.6.51@sha256:20575ecebe6216036d25dab5903808211f1e9ba63dc7825ac20cb975e34cfcae` | MySQL 5.6.51 service image, the same pin Squire runs locally. |
 | `db_name` | string | `app` | Database name created by the service. |

@@ -27,7 +27,7 @@ spec:
       regex: '^[A-Za-z0-9_][A-Za-z0-9_.-]*$'
     image:
       type: string
-      default: "php:8.3-cli-trixie@sha256:628102249d93494233b54490b785f12db9cd60f4dc89416dfca15973f2125f10"
+      default: "php:8.5-cli-trixie@sha256:50956f094e90a716d43bea28087d447555ad80510e386ab8c9c10d8c70d781a9"
       description: "Container image for the job. It needs PHP 8.3 or later; the job installs any missing php_extensions itself."
     image_prefix:
       type: string
