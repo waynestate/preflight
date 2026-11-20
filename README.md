@@ -1134,5 +1134,5 @@ pwsh -File tests/check-npm-audit-fails.ps1
   <a href="https://github.com/waynestate/weld" title="WELD"><img src="docs/readme/cast/weld.png" width="48" alt="WELD"></a>
 </div>
 
-<div align="center"><sub>Sixteen on the manifest, every one checked in. The README art is cut from the front page by
+<div align="center"><sub>Seventeen on the manifest, every one checked in. The README art is cut from the front page by
 <a href="scripts/readme-art/README.md"><code>scripts/readme-art</code></a>; no runways were painted in its making.</sub></div>
