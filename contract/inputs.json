@@ -128,6 +128,15 @@
       ],
       "jobs": ["package-publish"]
     },
+    "release-gate": {
+      "inputs": [
+        { "name": "stage", "type": "string", "default": ".pre" },
+        { "name": "job_name", "type": "string", "default": "release-gate", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
+        { "name": "image", "type": "string", "default": "composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0" },
+        { "name": "image_prefix", "type": "string", "default": "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}", "regex": "^[^/\\s](\\S*[^/\\s])?$" }
+      ],
+      "jobs": ["release-gate"]
+    },
     "renovate": {
       "inputs": [
         { "name": "job_name", "type": "string", "default": "renovate", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
