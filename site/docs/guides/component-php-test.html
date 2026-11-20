@@ -41,7 +41,7 @@
   <div class="docs-content">
     <main id="main">
       <article class="docs-article"><h1 id="the-php-test-component">The php-test <span class="docs-heading-tail"><span>component</span><a class="docs-heading-link" aria-label="Link to this section" href="#the-php-test-component">#</a></span></h1>
-<p>Every engine gets its own check: this component runs your test command once per supported PHP version. This page shows how to add the <code>php-test</code> component to your app's <code>.gitlab-ci.yml</code>, how the matrix and the cache work, and how to trial the next PHP release. Next, add the <a href="component-composer-audit.html">composer-audit component</a>.</p>
+<p>Every engine gets its own check: this component runs your test command once per supported PHP version. PHP 8.6 runs as an advisory job that may fail; the required matrix is 8.3, 8.4, 8.5. This page shows how to add the <code>php-test</code> component to your app's <code>.gitlab-ci.yml</code>, how the matrix and the cache work, and how to trial the next PHP release. Next, add the <a href="component-composer-audit.html">composer-audit component</a>.</p>
 <h2 id="include-the-component">Include the <span class="docs-heading-tail"><span>component</span><a class="docs-heading-link" aria-label="Link to this section" href="#include-the-component">#</a></span></h2>
 <p>Goal: your app's test suite runs on each supported PHP version. The component runs the test command on each supported PHP version through <code>parallel:matrix</code>. Add the include to your app's <code>.gitlab-ci.yml</code>:</p>
 <pre tabindex="0"><code class="language-yaml">include:
@@ -93,8 +93,8 @@
 <tr>
 <td><code>php_advisory_version</code></td>
 <td>string</td>
-<td><code>&quot;&quot;</code></td>
-<td>One more PHP version tested in a separate <code>&lt;job_name&gt;-advisory</code> job that may fail (<code>allow_failure: true</code>), for example <code>8.6-rc</code> (follows the newest release candidate) or <code>8.6.0RC5</code>. Empty: no advisory job. Never add a release candidate to <code>php_versions</code>.</td>
+<td><code>&quot;8.6&quot;</code></td>
+<td>One more PHP version tested in a separate <code>&lt;job_name&gt;-advisory</code> job that may fail (<code>allow_failure: true</code>). Default <code>8.6</code> (the newest line, not yet required); set it to <code>&quot;&quot;</code> for no advisory job. A release candidate still works (for example <code>8.7-rc</code>). Never add a release candidate to <code>php_versions</code>.</td>
 </tr>
 <tr>
 <td><code>composer_version</code></td>
@@ -118,9 +118,10 @@
 </table></div>
 <aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>The template adds regexes to three inputs: <code>job_name</code> must match <code>^[A-Za-z0-9_][A-Za-z0-9_.-]*$</code>, <code>composer_version</code> must match <code>^2\.(9\.([6-9]|[1-9][0-9]+)|[1-9][0-9]+\.[0-9]+)$</code>, and <code>working_dir</code> must match <code>^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$</code>.</p></aside>
 <h2 id="what-the-jobs-do">What the jobs <span class="docs-heading-tail"><span>do</span><a class="docs-heading-link" aria-label="Link to this section" href="#what-the-jobs-do">#</a></span></h2>
-<p>The array input feeds <code>parallel:matrix</code> directly, so one job is created per PHP version. <code>PHP_VERSION</code> becomes a CI/CD variable in each job, which the <code>image</code> input's default expands at job time. The default image is deliberately tag-pinned, so each job runs the newest patch release of its PHP version. Each job is <code>interruptible: true</code> with a <code>timeout: 30 minutes</code>, and its script:</p>
+<p>The array input feeds <code>parallel:matrix</code> directly, so one job is created per PHP version. <code>PHP_VERSION</code> becomes a CI/CD variable in each job, which the <code>image</code> input's default expands at job time. The default image is deliberately tag-pinned, so each job runs the newest patch release of its PHP version. The <code>&lt;job_name&gt;-advisory</code> job runs the same script on <code>php_advisory_version</code> (default <code>8.6</code>) with <code>allow_failure: true</code>, and is skipped while that input is empty. Each job is <code>interruptible: true</code> with a <code>timeout: 30 minutes</code>, and its script:</p>
 <ol>
 <li>Installs <code>unzip</code> and <code>git</code> with <code>apt-get</code>, because the <code>php:*-cli</code> images do not ship them (the images are Debian-based, so <code>apt</code> is used).</li>
+<li>Installs <code>mbstring</code> only when <code>php -m</code> does not list it (with <code>libonig-dev</code> and <code>docker-php-ext-install</code>), because the official 8.6 image ships without it and PHPUnit needs it; a no-op on 8.3 to 8.5.</li>
 <li>Copies the official Composer installer from <code>getcomposer.org</code> and verifies its SHA-384 against the signature fetched at runtime from <code>composer.github.io/installer.sig</code>. On a mismatch the check deletes the installer and exits 1. No <code>$</code> variables appear in the <code>php -r</code> code, so GitLab CI variable expansion cannot corrupt it.</li>
 <li>Runs the installer quietly with <code>--install-dir=/usr/local/bin --filename=composer</code> and the pinned <code>composer_version</code>, so Composer lands on PATH, then removes <code>composer-setup.php</code>.</li>
 <li>Changes into <code>working_dir</code> and runs <code>composer install --no-interaction --no-progress</code>.</li>
@@ -138,7 +139,7 @@ variables:
 </code></pre>
 <p><code>COMPOSER_CACHE_DIR</code> points Composer at a path inside the project so GitLab can cache it.</p>
 <h2 id="try-the-next-php-release-without-breaking-the-pipeline">Try the next PHP release without breaking the <span class="docs-heading-tail"><span>pipeline</span><a class="docs-heading-link" aria-label="Link to this section" href="#try-the-next-php-release-without-breaking-the-pipeline">#</a></span></h2>
-<p>Include <code>php-test</code> a second time for the release that is not supported yet, name that job, and let it fail. The name is what lets your own <code>.gitlab-ci.yml</code> loosen only that job:</p>
+<p>By default the component already runs 8.6 in the <code>&lt;job_name&gt;-advisory</code> job that may fail, so this second include is only needed when you want to pin a release candidate tag or run the trial under your own job name. Include <code>php-test</code> a second time for the release that is not supported yet, name that job, and let it fail. The name is what lets your own <code>.gitlab-ci.yml</code> loosen only that job:</p>
 <pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@&lt;full commit SHA&gt; # &lt;tag&gt;
     inputs:
@@ -152,20 +153,22 @@ php-test-next:
 </code></pre>
 <p>A red <code>php-test-next</code> job is an early warning, not a stop. Drop the <code>allow_failure</code> and move the version into the main <code>php_versions</code> list once the release is supported (the supported versions follow <code>policy.json</code>).</p>
 <h2 id="testing-the-next-php-release">Testing the next PHP <span class="docs-heading-tail"><span>release</span><a class="docs-heading-link" aria-label="Link to this section" href="#testing-the-next-php-release">#</a></span></h2>
-<p>Set <code>php_advisory_version</code> to a release candidate tag and the component adds a <code>&lt;job_name&gt;-advisory</code> job that runs your tests on that version:</p>
+<p>By default the component already adds the <code>&lt;job_name&gt;-advisory</code> job, running your tests on 8.6 (the newest line, not yet required). Set <code>php_advisory_version</code> to a release candidate tag to trial that instead:</p>
 <pre tabindex="0"><code class="language-yaml">include:
   - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
     inputs:
       test_command: vendor/bin/phpunit
-      php_advisory_version: &quot;8.6-rc&quot;
+      php_advisory_version: &quot;8.7-rc&quot;
 </code></pre>
 <p>The value goes into the image tag, <code>php:&lt;version&gt;-cli-trixie</code>, so any tag the official <code>php</code> image publishes works:
-<code>8.6-rc</code> follows the newest release candidate, and an exact one such as <code>8.6.0RC5</code> stays put. The job warns, it never
-blocks; move the version into <code>php_versions</code> only once it is a final, supported release.</p>
-<p>Preflight's own pipeline runs this job on <code>8.6-rc</code> against its fixture app. Its first look, on 2026-11-11, found the
-8.6 candidate image built without the <code>mbstring</code> extension, which PHPUnit needs, so the job stops before the first
-test. That is the point of the job: you hear about it from a yellow warning, well before it could turn a required
-job red.</p>
+<code>8.7-rc</code> follows the newest release candidate, and an exact one such as <code>8.7.0RC5</code> stays put. Set the input to an
+empty string for no advisory job. The job warns, it never blocks; move the version into <code>php_versions</code> only once it
+is a final, supported release.</p>
+<p>Preflight's own pipeline leaves the input at its default, so its advisory job runs the fixture app on PHP 8.6 and
+proves the input in a real pipeline (BEST_PRACTICES 6.4). When the 8.6 image shipped without the <code>mbstring</code>
+extension, which PHPUnit needs, the job stopped before the first test; the template now installs <code>mbstring</code> when the
+image lacks it, so PHPUnit starts. That is the point of the job: you hear about it from a yellow warning, well before
+it could turn a required job red.</p>
 <h2 id="related"><span class="docs-heading-tail"><span>Related</span><a class="docs-heading-link" aria-label="Link to this section" href="#related">#</a></span></h2>
 <ul>
 <li><a href="component-proctor.html">The proctor component</a></li>

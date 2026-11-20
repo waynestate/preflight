@@ -12,6 +12,8 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ## Unreleased [#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Changed: the `php-test` component runs PHP 8.6 as an advisory job by default (`php_advisory_version` now defaults to "8.6"); the job may fail and never gates a pipeline. The required matrix stays PHP 8.3, 8.4 and 8.5. Set the input to an empty string to turn it off (D-2).
+- Fixed: the `php-test` advisory job installs mbstring when the PHP image lacks it (the official 8.6 image does), so PHPUnit can start.
 - Docs: the README, guides and examples pin 0.10.0 (commit 44e683f). BEST_PRACTICES counts fifteen tags, the README and components reference diff `0.9.0 0.10.0`, and the a11y guide clones the 0.10.0 kit.
 - Site: the front page and README art pin 0.10.0. The quick start, every placard, the flight plan and the GitHub workflow pin the 0.10.0 tag commit, the placards say "in 0.10.0", the `proctor` and `mysql56-migrate` placards show the PHP 8.5 default image, and the components note names what is new in 0.10.0 in one line. The type certificate data sheet is amended to 0.10.0 where a line really changed: the change bars move to `proctor`'s `image` and, on the continuation slip, `mysql56-migrate`'s, the log gains its 0.10.0 line, and the terminal shows the real `git diff -U0 0.9.0 0.10.0` for those two lines (the Renovate and Playwright digest hunks folded), wrapped at the column edge like a terminal rather than at each hyphen of a digest. The README art kit's `COMPONENT_TAG` is 0.10.0; the hero, the checklist card and the placards and flight plan phone crops are fresh captures (the flight manual crop shows no pin and stays).
 

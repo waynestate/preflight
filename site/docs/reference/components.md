@@ -86,7 +86,7 @@ From `templates/proctor/template.yml`: the single job (named by `job_name`) runs
 
 ## php-test [#](https://preflight.apps.wayne.edu/docs/reference/components.html#php-test)
 
-Runs the test command on each supported PHP version through `parallel:matrix`.
+Runs the test command on each supported PHP version through `parallel:matrix`. PHP 8.6 runs as an advisory job that may fail; the required matrix is 8.3, 8.4, 8.5.
 
 ```yaml
 include:
@@ -102,12 +102,12 @@ include:
 | `image` | string | `php:${PHP_VERSION}-cli-trixie` | Docker image for the jobs. The default carries the literal `${PHP_VERSION}`, which GitLab expands in the image at job time. |
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `php_versions` | array | `["8.3", "8.4", "8.5"]` | PHP versions to test against. |
-| `php_advisory_version` | string | `""` | One more PHP version tested in a separate `<job_name>-advisory` job that may fail (`allow_failure: true`), for a release candidate. Empty: no advisory job. Never add a release candidate to `php_versions`. |
+| `php_advisory_version` | string | `"8.6"` | One more PHP version tested in a separate `<job_name>-advisory` job that may fail (`allow_failure: true`). Default `8.6` (the newest line, not yet required); set it to `""` for no advisory job. A release candidate still works (for example `8.7-rc`). Never add a release candidate to `php_versions`. |
 | `composer_version` | string | `2.11.1` | Composer version to install, 2.9.6 or later. |
 | `test_command` | string | `vendor/bin/phpunit` | The test command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
 
-From `templates/php-test/template.yml`: one job is created per entry in `php_versions` through `parallel:matrix`; `PHP_VERSION` becomes a CI/CD variable in each job, which the image input's default expands, and each job runs the newest patch release of its version. The default image is deliberately tag-pinned (the template points at the README section Updating image pins). Each job installs Composer the same way as proctor, runs `composer install --no-interaction --no-progress`, and then the test command. The jobs are `interruptible: true` with a timeout of 30 minutes.
+From `templates/php-test/template.yml`: one job is created per entry in `php_versions` through `parallel:matrix`; `PHP_VERSION` becomes a CI/CD variable in each job, which the image input's default expands, and each job runs the newest patch release of its version. The default image is deliberately tag-pinned (the template points at the README section Updating image pins). Each job installs Composer the same way as proctor, runs `composer install --no-interaction --no-progress`, and then the test command. The jobs are `interruptible: true` with a timeout of 30 minutes. The `<job_name>-advisory` job runs the same script on `php_advisory_version` (default `8.6`) with `allow_failure: true`, and it is skipped while that input is empty. Because the official 8.6 image ships without `mbstring`, the script installs it first when `php -m` does not list it (a no-op on 8.3 to 8.5), so PHPUnit can start.
 
 ### Caching [#](https://preflight.apps.wayne.edu/docs/reference/components.html#caching)
 
@@ -115,7 +115,7 @@ The jobs always cache Composer downloads in `.composer-cache/` so repeat runs do
 
 ### Try the next PHP release without breaking the pipeline [#](https://preflight.apps.wayne.edu/docs/reference/components.html#try-the-next-php-release-without-breaking-the-pipeline)
 
-Include `php-test` a second time for the release that is not supported yet, name that job, and let it fail. The name is what lets your own `.gitlab-ci.yml` loosen only that job:
+By default the component already runs 8.6 in the `<job_name>-advisory` job that may fail, so this second include is only needed when you want to pin a release candidate tag or run the trial under your own job name. Include `php-test` a second time for the release that is not supported yet, name that job, and let it fail. The name is what lets your own `.gitlab-ci.yml` loosen only that job:
 
 ```yaml
 include:
