@@ -25,9 +25,9 @@ spec:
       type: array
       default: ["8.3", "8.4", "8.5"]
     php_advisory_version:
-      description: "One more PHP version tested in a separate job that may fail, for example 8.6-rc (follows the newest release candidate) or 8.6.0RC5. Empty: no advisory job."
+      description: "One more PHP version tested in a separate job that may fail. Default 8.6 (the newest line, not yet required); set it to \"\" for no advisory job. A release candidate still works (for example 8.7-rc)."
       type: string
-      default: ""
+      default: "8.6"
       regex: '^$|^[0-9]+\.[0-9]+([.-][0-9A-Za-z]+)*$'
     composer_version:
       description: Composer version to install, 2.9.6 or later.
@@ -77,6 +77,9 @@ spec:
     # removed. No $ variables appear in the php -r code, so GitLab CI
     # variable expansion cannot corrupt it.
     - apt-get update && apt-get install -y --no-install-recommends unzip git
+    # The official 8.6 image is ZTS and ships without mbstring, which PHPUnit
+    # needs; install it only when missing (a no-op on 8.3 to 8.5).
+    - php -m | grep -qi '^mbstring$' || { apt-get install -y --no-install-recommends libonig-dev && docker-php-ext-install mbstring; }
     - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
     - php -r "if (hash_file('sha384', 'composer-setup.php') !== trim(file_get_contents('https://composer.github.io/installer.sig'))) { unlink('composer-setup.php'); exit(1); }"
     - php composer-setup.php --quiet --install-dir=/usr/local/bin --filename=composer --version=$[[ inputs.composer_version ]]
