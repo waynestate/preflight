@@ -97,6 +97,7 @@ include:
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
 | `git_depth` | string | `"0"` | How many commits the job clones (GitLab's `GIT_DEPTH`); the default `0` clones the full history, so PROCTOR's override-approver check can see who wrote each override. |
 | `check_path` | string | `""` | Directory to run the proctor command in, relative to the project root, after the install. Empty (the default) runs it in `working_dir`; set it to `.` to install in a folder such as `deploy` and run the check from the project root. |
+| `tag_pipeline` | string | `full` | What this job does on a tag pipeline. `full` (default): it runs, as on any pipeline. `release-only`: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch. |
 
 The job also keeps PROCTOR's JSON report (what `--format=json` prints) as
 `proctor.json` in its artifact, for 30 days, whether it passed or failed.
@@ -134,6 +135,7 @@ include:
 | `composer_version` | string | `2.11.1` | Composer version to install. |
 | `test_command` | string | `vendor/bin/phpunit` | The test command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
+| `tag_pipeline` | string | `full` | What this job does on a tag pipeline. `full` (default): it runs, as on any pipeline. `release-only`: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch. |
 
 #### Caching
 
@@ -184,6 +186,7 @@ include:
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `working_dir` | string | `.` | Directory to run composer audit in, relative to the project root. |
 | `abandoned` | string | `fail` | How composer audit treats abandoned packages: fail (default), report (list them, do not fail) or ignore. |
+| `tag_pipeline` | string | `full` | What this job does on a tag pipeline. `full` (default): it runs, as on any pipeline. `release-only`: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch. |
 
 The job fails on three findings: a security advisory, a version on Packagist's malware list (Composer 2.10 reads it,
 fed by Aikido) and, while `abandoned` is `fail`, an abandoned package. The `abandoned` input relaxes only the last one.
@@ -220,6 +223,7 @@ include:
 | `image` | string | `composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0` | Docker image for the job. |
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `working_dir` | string | `.` | Directory to run Composer in, relative to the project root. |
+| `tag_pipeline` | string | `full` | What this job does on a tag pipeline. `full` (default): it runs, as on any pipeline. `release-only`: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch. |
 
 The Composer image (`composer:2.11.1`, pinned by digest) already ships Composer,
 so the job installs the app's locked dependencies with
