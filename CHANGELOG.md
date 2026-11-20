@@ -6,6 +6,9 @@ are Git tags.
 
 ## Unreleased
 
+- Docs: the README, guides and examples pin 0.10.0 (commit 44e683f). BEST_PRACTICES counts fifteen tags, the README and components reference diff `0.9.0 0.10.0`, and the a11y guide clones the 0.10.0 kit.
+- Site: the front page and README art pin 0.10.0. The quick start, every placard, the flight plan and the GitHub workflow pin the 0.10.0 tag commit, the placards say "in 0.10.0", the `proctor` and `mysql56-migrate` placards show the PHP 8.5 default image, and the components note names what is new in 0.10.0 in one line. The type certificate data sheet is amended to 0.10.0 where a line really changed: the change bars move to `proctor`'s `image` and, on the continuation slip, `mysql56-migrate`'s, the log gains its 0.10.0 line, and the terminal shows the real `git diff -U0 0.9.0 0.10.0` for those two lines (the Renovate and Playwright digest hunks folded), wrapped at the column edge like a terminal rather than at each hyphen of a digest. The README art kit's `COMPONENT_TAG` is 0.10.0; the hero, the checklist card and the placards and flight plan phone crops are fresh captures (the flight manual crop shows no pin and stays).
+
 ## 0.10.0 (2026-11-19)
 
 PHP 8.5 becomes the default image line for `proctor` and `mysql56-migrate`, three image digests move, the deploy kit follows

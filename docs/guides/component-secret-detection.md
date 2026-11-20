@@ -46,7 +46,7 @@ comment:
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/secret-detection@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/secret-detection@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
 ```
 
 ## Inputs

@@ -31,7 +31,7 @@ The job prints one `portability: <check>: problem: ...` line per problem as it f
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
     inputs:
       env: ["APP_KEY=${PORTABILITY_APP_KEY}", "APP_URL=https://myapp.example.edu", "SESSION_DRIVER=cookie", "LOG_CHANNEL=stderr"]
       session_login_path: /_portability/login
@@ -73,7 +73,7 @@ An app that keeps its sessions in a database (WELD does) needs both replicas to 
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
     inputs:
       services: [{ name: "mysql:8.4.7@sha256:<digest>", alias: db, variables: { MYSQL_ROOT_PASSWORD: "portability", MYSQL_DATABASE: "app" } }]
       env: ["APP_KEY=${PORTABILITY_APP_KEY}", "DB_CONNECTION=mysql", "DB_HOST=db", "DB_DATABASE=app", "DB_USERNAME=root", "DB_PASSWORD=portability", "SESSION_DRIVER=database", "LOG_CHANNEL=stderr"]

@@ -21,13 +21,13 @@ workflow:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@fb73b538f3980292119b5b306ff64383d760a214 # 0.9.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
 ```
 
 Note
