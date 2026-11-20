@@ -73,6 +73,9 @@ artifacts:
 | `config` | string | `phpstan.neon` | Path to the app's PHPStan config file. It must be a relative path; GitLab refuses the pipeline at creation if it is not. |
 | `memory_limit` | string | `1G` | Memory limit passed to PHPStan. A PHP size such as `1G`, `512M` or `-1`; GitLab refuses the pipeline at creation if it is not. |
 | `working_dir` | string | `.` | Directory to run PHPStan in, relative to the project root. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
+
+Set `tag_pipeline: release-only` when a tag is cut from a commit that main already tested: the job is skipped on the tag pipeline and the `release-gate` component checks main was green.
 
 `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`, and `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$`.
 

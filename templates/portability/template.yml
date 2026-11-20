@@ -137,6 +137,11 @@ spec:
       description: The checks to run. Leave one out only on purpose (for example session-hop for an app with no sign-in); the strict boot always runs.
       type: array
       default: ["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm", "healthcheck"]
+    tag_pipeline:
+      description: "What this job does on a tag pipeline. full (default): it runs, as on any pipeline. release-only: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch."
+      type: string
+      default: full
+      regex: '^(full|release-only)$'
 ---
 "$[[ inputs.job_name ]]":
   stage: $[[ inputs.stage ]]
@@ -144,6 +149,10 @@ spec:
   services: $[[ inputs.services ]]
   interruptible: true
   timeout: 30 minutes
+  rules:
+    - if: '$CI_COMMIT_TAG && "$[[ inputs.tag_pipeline ]]" == "release-only"'
+      when: never
+    - when: on_success
   variables:
     # Buildah keeps its layers with the vfs driver and runs RUN steps with
     # chroot isolation: neither needs a privileged runner or a daemon.
