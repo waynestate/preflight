@@ -6,6 +6,12 @@ are Git tags.
 
 ## Unreleased
 
+## 0.10.0 (2026-11-19)
+
+PHP 8.5 becomes the default image line for `proctor` and `mysql56-migrate`, three image digests move, the deploy kit follows
+Squire 0.11.1, and three new guards keep the pipeline, the front page and the docs honest. No input or job was renamed or removed.
+`proctor` and `mysql56-migrate` still run on PHP 8.3 or later through the `image` input.
+
 - Fixed: Preflight's own pipeline has the `must-fail-composer-ci` job at last. The 0.9.0 notes, MAINTAINING and the README said it ran `tests/check-composer-ci-fails.sh` in CI, but `.gitlab-ci.yml` never carried the job, so the check only ran by hand. It runs in the template's own Composer image, pinned by digest.
 - Added: `tests/check-must-fail-jobs` (sh and PowerShell, in the `contract` job) fails when a `tests/check-*-fails.sh` script is named nowhere in `.gitlab-ci.yml`, or a `must-fail-*` job names a check script that does not exist, so a must-fail proof can no longer be written and never wired. Its `--self-test` strips the `composer-ci` lines and proves the guard fails.
 - Added: `tests/check-component-count` (sh and PowerShell, in the `contract` job) holds the component count the docs state to the number of folders in `templates/`, with a `--self-test`. BEST_PRACTICES and the README now count sixteen components (they said fifteen since 0.9.0 added `composer-ci`), and 7.1 and 7.2 name `composer-ci`: fifteen of sixteen carry a must-fail fixture.
