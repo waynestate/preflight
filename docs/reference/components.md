@@ -195,6 +195,7 @@ include:
 | `working_dir` | string | `.` | Directory that holds `package-lock.json`, relative to the project root. |
 | `audit_level` | string | `high` | Lowest severity that fails the job: `low`, `moderate`, `high` or `critical`; `medium` (CREED's and Composer's word) means `moderate`. |
 | `omit_dev` | boolean | `true` | Whether the failing audit leaves dev dependencies out. The full report always lists them. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
 
 From `templates/npm-audit/template.yml`: with no `package-lock.json` (or `npm-shrinkwrap.json`) the job prints "nothing to audit" and passes. Otherwise it runs `npm audit --omit=dev --audit-level=<audit_level> --audit=true --offline=false` and keeps npm's exit code; the two flags stop an `.npmrc` with `audit=false` or `offline=true` from faking a pass. An unreachable registry fails the job with a message saying so. Nothing is installed. The cache is the app's own (key `npm`, path `.cache/npm/`, `policy: pull`). There is no `allow_failure` input. The job is `interruptible: true` with a timeout of 10 minutes. [The npm-audit component](../guides/component-npm-audit.md) has the severity map and the proof.
 
@@ -241,6 +242,7 @@ include:
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `config` | string | `pint.json` | Path to the app's Pint config file. |
 | `working_dir` | string | `.` | Directory to run Pint in, relative to the project root. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
 
 From `templates/pint/template.yml`: the component does not install Pint itself; it runs `composer install --no-interaction --no-progress --prefer-dist` and then the app's own Pint in test mode against the `config` file. The job is `interruptible: true` with a timeout of 10m.
 
@@ -267,6 +269,7 @@ include:
 | `config` | string | `phpstan.neon` | Path to the app's PHPStan config file. |
 | `memory_limit` | string | `1G` | Memory limit passed to PHPStan. |
 | `working_dir` | string | `.` | Directory to run PHPStan in, relative to the project root. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
 
 From `templates/phpstan/template.yml`: the component does not install PHPStan itself; it runs `composer install --no-interaction --no-progress --prefer-dist` and then the app's own PHPStan with `--no-progress --error-format=gitlab`, the `memory_limit` value and the `config` file, redirecting the output to `$CI_PROJECT_DIR/phpstan-report.json`. The report is published as a Code Quality report with `when: always`. The job is `interruptible: true` with a timeout of 10m.
 
@@ -292,6 +295,7 @@ include:
 | `working_dir` | string | `.` | Directory to run the commands in, relative to the project root. |
 | `eslint_args` | string | `.` | Arguments passed to eslint. |
 | `prettier` | boolean | `true` | Whether to also run `prettier --check`. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
 
 From `templates/eslint/template.yml`: the component does not install ESLint or Prettier itself; it runs `npm ci --ignore-scripts --cache .npm-cache` (the cache uses the fixed key `preflight-eslint` and stores `.npm-cache/`), then `npx --no-install eslint` with the `eslint_args` value, and, while `prettier` is true, `npx --no-install prettier --check .`. The job is `interruptible: true` with a timeout of 15m.
 
@@ -411,6 +415,7 @@ The one-job form ships in 0.2.0; 0.1.4 carries the earlier two-job form (`portab
 | `logs_path` | string | `storage/logs` | Directory, relative to `app_root`, where nothing may be written. |
 | `require_healthcheck` | boolean | `false` | Fail when the image declares no HEALTHCHECK. Docker and Coolify use it; OpenShift and Kubernetes use their own probes. |
 | `checks` | array | `["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm", "healthcheck"]` | The checks to run. Leave one out only on purpose; the strict boot always runs. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
 
 The `image` default is an immutable tag (`-immutable`) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.
 
@@ -496,6 +501,7 @@ mysql56-migrate ships in 0.6.0. A raw PHP app sets `migrate_command` to its own 
 | `migrate_command` | string | `php artisan migrate --force --no-interaction` | Command that runs the app's migrations. |
 | `tags` | array | `["amd64"]` | Runner tags for the job. The official MySQL 5.6 images are amd64 only; set an empty list on an amd64 or emulating default runner. |
 | `php_extensions` | array | `["pdo_mysql"]` | PHP extensions installed with `docker-php-ext-install` unless `php -m` already lists them. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
 
 From `templates/mysql56-migrate/template.yml`: the single job (named by `job_name`) runs in the `test` stage by default, is `interruptible: true`, and has a timeout of 30 minutes. Its service is `image_prefix/service_image` with `alias: mysql`, created with the `db_name`, `db_user` and `db_password` inputs. It installs each of `php_extensions` that `php -m` does not list, runs `composer install --no-interaction --no-progress` when a `composer.json` exists (installing Composer 2.11.1, checked by SHA-256, when the image has none), waits up to 120 seconds for a PDO connection, then runs `migrate_command` with `DB_CONNECTION=mysql`, `DB_HOST=mysql` and `DB_PORT=3306`. The Composer cache uses the fixed key `preflight-mysql56-migrate` and the path `.composer-cache/`, saved with `when: always`. Its rules never run it on schedules, run it on tags and the default branch, and make it manual with `allow_failure: true` on merge requests.
 
