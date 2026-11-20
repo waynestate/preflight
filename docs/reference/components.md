@@ -354,6 +354,26 @@ include:
 
 From `templates/package-publish/template.yml`: the job runs only when `$CI_COMMIT_TAG` is set. The tag must be a semantic version, `1.2.3` or `v1.2.3` with an optional pre-release, or the job fails. The package name comes from `composer.json`, the file the registry serves. The job reads the masked CI variable named by `read_token_variable`, checks that `group_id` is numeric, reads the group's Composer registry index with the token, and follows the package metadata to the version already on the manifest. A version already published at this commit passes quietly (exit 0); a version published at a different commit fails (exit 1). Publishing posts the tag to the project's Composer packages endpoint with the job token. The job is `interruptible: true` with a timeout of 30 minutes.
 
+## release-gate
+
+Version 1 · Category: Release/Publishing · Tags: release,gate,tag-pipeline
+
+Fails a tag pipeline unless the default branch already ran a successful pipeline on the tagged commit (D-125). The job runs only on tags, in the `.pre` stage before every other stage, so a failure stops the whole tag pipeline before any release job starts. It asks the GitLab API first, with the job token only, and falls back to git when the API cannot be read; the fallback proves the commit is on the default branch, not that it passed there, so in fallback mode the green-ness rests on the release procedure, which says to tag only after the default branch is green. A repo with no release jobs still gets a tag pipeline of just the gate. See [The release-gate component](../guides/component-release-gate.md).
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/release-gate@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+```
+
+| Input | Type | Default | What it does |
+|-------|------|---------|--------------|
+| `stage` | string | `.pre` | Pipeline stage for the release-gate job. The default, .pre, runs before every other stage, so a failed gate stops the whole tag pipeline. |
+| `job_name` | string | `release-gate` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0` | Docker image for the release-gate job. The default ships git and curl, which the job uses for the API check and the git fallback. |
+| `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path put in front of the image input. The default is this group's GitLab Dependency Proxy, so Docker Hub images are pulled once and then served from GitLab's cache. On a GitLab or group without the proxy, set it to docker.io. No trailing slash. |
+
+From `templates/release-gate/template.yml`: the single job (named by `job_name`) runs in the `.pre` stage by default, is `interruptible: true`, and has a timeout of 5 minutes. It runs only when `$CI_COMMIT_TAG` is set, clones the full history (`GIT_DEPTH: "0"`), and asks the GitLab API with the `JOB-TOKEN` header for a successful pipeline of `$CI_COMMIT_SHA` on `$CI_DEFAULT_BRANCH`; a hit passes, an empty list fails the job. When the API cannot be read, it fetches the default branch and passes only if the tagged commit is an ancestor of it, and says in its log that this proves the commit is on the branch, not that it passed there.
+
 ## renovate
 
 Runs [Renovate](https://docs.renovatebot.com/) as a scheduled or manual job that bumps image digests, GitHub action SHAs and package versions across the group's repositories, and merges the green ones itself. Bumps of `component:` include pins are covered by the preset and wait for review. Majors open a merge request and wait for a person. See [Renovate](../guides/renovate.md) for what auto-merges and what waits.
@@ -525,6 +545,7 @@ From `templates/mysql56-migrate/template.yml`: the single job (named by `job_nam
 - [The eslint component](../guides/component-eslint.md)
 - [The secret-detection component](../guides/component-secret-detection.md)
 - [The package-publish component](../guides/component-package-publish.md)
+- [The release-gate component](../guides/component-release-gate.md)
 - [The renovate component](../guides/component-renovate.md)
 - [The portability component](../guides/component-portability.md)
 - [The a11y component](../guides/component-a11y.md)

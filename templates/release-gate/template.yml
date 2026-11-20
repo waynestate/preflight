@@ -41,7 +41,7 @@ spec:
   # The gate runs in .pre, before every other stage, so a failure stops the
   # tag pipeline before any release job starts.
   image: $[[ inputs.image_prefix ]]/$[[ inputs.image ]]
-  interruptible: false
+  interruptible: true
   timeout: 5 minutes
   variables:
     GIT_DEPTH: "0"

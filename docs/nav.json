@@ -67,6 +67,10 @@
           "path": "guides/component-package-publish"
         },
         {
+          "title": "The release-gate component",
+          "path": "guides/component-release-gate"
+        },
+        {
           "title": "The renovate component",
           "path": "guides/component-renovate"
         },

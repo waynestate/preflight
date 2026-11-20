@@ -406,6 +406,35 @@ include:
 
 Protect your release tags.
 
+### release-gate
+
+Version 1 · Category: Release/Publishing · Tags: release,gate,tag-pipeline
+
+Fails a tag pipeline unless the default branch already ran a successful
+pipeline on the tagged commit (D-125). Opt in by setting `tag_pipeline:
+release-only` on the test components and including this one: the tag
+pipeline skips the tests and runs only the release jobs, and the gate is
+the proof that skipping them is safe. It asks the GitLab API first, with
+the job token only, and falls back to git when the API cannot be read; the
+fallback proves the commit is on the default branch, not that it passed
+there, so in fallback mode the green-ness rests on the release procedure,
+which says to tag only after main is green. A repo with no release jobs
+still gets a tag pipeline of just the gate.
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/release-gate@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+```
+
+| Input | Type | Default | What it does |
+|-------|------|---------|--------------|
+| `stage` | string | `.pre` | Pipeline stage for the job. The default, .pre, runs before every other stage, so a failed gate stops the whole tag pipeline. |
+| `job_name` | string | `release-gate` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0` | Docker image for the job. The default ships git and curl, which the job uses for the API check and the git fallback. |
+| `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
+
+The details: [The release-gate component](docs/guides/component-release-gate.md).
+
 ### renovate
 
 Runs [Renovate](https://docs.renovatebot.com/) as a scheduled or manual job
