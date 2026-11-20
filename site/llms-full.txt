@@ -1695,6 +1695,10 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ### Unreleased [#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+### 0.11.0 (2026-11-19) [#](https://preflight.apps.wayne.edu/docs/changelog.html#0-11-0-2026-11-19)
+
+The `php-test` component now runs PHP 8.6 as an advisory job by default (D-2). The job may fail and never gates a pipeline; the required matrix stays 8.3, 8.4 and 8.5. No input or job was renamed or removed.
+
 - Changed: the `php-test` component runs PHP 8.6 as an advisory job by default (`php_advisory_version` now defaults to "8.6"); the job may fail and never gates a pipeline. The required matrix stays PHP 8.3, 8.4 and 8.5. Set the input to an empty string to turn it off (D-2).
 - Fixed: the `php-test` advisory job installs mbstring when the PHP image lacks it (the official 8.6 image does), so PHPUnit can start.
 - Docs: the README, guides and examples pin 0.10.0 (commit 44e683f). BEST_PRACTICES counts fifteen tags, the README and components reference diff `0.9.0 0.10.0`, and the a11y guide clones the 0.10.0 kit.
