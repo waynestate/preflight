@@ -6,6 +6,9 @@ are Git tags.
 
 ## Unreleased
 
+- Fixed: Preflight's own pipeline has the `must-fail-composer-ci` job at last. The 0.9.0 notes, MAINTAINING and the README said it ran `tests/check-composer-ci-fails.sh` in CI, but `.gitlab-ci.yml` never carried the job, so the check only ran by hand. It runs in the template's own Composer image, pinned by digest.
+- Added: `tests/check-must-fail-jobs` (sh and PowerShell, in the `contract` job) fails when a `tests/check-*-fails.sh` script is named nowhere in `.gitlab-ci.yml`, or a `must-fail-*` job names a check script that does not exist, so a must-fail proof can no longer be written and never wired. Its `--self-test` strips the `composer-ci` lines and proves the guard fails.
+- Added: `tests/check-component-count` (sh and PowerShell, in the `contract` job) holds the component count the docs state to the number of folders in `templates/`, with a `--self-test`. BEST_PRACTICES and the README now count sixteen components (they said fifteen since 0.9.0 added `composer-ci`), and 7.1 and 7.2 name `composer-ci`: fifteen of sixteen carry a must-fail fixture.
 - Changed: the `proctor` and `mysql56-migrate` components default to PHP 8.5 (`php:8.5-cli-trixie`, pinned by digest), the stack's default PHP line (D-113); both still run on PHP 8.3 or later through the `image` input.
 - Changed: the `a11y` component's default Playwright image is the new v1.65.0-noble digest; the README, the a11y guide and the components reference show it.
 - Changed: the `renovate` component's default Renovate image is 44.251.0 (pinned by digest); the README, the renovate guide and the components reference show it.
