@@ -7,6 +7,8 @@ are Git tags.
 ## Unreleased
 
 - Removed: Squire's local-running kit files (docker-compose.squire.yml, haproxy.cfg, parity scripts, env example; D-095). Parity runs the app locally: `parity up` in `deploy/`.
+- Docs: SECURITY.md says how to report a vulnerability privately.
+
 ## 0.12.0 (2026-11-20)
 
 Tag pipelines can run only the release jobs (D-125). Every test component gains an opt-in `tag_pipeline` input and a new `release-gate` component fails the tag pipeline unless main passed the tagged commit. Nothing changes for a repo that sets nothing: the input defaults to `full`. No input or job was renamed or removed.

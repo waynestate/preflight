@@ -1136,3 +1136,5 @@ pwsh -File tests/check-npm-audit-fails.ps1
 
 <div align="center"><sub>Seventeen on the manifest, every one checked in. The README art is cut from the front page by
 <a href="scripts/readme-art/README.md"><code>scripts/readme-art</code></a>; no runways were painted in its making.</sub></div>
+
+Found a security problem? See [SECURITY.md](SECURITY.md); please do not open a public issue.
