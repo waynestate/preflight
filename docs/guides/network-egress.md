@@ -44,6 +44,7 @@ downloads, and from where. Air traffic control wants a flight plan before it ope
 | `mysql56-migrate` | `git` and `unzip` with `apt-get` and the Composer 2.11.1 phar (checked by SHA-256) when the image has no Composer; the app's dependencies. The MySQL 5.6.51 service is an image, pulled by the runner | `deb.debian.org`, `getcomposer.org`, `repo.packagist.org`, `api.github.com`, `codeload.github.com`, `github.com` |
 | `portability` | Nothing for the probe itself. The build pulls the app's base images and runs its Dockerfile, so it reaches whatever they name | the app's own |
 | `package-publish` | The group's Composer registry index and the package's metadata; then the publish request | none |
+| `release-gate` | Nothing: it asks the GitLab API for a successful pipeline of the tagged commit on the default branch, and falls back to a `git fetch` of the default branch, both on the instance itself | none |
 | `renovate` | Every registry it looks up updates in, and release notes | `registry.npmjs.org`, `repo.packagist.org`, `packagist.org`, `registry-1.docker.io`, `auth.docker.io`, `quay.io`, `mcr.microsoft.com`, `api.github.com`, `github.com` |
 
 Composer fetches a GitHub-hosted package from `api.github.com`, which redirects to `codeload.github.com`; when that

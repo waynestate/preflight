@@ -12,7 +12,8 @@
         { "name": "proctor_command", "type": "string", "default": "vendor/bin/proctor check --format=codequality" },
         { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" },
         { "name": "git_depth", "type": "string", "default": "0", "regex": "^[0-9]+$" },
-        { "name": "check_path", "type": "string", "default": "", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)?$" }
+        { "name": "check_path", "type": "string", "default": "", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)?$" },
+        { "name": "tag_pipeline", "type": "string", "default": "full", "regex": "^(full|release-only)$" }
       ],
       "jobs": ["proctor"]
     },
@@ -26,7 +27,8 @@
         { "name": "php_advisory_version", "type": "string", "default": "8.6", "regex": "^$|^[0-9]+\\.[0-9]+([.-][0-9A-Za-z]+)*$" },
         { "name": "composer_version", "type": "string", "default": "2.11.1", "regex": "^2\\.(9\\.([6-9]|[1-9][0-9]+)|[1-9][0-9]+\\.[0-9]+)$" },
         { "name": "test_command", "type": "string", "default": "vendor/bin/phpunit" },
-        { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" }
+        { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" },
+        { "name": "tag_pipeline", "type": "string", "default": "full", "regex": "^(full|release-only)$" }
       ],
       "jobs": ["php-test", "php-test-advisory"]
     },
@@ -37,7 +39,8 @@
         { "name": "image", "type": "string", "default": "composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0" },
         { "name": "image_prefix", "type": "string", "default": "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}", "regex": "^[^/\\s](\\S*[^/\\s])?$" },
         { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" },
-        { "name": "abandoned", "type": "string", "default": "fail", "regex": "^(fail|report|ignore)$" }
+        { "name": "abandoned", "type": "string", "default": "fail", "regex": "^(fail|report|ignore)$" },
+        { "name": "tag_pipeline", "type": "string", "default": "full", "regex": "^(full|release-only)$" }
       ],
       "jobs": ["composer-audit"]
     },
@@ -47,7 +50,8 @@
         { "name": "job_name", "type": "string", "default": "composer-ci", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
         { "name": "image", "type": "string", "default": "composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0" },
         { "name": "image_prefix", "type": "string", "default": "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}", "regex": "^[^/\\s](\\S*[^/\\s])?$" },
-        { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" }
+        { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" },
+        { "name": "tag_pipeline", "type": "string", "default": "full", "regex": "^(full|release-only)$" }
       ],
       "jobs": ["composer-ci"]
     },
@@ -58,7 +62,8 @@
         { "name": "image", "type": "string", "default": "composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0" },
         { "name": "image_prefix", "type": "string", "default": "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}", "regex": "^[^/\\s](\\S*[^/\\s])?$" },
         { "name": "omit_dev", "type": "boolean", "default": true },
-        { "name": "output", "type": "string", "default": "sbom.cdx.json", "regex": "^[A-Za-z0-9_-][A-Za-z0-9._/-]*$" }
+        { "name": "output", "type": "string", "default": "sbom.cdx.json", "regex": "^[A-Za-z0-9_-][A-Za-z0-9._/-]*$" },
+        { "name": "tag_pipeline", "type": "string", "default": "full", "regex": "^(full|release-only)$" }
       ],
       "jobs": ["sbom"]
     },
@@ -69,7 +74,8 @@
         { "name": "image", "type": "string", "default": "composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0" },
         { "name": "image_prefix", "type": "string", "default": "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}", "regex": "^[^/\\s](\\S*[^/\\s])?$" },
         { "name": "config", "type": "string", "default": "pint.json", "regex": "^[A-Za-z0-9_-][A-Za-z0-9._/-]*$" },
-        { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" }
+        { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" },
+        { "name": "tag_pipeline", "type": "string", "default": "full", "regex": "^(full|release-only)$" }
       ],
       "jobs": ["pint"]
     },
@@ -81,7 +87,8 @@
         { "name": "image_prefix", "type": "string", "default": "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}", "regex": "^[^/\\s](\\S*[^/\\s])?$" },
         { "name": "config", "type": "string", "default": "phpstan.neon", "regex": "^[A-Za-z0-9_-][A-Za-z0-9._/-]*$" },
         { "name": "memory_limit", "type": "string", "default": "1G", "regex": "^(-1|[0-9]+[KkMmGg]?)$" },
-        { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" }
+        { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" },
+        { "name": "tag_pipeline", "type": "string", "default": "full", "regex": "^(full|release-only)$" }
       ],
       "jobs": ["phpstan"]
     },
@@ -93,7 +100,8 @@
         { "name": "image_prefix", "type": "string", "default": "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}", "regex": "^[^/\\s](\\S*[^/\\s])?$" },
         { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" },
         { "name": "eslint_args", "type": "string", "default": "." },
-        { "name": "prettier", "type": "boolean", "default": true }
+        { "name": "prettier", "type": "boolean", "default": true },
+        { "name": "tag_pipeline", "type": "string", "default": "full", "regex": "^(full|release-only)$" }
       ],
       "jobs": ["eslint"]
     },
@@ -104,7 +112,8 @@
         { "name": "image", "type": "string", "default": "zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f" },
         { "name": "image_prefix", "type": "string", "default": "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}", "regex": "^[^/\\s](\\S*[^/\\s])?$" },
         { "name": "config_path", "type": "string", "default": "", "regex": "^(\\.?[A-Za-z0-9_-][A-Za-z0-9._/-]*)?$" },
-        { "name": "allow_failure", "type": "boolean", "default": false }
+        { "name": "allow_failure", "type": "boolean", "default": false },
+        { "name": "tag_pipeline", "type": "string", "default": "full", "regex": "^(full|release-only)$" }
       ],
       "jobs": ["secret-detection"]
     },
@@ -118,6 +127,15 @@
         { "name": "read_token_variable", "type": "string", "default": "PACKAGE_READ_TOKEN" }
       ],
       "jobs": ["package-publish"]
+    },
+    "release-gate": {
+      "inputs": [
+        { "name": "stage", "type": "string", "default": ".pre" },
+        { "name": "job_name", "type": "string", "default": "release-gate", "regex": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$" },
+        { "name": "image", "type": "string", "default": "composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0" },
+        { "name": "image_prefix", "type": "string", "default": "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}", "regex": "^[^/\\s](\\S*[^/\\s])?$" }
+      ],
+      "jobs": ["release-gate"]
     },
     "renovate": {
       "inputs": [
@@ -159,7 +177,8 @@
         { "name": "session_header", "type": "string", "default": "" },
         { "name": "logs_path", "type": "string", "default": "storage/logs" },
         { "name": "require_healthcheck", "type": "boolean", "default": false },
-        { "name": "checks", "type": "array", "default": ["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm", "healthcheck"] }
+        { "name": "checks", "type": "array", "default": ["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm", "healthcheck"] },
+        { "name": "tag_pipeline", "type": "string", "default": "full", "regex": "^(full|release-only)$" }
       ],
       "jobs": ["portability"]
     },
@@ -177,7 +196,8 @@
         { "name": "widths", "type": "array", "default": [320, 1280] },
         { "name": "playwright_version", "type": "string", "default": "", "regex": "^([0-9]+\\.[0-9]+\\.[0-9]+)?$" },
         { "name": "axe_core_version", "type": "string", "default": "4.14.0", "regex": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
-        { "name": "axe_playwright_version", "type": "string", "default": "4.14.0", "regex": "^[0-9]+\\.[0-9]+\\.[0-9]+$" }
+        { "name": "axe_playwright_version", "type": "string", "default": "4.14.0", "regex": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        { "name": "tag_pipeline", "type": "string", "default": "full", "regex": "^(full|release-only)$" }
       ],
       "jobs": ["a11y"]
     },
@@ -189,7 +209,8 @@
         { "name": "image_prefix", "type": "string", "default": "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}", "regex": "^[^/\\s](\\S*[^/\\s])?$" },
         { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" },
         { "name": "squire_version", "type": "string", "default": "", "regex": "^([0-9]+\\.[0-9]+\\.[0-9]+)?$" },
-        { "name": "allow_failure", "type": "boolean", "default": false }
+        { "name": "allow_failure", "type": "boolean", "default": false },
+        { "name": "tag_pipeline", "type": "string", "default": "full", "regex": "^(full|release-only)$" }
       ],
       "jobs": ["squire-kit"]
     },
@@ -201,7 +222,8 @@
         { "name": "image_prefix", "type": "string", "default": "${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}", "regex": "^[^/\\s](\\S*[^/\\s])?$" },
         { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" },
         { "name": "audit_level", "type": "string", "default": "high", "regex": "^(low|moderate|medium|high|critical)$" },
-        { "name": "omit_dev", "type": "boolean", "default": true }
+        { "name": "omit_dev", "type": "boolean", "default": true },
+        { "name": "tag_pipeline", "type": "string", "default": "full", "regex": "^(full|release-only)$" }
       ],
       "jobs": ["npm-audit"]
     },
@@ -217,7 +239,8 @@
         { "name": "db_password", "type": "string", "default": "preflight-mysql56-ci" },
         { "name": "migrate_command", "type": "string", "default": "php artisan migrate --force --no-interaction" },
         { "name": "tags", "type": "array", "default": ["amd64"] },
-        { "name": "php_extensions", "type": "array", "default": ["pdo_mysql"] }
+        { "name": "php_extensions", "type": "array", "default": ["pdo_mysql"] },
+        { "name": "tag_pipeline", "type": "string", "default": "full", "regex": "^(full|release-only)$" }
       ],
       "jobs": ["mysql56-migrate"]
     }

@@ -50,8 +50,17 @@ spec:
       type: boolean
       default: false
       description: "Whether the job can fail without failing the pipeline, for a repository cleaning up its first findings."
+    tag_pipeline:
+      description: "What this job does on a tag pipeline. full (default): it runs, as on any pipeline. release-only: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch."
+      type: string
+      default: full
+      regex: '^(full|release-only)$'
 ---
 "$[[ inputs.job_name ]]":
+  rules:
+    - if: '$CI_COMMIT_TAG && "$[[ inputs.tag_pipeline ]]" == "release-only"'
+      when: never
+    - when: on_success
   stage: $[[ inputs.stage ]]
   image: $[[ inputs.image_prefix ]]/$[[ inputs.image ]]
   allow_failure: $[[ inputs.allow_failure ]]

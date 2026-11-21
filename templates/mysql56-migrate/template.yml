@@ -63,6 +63,11 @@ spec:
       type: array
       default: ["pdo_mysql"]
       description: "PHP extensions installed with docker-php-ext-install unless php -m already lists them."
+    tag_pipeline:
+      description: "What this job does on a tag pipeline. full (default): it runs, as on any pipeline. release-only: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch."
+      type: string
+      default: full
+      regex: '^(full|release-only)$'
 ---
 "$[[ inputs.job_name ]]":
   stage: $[[ inputs.stage ]]
@@ -74,6 +79,8 @@ spec:
   interruptible: true
   timeout: 30 minutes
   rules:
+    - if: '$CI_COMMIT_TAG && "$[[ inputs.tag_pipeline ]]" == "release-only"'
+      when: never
     - if: $CI_PIPELINE_SOURCE == "schedule"
       when: never
     - if: $CI_COMMIT_TAG

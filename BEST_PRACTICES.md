@@ -7,10 +7,11 @@ Status: draft, checked against sources on 2026-10-27, with a second research pas
 ## What this covers
 
 Preflight is a set of GitLab CI/CD components that every stack project and WSU app includes with
-`include: component:`. Today it has sixteen: `php-test` (PHP versions through `parallel:matrix`), `mysql56-migrate` (the app's migrations
+`include: component:`. Today it has seventeen: `php-test` (PHP versions through `parallel:matrix`), `mysql56-migrate` (the app's migrations
 against MySQL 5.6.51, Citadel's shared server), `composer-audit`, `composer-ci`, `npm-audit`,
 `proctor`, `sbom`, `pint`, `phpstan`, `eslint`, `secret-detection`, `a11y` (the accessibility suite, 6.5),
-`portability`, `package-publish`, `renovate` and `squire-kit` (a deploy kit still matches its Squire release). A contract
+`portability`, `package-publish`, `release-gate` (a tag pipeline passes only if the default branch already tested the tagged commit, D-125),
+`renovate` and `squire-kit` (a deploy kit still matches its Squire release). A contract
 suite, `contract/inputs.json`, holds the inputs and job names every template promises, and the `contract` job checks it
 on every pipeline.
 
@@ -197,7 +198,7 @@ the run.
 Sources: [GitLab: CI/CD inputs](https://docs.gitlab.com/ci/inputs/);
 [GitLab: component examples](https://docs.gitlab.com/ci/components/examples/).
 
-**How the stack holds it: Enforced.** All sixteen templates use `spec:inputs` with types, descriptions and defaults.
+**How the stack holds it: Enforced.** All seventeen templates use `spec:inputs` with types, descriptions and defaults.
 GitLab rejects a wrong type or an unknown input at pipeline creation. The first pipeline, back when Preflight had
 three components, passed all six jobs with the array input. The documented defaults are held too:
 `tests/DocsInputTablesTest.php` (in `composer ci`) fails when the input table for a component in the README, the
@@ -246,7 +247,7 @@ Why: global keys leak into the consuming pipeline.
 
 Sources: [GitLab: component examples](https://docs.gitlab.com/ci/components/examples/).
 
-**How the stack holds it: Enforced.** All sixteen templates follow it. `tests/check-contract.sh` fails on any top-level
+**How the stack holds it: Enforced.** All seventeen templates follow it. `tests/check-contract.sh` fails on any top-level
 key that is not a job named in `contract/inputs.json`, so a template cannot add a global key. The README's "Which jobs
 may be allowed to fail" explains why `proctor`, `secret-detection`, `a11y` and `squire-kit` take `allow_failure`, and
 why the audit jobs take none.
@@ -323,7 +324,7 @@ A job timeout cannot exceed the runner's timeout.
 
 Sources: [GitLab: CI/CD YAML, `timeout` and `interruptible`](https://docs.gitlab.com/ci/yaml/).
 
-**How the stack holds it: Checked.** All sixteen templates set `interruptible: true` and a `timeout` of their own:
+**How the stack holds it: Checked.** All seventeen templates set `interruptible: true` and a `timeout` of their own:
 `10m` for pint and phpstan, `10 minutes` for squire-kit and npm-audit, `15m` for eslint, `30 minutes` for composer-audit,
 mysql56-migrate, package-publish, php-test, proctor, sbom, secret-detection, a11y and portability, and `1 hour` for
 renovate. `tests/TemplateJobsTest.php` (part of `composer ci`) fails if a job a consumer gets, its own keys or the
@@ -366,7 +367,7 @@ exposes `name`, `sha`, `version` and `reference`, was beta in 18.6 and became GA
 Sources: [GitLab: components, `spec:component`](https://docs.gitlab.com/ci/components/);
 [GitLab: component examples, versioning with component context](https://docs.gitlab.com/ci/components/examples/).
 
-**How the stack holds it: Enforced.** All sixteen templates declare `component: [name, version, sha, reference]` under
+**How the stack holds it: Enforced.** All seventeen templates declare `component: [name, version, sha, reference]` under
 `spec:` and print the `Preflight component <name> <version> (ref <reference>, sha <sha>)` line as the first command of
 every job (for example `templates/proctor/template.yml:75`), and `tests/check-component-version.sh` (and its `.ps1` twin)
 fails the `contract` job if a template drops the declaration or stops printing the line first. The line needs GitLab
@@ -469,7 +470,7 @@ by a hostile `composer.json`, which is exactly what a contributed branch can car
 Sources: [GitLab: merge request pipelines](https://docs.gitlab.com/ci/pipelines/merge_request_pipelines/);
 [GitLab: CI/CD variables](https://docs.gitlab.com/ci/variables/).
 
-**How the stack holds it: Documented.** The sixteen templates hold no secrets (5.1 says how that is checked), which limits the harm, and the README
+**How the stack holds it: Documented.** The seventeen templates hold no secrets (5.1 says how that is checked), which limits the harm, and the README
 documents the rule: review a fork's `.gitlab-ci.yml` before running its pipeline, and never give it protected variables.
 
 ---
@@ -825,7 +826,7 @@ Sources: [GitLab: CI/CD variables](https://docs.gitlab.com/ci/variables/);
 [GitLab: pipeline security, secrets](https://docs.gitlab.com/ci/pipeline_security/);
 [OWASP CICD-SEC-6 Insufficient Credential Hygiene](https://owasp.org/www-project-top-10-ci-cd-security-risks/).
 
-**How the stack holds it: Checked.** The sixteen templates hold no credential except `mysql56-migrate`'s
+**How the stack holds it: Checked.** The seventeen templates hold no credential except `mysql56-migrate`'s
 `db_password`, a throwaway for a database that lives as long as the job's service container. `tests/TemplateJobsTest.php`
 (part of `composer ci`) fails if another one appears: a credential-named input (password, token, secret, key) must
 default to empty or to the name of a CI/CD variable, a job script may read only `CI_JOB_TOKEN` and
@@ -1055,7 +1056,7 @@ Why: a component that never fails looks the same as one that works.
 
 Sources: [GitLab: components, testing](https://docs.gitlab.com/ci/components/).
 
-**How the stack holds it: Partly.** Every component that runs as a job, fifteen of sixteen, carries a must-fail fixture.
+**How the stack holds it: Partly.** Every component that runs as a job, sixteen of seventeen, carries a must-fail fixture.
 Fourteen run in a `must-fail-` job in `.gitlab-ci.yml`, and `proctor`'s main fixture runs in the `contract` job (its lock fixture, `tests/check-proctor-lock-fails`, runs in
 `must-fail-proctor-lock`): `proctor` runs the template's own `--record` guard and command line
 on `tests/proctor-fails`, a fake proctor that prints one blocker finding and exits 1, against the clean stubs in

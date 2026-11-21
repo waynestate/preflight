@@ -37,6 +37,9 @@ trailing comment, or the full commit SHA of a commit at or after it. The [Upgrad
 | `working_dir` | string | `.` | Directory that holds `package-lock.json`, relative to the project root. |
 | `audit_level` | string | `high` | Lowest severity that fails the job: `low`, `moderate`, `high` or `critical`. `medium` is accepted too and means `moderate` (see Severity words below). |
 | `omit_dev` | boolean | `true` | Whether the failing audit leaves dev dependencies out. The full report after it always lists them and never fails. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
+
+Set `tag_pipeline: release-only` when a tag is cut from a commit that main already tested: the job is skipped on the tag pipeline and the `release-gate` component checks main was green.
 
 > [!NOTE]
 > The template adds regexes to three inputs: `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`, `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$` and `audit_level` must match `^(low|moderate|medium|high|critical)$`.
