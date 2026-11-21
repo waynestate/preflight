@@ -36,6 +36,9 @@ Pin the full commit SHA of the release tag you use.
 | `migrate_command` | string | `php artisan migrate --force --no-interaction` | Command that runs the app's migrations. |
 | `tags` | array | `["amd64"]` | Runner tags for the job. The official MySQL 5.6 images are amd64 only; set an empty list on an amd64 or emulating default runner. |
 | `php_extensions` | array | `["pdo_mysql"]` | PHP extensions installed with `docker-php-ext-install` unless `php -m` already lists them. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
+
+Set `tag_pipeline: release-only` when a tag is cut from a commit that main already tested: the job is skipped on the tag pipeline and the `release-gate` component checks main was green.
 
 An app whose `composer.json` needs extensions with system libraries (`intl`, `zip`, `gd`) sets `image` to one that has them, since `docker-php-ext-install` alone cannot build those.
 

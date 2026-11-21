@@ -7,6 +7,14 @@ are Git tags.
 ## Unreleased
 
 - Removed: Squire's local-running kit files (docker-compose.squire.yml, haproxy.cfg, parity scripts, env example; D-095). Parity runs the app locally: `parity up` in `deploy/`.
+## 0.12.0 (2026-11-20)
+
+Tag pipelines can run only the release jobs (D-125). Every test component gains an opt-in `tag_pipeline` input and a new `release-gate` component fails the tag pipeline unless main passed the tagged commit. Nothing changes for a repo that sets nothing: the input defaults to `full`. No input or job was renamed or removed.
+
+- Added: the `tag_pipeline` input (`full` by default, or `release-only`) on proctor, php-test, composer-audit, composer-ci, a11y, secret-detection, sbom, squire-kit, mysql56-migrate, portability, npm-audit, eslint, phpstan and pint. With `release-only` the job is skipped on tag pipelines (D-125).
+- Added: the `release-gate` component (seventeenth). On a tag pipeline, in stage `.pre`, it asks the API whether the tagged commit has a successful pipeline on the default branch, using only the job token. When the token cannot list pipelines it falls back to checking with git that the commit is on the default branch, and says in the log that green-ness then rests on the release procedure.
+- Added: `tests/check-release-gate-fails.sh` and the `must-fail-release-gate` job prove the gate passes a tested commit and fails an untested one in both modes.
+- Changed: Preflight's own pipeline opts in: on a tag it runs the gate and the release job only.
 
 ## 0.11.0 (2026-11-19)
 

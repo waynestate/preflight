@@ -129,6 +129,7 @@ and run PHPUnit inside it the same way.
    runs the `release` job, which creates the GitLab Release with the tag's commit SHA in its notes, so consumers can pin
    the SHA. The project's job token must be allowed to create releases, or the job fails. The mirror carries the tag to
    GitHub. Record the tag's commit SHA in the CHANGELOG, because GitHub consumers pin the reusable workflow by SHA.
+   Tag only after main's pipeline is green; a repo with `release-only` relies on it.
 5. **Then bump the pins in every consumer:** the `@X.Y.Z` on each component include in their `.gitlab-ci.yml`, and the
     SHA in their `.github/workflows/ci.yml`. Every component ships in each tag from 0.1.1 on, so a new consumer pins
     the latest tag on every include.

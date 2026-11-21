@@ -45,6 +45,11 @@ spec:
       type: string
       default: "."
       regex: '^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$'
+    tag_pipeline:
+      description: "What this job does on a tag pipeline. full (default): it runs, as on any pipeline. release-only: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch."
+      type: string
+      default: full
+      regex: '^(full|release-only)$'
 ---
 ".$[[ inputs.job_name ]]-base":
   image: $[[ inputs.image_prefix ]]/$[[ inputs.image ]]
@@ -91,6 +96,10 @@ spec:
 "$[[ inputs.job_name ]]":
   extends: .$[[ inputs.job_name ]]-base
   stage: $[[ inputs.stage ]]
+  rules:
+    - if: '$CI_COMMIT_TAG && "$[[ inputs.tag_pipeline ]]" == "release-only"'
+      when: never
+    - when: on_success
   # An array input that replaces an entire YAML value is interpolated as its
   # specified type (docs: Input types), so the array feeds parallel:matrix
   # directly. One job is created per PHP version; PHP_VERSION becomes a
@@ -108,6 +117,8 @@ spec:
   variables:
     PHP_VERSION: "$[[ inputs.php_advisory_version ]]"
   rules:
+    - if: '$CI_COMMIT_TAG && "$[[ inputs.tag_pipeline ]]" == "release-only"'
+      when: never
     - if: $PHP_VERSION == null || $PHP_VERSION == ""
       when: never
     - when: on_success

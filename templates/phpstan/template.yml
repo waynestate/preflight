@@ -43,12 +43,21 @@ spec:
       default: "."
       description: "Directory the app lives in, relative to the repository root."
       regex: '^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$'
+    tag_pipeline:
+      description: "What this job does on a tag pipeline. full (default): it runs, as on any pipeline. release-only: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch."
+      type: string
+      default: full
+      regex: '^(full|release-only)$'
 ---
 "$[[ inputs.job_name ]]":
   stage: $[[ inputs.stage ]]
   image: $[[ inputs.image_prefix ]]/$[[ inputs.image ]]
   interruptible: true
   timeout: 10m
+  rules:
+    - if: '$CI_COMMIT_TAG && "$[[ inputs.tag_pipeline ]]" == "release-only"'
+      when: never
+    - when: on_success
   # The cache is always on. COMPOSER_CACHE_DIR points Composer at a path
   # inside the project so GitLab can cache it. The key is fixed, not a
   # composer.lock hash: Composer's cache is additive, so a lock

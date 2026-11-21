@@ -47,6 +47,9 @@ include:
 | `working_dir` | string | `.` | Directory to run the commands in, relative to the project root. |
 | `eslint_args` | string | `.` | Arguments passed to eslint. |
 | `prettier` | boolean | `true` | Whether to also run `prettier --check`. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
+
+Set `tag_pipeline: release-only` when a tag is cut from a commit that main already tested: the job is skipped on the tag pipeline and the `release-gate` component checks main was green.
 
 ## Verify [#](https://preflight.apps.wayne.edu/docs/guides/component-eslint.html#verify)
 
