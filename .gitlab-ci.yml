@@ -11,31 +11,38 @@ include:
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/proctor@$CI_COMMIT_SHA
     inputs:
       working_dir: tests/fixture-app
+      tag_pipeline: release-only
   # The default advisory job now runs the fixture on PHP 8.6, in a job that
   # may fail, and proves the input in a real pipeline (BEST_PRACTICES 6.4).
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/php-test@$CI_COMMIT_SHA
     inputs:
       working_dir: tests/fixture-app
       test_command: vendor/bin/phpunit
+      tag_pipeline: release-only
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/composer-audit@$CI_COMMIT_SHA
     inputs:
       stage: audit
       working_dir: tests/fixture-app
+      tag_pipeline: release-only
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/sbom@$CI_COMMIT_SHA
     inputs:
       stage: audit
+      tag_pipeline: release-only
   # The npm-audit component at this commit, on a lock with no advisory: it
   # must pass. must-fail-npm-audit below proves a known advisory fails.
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/npm-audit@$CI_COMMIT_SHA
     inputs:
       stage: audit
       working_dir: tests/npm-audit-fixtures/clean
+      tag_pipeline: release-only
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/pint@$CI_COMMIT_SHA
     inputs:
       working_dir: tests/fixture-app
+      tag_pipeline: release-only
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/phpstan@$CI_COMMIT_SHA
     inputs:
       working_dir: tests/fixture-app
+      tag_pipeline: release-only
   # Preflight's own front page and docs, checked by the a11y component at
   # this commit with the stack's floor, WCAG 2.2 AA. The Playwright image is
   # on Microsoft's registry, not Docker Hub, so it skips the Dependency Proxy.
@@ -44,12 +51,14 @@ include:
       site_dir: site
       pages: ["**/*.html"]
       wcag_tags: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]
+      tag_pipeline: release-only
   # The squire-kit component at this commit, on a kit Squire wrote
   # (tests/squire-kit-fixture, from squire init --target=raw). Renovate moves
   # the fixture with each Squire release, like any kit.
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/squire-kit@$CI_COMMIT_SHA
     inputs:
       working_dir: tests/squire-kit-fixture
+      tag_pipeline: release-only
   # The portability component at this commit, on the clean fixture: it must
   # pass. must-fail-portability below proves each flaw still fails. The
   # fixture's base image comes through the Dependency Proxy; the probe
@@ -61,6 +70,7 @@ include:
       env: ["APP_URL=http://portability.invalid", "APP_KEY=portability-fixture-key-not-a-secret"]
       session_login_path: /login
       session_check_path: /me
+      tag_pipeline: release-only
   # The mysql56-migrate component at this commit, on the clean fixture: it
   # must pass. must-fail-mysql56-migrate below proves a JSON column and a
   # too-long utf8mb4 index still fail. Both jobs carry the amd64 tag because
@@ -70,17 +80,30 @@ include:
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/mysql56-migrate@$CI_COMMIT_SHA
     inputs:
       migrate_command: php tests/mysql56-migrate/migrate.php tests/mysql56-migrate/clean
+      tag_pipeline: release-only
   # The composer-ci component at this commit, on the pass fixture: it must
   # pass. The fixtures prove it, and must-fail-composer-ci proves it fails.
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/composer-ci@$CI_COMMIT_SHA
     inputs:
       working_dir: tests/ci-fixtures/pass
+      tag_pipeline: release-only
+  # Fails the tag pipeline unless main passed that commit.
+  - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/release-gate@$CI_COMMIT_SHA
   - template: Jobs/Secret-Detection.gitlab-ci.yml
 
 stages:
   - test
   - audit
   - release
+
+# D-125: on a tag, the pipeline is the release-gate proof plus the release
+# job, and nothing else. The local jobs in this file prove the components
+# on branches and merge requests, so every one of them skips on tags.
+.skip-on-tag:
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: never
+    - when: on_success
 
 # GitLab's secret detection template marks its job allow_failure: true.
 # Preflight's own pipeline overrides that, so a committed secret fails the
@@ -92,6 +115,7 @@ secret_detection:
 # promised in contract/inputs.json (BEST_PRACTICES.md 1.4). Runs on the
 # mikefarah/yq image, pinned by digest.
 contract:
+  extends: .skip-on-tag
   stage: test
   image:
     name: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/mikefarah/yq@sha256:5d56494617dce8311106e905aac5c080a2087c905a7f7de2984db2e2cc60ab2e
@@ -137,6 +161,7 @@ contract:
 # result. Runs in the template's own image, pinned by digest, so it needs
 # no Docker.
 must-fail-php-test:
+  extends: .skip-on-tag
   stage: test
   image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/php:8.5-cli-trixie@sha256:50956f094e90a716d43bea28087d447555ad80510e386ab8c9c10d8c70d781a9
   script:
@@ -147,6 +172,7 @@ must-fail-php-test:
 # the job results. Run in the templates' own image, pinned by digest, so
 # they need no Docker.
 must-fail-phpstan-pint:
+  extends: .skip-on-tag
   stage: test
   image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0
   script:
@@ -159,6 +185,7 @@ must-fail-phpstan-pint:
 # it needs no Docker. npm downloads land in .npm-cache/ under a fixed key,
 # so repeat pipelines skip them.
 must-fail-eslint:
+  extends: .skip-on-tag
   stage: test
   image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/node:22.13-alpine@sha256:e2b39f7b64281324929257d0f8004fb6cb4bf0fdfb9aa8cedb235a766aec31da
   cache:
@@ -175,6 +202,7 @@ must-fail-eslint:
 # Runs in the template's own image, pinned by digest, so it needs no Docker;
 # it downloads nothing, so it keeps no cache.
 must-fail-package-publish:
+  extends: .skip-on-tag
   stage: test
   image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0
   script:
@@ -190,10 +218,26 @@ must-fail-package-publish:
 # carry no packages, so the check needs no network. Runs in the
 # template's own image, pinned by digest, so it needs no Docker.
 must-fail-composer-ci:
+  extends: .skip-on-tag
   stage: test
   image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0
   script:
     - sh tests/check-composer-ci-fails.sh
+
+# The must-fail fixture for the release-gate component: the check renders
+# the template's own script lines and runs them with sh -e in a temp dir
+# whose checkout is a tiny git repo with a bare origin, with a fake curl
+# answering the GitLab API per case: a successful pipeline of the commit on
+# the default branch passes, an empty list fails and names the missing
+# pipeline, and the git fallback passes only when the commit is on the
+# default branch. Runs in the template's own image, pinned by digest, so it
+# needs no Docker.
+must-fail-release-gate:
+  extends: .skip-on-tag
+  stage: test
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0
+  script:
+    - sh tests/check-release-gate-fails.sh
 
 # The must-fail fixtures for the composer-audit component: the check proves
 # the template keeps the job honest (no allow_failure, no
@@ -207,6 +251,7 @@ must-fail-composer-ci:
 # packages, so it keeps no cache. Runs in the template's own image, pinned
 # by digest.
 must-fail-composer-audit:
+  extends: .skip-on-tag
   stage: test
   image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0
   script:
@@ -222,6 +267,7 @@ must-fail-composer-audit:
 # .composer-cache/ under a fixed key, so repeat pipelines skip them. Runs
 # in the template's own image, pinned by digest.
 must-fail-proctor-lock:
+  extends: .skip-on-tag
   stage: test
   image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0
   cache:
@@ -244,6 +290,7 @@ must-fail-proctor-lock:
 # .composer-cache/ under a fixed key, so repeat pipelines skip them. Runs
 # in the template's own image, pinned by digest.
 must-warn-preflight-gates:
+  extends: .skip-on-tag
   stage: test
   image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0
   cache:
@@ -268,6 +315,7 @@ must-warn-preflight-gates:
 # installs nothing, so it keeps no cache. Runs in the template's own image,
 # pinned by digest.
 must-fail-npm-audit:
+  extends: .skip-on-tag
   stage: test
   image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/node:22.13-alpine@sha256:e2b39f7b64281324929257d0f8004fb6cb4bf0fdfb9aa8cedb235a766aec31da
   script:
@@ -281,6 +329,7 @@ must-fail-npm-audit:
 # is ever committed. Runs in the template's own image, pinned by digest, so
 # it needs no Docker; it downloads nothing, so it keeps no cache.
 must-fail-secret-detection:
+  extends: .skip-on-tag
   stage: test
   image:
     name: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
@@ -295,6 +344,7 @@ must-fail-secret-detection:
 # downloads land in .composer-cache/ under a fixed key, so repeat
 # pipelines skip them.
 must-fail-sbom:
+  extends: .skip-on-tag
   stage: test
   image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0
   cache:
@@ -315,6 +365,7 @@ must-fail-sbom:
 # in the template's own image, pinned by digest. Composer downloads land in
 # .composer-cache/ under a fixed key, so repeat pipelines skip them.
 must-fail-squire-kit:
+  extends: .skip-on-tag
   stage: test
   image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0
   cache:
@@ -334,6 +385,7 @@ must-fail-squire-kit:
 # the Dependency Proxy. npm downloads land in .npm-cache/ under a fixed key,
 # so repeat pipelines skip them.
 must-fail-a11y:
+  extends: .skip-on-tag
   stage: test
   image: mcr.microsoft.com/playwright:v1.65.0-noble@sha256:9beb546099e11f52d62e505537914870e01a67e0e6b00ae41da4775324e73dbe
   interruptible: true
@@ -359,6 +411,7 @@ must-fail-a11y:
 # digest; it needs user namespaces, not a privileged runner. quay.io, not
 # Docker Hub, so it skips the Dependency Proxy.
 must-fail-portability:
+  extends: .skip-on-tag
   stage: test
   image: quay.io/buildah/stable:v1.45.1-immutable@sha256:e5a33092657823b0830186ea525054cf4cdeef29b6a44833444c59d86f561f29
   interruptible: true
@@ -386,6 +439,8 @@ must-fail-mysql56-migrate:
   interruptible: true
   timeout: 30 minutes
   rules:
+    - if: $CI_COMMIT_TAG
+      when: never
     - if: $CI_PIPELINE_SOURCE == "schedule"
       when: never
     - if: $CI_COMMIT_TAG
