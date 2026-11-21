@@ -67,12 +67,11 @@ preset keep it equal to a Squire release:
   under `/tmp` (outside the repository, `--no-dev --no-scripts`) and run
   `squire update` on the kit folder, so the merge request carries the
   refreshed files. It waits for review (`squire-kit`, `needs-review`).
-- **Renovate leaves kit files alone.** Updates to `docker-compose.squire.yml`
-  and anything under `.squire/` are turned off outside Squire's own
-  `templates/` folders. A digest or tag bump there is an edit to a file Squire
-  owns: the kit drifts from its release, and the next `squire update` refuses
-  to overwrite it. Change the image in Squire's templates instead; the next
-  Squire release carries it to every kit.
+- **Renovate leaves kit files alone.** Updates to the Squire kit files are
+  turned off outside Squire's own `templates/` folders. A digest or tag bump
+  there is an edit to a file Squire owns: the kit drifts from its release, and
+  the next `squire update` refuses to overwrite it. Change the image in
+  Squire's templates instead; the next Squire release carries it to every kit.
 
 Renovate only runs a post-upgrade command its runner allows. The
 [`renovate` component](./component-renovate.md)'s `squire_kit_tasks` input

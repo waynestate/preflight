@@ -230,7 +230,7 @@ Exit 2 means the job never judged a page: an input or a tool is wrong.
 The job installs the Squire release the kit records and runs `squire init --check`; the log lists every kit file with its state.
 
 - **Cause:** one of the states below.
-  - `modified`: someone, or a bot, edited a file Squire owns. Renovate's digest and tag bumps to `.squire/` files and `docker-compose.squire.yml` were the usual culprit before the preset turned them off.
+  - `modified`: someone, or a bot, edited a file Squire owns. Renovate's digest and tag bumps to the Squire kit files were the usual culprit before the preset turned them off.
   - `outdated`: the file is untouched but is not the template of the recorded release, usually because `.squire.json` was bumped without `squire update`.
   - `missing`: a kit file is gone, or the release added one that `squire update` does not write.
   - `untracked`: a file sits in one of the kit's groups but is not recorded in `.squire.json`.

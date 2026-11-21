@@ -82,9 +82,9 @@ The log lists every kit file with its state; the last lines name what to do.
   Squire records it.
 
 > [!CAUTION]
-> Renovate's digest and tag bumps were what made the stack's kits drift: a bump to a base image inside `.squire/` or to
-> `docker-compose.squire.yml` is an edit to a file Squire owns. Preflight's preset now leaves those files alone; update
-> the image in Squire's templates and let the next Squire release carry it.
+> Renovate's digest and tag bumps were what made the stack's kits drift: a bump to a base image in a Squire kit file is
+> an edit to a file Squire owns. Preflight's preset now leaves those files alone; update the image in Squire's
+> templates and let the next Squire release carry it.
 
 ## Adopt it with findings
 

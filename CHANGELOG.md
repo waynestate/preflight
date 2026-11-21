@@ -6,6 +6,8 @@ are Git tags.
 
 ## Unreleased
 
+- Removed: Squire's local-running kit files (docker-compose.squire.yml, haproxy.cfg, parity scripts, env example; D-095). Parity runs the app locally: `parity up` in `deploy/`.
+
 ## 0.11.0 (2026-11-19)
 
 The `php-test` component now runs PHP 8.6 as an advisory job by default (D-2). The job may fail and never gates a pipeline; the required matrix stays 8.3, 8.4 and 8.5. No input or job was renamed or removed.
