@@ -13,6 +13,7 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 ## Unreleased [#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
 - Removed: Squire's local-running kit files (docker-compose.squire.yml, haproxy.cfg, parity scripts, env example; D-095). Parity runs the app locally: `parity up` in `deploy/`.
+- Docs: SECURITY.md says how to report a vulnerability privately.
 
 ## 0.12.0 (2026-11-20) [#](https://preflight.apps.wayne.edu/docs/changelog.html#0-12-0-2026-11-20)
 
