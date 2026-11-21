@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Components | Preflight docs</title>
 <meta name="description" content="Every component, with its include example, inputs and defaults.">
-<meta name="docs-version" content="0.11.0">
+<meta name="docs-version" content="0.12.0">
 <link rel="stylesheet" href="../../assets/wayne-ui/wayne-ui.css">
 <link rel="stylesheet" href="../../assets/docs.css">
 <link rel="stylesheet" href="../../docs/theme/preflight.css">
@@ -20,7 +20,7 @@
     <a class="brand" href="../../index.html">
       <img src="../../brand/preflight-avatar-256.png" width="36" height="36" alt="">
       <span class="brand__name">PREFLIGHT</span>
-      <span class="brand__tail">0.11.0</span>
+      <span class="brand__tail">0.12.0</span>
     </a>
     <nav class="topnav" aria-label="Site">
       <a class="topnav__section" href="../../index.html#checklist">Checklist</a>
@@ -35,9 +35,9 @@
 </header><div class="docs-layout docs-layout--toc">
   <details class="docs-menu">
     <summary>Menu</summary>
-    <nav class="docs-nav" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../../docs/index.html">Overview</a></li><li><a href="../../docs/install.html">Install</a></li><li><a href="../../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../../docs/guides/component-composer-ci.html">The composer-ci component</a></li><li><a href="../../docs/guides/component-npm-audit.html">The npm-audit component</a></li><li><a href="../../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../../docs/guides/component-pint.html">The pint component</a></li><li><a href="../../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../../docs/guides/component-secret-detection.html">The secret-detection component</a></li><li><a href="../../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../../docs/guides/component-portability.html">The portability component</a></li><li><a href="../../docs/guides/component-a11y.html">The a11y component</a></li><li><a href="../../docs/guides/component-squire-kit.html">The squire-kit component</a></li><li><a href="../../docs/guides/component-mysql56-migrate.html">The mysql56-migrate component</a></li><li><a href="../../docs/guides/inputs-contract.html">The inputs contract</a></li><li><a href="../../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../../docs/guides/renovate.html">Renovate</a></li><li><a href="../../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../../docs/guides/dependency-caching.html">Dependency caching</a></li><li><a href="../../docs/guides/network-egress.html">Which hosts the jobs reach</a></li><li><a href="../../docs/guides/template-lint.html">Template lint</a></li><li><a href="../../docs/guides/deprecation.html">Deprecating a component</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../../docs/reference/components.html" aria-current="page">Components</a></li><li><a href="../../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../../docs/reference/local-checks.html">Local checks</a></li><li><a href="../../docs/reference/proof.html">Proof</a></li></ul></li><li><a href="../../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../../docs/upgrading.html">Upgrading</a></li><li><a href="../../docs/changelog.html">Changelog</a></li></ul></nav>
+    <nav class="docs-nav" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../../docs/index.html">Overview</a></li><li><a href="../../docs/install.html">Install</a></li><li><a href="../../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../../docs/guides/component-composer-ci.html">The composer-ci component</a></li><li><a href="../../docs/guides/component-npm-audit.html">The npm-audit component</a></li><li><a href="../../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../../docs/guides/component-pint.html">The pint component</a></li><li><a href="../../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../../docs/guides/component-secret-detection.html">The secret-detection component</a></li><li><a href="../../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../../docs/guides/component-release-gate.html">The release-gate component</a></li><li><a href="../../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../../docs/guides/component-portability.html">The portability component</a></li><li><a href="../../docs/guides/component-a11y.html">The a11y component</a></li><li><a href="../../docs/guides/component-squire-kit.html">The squire-kit component</a></li><li><a href="../../docs/guides/component-mysql56-migrate.html">The mysql56-migrate component</a></li><li><a href="../../docs/guides/inputs-contract.html">The inputs contract</a></li><li><a href="../../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../../docs/guides/renovate.html">Renovate</a></li><li><a href="../../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../../docs/guides/dependency-caching.html">Dependency caching</a></li><li><a href="../../docs/guides/network-egress.html">Which hosts the jobs reach</a></li><li><a href="../../docs/guides/template-lint.html">Template lint</a></li><li><a href="../../docs/guides/deprecation.html">Deprecating a component</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../../docs/reference/components.html" aria-current="page">Components</a></li><li><a href="../../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../../docs/reference/local-checks.html">Local checks</a></li><li><a href="../../docs/reference/proof.html">Proof</a></li></ul></li><li><a href="../../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../../docs/upgrading.html">Upgrading</a></li><li><a href="../../docs/changelog.html">Changelog</a></li></ul></nav>
   </details>
-  <nav class="docs-nav docs-nav--sidebar" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../../docs/index.html">Overview</a></li><li><a href="../../docs/install.html">Install</a></li><li><a href="../../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../../docs/guides/component-composer-ci.html">The composer-ci component</a></li><li><a href="../../docs/guides/component-npm-audit.html">The npm-audit component</a></li><li><a href="../../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../../docs/guides/component-pint.html">The pint component</a></li><li><a href="../../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../../docs/guides/component-secret-detection.html">The secret-detection component</a></li><li><a href="../../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../../docs/guides/component-portability.html">The portability component</a></li><li><a href="../../docs/guides/component-a11y.html">The a11y component</a></li><li><a href="../../docs/guides/component-squire-kit.html">The squire-kit component</a></li><li><a href="../../docs/guides/component-mysql56-migrate.html">The mysql56-migrate component</a></li><li><a href="../../docs/guides/inputs-contract.html">The inputs contract</a></li><li><a href="../../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../../docs/guides/renovate.html">Renovate</a></li><li><a href="../../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../../docs/guides/dependency-caching.html">Dependency caching</a></li><li><a href="../../docs/guides/network-egress.html">Which hosts the jobs reach</a></li><li><a href="../../docs/guides/template-lint.html">Template lint</a></li><li><a href="../../docs/guides/deprecation.html">Deprecating a component</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../../docs/reference/components.html" aria-current="page">Components</a></li><li><a href="../../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../../docs/reference/local-checks.html">Local checks</a></li><li><a href="../../docs/reference/proof.html">Proof</a></li></ul></li><li><a href="../../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../../docs/upgrading.html">Upgrading</a></li><li><a href="../../docs/changelog.html">Changelog</a></li></ul></nav>
+  <nav class="docs-nav docs-nav--sidebar" aria-label="Documentation"><ul class="docs-nav__list"><li class="docs-nav__group"><span class="docs-nav__label">Getting Started</span><ul><li><a href="../../docs/index.html">Overview</a></li><li><a href="../../docs/install.html">Install</a></li><li><a href="../../docs/guides/quick-start.html">Quick start</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Guides</span><ul><li><a href="../../docs/guides/component-proctor.html">The proctor component</a></li><li><a href="../../docs/guides/component-php-test.html">The php-test component</a></li><li><a href="../../docs/guides/component-composer-audit.html">The composer-audit component</a></li><li><a href="../../docs/guides/component-composer-ci.html">The composer-ci component</a></li><li><a href="../../docs/guides/component-npm-audit.html">The npm-audit component</a></li><li><a href="../../docs/guides/component-sbom.html">The sbom component</a></li><li><a href="../../docs/guides/component-pint.html">The pint component</a></li><li><a href="../../docs/guides/component-phpstan.html">The phpstan component</a></li><li><a href="../../docs/guides/component-eslint.html">The eslint component</a></li><li><a href="../../docs/guides/component-secret-detection.html">The secret-detection component</a></li><li><a href="../../docs/guides/component-package-publish.html">The package-publish component</a></li><li><a href="../../docs/guides/component-release-gate.html">The release-gate component</a></li><li><a href="../../docs/guides/component-renovate.html">The renovate component</a></li><li><a href="../../docs/guides/component-portability.html">The portability component</a></li><li><a href="../../docs/guides/component-a11y.html">The a11y component</a></li><li><a href="../../docs/guides/component-squire-kit.html">The squire-kit component</a></li><li><a href="../../docs/guides/component-mysql56-migrate.html">The mysql56-migrate component</a></li><li><a href="../../docs/guides/inputs-contract.html">The inputs contract</a></li><li><a href="../../docs/guides/include-twice.html">Include a component twice</a></li><li><a href="../../docs/guides/same-instance-only.html">Same instance only</a></li><li><a href="../../docs/guides/github-mirrors.html">GitHub mirrors</a></li><li><a href="../../docs/guides/job-token-allowlist.html">Keep the job token allowlist short</a></li><li><a href="../../docs/guides/instance-runner.html">Strongly recommended: a git.wayne.edu instance runner</a></li><li><a href="../../docs/guides/renovate.html">Renovate</a></li><li><a href="../../docs/guides/when-components-run.html">When the components run</a></li><li><a href="../../docs/guides/what-components-cannot-force.html">What the components cannot force</a></li><li><a href="../../docs/guides/image-pins.html">Updating image pins</a></li><li><a href="../../docs/guides/dependency-caching.html">Dependency caching</a></li><li><a href="../../docs/guides/network-egress.html">Which hosts the jobs reach</a></li><li><a href="../../docs/guides/template-lint.html">Template lint</a></li><li><a href="../../docs/guides/deprecation.html">Deprecating a component</a></li></ul></li><li class="docs-nav__group"><span class="docs-nav__label">Reference</span><ul><li><a href="../../docs/reference/components.html" aria-current="page">Components</a></li><li><a href="../../docs/reference/conventions.html">Shared conventions</a></li><li><a href="../../docs/reference/local-checks.html">Local checks</a></li><li><a href="../../docs/reference/proof.html">Proof</a></li></ul></li><li><a href="../../docs/troubleshooting.html">Troubleshooting</a></li><li><a href="../../docs/upgrading.html">Upgrading</a></li><li><a href="../../docs/changelog.html">Changelog</a></li></ul></nav>
   <div class="docs-content">
     <main id="main">
       <article class="docs-article"><h1 id="components"><span class="docs-heading-tail"><span>Components</span><a class="docs-heading-link" aria-label="Link to this section" href="#components">#</a></span></h1>
@@ -264,6 +264,12 @@
 <td><code>&quot;&quot;</code></td>
 <td>Directory to run the proctor command in, relative to the project root, after the install. Empty (the default) runs it in <code>working_dir</code>; set it to <code>.</code> to install in a folder such as <code>deploy</code> and run the check from the project root.</td>
 </tr>
+<tr>
+<td><code>tag_pipeline</code></td>
+<td>string</td>
+<td><code>full</code></td>
+<td>What this job does on a tag pipeline. <code>full</code> (default): it runs, as on any pipeline. <code>release-only</code>: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch.</td>
+</tr>
 </tbody>
 </table></div>
 <p>From <code>templates/proctor/template.yml</code>: the single job (named by <code>job_name</code>) runs in the <code>test</code> stage by default, is <code>interruptible: true</code>, and has a timeout of 30 minutes. It installs Composer with the official getcomposer.org installer, verifies the installer's SHA-384 against composer.github.io/installer.sig, and pins the installed version to <code>composer_version</code>. It then runs <code>composer install --no-interaction --no-progress --no-plugins --no-scripts --ignore-platform-reqs</code>, so the app's plugins and scripts never run with the job's access and the app's PHP version and extensions are not required. The command's output goes through a plain redirect (not <code>tee</code>) to <code>gl-code-quality-report.json</code> at the project root, which keeps PROCTOR's exit code as the job result and gives the artifact the same path for every <code>working_dir</code>, including <code>.</code>. The report is published as a Code Quality report with <code>when: always</code>. Before the command runs, a guard adds <code>--record &quot;$CI_PROJECT_DIR/proctor.json&quot;</code> when the command is a plain <code>proctor check</code> line (letters, digits, spaces and <code>/ . _ = : , @ % + -</code> only, no <code>--record</code> of its own) and the app's PROCTOR lists <code>--record</code> in its help (0.11.0 and later); the guard reads the command from the job variable <code>PREFLIGHT_PROCTOR_COMMAND</code> and cannot change the job's result. The artifact keeps <code>proctor.json</code> (<code>paths</code>, <code>expire_in: 30 days</code>), PROCTOR's JSON report for Rollcall's <code>ROLLCALL_PROCTOR_SOURCE=gitlab</code> reader; on PROCTOR 0.10.0 or older no file is written and the runner only warns.</p>
@@ -338,6 +344,12 @@
 <td><code>.</code></td>
 <td>Directory to run the command in, relative to the project root.</td>
 </tr>
+<tr>
+<td><code>tag_pipeline</code></td>
+<td>string</td>
+<td><code>full</code></td>
+<td>What this job does on a tag pipeline. <code>full</code> (default): it runs, as on any pipeline. <code>release-only</code>: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch.</td>
+</tr>
 </tbody>
 </table></div>
 <p>From <code>templates/php-test/template.yml</code>: one job is created per entry in <code>php_versions</code> through <code>parallel:matrix</code>; <code>PHP_VERSION</code> becomes a CI/CD variable in each job, which the image input's default expands, and each job runs the newest patch release of its version. The default image is deliberately tag-pinned (the template points at the README section Updating image pins). Each job installs Composer the same way as proctor, runs <code>composer install --no-interaction --no-progress</code>, and then the test command. The jobs are <code>interruptible: true</code> with a timeout of 30 minutes. The <code>&lt;job_name&gt;-advisory</code> job runs the same script on <code>php_advisory_version</code> (default <code>8.6</code>) with <code>allow_failure: true</code>, and it is skipped while that input is empty. Because the official 8.6 image ships without <code>mbstring</code>, the script installs it first when <code>php -m</code> does not list it (a no-op on 8.3 to 8.5), so PHPUnit can start.</p>
@@ -410,6 +422,12 @@ php-test-next:
 <td><code>fail</code></td>
 <td>How composer audit treats abandoned packages: fail (default), report (list them, do not fail) or ignore.</td>
 </tr>
+<tr>
+<td><code>tag_pipeline</code></td>
+<td>string</td>
+<td><code>full</code></td>
+<td>What this job does on a tag pipeline. <code>full</code> (default): it runs, as on any pipeline. <code>release-only</code>: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch.</td>
+</tr>
 </tbody>
 </table></div>
 <p>From <code>templates/composer-audit/template.yml</code>: the Composer image (<code>composer:2.11.1</code>, pinned by digest) already ships Composer, so there is no install step. The job runs <code>composer audit --locked</code> with <code>--abandoned</code> set to the <code>abandoned</code> input (<code>fail</code> by default, <code>report</code> or <code>ignore</code> to relax the abandoned check), which exits non-zero when it finds advisories, and fails the job. There is no <code>allow_failure</code> input: advisories must fail. The job is <code>interruptible: true</code> with a timeout of 30 minutes.</p>
@@ -461,6 +479,12 @@ php-test-next:
 <td>string</td>
 <td><code>.</code></td>
 <td>Directory to run Composer in, relative to the project root.</td>
+</tr>
+<tr>
+<td><code>tag_pipeline</code></td>
+<td>string</td>
+<td><code>full</code></td>
+<td>What this job does on a tag pipeline. <code>full</code> (default): it runs, as on any pipeline. <code>release-only</code>: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch.</td>
 </tr>
 </tbody>
 </table></div>
@@ -524,6 +548,12 @@ php-test-next:
 <td><code>true</code></td>
 <td>Whether the failing audit leaves dev dependencies out. The full report always lists them.</td>
 </tr>
+<tr>
+<td><code>tag_pipeline</code></td>
+<td>string</td>
+<td><code>full</code></td>
+<td>What the job does on a tag pipeline: <code>full</code> (default) runs it as on any pipeline; <code>release-only</code> skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the <code>release-gate</code> component.</td>
+</tr>
 </tbody>
 </table></div>
 <p>From <code>templates/npm-audit/template.yml</code>: with no <code>package-lock.json</code> (or <code>npm-shrinkwrap.json</code>) the job prints &quot;nothing to audit&quot; and passes. Otherwise it runs <code>npm audit --omit=dev --audit-level=&lt;audit_level&gt; --audit=true --offline=false</code> and keeps npm's exit code; the two flags stop an <code>.npmrc</code> with <code>audit=false</code> or <code>offline=true</code> from faking a pass. An unreachable registry fails the job with a message saying so. Nothing is installed. The cache is the app's own (key <code>npm</code>, path <code>.cache/npm/</code>, <code>policy: pull</code>). There is no <code>allow_failure</code> input. The job is <code>interruptible: true</code> with a timeout of 10 minutes. <a href="../guides/component-npm-audit.html">The npm-audit component</a> has the severity map and the proof.</p>
@@ -579,6 +609,12 @@ php-test-next:
 <td>string</td>
 <td><code>sbom.cdx.json</code></td>
 <td>Path of the SBOM file to publish, relative to the project root.</td>
+</tr>
+<tr>
+<td><code>tag_pipeline</code></td>
+<td>string</td>
+<td><code>full</code></td>
+<td>What the job does on a tag pipeline. <code>full</code> (the default) runs it as on any pipeline; <code>release-only</code> skips it on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component.</td>
 </tr>
 </tbody>
 </table></div>
@@ -636,6 +672,12 @@ php-test-next:
 <td>string</td>
 <td><code>.</code></td>
 <td>Directory to run Pint in, relative to the project root.</td>
+</tr>
+<tr>
+<td><code>tag_pipeline</code></td>
+<td>string</td>
+<td><code>full</code></td>
+<td>What the job does on a tag pipeline: <code>full</code> (default) runs it as on any pipeline; <code>release-only</code> skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the <code>release-gate</code> component.</td>
 </tr>
 </tbody>
 </table></div>
@@ -701,6 +743,12 @@ php-test-next:
 <td><code>.</code></td>
 <td>Directory to run PHPStan in, relative to the project root.</td>
 </tr>
+<tr>
+<td><code>tag_pipeline</code></td>
+<td>string</td>
+<td><code>full</code></td>
+<td>What the job does on a tag pipeline: <code>full</code> (default) runs it as on any pipeline; <code>release-only</code> skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the <code>release-gate</code> component.</td>
+</tr>
 </tbody>
 </table></div>
 <p>From <code>templates/phpstan/template.yml</code>: the component does not install PHPStan itself; it runs <code>composer install --no-interaction --no-progress --prefer-dist</code> and then the app's own PHPStan with <code>--no-progress --error-format=gitlab</code>, the <code>memory_limit</code> value and the <code>config</code> file, redirecting the output to <code>$CI_PROJECT_DIR/phpstan-report.json</code>. The report is published as a Code Quality report with <code>when: always</code>. The job is <code>interruptible: true</code> with a timeout of 10m.</p>
@@ -764,6 +812,12 @@ php-test-next:
 <td><code>true</code></td>
 <td>Whether to also run <code>prettier --check</code>.</td>
 </tr>
+<tr>
+<td><code>tag_pipeline</code></td>
+<td>string</td>
+<td><code>full</code></td>
+<td>What the job does on a tag pipeline: <code>full</code> (default) runs it as on any pipeline; <code>release-only</code> skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the <code>release-gate</code> component.</td>
+</tr>
 </tbody>
 </table></div>
 <p>From <code>templates/eslint/template.yml</code>: the component does not install ESLint or Prettier itself; it runs <code>npm ci --ignore-scripts --cache .npm-cache</code> (the cache uses the fixed key <code>preflight-eslint</code> and stores <code>.npm-cache/</code>), then <code>npx --no-install eslint</code> with the <code>eslint_args</code> value, and, while <code>prettier</code> is true, <code>npx --no-install prettier --check .</code>. The job is <code>interruptible: true</code> with a timeout of 15m.</p>
@@ -818,6 +872,12 @@ php-test-next:
 <td>boolean</td>
 <td><code>false</code></td>
 <td>Whether the job can fail without failing the pipeline.</td>
+</tr>
+<tr>
+<td><code>tag_pipeline</code></td>
+<td>string</td>
+<td><code>full</code></td>
+<td>What the job does on a tag pipeline. <code>full</code> (the default) runs it as on any pipeline; <code>release-only</code> skips it on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component.</td>
 </tr>
 </tbody>
 </table></div>
@@ -880,6 +940,49 @@ php-test-next:
 </table></div>
 <aside class="docs-callout docs-callout--warning" role="note"><p class="docs-callout__label">Warning</p><p>Protect your release tags.</p></aside>
 <p>From <code>templates/package-publish/template.yml</code>: the job runs only when <code>$CI_COMMIT_TAG</code> is set. The tag must be a semantic version, <code>1.2.3</code> or <code>v1.2.3</code> with an optional pre-release, or the job fails. The package name comes from <code>composer.json</code>, the file the registry serves. The job reads the masked CI variable named by <code>read_token_variable</code>, checks that <code>group_id</code> is numeric, reads the group's Composer registry index with the token, and follows the package metadata to the version already on the manifest. A version already published at this commit passes quietly (exit 0); a version published at a different commit fails (exit 1). Publishing posts the tag to the project's Composer packages endpoint with the job token. The job is <code>interruptible: true</code> with a timeout of 30 minutes.</p>
+<h2 id="release-gate"><span class="docs-heading-tail"><span>release-gate</span><a class="docs-heading-link" aria-label="Link to this section" href="#release-gate">#</a></span></h2>
+<p>Version 1 · Category: Release/Publishing · Tags: release,gate,tag-pipeline</p>
+<p>Fails a tag pipeline unless the default branch already ran a successful pipeline on the tagged commit (D-125). The job runs only on tags, in the <code>.pre</code> stage before every other stage, so a failure stops the whole tag pipeline before any release job starts. It asks the GitLab API first, with the job token only, and falls back to git when the API cannot be read; the fallback proves the commit is on the default branch, not that it passed there, so in fallback mode the green-ness rests on the release procedure, which says to tag only after the default branch is green. A repo with no release jobs still gets a tag pipeline of just the gate. See <a href="../guides/component-release-gate.html">The release-gate component</a>.</p>
+<pre tabindex="0"><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/release-gate@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+</code></pre>
+<div class="docs-table" role="region" aria-label="Table" tabindex="0"><table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Type</th>
+<th>Default</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stage</code></td>
+<td>string</td>
+<td><code>.pre</code></td>
+<td>Pipeline stage for the release-gate job. The default, .pre, runs before every other stage, so a failed gate stops the whole tag pipeline.</td>
+</tr>
+<tr>
+<td><code>job_name</code></td>
+<td>string</td>
+<td><code>release-gate</code></td>
+<td>Name of the job. Set it when you include this component more than once.</td>
+</tr>
+<tr>
+<td><code>image</code></td>
+<td>string</td>
+<td><code>composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0</code></td>
+<td>Docker image for the release-gate job. The default ships git and curl, which the job uses for the API check and the git fallback.</td>
+</tr>
+<tr>
+<td><code>image_prefix</code></td>
+<td>string</td>
+<td><code>${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}</code></td>
+<td>Registry path put in front of the image input. The default is this group's GitLab Dependency Proxy, so Docker Hub images are pulled once and then served from GitLab's cache. On a GitLab or group without the proxy, set it to docker.io. No trailing slash.</td>
+</tr>
+</tbody>
+</table></div>
+<p>From <code>templates/release-gate/template.yml</code>: the single job (named by <code>job_name</code>) runs in the <code>.pre</code> stage by default, is <code>interruptible: true</code>, and has a timeout of 5 minutes. It runs only when <code>$CI_COMMIT_TAG</code> is set, clones the full history (<code>GIT_DEPTH: &quot;0&quot;</code>), and asks the GitLab API with the <code>JOB-TOKEN</code> header for a successful pipeline of <code>$CI_COMMIT_SHA</code> on <code>$CI_DEFAULT_BRANCH</code>; a hit passes, an empty list fails the job. When the API cannot be read, it fetches the default branch and passes only if the tagged commit is an ancestor of it, and says in its log that this proves the commit is on the branch, not that it passed there.</p>
 <h2 id="renovate"><span class="docs-heading-tail"><span>renovate</span><a class="docs-heading-link" aria-label="Link to this section" href="#renovate">#</a></span></h2>
 <p>Runs <a rel="noopener" href="https://docs.renovatebot.com/">Renovate</a> as a scheduled or manual job that bumps image digests, GitHub action SHAs and package versions across the group's repositories, and merges the green ones itself. Bumps of <code>component:</code> include pins are covered by the preset and wait for review. Majors open a merge request and wait for a person. See <a href="../guides/renovate.html">Renovate</a> for what auto-merges and what waits.</p>
 <pre tabindex="0"><code class="language-yaml">include:
@@ -1124,6 +1227,12 @@ php-test-next:
 <td><code>[&quot;health&quot;, &quot;env-only&quot;, &quot;forwarded-headers&quot;, &quot;logs&quot;, &quot;session-hop&quot;, &quot;sigterm&quot;, &quot;healthcheck&quot;]</code></td>
 <td>The checks to run. Leave one out only on purpose; the strict boot always runs.</td>
 </tr>
+<tr>
+<td><code>tag_pipeline</code></td>
+<td>string</td>
+<td><code>full</code></td>
+<td>What the job does on a tag pipeline: <code>full</code> (default) runs it as on any pipeline; <code>release-only</code> skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the <code>release-gate</code> component.</td>
+</tr>
 </tbody>
 </table></div>
 <p>The <code>image</code> default is an immutable tag (<code>-immutable</code>) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.</p>
@@ -1225,6 +1334,12 @@ php-test-next:
 <td><code>4.14.0</code></td>
 <td>@axe-core/playwright version; its axe-core range must include <code>axe_core_version</code>.</td>
 </tr>
+<tr>
+<td><code>tag_pipeline</code></td>
+<td>string</td>
+<td><code>full</code></td>
+<td>What the job does on a tag pipeline. <code>full</code> (the default) runs it as on any pipeline; <code>release-only</code> skips it on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component.</td>
+</tr>
 </tbody>
 </table></div>
 <p>From <code>templates/a11y/template.yml</code>: the single job (named by <code>job_name</code>) runs in the <code>test</code> stage by default, is <code>interruptible: true</code>, and has a timeout of 30 minutes. It reads the Playwright version from the image tag, installs <code>playwright</code>, <code>@axe-core/playwright</code> and <code>axe-core</code> at exact versions with <code>npm install --ignore-scripts</code> into a temporary folder outside the project, writes the inputs as JSON and the checker (inlined from <code>templates/a11y/check.mjs</code>, because a component ships only its <code>template.yml</code>), and runs it from the project root with every check at reduced motion. It writes <code>gl-a11y-junit.xml</code> (published as a JUnit report) and <code>gl-a11y-report.json</code>, kept as artifacts for 30 days with <code>when: always</code>. It exits 0 clean, 1 on a violation or a page that did not load, and 2 on a tool or configuration error. <code>allow_failure</code> is interpolated as a real YAML boolean.</p>
@@ -1287,6 +1402,12 @@ php-test-next:
 <td>boolean</td>
 <td><code>false</code></td>
 <td>Whether the job can fail without failing the pipeline, for a repository cleaning up its first findings.</td>
+</tr>
+<tr>
+<td><code>tag_pipeline</code></td>
+<td>string</td>
+<td><code>full</code></td>
+<td>What the job does on a tag pipeline. <code>full</code> (the default) runs it as on any pipeline; <code>release-only</code> skips it on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component.</td>
 </tr>
 </tbody>
 </table></div>
@@ -1373,6 +1494,12 @@ php-test-next:
 <td><code>[&quot;pdo_mysql&quot;]</code></td>
 <td>PHP extensions installed with <code>docker-php-ext-install</code> unless <code>php -m</code> already lists them.</td>
 </tr>
+<tr>
+<td><code>tag_pipeline</code></td>
+<td>string</td>
+<td><code>full</code></td>
+<td>What the job does on a tag pipeline: <code>full</code> (default) runs it as on any pipeline; <code>release-only</code> skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the <code>release-gate</code> component.</td>
+</tr>
 </tbody>
 </table></div>
 <p>From <code>templates/mysql56-migrate/template.yml</code>: the single job (named by <code>job_name</code>) runs in the <code>test</code> stage by default, is <code>interruptible: true</code>, and has a timeout of 30 minutes. Its service is <code>image_prefix/service_image</code> with <code>alias: mysql</code>, created with the <code>db_name</code>, <code>db_user</code> and <code>db_password</code> inputs. It installs each of <code>php_extensions</code> that <code>php -m</code> does not list, runs <code>composer install --no-interaction --no-progress</code> when a <code>composer.json</code> exists (installing Composer 2.11.1, checked by SHA-256, when the image has none), waits up to 120 seconds for a PDO connection, then runs <code>migrate_command</code> with <code>DB_CONNECTION=mysql</code>, <code>DB_HOST=mysql</code> and <code>DB_PORT=3306</code>. The Composer cache uses the fixed key <code>preflight-mysql56-migrate</code> and the path <code>.composer-cache/</code>, saved with <code>when: always</code>. Its rules never run it on schedules, run it on tags and the default branch, and make it manual with <code>allow_failure: true</code> on merge requests.</p>
@@ -1388,6 +1515,7 @@ php-test-next:
 <li><a href="../guides/component-eslint.html">The eslint component</a></li>
 <li><a href="../guides/component-secret-detection.html">The secret-detection component</a></li>
 <li><a href="../guides/component-package-publish.html">The package-publish component</a></li>
+<li><a href="../guides/component-release-gate.html">The release-gate component</a></li>
 <li><a href="../guides/component-renovate.html">The renovate component</a></li>
 <li><a href="../guides/component-portability.html">The portability component</a></li>
 <li><a href="../guides/component-a11y.html">The a11y component</a></li>
@@ -1401,10 +1529,10 @@ php-test-next:
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../../docs/guides/deprecation.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">Deprecating a component</span></a><a class="docs-pager__link docs-pager__link--next" href="../../docs/reference/conventions.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">Shared conventions</span></a></nav>
   </div>
-  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#the-inputs-contract">The inputs contract</a></li><li class="docs-toc__item"><a href="#proctor">proctor</a></li><li class="docs-toc__item"><a href="#php-test">php-test</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#caching">Caching</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#try-the-next-php-release-without-breaking-the-pipeline">Try the next PHP release without breaking the pipeline</a></li><li class="docs-toc__item"><a href="#composer-audit">composer-audit</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#run-it-on-a-schedule">Run it on a schedule</a></li><li class="docs-toc__item"><a href="#composer-ci">composer-ci</a></li><li class="docs-toc__item"><a href="#npm-audit">npm-audit</a></li><li class="docs-toc__item"><a href="#sbom">sbom</a></li><li class="docs-toc__item"><a href="#pint">pint</a></li><li class="docs-toc__item"><a href="#phpstan">phpstan</a></li><li class="docs-toc__item"><a href="#eslint">eslint</a></li><li class="docs-toc__item"><a href="#secret-detection">secret-detection</a></li><li class="docs-toc__item"><a href="#package-publish">package-publish</a></li><li class="docs-toc__item"><a href="#renovate">renovate</a></li><li class="docs-toc__item"><a href="#portability">portability</a></li><li class="docs-toc__item"><a href="#a11y">a11y</a></li><li class="docs-toc__item"><a href="#squire-kit">squire-kit</a></li><li class="docs-toc__item"><a href="#mysql56-migrate">mysql56-migrate</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#the-inputs-contract">The inputs contract</a></li><li class="docs-toc__item"><a href="#proctor">proctor</a></li><li class="docs-toc__item"><a href="#php-test">php-test</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#caching">Caching</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#try-the-next-php-release-without-breaking-the-pipeline">Try the next PHP release without breaking the pipeline</a></li><li class="docs-toc__item"><a href="#composer-audit">composer-audit</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#run-it-on-a-schedule">Run it on a schedule</a></li><li class="docs-toc__item"><a href="#composer-ci">composer-ci</a></li><li class="docs-toc__item"><a href="#npm-audit">npm-audit</a></li><li class="docs-toc__item"><a href="#sbom">sbom</a></li><li class="docs-toc__item"><a href="#pint">pint</a></li><li class="docs-toc__item"><a href="#phpstan">phpstan</a></li><li class="docs-toc__item"><a href="#eslint">eslint</a></li><li class="docs-toc__item"><a href="#secret-detection">secret-detection</a></li><li class="docs-toc__item"><a href="#package-publish">package-publish</a></li><li class="docs-toc__item"><a href="#release-gate">release-gate</a></li><li class="docs-toc__item"><a href="#renovate">renovate</a></li><li class="docs-toc__item"><a href="#portability">portability</a></li><li class="docs-toc__item"><a href="#a11y">a11y</a></li><li class="docs-toc__item"><a href="#squire-kit">squire-kit</a></li><li class="docs-toc__item"><a href="#mysql56-migrate">mysql56-migrate</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
-  <span>Documents Preflight <span data-docs-version>0.11.0</span></span>
+  <span>Documents Preflight <span data-docs-version>0.12.0</span></span>
   <span><a rel="noopener" href="https://github.com/waynestate/preflight">Source</a> <a href="components.md">Markdown</a></span>
 </footer>
 </body>

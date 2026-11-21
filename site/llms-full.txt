@@ -70,7 +70,7 @@ older PHP or needing an extension the image lacks still gets its report.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
     inputs:
       proctor_command: vendor/bin/proctor check --format=codequality
 ```
@@ -87,6 +87,7 @@ include:
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
 | `git_depth` | string | `"0"` | How many commits the job clones (GitLab's `GIT_DEPTH`); the default `0` clones the full history, so PROCTOR's override-approver check can see who wrote each override. |
 | `check_path` | string | `""` | Directory to run the proctor command in, relative to the project root, after the install. Empty (the default) runs it in `working_dir`; set it to `.` to install in a folder such as `deploy` and run the check from the project root. |
+| `tag_pipeline` | string | `full` | What this job does on a tag pipeline. `full` (default): it runs, as on any pipeline. `release-only`: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch. |
 
 The job also keeps PROCTOR's JSON report (what `--format=json` prints) as
 `proctor.json` in its artifact, for 30 days, whether it passed or failed.
@@ -108,7 +109,7 @@ Runs the test command on each supported PHP version through `parallel:matrix`. P
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
     inputs:
       test_command: vendor/bin/phpunit
 ```
@@ -124,6 +125,7 @@ include:
 | `composer_version` | string | `2.11.1` | Composer version to install. |
 | `test_command` | string | `vendor/bin/phpunit` | The test command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
+| `tag_pipeline` | string | `full` | What this job does on a tag pipeline. `full` (default): it runs, as on any pipeline. `release-only`: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch. |
 
 ##### Caching
 
@@ -161,7 +163,7 @@ Runs `composer audit --locked` and fails on advisories.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
     inputs:
       working_dir: .
 ```
@@ -174,6 +176,7 @@ include:
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `working_dir` | string | `.` | Directory to run composer audit in, relative to the project root. |
 | `abandoned` | string | `fail` | How composer audit treats abandoned packages: fail (default), report (list them, do not fail) or ignore. |
+| `tag_pipeline` | string | `full` | What this job does on a tag pipeline. `full` (default): it runs, as on any pipeline. `release-only`: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch. |
 
 The job fails on three findings: a security advisory, a version on Packagist's malware list (Composer 2.10 reads it,
 fed by Aikido) and, while `abandoned` is `fail`, an abandoned package. The `abandoned` input relaxes only the last one.
@@ -198,7 +201,7 @@ repos that hand-write this job can replace their copies with one include.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-ci@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-ci@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
     inputs:
       working_dir: .
 ```
@@ -210,6 +213,7 @@ include:
 | `image` | string | `composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0` | Docker image for the job. |
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `working_dir` | string | `.` | Directory to run Composer in, relative to the project root. |
+| `tag_pipeline` | string | `full` | What this job does on a tag pipeline. `full` (default): it runs, as on any pipeline. `release-only`: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch. |
 
 The Composer image (`composer:2.11.1`, pinned by digest) already ships Composer,
 so the job installs the app's locked dependencies with
@@ -227,7 +231,7 @@ New in 0.5.0; 0.4.0 does not include it.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/npm-audit@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
     inputs:
       audit_level: high
 ```
@@ -241,6 +245,7 @@ include:
 | `working_dir` | string | `.` | Directory that holds `package-lock.json`, relative to the project root. |
 | `audit_level` | string | `high` | Lowest severity that fails the job: `low`, `moderate`, `high` or `critical`; `medium` (CREED's and Composer's word) means `moderate`. |
 | `omit_dev` | boolean | `true` | Whether the failing audit leaves dev dependencies out. The full report always lists them. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
 
 An app with no lock file passes with a "nothing to audit" line, so a repo with no front end never goes red. The job
 passes `--audit=true --offline=false`, because an `.npmrc` with `audit=false` or `offline=true` makes npm print "found 0
@@ -254,7 +259,7 @@ Generates a CycloneDX SBOM with `cyclonedx/cyclonedx-php-composer`, validates it
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
     inputs:
       output: sbom.cdx.json
 ```
@@ -267,6 +272,7 @@ include:
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `omit_dev` | boolean | `true` | Whether to omit dev dependencies from the SBOM. |
 | `output` | string | `sbom.cdx.json` | Path of the SBOM file to publish, relative to the project root. It must be a relative path; GitLab refuses the pipeline at creation if it is not. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline. `full` (the default) runs it as on any pipeline; `release-only` skips it on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component. |
 
 #### pint
 
@@ -276,7 +282,7 @@ Runs the app's own [Laravel Pint](https://laravel.com/docs/12.x/pint) in test mo
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
     inputs:
       config: pint.json
 ```
@@ -289,6 +295,7 @@ include:
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `config` | string | `pint.json` | Path to the app's Pint config file. It must be a relative path; GitLab refuses the pipeline at creation if it is not. |
 | `working_dir` | string | `.` | Directory to run Pint in, relative to the project root. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
 
 #### phpstan
 
@@ -298,7 +305,7 @@ Runs the app's own [PHPStan](https://phpstan.org/) and fails the pipeline on sta
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
     inputs:
       config: phpstan.neon
       memory_limit: 1G
@@ -313,6 +320,7 @@ include:
 | `config` | string | `phpstan.neon` | Path to the app's PHPStan config file. It must be a relative path; GitLab refuses the pipeline at creation if it is not. |
 | `memory_limit` | string | `1G` | Memory limit passed to PHPStan. A PHP size such as `1G`, `512M` or `-1`; GitLab refuses the pipeline at creation if it is not. |
 | `working_dir` | string | `.` | Directory to run PHPStan in, relative to the project root. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
 
 #### eslint
 
@@ -322,7 +330,7 @@ Runs the app's own [ESLint](https://eslint.org/) (and [Prettier](https://prettie
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
     inputs:
       eslint_args: .
 ```
@@ -336,6 +344,7 @@ include:
 | `working_dir` | string | `.` | Directory to run the commands in, relative to the project root. |
 | `eslint_args` | string | `.` | Arguments passed to eslint. |
 | `prettier` | boolean | `true` | Whether to also run `prettier --check`. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
 
 #### secret-detection
 
@@ -345,7 +354,7 @@ Runs [Gitleaks](https://github.com/gitleaks/gitleaks) over the checked-out tree 
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/secret-detection@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/secret-detection@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 | Input | Type | Default | What it does |
@@ -356,6 +365,7 @@ include:
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `config_path` | string | `""` | Path to a `.gitleaks.toml` config file, relative to the project root. Empty uses the built-in rules plus a path allowlist for `vendor/` and `node_modules/`. When set, your file replaces the default, so add the same `vendor` and `node_modules` path allowlist to it. |
 | `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline. `full` (the default) runs it as on any pipeline; `release-only` skips it on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component. |
 
 #### package-publish
 
@@ -370,7 +380,7 @@ curl and PHP, which the job uses for the registry round trip.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/package-publish@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
     inputs:
       group_id: "<your group id>"
 ```
@@ -386,6 +396,35 @@ include:
 
 Protect your release tags.
 
+#### release-gate
+
+Version 1 · Category: Release/Publishing · Tags: release,gate,tag-pipeline
+
+Fails a tag pipeline unless the default branch already ran a successful
+pipeline on the tagged commit (D-125). Opt in by setting `tag_pipeline:
+release-only` on the test components and including this one: the tag
+pipeline skips the tests and runs only the release jobs, and the gate is
+the proof that skipping them is safe. It asks the GitLab API first, with
+the job token only, and falls back to git when the API cannot be read; the
+fallback proves the commit is on the default branch, not that it passed
+there, so in fallback mode the green-ness rests on the release procedure,
+which says to tag only after main is green. A repo with no release jobs
+still gets a tag pipeline of just the gate.
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/release-gate@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
+```
+
+| Input | Type | Default | What it does |
+|-------|------|---------|--------------|
+| `stage` | string | `.pre` | Pipeline stage for the job. The default, .pre, runs before every other stage, so a failed gate stops the whole tag pipeline. |
+| `job_name` | string | `release-gate` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0` | Docker image for the job. The default ships git and curl, which the job uses for the API check and the git fallback. |
+| `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
+
+The details: [The release-gate component](https://github.com/waynestate/preflight/blob/HEAD/docs/guides/component-release-gate.md).
+
 #### renovate
 
 Runs [Renovate](https://docs.renovatebot.com/) as a scheduled or manual job
@@ -397,7 +436,7 @@ auto-merges and what waits.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/renovate@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
     inputs:
       git_author: "Preflight Bot <preflight-bot@example.com>"
 ```
@@ -440,7 +479,7 @@ No takeoff without a clean pre-flight.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/portability@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
     inputs:
       env: ["APP_KEY=${PORTABILITY_APP_KEY}", "APP_URL=https://myapp.example.edu"]
       session_login_path: /_portability/login
@@ -482,6 +521,7 @@ sign-in route for `session-hop` and what each failure usually means.
 | `logs_path` | string | `storage/logs` | Directory, relative to `app_root`, where nothing may be written. |
 | `require_healthcheck` | boolean | `false` | Fail when the image declares no HEALTHCHECK. Docker and Coolify use it; OpenShift and Kubernetes use their own probes. |
 | `checks` | array | `["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm", "healthcheck"]` | The checks to run. Leave one out only on purpose; the strict boot always runs. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
 
 The `image` default is an immutable tag (`-immutable`) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.
 
@@ -500,7 +540,7 @@ person to review. Every page gets a walk-round, in daylight and at night.
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
     inputs:
       pages: ["index.html", "docs/**/*.html"]
       wcag_tags: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]
@@ -524,6 +564,7 @@ a11y ships in 0.2.0 (0.1.4 does not include it). While a site fixes its first fi
 | `playwright_version` | string | `""` | playwright npm version. Empty reads it from the image tag. |
 | `axe_core_version` | string | `4.14.0` | axe-core version, the rules engine. The job fails if a different axe-core ran. |
 | `axe_playwright_version` | string | `4.14.0` | @axe-core/playwright version. Its axe-core range must include `axe_core_version`. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline. `full` (the default) runs it as on any pipeline; `release-only` skips it on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component. |
 
 The job installs the three npm packages at exact versions with `--ignore-scripts` into a temporary folder, never into
 the app. The checker is `templates/a11y/check.mjs`, inlined in the template because a component ships only its
@@ -541,7 +582,7 @@ recorded version, so a new Squire never turns main red by itself: Renovate's Squ
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/squire-kit@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
     inputs:
       working_dir: deploy
 ```
@@ -558,6 +599,7 @@ a repository cleans up its first findings, set `allow_failure: true`.
 | `working_dir` | string | `.` | The kit folder: the one holding `.squire.json`, relative to the project root. |
 | `squire_version` | string | `""` | Squire release to check against, `x.y.z`. Empty reads the version recorded in `.squire.json`. |
 | `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline, for a repository cleaning up its first findings. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline. `full` (the default) runs it as on any pipeline; `release-only` skips it on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component. |
 
 The job installs Squire with `composer create-project --no-dev --no-scripts` into a temporary folder, never into the
 app. It exits 0 when the kit matches, 1 when it drifted, and 2 when the check could not run.
@@ -572,7 +614,7 @@ database rule asks for exactly this. Old airframes still fly; you just check the
 
 ```yaml
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/mysql56-migrate@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/mysql56-migrate@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 A raw PHP app sets `migrate_command` to its own script (`php database/migrate.php`), which reads the same `DB_*`
@@ -594,6 +636,7 @@ never runs on schedules.
 | `migrate_command` | string | `php artisan migrate --force --no-interaction` | Command that runs the app's migrations. |
 | `tags` | array | `["amd64"]` | Runner tags for the job. The official MySQL 5.6 images are amd64 only; set an empty list on an amd64 or emulating default runner. |
 | `php_extensions` | array | `["pdo_mysql"]` | PHP extensions installed with `docker-php-ext-install` unless `php -m` already lists them. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
 
 An app whose `composer.json` needs extensions with system libraries (`intl`, `zip`, `gd`) sets `image` to one that
 has them, since `docker-php-ext-install` alone cannot build those. The guide
@@ -629,7 +672,7 @@ on:
 
 jobs:
   ci:
-    uses: waynestate/preflight/.github/workflows/php-package.yml@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+    uses: waynestate/preflight/.github/workflows/php-package.yml@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 This workflow ships in the `0.1.1` tag, so pin the full commit SHA of the
@@ -786,13 +829,13 @@ workflow:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 The `workflow:rules` block must live in the app's own file. A component
@@ -1074,7 +1117,7 @@ Preflight is a set of GitLab CI/CD components. Add them to the `include:` block 
 
 ```
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 Already included in [WELD](https://weld.apps.wayne.edu/) and in every [Sourdough](https://sourdough.apps.wayne.edu/) app. Use Preflight on its own to give a GitLab project you already have the stack's CI checks.
@@ -1144,7 +1187,7 @@ Cockpit placards
 
 Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All ten are in the 0.10.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Six more components ship in the same tag, and the docs cover each one: `secret-detection`, `squire-kit`, `portability`, `package-publish`, `renovate` and `npm-audit`. New in 0.10.0: `proctor` and `mysql56-migrate` default to PHP 8.5 (8.3 or later still flies through `image`), Playwright and Renovate move to new digests, Preflight's deploy kit follows Squire 0.11.1, and a `must-fail-composer-ci` job and two new guards make the pipeline do what the docs say it does. Nothing renamed, nothing removed. Since 0.9.0: `composer-ci` and `proctor`'s `check_path`; since 0.8.0, `portability`'s `session_header`. Every input on these placards is held to [a written contract](https://preflight.apps.wayne.edu/#contract).
 
-in 0.10.0
+in 0.11.0
 
 #### proctor
 
@@ -1153,7 +1196,7 @@ Watches the cabin.
 Runs PROCTOR's checks, publishes a Code Quality report and, since 0.5.0, keeps `proctor.json` for Rollcall.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 **7 inputs**
@@ -1166,7 +1209,7 @@ Runs PROCTOR's checks, publishes a Code Quality report and, since 0.5.0, keeps `
 - **working_dir**: `.`
 - **check_path**: `""`
 
-in 0.10.0
+in 0.11.0
 
 #### php-test
 
@@ -1175,7 +1218,7 @@ Three engines, all running.
 The test command on each supported PHP version, one job per version.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 **6 inputs**
@@ -1187,7 +1230,7 @@ The test command on each supported PHP version, one job per version.
 - **test_command**: `vendor/bin/phpunit`
 - **working_dir**: `.`
 
-in 0.10.0
+in 0.11.0
 
 #### mysql56-migrate
 
@@ -1196,7 +1239,7 @@ Practice on the runway you land on.
 Runs the app's migrations against a real MySQL 5.6.51, the version of Citadel's shared server, on the runner tagged `amd64`. SQLite waves through a `JSON` column or a too-long utf8mb4 index; 5.6 does not.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/mysql56-migrate@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/mysql56-migrate@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 **6 inputs**
@@ -1208,7 +1251,7 @@ Runs the app's migrations against a real MySQL 5.6.51, the version of Citadel's 
 - **tags**: `["amd64"]`
 - **php_extensions**: `["pdo_mysql"]`
 
-in 0.10.0
+in 0.11.0
 
 #### composer-audit
 
@@ -1217,7 +1260,7 @@ Checks the passenger list.
 `composer audit --locked`, failing on any advisory.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 **3 inputs**
@@ -1226,7 +1269,7 @@ Checks the passenger list.
 - **image**: `composer:2.11.1@sha256:…`
 - **working_dir**: `.`
 
-in 0.10.0
+in 0.11.0
 
 #### sbom
 
@@ -1235,7 +1278,7 @@ The cargo manifest.
 A validated CycloneDX SBOM, published as an artifact. The plugin installs globally, so the app's files stay as they are.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 **4 inputs**
@@ -1245,7 +1288,7 @@ A validated CycloneDX SBOM, published as an artifact. The plugin installs global
 - **omit_dev**: `true`
 - **output**: `sbom.cdx.json`
 
-in 0.10.0
+in 0.11.0
 
 #### pint
 
@@ -1254,7 +1297,7 @@ Uniform pressed.
 The app's own Laravel Pint in test mode. The app requires `laravel/pint` and ships a `pint.json`.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 **4 inputs**
@@ -1264,7 +1307,7 @@ The app's own Laravel Pint in test mode. The app requires `laravel/pint` and shi
 - **config**: `pint.json`
 - **working_dir**: `.`
 
-in 0.10.0
+in 0.11.0
 
 #### phpstan
 
@@ -1273,7 +1316,7 @@ Instruments cross-checked.
 The app's own PHPStan, with a Code Quality report. The app requires `phpstan/phpstan` and ships a `phpstan.neon`.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 **5 inputs**
@@ -1284,7 +1327,7 @@ The app's own PHPStan, with a Code Quality report. The app requires `phpstan/php
 - **memory_limit**: `1G`
 - **working_dir**: `.`
 
-in 0.10.0
+in 0.11.0
 
 #### eslint
 
@@ -1293,7 +1336,7 @@ The front cabin, too.
 The app's own ESLint and Prettier. The app requires `@waynestate/pinstripe`, `eslint` and `prettier`.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 **5 inputs**
@@ -1304,7 +1347,7 @@ The app's own ESLint and Prettier. The app requires `@waynestate/pinstripe`, `es
 - **eslint_args**: `.`
 - **prettier**: `true`
 
-in 0.10.0
+in 0.11.0
 
 #### a11y
 
@@ -1313,7 +1356,7 @@ Boarding for every passenger.
 Opens the pages in Chromium and fails on any axe-core violation, with the reflow check at 320 px. It serves a static `site_dir`, or checks a running app at `base_url`.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 **6 inputs**
@@ -1325,7 +1368,7 @@ Opens the pages in Chromium and fails on any axe-core violation, with the reflow
 - **base_url**: `""`
 - **wcag_tags**: `wcag21aa` and below
 
-in 0.10.0
+in 0.11.0
 
 #### composer-ci
 
@@ -1334,7 +1377,7 @@ Your checklist, flown as written.
 `composer install`, then the project's own `composer ci`, whose exit code decides the job. There is no `allow_failure` input: a red `composer ci` holds the pipeline.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-ci@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-ci@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 **3 inputs**
@@ -1343,7 +1386,7 @@ Your checklist, flown as written.
 - **image**: `composer:2.11.1@sha256:…`
 - **working_dir**: `.`
 
-in 0.10.0
+in 0.11.0
 
 #### php-package.yml
 
@@ -1352,7 +1395,7 @@ Two cockpits, one checklist.
 Components stay inside one GitLab instance, so GitHub mirrors call this reusable workflow instead: `composer ci` on each PHP version, then a Composer audit.
 
 ```
-uses: waynestate/preflight/.github/workflows/php-package.yml@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+uses: waynestate/preflight/.github/workflows/php-package.yml@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 **3 inputs**
@@ -1447,13 +1490,13 @@ workflow:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 2 Switches · project settings
@@ -1484,7 +1527,7 @@ on:
 
 jobs:
   ci:
-    uses: waynestate/preflight/.github/workflows/php-package.yml@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+    uses: waynestate/preflight/.github/workflows/php-package.yml@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 4 Ground check · your machine
@@ -1694,6 +1737,15 @@ Source: https://preflight.apps.wayne.edu/docs/changelog.html
 All notable changes to Preflight are recorded here. Entries follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); released versions are Git tags.
 
 ### Unreleased [#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
+
+### 0.12.0 (2026-11-20) [#](https://preflight.apps.wayne.edu/docs/changelog.html#0-12-0-2026-11-20)
+
+Tag pipelines can run only the release jobs (D-125). Every test component gains an opt-in `tag_pipeline` input and a new `release-gate` component fails the tag pipeline unless main passed the tagged commit. Nothing changes for a repo that sets nothing: the input defaults to `full`. No input or job was renamed or removed.
+
+- Added: the `tag_pipeline` input (`full` by default, or `release-only`) on proctor, php-test, composer-audit, composer-ci, a11y, secret-detection, sbom, squire-kit, mysql56-migrate, portability, npm-audit, eslint, phpstan and pint. With `release-only` the job is skipped on tag pipelines (D-125).
+- Added: the `release-gate` component (seventeenth). On a tag pipeline, in stage `.pre`, it asks the API whether the tagged commit has a successful pipeline on the default branch, using only the job token. When the token cannot list pipelines it falls back to checking with git that the commit is on the default branch, and says in the log that green-ness then rests on the release procedure.
+- Added: `tests/check-release-gate-fails.sh` and the `must-fail-release-gate` job prove the gate passes a tested commit and fails an untested one in both modes.
+- Changed: Preflight's own pipeline opts in: on a tag it runs the gate and the release job only.
 
 ### 0.11.0 (2026-11-19) [#](https://preflight.apps.wayne.edu/docs/changelog.html#0-11-0-2026-11-19)
 
@@ -2057,8 +2109,11 @@ include:
 | `playwright_version` | string | `""` | playwright npm version. Empty reads it from the image tag; set it only for an image whose tag does not carry `vX.Y.Z`. |
 | `axe_core_version` | string | `4.14.0` | axe-core version, the rules engine. The job fails if a different axe-core ran. |
 | `axe_playwright_version` | string | `4.14.0` | @axe-core/playwright version, the bridge to Playwright. Its axe-core range must include `axe_core_version`. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline. `full` (the default) runs it as on any pipeline; `release-only` skips it on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component. |
 
 A page glob uses `**` for any number of folders and `*` inside one folder name. Folders that start with a dot, `node_modules` and `vendor` are skipped. A literal page that is not there fails its check (HTTP 404); a glob that matches nothing stops the job as a configuration error, so a moved docs folder cannot quietly shrink the gate.
+
+Set `tag_pipeline: release-only` when a tag is cut from a commit that main already tested: the job is skipped on the tag pipeline and the `release-gate` component checks main was green.
 
 ### How the job works [#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#how-the-job-works)
 
@@ -2210,10 +2265,13 @@ include:
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `working_dir` | string | `.` | Directory to run composer audit in, relative to the project root. |
 | `abandoned` | string | `fail` | How composer audit treats abandoned packages: fail (default), report (list them, do not fail) or ignore. |
+| `tag_pipeline` | string | `full` | What this job does on a tag pipeline. `full` (default): it runs, as on any pipeline. `release-only`: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch. |
 
 Note
 
 The template adds regexes to three inputs: `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`, `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$` and `abandoned` must match `^(fail|report|ignore)$`.
+
+Set `tag_pipeline: release-only` when a tag is cut from a commit that main already tested: the job is skipped on the tag pipeline and the `release-gate` component checks main was green.
 
 ### What the job does [#](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#what-the-job-does)
 
@@ -2284,10 +2342,13 @@ include:
 | `image` | string | `composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0` | Docker image for the job. |
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `working_dir` | string | `.` | Directory to run Composer in, relative to the project root. |
+| `tag_pipeline` | string | `full` | What this job does on a tag pipeline. `full` (default): it runs, as on any pipeline. `release-only`: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch. |
 
 Note
 
 The template adds regexes to two inputs: `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$` and `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$`.
+
+Set `tag_pipeline: release-only` when a tag is cut from a commit that main already tested: the job is skipped on the tag pipeline and the `release-gate` component checks main was green.
 
 ### What the job does [#](https://preflight.apps.wayne.edu/docs/guides/component-composer-ci.html#what-the-job-does)
 
@@ -2353,6 +2414,9 @@ include:
 | `working_dir` | string | `.` | Directory to run the commands in, relative to the project root. |
 | `eslint_args` | string | `.` | Arguments passed to eslint. |
 | `prettier` | boolean | `true` | Whether to also run `prettier --check`. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
+
+Set `tag_pipeline: release-only` when a tag is cut from a commit that main already tested: the job is skipped on the tag pipeline and the `release-gate` component checks main was green.
 
 ### Verify [#](https://preflight.apps.wayne.edu/docs/guides/component-eslint.html#verify)
 
@@ -2408,6 +2472,9 @@ The official MySQL 5.6 images are amd64 only, so the job defaults to `tags: ["am
 | `migrate_command` | string | `php artisan migrate --force --no-interaction` | Command that runs the app's migrations. |
 | `tags` | array | `["amd64"]` | Runner tags for the job. The official MySQL 5.6 images are amd64 only; set an empty list on an amd64 or emulating default runner. |
 | `php_extensions` | array | `["pdo_mysql"]` | PHP extensions installed with `docker-php-ext-install` unless `php -m` already lists them. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
+
+Set `tag_pipeline: release-only` when a tag is cut from a commit that main already tested: the job is skipped on the tag pipeline and the `release-gate` component checks main was green.
 
 An app whose `composer.json` needs extensions with system libraries (`intl`, `zip`, `gd`) sets `image` to one that has them, since `docker-php-ext-install` alone cannot build those.
 
@@ -2489,6 +2556,9 @@ npm-audit ships in Preflight 0.5.0; 0.4.0 does not include it. Pin that tag's fu
 | `working_dir` | string | `.` | Directory that holds `package-lock.json`, relative to the project root. |
 | `audit_level` | string | `high` | Lowest severity that fails the job: `low`, `moderate`, `high` or `critical`. `medium` is accepted too and means `moderate` (see Severity words below). |
 | `omit_dev` | boolean | `true` | Whether the failing audit leaves dev dependencies out. The full report after it always lists them and never fails. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
+
+Set `tag_pipeline: release-only` when a tag is cut from a commit that main already tested: the job is skipped on the tag pipeline and the `release-gate` component checks main was green.
 
 Note
 
@@ -2648,10 +2718,13 @@ include:
 | `composer_version` | string | `2.11.1` | Composer version to install, 2.9.6 or later. |
 | `test_command` | string | `vendor/bin/phpunit` | The test command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
+| `tag_pipeline` | string | `full` | What this job does on a tag pipeline. `full` (default): it runs, as on any pipeline. `release-only`: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch. |
 
 Note
 
 The template adds regexes to three inputs: `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`, `composer_version` must match `^2\.(9\.([6-9]|[1-9][0-9]+)|[1-9][0-9]+\.[0-9]+)$`, and `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$`.
+
+Set `tag_pipeline: release-only` when a tag is cut from a commit that main already tested: the job is skipped on the tag pipeline and the `release-gate` component checks main was green.
 
 ### What the jobs do [#](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html#what-the-jobs-do)
 
@@ -2790,6 +2863,9 @@ artifacts:
 | `config` | string | `phpstan.neon` | Path to the app's PHPStan config file. It must be a relative path; GitLab refuses the pipeline at creation if it is not. |
 | `memory_limit` | string | `1G` | Memory limit passed to PHPStan. A PHP size such as `1G`, `512M` or `-1`; GitLab refuses the pipeline at creation if it is not. |
 | `working_dir` | string | `.` | Directory to run PHPStan in, relative to the project root. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
+
+Set `tag_pipeline: release-only` when a tag is cut from a commit that main already tested: the job is skipped on the tag pipeline and the `release-gate` component checks main was green.
 
 `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`, and `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$`.
 
@@ -2863,6 +2939,9 @@ The job lands in the `test` stage by default, is `interruptible: true`, and has 
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `config` | string | `pint.json` | Path to the app's Pint config file. It must be a relative path; GitLab refuses the pipeline at creation if it is not. |
 | `working_dir` | string | `.` | Directory to run Pint in, relative to the project root. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
+
+Set `tag_pipeline: release-only` when a tag is cut from a commit that main already tested: the job is skipped on the tag pipeline and the `release-gate` component checks main was green.
 
 `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`, and `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$`.
 
@@ -3029,6 +3108,9 @@ Before 0.5.0 an Apache image needed a `start_command` shim such as `exec setsid 
 | `logs_path` | string | `storage/logs` | Directory, relative to `app_root`, where nothing may be written. |
 | `require_healthcheck` | boolean | `false` | Fail when the image declares no HEALTHCHECK. Docker and Coolify use it; OpenShift and Kubernetes use their own probes. |
 | `checks` | array | `["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm", "healthcheck"]` | The checks to run. Leave one out only on purpose; the strict boot always runs. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
+
+Set `tag_pipeline: release-only` when a tag is cut from a commit that main already tested: the job is skipped on the tag pipeline and the `release-gate` component checks main was green.
 
 The `image` default is an immutable tag (`-immutable`) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.
 
@@ -3082,10 +3164,13 @@ The install skips plugins and scripts on purpose: the job only inspects the app,
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
 | `git_depth` | string | `"0"` | How many commits the job clones (GitLab's `GIT_DEPTH`); the default `0` clones the full history, so PROCTOR's override-approver check can see who wrote each override. |
 | `check_path` | string | `""` | Directory to run the proctor command in, relative to the project root, after the install. Empty (the default) runs it in `working_dir`; set it to `.` to install in a folder such as `deploy` and run the check from the project root. |
+| `tag_pipeline` | string | `full` | What this job does on a tag pipeline. `full` (default): it runs, as on any pipeline. `release-only`: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch. |
 
 Note
 
 The template adds regexes to five inputs: `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`, `composer_version` must match `^2\.(9\.([6-9]|[1-9][0-9]+)|[1-9][0-9]+\.[0-9]+)$`, `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$`, `git_depth` must match `^[0-9]+$`, and `check_path` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)?$`.
+
+Set `tag_pipeline: release-only` when a tag is cut from a commit that main already tested: the job is skipped on the tag pipeline and the `release-gate` component checks main was green.
 
 ### Install in one folder, check from another [#](https://preflight.apps.wayne.edu/docs/guides/component-proctor.html#install-in-one-folder-check-from-another)
 
@@ -3145,6 +3230,69 @@ Set `allow_failure: true` if the job may fail without failing the pipeline; the 
 
 - [The php-test component](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html)
 - [The composer-audit component](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html)
+
+---
+
+Source: https://preflight.apps.wayne.edu/docs/guides/component-release-gate.html
+
+## The release-gate component [#](https://preflight.apps.wayne.edu/docs/guides/component-release-gate.html#the-release-gate-component)
+
+This page covers the `release-gate` component: what the job does, how to include it, and every input it takes. Goal: when a repo opts its test components into `tag_pipeline: release-only`, a tag pipeline skips the tests and runs only the release jobs, and this gate is the proof that skipping them is safe.
+
+Version 1 · Category: Release/Publishing · Tags: release,gate,tag-pipeline
+
+### What the job does [#](https://preflight.apps.wayne.edu/docs/guides/component-release-gate.html#what-the-job-does)
+
+The job runs in the `.pre` stage, before every other stage, so a failure stops the whole tag pipeline before any release job starts. It runs only on tags, and it answers one question: did the default branch already run a successful pipeline on this exact commit? Skipping the tests is only safe if the answer is yes, and the job is how the pipeline finds out.
+
+The job, in order:
+
+1. Runs only when the pipeline is for a tag, so `$CI_COMMIT_TAG` is set.
+2. Asks the GitLab API, with the job token (`CI_JOB_TOKEN`) and nothing else, for a successful pipeline of `$CI_COMMIT_SHA` on `$CI_DEFAULT_BRANCH`. A hit passes the gate: the default branch tested this very commit, so the tag pipeline can release what was already green. An empty list fails the job, because the commit was never tested on the default branch.
+3. When the API cannot be read (the job token may not list pipelines on some GitLab installations, or the API is unreachable), the job falls back to git: it fetches the default branch and checks that the tagged commit is an ancestor of it.
+
+The git fallback has an honest limit. It proves the commit is on the default branch, not that it passed there: git history records merges, not pipeline results. In fallback mode the gate's green-ness rests on the release procedure instead, which says to tag only after main is green. The job prints that in its log when it falls back.
+
+A repo with no release jobs still gets the gate. With the test components set to `tag_pipeline: release-only` and this component included, its tag pipeline is just the gate, and the gate still refuses a tag on a commit the default branch never tested.
+
+The default image ships git and curl, which the job uses for the API check and the git fallback. The job is interruptible and times out after 5 minutes.
+
+Note
+
+The gate reads the API with the predefined `CI_JOB_TOKEN` only. It needs no extra CI variables, and it never asks for a project access token.
+
+### Include the component [#](https://preflight.apps.wayne.edu/docs/guides/component-release-gate.html#include-the-component)
+
+Opt in by setting `tag_pipeline: release-only` on the test components you want skipped on tag pipelines, and include this component. Pin the include to a full commit SHA with the tag in a trailing comment:
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+    inputs:
+      tag_pipeline: release-only
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/release-gate@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+```
+
+### Inputs [#](https://preflight.apps.wayne.edu/docs/guides/component-release-gate.html#inputs)
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `.pre` | Pipeline stage for the release-gate job. The default, .pre, runs before every other stage, so a failed gate stops the whole tag pipeline. |
+| `job_name` | string | `release-gate` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0` | Docker image for the release-gate job. The default ships git and curl, which the job uses for the API check and the git fallback. |
+| `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path put in front of the image input. The default is this group's GitLab Dependency Proxy, so Docker Hub images are pulled once and then served from GitLab's cache. On a GitLab or group without the proxy, set it to docker.io. No trailing slash. |
+
+### Verify [#](https://preflight.apps.wayne.edu/docs/guides/component-release-gate.html#verify)
+
+Push a semantic version tag at a commit the default branch already ran green. Expected: the `release-gate` job runs first, in the `.pre` stage, names the pipeline it found, and passes, and the release jobs run after it. Tag a commit the default branch never tested, and the gate fails the pipeline before anything else starts.
+
+### Related [#](https://preflight.apps.wayne.edu/docs/guides/component-release-gate.html#related)
+
+- [Quick start](https://preflight.apps.wayne.edu/docs/guides/quick-start.html): wire one component into an app and watch the pipeline run it.
+- [Install](https://preflight.apps.wayne.edu/docs/install.html): the requirements, the include snippet, and how to verify.
+- [When the components run](https://preflight.apps.wayne.edu/docs/guides/when-components-run.html): the `workflow:rules` block that belongs in the app's own file.
+- [Include a component twice](https://preflight.apps.wayne.edu/docs/guides/include-twice.html): the `job_name` input in action.
+- [Reference](https://preflight.apps.wayne.edu/docs/reference/components.html): every component, with its inputs and defaults.
 
 ---
 
@@ -3280,12 +3428,15 @@ The path is the `output` input, and the artifact expires in 30 days.
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `omit_dev` | boolean | `true` | Whether to omit dev dependencies from the SBOM. |
 | `output` | string | `sbom.cdx.json` | Path of the SBOM file to publish, relative to the project root. It must be a relative path; GitLab refuses the pipeline at creation if it is not. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline. `full` (the default) runs it as on any pipeline; `release-only` skips it on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component. |
 
 `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`.
 
 Note
 
 `output` must be a relative path. The input carries a `regex`, so GitLab refuses the pipeline at creation when a value does not match.
+
+Set `tag_pipeline: release-only` when a tag is cut from a commit that main already tested: the job is skipped on the tag pipeline and the `release-gate` component checks main was green.
 
 ### Verify [#](https://preflight.apps.wayne.edu/docs/guides/component-sbom.html#verify)
 
@@ -3338,6 +3489,9 @@ include:
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `config_path` | string | `""` | Path to a `.gitleaks.toml` config file, relative to the project root. Empty uses the built-in rules plus a path allowlist for `vendor/` and `node_modules/`. When set, your file replaces the default, so add the same `vendor` and `node_modules` path allowlist to it. |
 | `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline. `full` (the default) runs it as on any pipeline; `release-only` skips it on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component. |
+
+Set `tag_pipeline: release-only` when a tag is cut from a commit that main already tested: the job is skipped on the tag pipeline and the `release-gate` component checks main was green.
 
 ### Allowlist a false positive [#](https://preflight.apps.wayne.edu/docs/guides/component-secret-detection.html#allowlist-a-false-positive)
 
@@ -3423,8 +3577,11 @@ Run `vendor/bin/squire init --check --path=deploy` on your desk first. Include t
 | `working_dir` | string | `.` | The kit folder: the one holding `.squire.json`, relative to the project root. |
 | `squire_version` | string | `""` | Squire release to check against. Empty reads the version recorded in `.squire.json`. |
 | `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline, for a repository cleaning up its first findings. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline. `full` (the default) runs it as on any pipeline; `release-only` skips it on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component. |
 
 `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`, `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$`, and `squire_version` must be empty or match `^[0-9]+\.[0-9]+\.[0-9]+$`. GitLab refuses the pipeline at creation when a value does not match.
+
+Set `tag_pipeline: release-only` when a tag is cut from a commit that main already tested: the job is skipped on the tag pipeline and the `release-gate` component checks main was green.
 
 ### When the job is red [#](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html#when-the-job-is-red)
 
@@ -3909,6 +4066,7 @@ This list covers Preflight's components only. Your app adds its own hosts: a pri
 | `mysql56-migrate` | `git` and `unzip` with `apt-get` and the Composer 2.11.1 phar (checked by SHA-256) when the image has no Composer; the app's dependencies. The MySQL 5.6.51 service is an image, pulled by the runner | `deb.debian.org`, `getcomposer.org`, `repo.packagist.org`, `api.github.com`, `codeload.github.com`, `github.com` |
 | `portability` | Nothing for the probe itself. The build pulls the app's base images and runs its Dockerfile, so it reaches whatever they name | the app's own |
 | `package-publish` | The group's Composer registry index and the package's metadata; then the publish request | none |
+| `release-gate` | Nothing: it asks the GitLab API for a successful pipeline of the tagged commit on the default branch, and falls back to a `git fetch` of the default branch, both on the instance itself | none |
 | `renovate` | Every registry it looks up updates in, and release notes | `registry.npmjs.org`, `repo.packagist.org`, `packagist.org`, `registry-1.docker.io`, `auth.docker.io`, `quay.io`, `mcr.microsoft.com`, `api.github.com`, `github.com` |
 
 Composer fetches a GitHub-hosted package from `api.github.com`, which redirects to `codeload.github.com`; when that fails it clones from `github.com`. A private Packagist mirror or an HTTP proxy with path rules can narrow those three.
@@ -4371,6 +4529,7 @@ include:
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
 | `git_depth` | string | `"0"` | How many commits the job clones (GitLab's `GIT_DEPTH`); the default `0` clones the full history, so PROCTOR's override-approver check can see who wrote each override. |
 | `check_path` | string | `""` | Directory to run the proctor command in, relative to the project root, after the install. Empty (the default) runs it in `working_dir`; set it to `.` to install in a folder such as `deploy` and run the check from the project root. |
+| `tag_pipeline` | string | `full` | What this job does on a tag pipeline. `full` (default): it runs, as on any pipeline. `release-only`: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch. |
 
 From `templates/proctor/template.yml`: the single job (named by `job_name`) runs in the `test` stage by default, is `interruptible: true`, and has a timeout of 30 minutes. It installs Composer with the official getcomposer.org installer, verifies the installer's SHA-384 against composer.github.io/installer.sig, and pins the installed version to `composer_version`. It then runs `composer install --no-interaction --no-progress --no-plugins --no-scripts --ignore-platform-reqs`, so the app's plugins and scripts never run with the job's access and the app's PHP version and extensions are not required. The command's output goes through a plain redirect (not `tee`) to `gl-code-quality-report.json` at the project root, which keeps PROCTOR's exit code as the job result and gives the artifact the same path for every `working_dir`, including `.`. The report is published as a Code Quality report with `when: always`. Before the command runs, a guard adds `--record "$CI_PROJECT_DIR/proctor.json"` when the command is a plain `proctor check` line (letters, digits, spaces and `/ . _ = : , @ % + -` only, no `--record` of its own) and the app's PROCTOR lists `--record` in its help (0.11.0 and later); the guard reads the command from the job variable `PREFLIGHT_PROCTOR_COMMAND` and cannot change the job's result. The artifact keeps `proctor.json` (`paths`, `expire_in: 30 days`), PROCTOR's JSON report for Rollcall's `ROLLCALL_PROCTOR_SOURCE=gitlab` reader; on PROCTOR 0.10.0 or older no file is written and the runner only warns.
 
@@ -4396,6 +4555,7 @@ include:
 | `composer_version` | string | `2.11.1` | Composer version to install, 2.9.6 or later. |
 | `test_command` | string | `vendor/bin/phpunit` | The test command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
+| `tag_pipeline` | string | `full` | What this job does on a tag pipeline. `full` (default): it runs, as on any pipeline. `release-only`: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch. |
 
 From `templates/php-test/template.yml`: one job is created per entry in `php_versions` through `parallel:matrix`; `PHP_VERSION` becomes a CI/CD variable in each job, which the image input's default expands, and each job runs the newest patch release of its version. The default image is deliberately tag-pinned (the template points at the README section Updating image pins). Each job installs Composer the same way as proctor, runs `composer install --no-interaction --no-progress`, and then the test command. The jobs are `interruptible: true` with a timeout of 30 minutes. The `<job_name>-advisory` job runs the same script on `php_advisory_version` (default `8.6`) with `allow_failure: true`, and it is skipped while that input is empty. Because the official 8.6 image ships without `mbstring`, the script installs it first when `php -m` does not list it (a no-op on 8.3 to 8.5), so PHPUnit can start.
 
@@ -4441,6 +4601,7 @@ include:
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `working_dir` | string | `.` | Directory to run composer audit in, relative to the project root. |
 | `abandoned` | string | `fail` | How composer audit treats abandoned packages: fail (default), report (list them, do not fail) or ignore. |
+| `tag_pipeline` | string | `full` | What this job does on a tag pipeline. `full` (default): it runs, as on any pipeline. `release-only`: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch. |
 
 From `templates/composer-audit/template.yml`: the Composer image (`composer:2.11.1`, pinned by digest) already ships Composer, so there is no install step. The job runs `composer audit --locked` with `--abandoned` set to the `abandoned` input (`fail` by default, `report` or `ignore` to relax the abandoned check), which exits non-zero when it finds advisories, and fails the job. There is no `allow_failure` input: advisories must fail. The job is `interruptible: true` with a timeout of 30 minutes.
 
@@ -4466,6 +4627,7 @@ include:
 | `image` | string | `composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0` | Docker image for the job. |
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `working_dir` | string | `.` | Directory to run Composer in, relative to the project root. |
+| `tag_pipeline` | string | `full` | What this job does on a tag pipeline. `full` (default): it runs, as on any pipeline. `release-only`: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch. |
 
 From `templates/composer-ci/template.yml`: the Composer image (`composer:2.11.1`, pinned by digest) already ships Composer, so there is no install step for the tool. The job changes into `working_dir`, runs `composer install --no-interaction --no-progress --prefer-dist`, and then `composer ci`, the project's own ci script, whose exit code decides the job. There is no `allow_failure` input: a failing `composer ci` must fail the pipeline. The Composer cache uses the fixed key `preflight-composer-ci` and the path `.composer-cache/`, saved with `when: always`. The job is `interruptible: true` with a timeout of 30 minutes.
 
@@ -4489,6 +4651,7 @@ include:
 | `working_dir` | string | `.` | Directory that holds `package-lock.json`, relative to the project root. |
 | `audit_level` | string | `high` | Lowest severity that fails the job: `low`, `moderate`, `high` or `critical`; `medium` (CREED's and Composer's word) means `moderate`. |
 | `omit_dev` | boolean | `true` | Whether the failing audit leaves dev dependencies out. The full report always lists them. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
 
 From `templates/npm-audit/template.yml`: with no `package-lock.json` (or `npm-shrinkwrap.json`) the job prints "nothing to audit" and passes. Otherwise it runs `npm audit --omit=dev --audit-level=<audit_level> --audit=true --offline=false` and keeps npm's exit code; the two flags stop an `.npmrc` with `audit=false` or `offline=true` from faking a pass. An unreachable registry fails the job with a message saying so. Nothing is installed. The cache is the app's own (key `npm`, path `.cache/npm/`, `policy: pull`). There is no `allow_failure` input. The job is `interruptible: true` with a timeout of 10 minutes. [The npm-audit component](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html) has the severity map and the proof.
 
@@ -4511,6 +4674,7 @@ include:
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `omit_dev` | boolean | `true` | Whether to omit dev dependencies from the SBOM. |
 | `output` | string | `sbom.cdx.json` | Path of the SBOM file to publish, relative to the project root. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline. `full` (the default) runs it as on any pipeline; `release-only` skips it on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component. |
 
 From `templates/sbom/template.yml`: the job runs `composer install --no-interaction --no-progress --prefer-dist --no-scripts --ignore-platform-reqs` (the app's scripts never run, and its PHP version and extensions are not required), allows the plugin globally with `composer global config --no-plugins allow-plugins.cyclonedx/cyclonedx-php-composer true`, installs `cyclonedx/cyclonedx-php-composer:^6.2` globally, and then runs `composer CycloneDX:make-sbom --output-format=JSON --output-reproducible --validate` with `--omit=dev` added while `omit_dev` is true, writing to the `output` path. The `--validate` flag fails the job on an invalid SBOM. The SBOM file is published as an artifact with `expire_in: 30 days`. The job is `interruptible: true` with a timeout of 30 minutes.
 
@@ -4535,6 +4699,7 @@ include:
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `config` | string | `pint.json` | Path to the app's Pint config file. |
 | `working_dir` | string | `.` | Directory to run Pint in, relative to the project root. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
 
 From `templates/pint/template.yml`: the component does not install Pint itself; it runs `composer install --no-interaction --no-progress --prefer-dist` and then the app's own Pint in test mode against the `config` file. The job is `interruptible: true` with a timeout of 10m.
 
@@ -4561,6 +4726,7 @@ include:
 | `config` | string | `phpstan.neon` | Path to the app's PHPStan config file. |
 | `memory_limit` | string | `1G` | Memory limit passed to PHPStan. |
 | `working_dir` | string | `.` | Directory to run PHPStan in, relative to the project root. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
 
 From `templates/phpstan/template.yml`: the component does not install PHPStan itself; it runs `composer install --no-interaction --no-progress --prefer-dist` and then the app's own PHPStan with `--no-progress --error-format=gitlab`, the `memory_limit` value and the `config` file, redirecting the output to `$CI_PROJECT_DIR/phpstan-report.json`. The report is published as a Code Quality report with `when: always`. The job is `interruptible: true` with a timeout of 10m.
 
@@ -4586,6 +4752,7 @@ include:
 | `working_dir` | string | `.` | Directory to run the commands in, relative to the project root. |
 | `eslint_args` | string | `.` | Arguments passed to eslint. |
 | `prettier` | boolean | `true` | Whether to also run `prettier --check`. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
 
 From `templates/eslint/template.yml`: the component does not install ESLint or Prettier itself; it runs `npm ci --ignore-scripts --cache .npm-cache` (the cache uses the fixed key `preflight-eslint` and stores `.npm-cache/`), then `npx --no-install eslint` with the `eslint_args` value, and, while `prettier` is true, `npx --no-install prettier --check .`. The job is `interruptible: true` with a timeout of 15m.
 
@@ -4608,6 +4775,7 @@ include:
 | `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path in front of `image`: the job pulls `image_prefix/image`. The default is the group's GitLab Dependency Proxy, so Docker Hub is asked once and GitLab serves the cached copy. Outside a group with the proxy, set `docker.io`. No trailing slash. |
 | `config_path` | string | `""` | Path to a `.gitleaks.toml` config file, relative to the project root. Empty uses the built-in rules plus a path allowlist for `vendor/` and `node_modules/`. When set, your file replaces the default, so add the same `vendor` and `node_modules` path allowlist to it. |
 | `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline. `full` (the default) runs it as on any pipeline; `release-only` skips it on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component. |
 
 From `templates/secret-detection/template.yml`: the single job (named by `job_name`) runs in the `test` stage by default, is `interruptible: true`, and has a timeout of 30 minutes. The job overrides the image's entrypoint with an empty value, because GitLab's Docker executor would otherwise pass the script to the gitleaks binary; the image is Alpine-based with `/bin/sh`, and the script is plain POSIX sh. The job writes the default config to `/tmp` (outside the scanned tree) unless `config_path` is set, then runs `gitleaks dir --redact --no-banner` with `--config` pointing at that file or the user's, writing a JSON report to `gitleaks.json` at the project root. The report is published as an artifact with `when: always` and `expire_in: 30 days`, so a red pipeline still shows what was found, redacted. In `dir` mode Gitleaks reads a `.gitleaksignore` at the project root without an extra flag.
 
@@ -4638,6 +4806,26 @@ Warning
 Protect your release tags.
 
 From `templates/package-publish/template.yml`: the job runs only when `$CI_COMMIT_TAG` is set. The tag must be a semantic version, `1.2.3` or `v1.2.3` with an optional pre-release, or the job fails. The package name comes from `composer.json`, the file the registry serves. The job reads the masked CI variable named by `read_token_variable`, checks that `group_id` is numeric, reads the group's Composer registry index with the token, and follows the package metadata to the version already on the manifest. A version already published at this commit passes quietly (exit 0); a version published at a different commit fails (exit 1). Publishing posts the tag to the project's Composer packages endpoint with the job token. The job is `interruptible: true` with a timeout of 30 minutes.
+
+### release-gate [#](https://preflight.apps.wayne.edu/docs/reference/components.html#release-gate)
+
+Version 1 · Category: Release/Publishing · Tags: release,gate,tag-pipeline
+
+Fails a tag pipeline unless the default branch already ran a successful pipeline on the tagged commit (D-125). The job runs only on tags, in the `.pre` stage before every other stage, so a failure stops the whole tag pipeline before any release job starts. It asks the GitLab API first, with the job token only, and falls back to git when the API cannot be read; the fallback proves the commit is on the default branch, not that it passed there, so in fallback mode the green-ness rests on the release procedure, which says to tag only after the default branch is green. A repo with no release jobs still gets a tag pipeline of just the gate. See [The release-gate component](https://preflight.apps.wayne.edu/docs/guides/component-release-gate.html).
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/release-gate@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+```
+
+| Input | Type | Default | What it does |
+| --- | --- | --- | --- |
+| `stage` | string | `.pre` | Pipeline stage for the release-gate job. The default, .pre, runs before every other stage, so a failed gate stops the whole tag pipeline. |
+| `job_name` | string | `release-gate` | Name of the job. Set it when you include this component more than once. |
+| `image` | string | `composer:2.11.1@sha256:8de2184c6de224f4689e8f80ed5f5edaf0030b6b8b7839a22a2bcb6722ac87d0` | Docker image for the release-gate job. The default ships git and curl, which the job uses for the API check and the git fallback. |
+| `image_prefix` | string | `${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}` | Registry path put in front of the image input. The default is this group's GitLab Dependency Proxy, so Docker Hub images are pulled once and then served from GitLab's cache. On a GitLab or group without the proxy, set it to docker.io. No trailing slash. |
+
+From `templates/release-gate/template.yml`: the single job (named by `job_name`) runs in the `.pre` stage by default, is `interruptible: true`, and has a timeout of 5 minutes. It runs only when `$CI_COMMIT_TAG` is set, clones the full history (`GIT_DEPTH: "0"`), and asks the GitLab API with the `JOB-TOKEN` header for a successful pipeline of `$CI_COMMIT_SHA` on `$CI_DEFAULT_BRANCH`; a hit passes, an empty list fails the job. When the API cannot be read, it fetches the default branch and passes only if the tagged commit is an ancestor of it, and says in its log that this proves the commit is on the branch, not that it passed there.
 
 ### renovate [#](https://preflight.apps.wayne.edu/docs/reference/components.html#renovate)
 
@@ -4706,6 +4894,7 @@ The one-job form ships in 0.2.0; 0.1.4 carries the earlier two-job form (`portab
 | `logs_path` | string | `storage/logs` | Directory, relative to `app_root`, where nothing may be written. |
 | `require_healthcheck` | boolean | `false` | Fail when the image declares no HEALTHCHECK. Docker and Coolify use it; OpenShift and Kubernetes use their own probes. |
 | `checks` | array | `["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm", "healthcheck"]` | The checks to run. Leave one out only on purpose; the strict boot always runs. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
 
 The `image` default is an immutable tag (`-immutable`) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.
 
@@ -4740,6 +4929,7 @@ include:
 | `playwright_version` | string | `""` | playwright npm version. Empty reads it from the image tag. |
 | `axe_core_version` | string | `4.14.0` | axe-core version; the job fails if a different one ran. |
 | `axe_playwright_version` | string | `4.14.0` | @axe-core/playwright version; its axe-core range must include `axe_core_version`. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline. `full` (the default) runs it as on any pipeline; `release-only` skips it on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component. |
 
 From `templates/a11y/template.yml`: the single job (named by `job_name`) runs in the `test` stage by default, is `interruptible: true`, and has a timeout of 30 minutes. It reads the Playwright version from the image tag, installs `playwright`, `@axe-core/playwright` and `axe-core` at exact versions with `npm install --ignore-scripts` into a temporary folder outside the project, writes the inputs as JSON and the checker (inlined from `templates/a11y/check.mjs`, because a component ships only its `template.yml`), and runs it from the project root with every check at reduced motion. It writes `gl-a11y-junit.xml` (published as a JUnit report) and `gl-a11y-report.json`, kept as artifacts for 30 days with `when: always`. It exits 0 clean, 1 on a violation or a page that did not load, and 2 on a tool or configuration error. `allow_failure` is interpolated as a real YAML boolean.
 
@@ -4765,6 +4955,7 @@ include:
 | `working_dir` | string | `.` | The kit folder: the one holding `.squire.json`, relative to the project root. |
 | `squire_version` | string | `""` | Squire release to check against, `x.y.z`. Empty reads the version recorded in `.squire.json`. |
 | `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline, for a repository cleaning up its first findings. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline. `full` (the default) runs it as on any pipeline; `release-only` skips it on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component. |
 
 From `templates/squire-kit/template.yml`: the single job (named by `job_name`) runs in the `test` stage by default, is `interruptible: true`, and has a timeout of 10 minutes. It installs `waynestate/squire` at the recorded version with `composer create-project --no-dev --no-scripts` into a temporary folder outside the project and runs `squire init --check --path=.` in `working_dir`. It exits 0 when the kit matches, 1 when it drifted, and 2 when the check could not run (no `.squire.json`, no released version recorded, or no such release). `allow_failure` is interpolated as a real YAML boolean.
 
@@ -4792,6 +4983,7 @@ mysql56-migrate ships in 0.6.0. A raw PHP app sets `migrate_command` to its own 
 | `migrate_command` | string | `php artisan migrate --force --no-interaction` | Command that runs the app's migrations. |
 | `tags` | array | `["amd64"]` | Runner tags for the job. The official MySQL 5.6 images are amd64 only; set an empty list on an amd64 or emulating default runner. |
 | `php_extensions` | array | `["pdo_mysql"]` | PHP extensions installed with `docker-php-ext-install` unless `php -m` already lists them. |
+| `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
 
 From `templates/mysql56-migrate/template.yml`: the single job (named by `job_name`) runs in the `test` stage by default, is `interruptible: true`, and has a timeout of 30 minutes. Its service is `image_prefix/service_image` with `alias: mysql`, created with the `db_name`, `db_user` and `db_password` inputs. It installs each of `php_extensions` that `php -m` does not list, runs `composer install --no-interaction --no-progress` when a `composer.json` exists (installing Composer 2.11.1, checked by SHA-256, when the image has none), waits up to 120 seconds for a PDO connection, then runs `migrate_command` with `DB_CONNECTION=mysql`, `DB_HOST=mysql` and `DB_PORT=3306`. The Composer cache uses the fixed key `preflight-mysql56-migrate` and the path `.composer-cache/`, saved with `when: always`. Its rules never run it on schedules, run it on tags and the default branch, and make it manual with `allow_failure: true` on merge requests.
 
@@ -4807,6 +4999,7 @@ From `templates/mysql56-migrate/template.yml`: the single job (named by `job_nam
 - [The eslint component](https://preflight.apps.wayne.edu/docs/guides/component-eslint.html)
 - [The secret-detection component](https://preflight.apps.wayne.edu/docs/guides/component-secret-detection.html)
 - [The package-publish component](https://preflight.apps.wayne.edu/docs/guides/component-package-publish.html)
+- [The release-gate component](https://preflight.apps.wayne.edu/docs/guides/component-release-gate.html)
 - [The renovate component](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html)
 - [The portability component](https://preflight.apps.wayne.edu/docs/guides/component-portability.html)
 - [The a11y component](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html)

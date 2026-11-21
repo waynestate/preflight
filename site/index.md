@@ -20,7 +20,7 @@ Preflight is a set of GitLab CI/CD components. Add them to the `include:` block 
 
 ```
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 Already included in [WELD](https://weld.apps.wayne.edu/) and in every [Sourdough](https://sourdough.apps.wayne.edu/) app. Use Preflight on its own to give a GitLab project you already have the stack's CI checks.
@@ -90,7 +90,7 @@ Cockpit placards
 
 Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All ten are in the 0.10.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Six more components ship in the same tag, and the docs cover each one: `secret-detection`, `squire-kit`, `portability`, `package-publish`, `renovate` and `npm-audit`. New in 0.10.0: `proctor` and `mysql56-migrate` default to PHP 8.5 (8.3 or later still flies through `image`), Playwright and Renovate move to new digests, Preflight's deploy kit follows Squire 0.11.1, and a `must-fail-composer-ci` job and two new guards make the pipeline do what the docs say it does. Nothing renamed, nothing removed. Since 0.9.0: `composer-ci` and `proctor`'s `check_path`; since 0.8.0, `portability`'s `session_header`. Every input on these placards is held to [a written contract](https://preflight.apps.wayne.edu/#contract).
 
-in 0.10.0
+in 0.11.0
 
 ### proctor
 
@@ -99,7 +99,7 @@ Watches the cabin.
 Runs PROCTOR's checks, publishes a Code Quality report and, since 0.5.0, keeps `proctor.json` for Rollcall.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 **7 inputs**
@@ -112,7 +112,7 @@ Runs PROCTOR's checks, publishes a Code Quality report and, since 0.5.0, keeps `
 - **working_dir**: `.`
 - **check_path**: `""`
 
-in 0.10.0
+in 0.11.0
 
 ### php-test
 
@@ -121,7 +121,7 @@ Three engines, all running.
 The test command on each supported PHP version, one job per version.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 **6 inputs**
@@ -133,7 +133,7 @@ The test command on each supported PHP version, one job per version.
 - **test_command**: `vendor/bin/phpunit`
 - **working_dir**: `.`
 
-in 0.10.0
+in 0.11.0
 
 ### mysql56-migrate
 
@@ -142,7 +142,7 @@ Practice on the runway you land on.
 Runs the app's migrations against a real MySQL 5.6.51, the version of Citadel's shared server, on the runner tagged `amd64`. SQLite waves through a `JSON` column or a too-long utf8mb4 index; 5.6 does not.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/mysql56-migrate@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/mysql56-migrate@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 **6 inputs**
@@ -154,7 +154,7 @@ Runs the app's migrations against a real MySQL 5.6.51, the version of Citadel's 
 - **tags**: `["amd64"]`
 - **php_extensions**: `["pdo_mysql"]`
 
-in 0.10.0
+in 0.11.0
 
 ### composer-audit
 
@@ -163,7 +163,7 @@ Checks the passenger list.
 `composer audit --locked`, failing on any advisory.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 **3 inputs**
@@ -172,7 +172,7 @@ Checks the passenger list.
 - **image**: `composer:2.11.1@sha256:…`
 - **working_dir**: `.`
 
-in 0.10.0
+in 0.11.0
 
 ### sbom
 
@@ -181,7 +181,7 @@ The cargo manifest.
 A validated CycloneDX SBOM, published as an artifact. The plugin installs globally, so the app's files stay as they are.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 **4 inputs**
@@ -191,7 +191,7 @@ A validated CycloneDX SBOM, published as an artifact. The plugin installs global
 - **omit_dev**: `true`
 - **output**: `sbom.cdx.json`
 
-in 0.10.0
+in 0.11.0
 
 ### pint
 
@@ -200,7 +200,7 @@ Uniform pressed.
 The app's own Laravel Pint in test mode. The app requires `laravel/pint` and ships a `pint.json`.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 **4 inputs**
@@ -210,7 +210,7 @@ The app's own Laravel Pint in test mode. The app requires `laravel/pint` and shi
 - **config**: `pint.json`
 - **working_dir**: `.`
 
-in 0.10.0
+in 0.11.0
 
 ### phpstan
 
@@ -219,7 +219,7 @@ Instruments cross-checked.
 The app's own PHPStan, with a Code Quality report. The app requires `phpstan/phpstan` and ships a `phpstan.neon`.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 **5 inputs**
@@ -230,7 +230,7 @@ The app's own PHPStan, with a Code Quality report. The app requires `phpstan/php
 - **memory_limit**: `1G`
 - **working_dir**: `.`
 
-in 0.10.0
+in 0.11.0
 
 ### eslint
 
@@ -239,7 +239,7 @@ The front cabin, too.
 The app's own ESLint and Prettier. The app requires `@waynestate/pinstripe`, `eslint` and `prettier`.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 **5 inputs**
@@ -250,7 +250,7 @@ The app's own ESLint and Prettier. The app requires `@waynestate/pinstripe`, `es
 - **eslint_args**: `.`
 - **prettier**: `true`
 
-in 0.10.0
+in 0.11.0
 
 ### a11y
 
@@ -259,7 +259,7 @@ Boarding for every passenger.
 Opens the pages in Chromium and fails on any axe-core violation, with the reflow check at 320 px. It serves a static `site_dir`, or checks a running app at `base_url`.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 **6 inputs**
@@ -271,7 +271,7 @@ Opens the pages in Chromium and fails on any axe-core violation, with the reflow
 - **base_url**: `""`
 - **wcag_tags**: `wcag21aa` and below
 
-in 0.10.0
+in 0.11.0
 
 ### composer-ci
 
@@ -280,7 +280,7 @@ Your checklist, flown as written.
 `composer install`, then the project's own `composer ci`, whose exit code decides the job. There is no `allow_failure` input: a red `composer ci` holds the pipeline.
 
 ```
-- component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-ci@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+- component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-ci@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 **3 inputs**
@@ -289,7 +289,7 @@ Your checklist, flown as written.
 - **image**: `composer:2.11.1@sha256:…`
 - **working_dir**: `.`
 
-in 0.10.0
+in 0.11.0
 
 ### php-package.yml
 
@@ -298,7 +298,7 @@ Two cockpits, one checklist.
 Components stay inside one GitLab instance, so GitHub mirrors call this reusable workflow instead: `composer ci` on each PHP version, then a Composer audit.
 
 ```
-uses: waynestate/preflight/.github/workflows/php-package.yml@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+uses: waynestate/preflight/.github/workflows/php-package.yml@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 **3 inputs**
@@ -393,13 +393,13 @@ workflow:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
 
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 2 Switches · project settings
@@ -430,7 +430,7 @@ on:
 
 jobs:
   ci:
-    uses: waynestate/preflight/.github/workflows/php-package.yml@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+    uses: waynestate/preflight/.github/workflows/php-package.yml@33f371ca3c8f022d2e2605be85d278519ccad96a # 0.11.0
 ```
 
 4 Ground check · your machine

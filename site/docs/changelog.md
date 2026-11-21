@@ -12,6 +12,15 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ## Unreleased [#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+## 0.12.0 (2026-11-20) [#](https://preflight.apps.wayne.edu/docs/changelog.html#0-12-0-2026-11-20)
+
+Tag pipelines can run only the release jobs (D-125). Every test component gains an opt-in `tag_pipeline` input and a new `release-gate` component fails the tag pipeline unless main passed the tagged commit. Nothing changes for a repo that sets nothing: the input defaults to `full`. No input or job was renamed or removed.
+
+- Added: the `tag_pipeline` input (`full` by default, or `release-only`) on proctor, php-test, composer-audit, composer-ci, a11y, secret-detection, sbom, squire-kit, mysql56-migrate, portability, npm-audit, eslint, phpstan and pint. With `release-only` the job is skipped on tag pipelines (D-125).
+- Added: the `release-gate` component (seventeenth). On a tag pipeline, in stage `.pre`, it asks the API whether the tagged commit has a successful pipeline on the default branch, using only the job token. When the token cannot list pipelines it falls back to checking with git that the commit is on the default branch, and says in the log that green-ness then rests on the release procedure.
+- Added: `tests/check-release-gate-fails.sh` and the `must-fail-release-gate` job prove the gate passes a tested commit and fails an untested one in both modes.
+- Changed: Preflight's own pipeline opts in: on a tag it runs the gate and the release job only.
+
 ## 0.11.0 (2026-11-19) [#](https://preflight.apps.wayne.edu/docs/changelog.html#0-11-0-2026-11-19)
 
 The `php-test` component now runs PHP 8.6 as an advisory job by default (D-2). The job may fail and never gates a pipeline; the required matrix stays 8.3, 8.4 and 8.5. No input or job was renamed or removed.
