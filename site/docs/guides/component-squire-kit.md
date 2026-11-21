@@ -70,7 +70,7 @@ The log lists every kit file with its state; the last lines name what to do.
 - **`modified`.** Someone, or a bot, edited a file Squire owns. Put Squire's file back with `vendor/bin/squire init --force --path=deploy` and send the change to Squire instead, so every app gets it.
 - **`untracked`.** A file sits in one of the kit's groups but not in `.squire.json`. Remove it, or run `squire init` so Squire records it.
 
-> \[!CAUTION\] Renovate's digest and tag bumps were what made the stack's kits drift: a bump to a base image inside `.squire/` or to `docker-compose.squire.yml` is an edit to a file Squire owns. Preflight's preset now leaves those files alone; update the image in Squire's templates and let the next Squire release carry it.
+> \[!CAUTION\] Renovate's digest and tag bumps were what made the stack's kits drift: a bump to a base image in a Squire kit file is an edit to a file Squire owns. Preflight's preset now leaves those files alone; update the image in Squire's templates and let the next Squire release carry it.
 
 ## Adopt it with findings [#](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html#adopt-it-with-findings)
 

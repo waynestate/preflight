@@ -707,11 +707,11 @@ preset keep it equal to a Squire release:
   under `/tmp` (outside the repository, `--no-dev --no-scripts`) and run
   `squire update` on the kit folder, so the merge request carries the
   refreshed files. It waits for review (`squire-kit`, `needs-review`).
-- **Renovate leaves kit files alone.** Updates to `docker-compose.squire.yml`
-  and anything under `.squire/` are turned off outside Squire's own
-  `templates/` folders. A digest or tag bump there is an edit to a file Squire
-  owns: the kit drifts from its release, and the next `squire update` refuses
-  to overwrite it. Change the image in Squire's templates instead.
+- **Renovate leaves kit files alone.** Updates to the Squire kit files are
+  turned off outside Squire's own `templates/` folders. A digest or tag bump
+  there is an edit to a file Squire owns: the kit drifts from its release, and
+  the next `squire update` refuses to overwrite it. Change the image in
+  Squire's templates instead.
 
 Renovate only runs a post-upgrade command its runner allows. The renovate
 component's `squire_kit_tasks` input (default `false`) writes the allow-list
@@ -1694,6 +1694,8 @@ Source: https://preflight.apps.wayne.edu/docs/changelog.html
 All notable changes to Preflight are recorded here. Entries follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); released versions are Git tags.
 
 ### Unreleased [#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
+
+- Removed: Squire's local-running kit files (docker-compose.squire.yml, haproxy.cfg, parity scripts, env example; D-095). Parity runs the app locally: `parity up` in `deploy/`.
 
 ### 0.11.0 (2026-11-19) [#](https://preflight.apps.wayne.edu/docs/changelog.html#0-11-0-2026-11-19)
 
@@ -3434,7 +3436,7 @@ The log lists every kit file with its state; the last lines name what to do.
 - **`modified`.** Someone, or a bot, edited a file Squire owns. Put Squire's file back with `vendor/bin/squire init --force --path=deploy` and send the change to Squire instead, so every app gets it.
 - **`untracked`.** A file sits in one of the kit's groups but not in `.squire.json`. Remove it, or run `squire init` so Squire records it.
 
-> \[!CAUTION\] Renovate's digest and tag bumps were what made the stack's kits drift: a bump to a base image inside `.squire/` or to `docker-compose.squire.yml` is an edit to a file Squire owns. Preflight's preset now leaves those files alone; update the image in Squire's templates and let the next Squire release carry it.
+> \[!CAUTION\] Renovate's digest and tag bumps were what made the stack's kits drift: a bump to a base image in a Squire kit file is an edit to a file Squire owns. Preflight's preset now leaves those files alone; update the image in Squire's templates and let the next Squire release carry it.
 
 ### Adopt it with findings [#](https://preflight.apps.wayne.edu/docs/guides/component-squire-kit.html#adopt-it-with-findings)
 
@@ -4015,7 +4017,7 @@ Updates that change an image digest inside the templates, the contract, or this 
 A Squire deploy kit (the `deploy` folder in the stack's repos) is files Squire wrote, recorded with their hashes in `deploy/.squire.json`. Two rules in the preset keep it equal to a Squire release:
 
 - **A new Squire refreshes the kit.** The custom manager reads the version in `.squire.json` and opens a merge request for each new `waynestate/squire` on Packagist. Its `postUpgradeTasks` install that release into a folder under `/tmp` (outside the repository, `--no-dev --no-scripts`) and run `squire update` on the kit folder, so the merge request carries the refreshed files. It waits for review (`squire-kit`, `needs-review`).
-- **Renovate leaves kit files alone.** Updates to `docker-compose.squire.yml` and anything under `.squire/` are turned off outside Squire's own `templates/` folders. A digest or tag bump there is an edit to a file Squire owns: the kit drifts from its release, and the next `squire update` refuses to overwrite it. Change the image in Squire's templates instead; the next Squire release carries it to every kit.
+- **Renovate leaves kit files alone.** Updates to the Squire kit files are turned off outside Squire's own `templates/` folders. A digest or tag bump there is an edit to a file Squire owns: the kit drifts from its release, and the next `squire update` refuses to overwrite it. Change the image in Squire's templates instead; the next Squire release carries it to every kit.
 
 Renovate only runs a post-upgrade command its runner allows. The [`renovate` component](https://preflight.apps.wayne.edu/docs/guides/component-renovate.html)'s `squire_kit_tasks` input (default `false`) writes the allow-list into the runner's `config.js`: two anchored patterns that match the exact `composer create-project` and `squire update` commands, with the version and paths limited to safe characters. No shell runs the commands. Without the input, the merge request bumps the version only and shows an artifact error; refresh it by hand with `vendor/bin/squire update --path=deploy`, review the diff and commit it to the branch.
 
@@ -5416,7 +5418,7 @@ Exit 2 means the job never judged a page: an input or a tool is wrong.
 The job installs the Squire release the kit records and runs `squire init --check`; the log lists every kit file with its state.
 
 - **Cause:** one of the states below.
-  - `modified`: someone, or a bot, edited a file Squire owns. Renovate's digest and tag bumps to `.squire/` files and `docker-compose.squire.yml` were the usual culprit before the preset turned them off.
+  - `modified`: someone, or a bot, edited a file Squire owns. Renovate's digest and tag bumps to the Squire kit files were the usual culprit before the preset turned them off.
   - `outdated`: the file is untouched but is not the template of the recorded release, usually because `.squire.json` was bumped without `squire update`.
   - `missing`: a kit file is gone, or the release added one that `squire update` does not write.
   - `untracked`: a file sits in one of the kit's groups but is not recorded in `.squire.json`.

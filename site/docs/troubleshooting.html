@@ -239,7 +239,7 @@
 <ul>
 <li><strong>Cause:</strong> one of the states below.
 <ul>
-<li><code>modified</code>: someone, or a bot, edited a file Squire owns. Renovate's digest and tag bumps to <code>.squire/</code> files and <code>docker-compose.squire.yml</code> were the usual culprit before the preset turned them off.</li>
+<li><code>modified</code>: someone, or a bot, edited a file Squire owns. Renovate's digest and tag bumps to the Squire kit files were the usual culprit before the preset turned them off.</li>
 <li><code>outdated</code>: the file is untouched but is not the template of the recorded release, usually because <code>.squire.json</code> was bumped without <code>squire update</code>.</li>
 <li><code>missing</code>: a kit file is gone, or the release added one that <code>squire update</code> does not write.</li>
 <li><code>untracked</code>: a file sits in one of the kit's groups but is not recorded in <code>.squire.json</code>.</li>

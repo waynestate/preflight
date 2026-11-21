@@ -164,9 +164,9 @@ Squire records it.</li>
 </ul>
 <blockquote>
 <p>[!CAUTION]
-Renovate's digest and tag bumps were what made the stack's kits drift: a bump to a base image inside <code>.squire/</code> or to
-<code>docker-compose.squire.yml</code> is an edit to a file Squire owns. Preflight's preset now leaves those files alone; update
-the image in Squire's templates and let the next Squire release carry it.</p>
+Renovate's digest and tag bumps were what made the stack's kits drift: a bump to a base image in a Squire kit file is
+an edit to a file Squire owns. Preflight's preset now leaves those files alone; update the image in Squire's
+templates and let the next Squire release carry it.</p>
 </blockquote>
 <h2 id="adopt-it-with-findings">Adopt it with <span class="docs-heading-tail"><span>findings</span><a class="docs-heading-link" aria-label="Link to this section" href="#adopt-it-with-findings">#</a></span></h2>
 <p>To include the component before the kit is clean, let the job fail without failing the pipeline:</p>

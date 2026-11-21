@@ -89,12 +89,11 @@ on Packagist. Its <code>postUpgradeTasks</code> install that release into a fold
 under <code>/tmp</code> (outside the repository, <code>--no-dev --no-scripts</code>) and run
 <code>squire update</code> on the kit folder, so the merge request carries the
 refreshed files. It waits for review (<code>squire-kit</code>, <code>needs-review</code>).</li>
-<li><strong>Renovate leaves kit files alone.</strong> Updates to <code>docker-compose.squire.yml</code>
-and anything under <code>.squire/</code> are turned off outside Squire's own
-<code>templates/</code> folders. A digest or tag bump there is an edit to a file Squire
-owns: the kit drifts from its release, and the next <code>squire update</code> refuses
-to overwrite it. Change the image in Squire's templates instead; the next
-Squire release carries it to every kit.</li>
+<li><strong>Renovate leaves kit files alone.</strong> Updates to the Squire kit files are
+turned off outside Squire's own <code>templates/</code> folders. A digest or tag bump
+there is an edit to a file Squire owns: the kit drifts from its release, and
+the next <code>squire update</code> refuses to overwrite it. Change the image in
+Squire's templates instead; the next Squire release carries it to every kit.</li>
 </ul>
 <p>Renovate only runs a post-upgrade command its runner allows. The
 <a href="./component-renovate.html"><code>renovate</code> component</a>'s <code>squire_kit_tasks</code> input
