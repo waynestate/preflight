@@ -34,7 +34,7 @@ The card runs the seven above and `a11y`:
 | --- | --- | --- | --- |
 | 8 | Accessibility, WCAG 2.1 AA by default | `a11y` | 30 minutes |
 
-The panel below the lamps lists all sixteen components, two columns of names. The seven with no card row, because they guard something other than the code on every push (a deploy kit, the image, a release, a schedule), are:
+The panel below the lamps lists all seventeen components, two columns of names. The seven with no card row, because they guard something other than the code on every push (a deploy kit, the image, a release, a schedule), are:
 
 | Component | What it proves | Job | Timeout | Since |
 | --- | --- | --- | --- | --- |
