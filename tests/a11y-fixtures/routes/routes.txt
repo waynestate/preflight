@@ -1,0 +1,4 @@
+# GET routes from the app's router, one per line.
+/
+/docs/
+/about
