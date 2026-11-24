@@ -567,6 +567,7 @@ a11y ships in 0.2.0 (0.1.4 does not include it). While a site fixes its first fi
 | `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline, for a site fixing its first findings. |
 | `site_dir` | string | `site` | Static folder to serve, relative to the project root. Page globs expand in it. |
 | `pages` | array | `["**/*.html"]` | Pages to check, relative to the site root: paths (`index.html`, `docs/`) or globs (`docs/**/*.html`). A glob must match at least one file. |
+| `required_routes_file` | string | `""` | Optional file of routes the page list must cover, one path per line (a leading `/` is allowed; blank lines and lines starting with `#` are ignored). The job fails when a listed route is not one of the checked pages. Generate it from the app's router so a new route cannot go unchecked. |
 | `base_url` | string | `""` | Check a running site at this URL instead of serving `site_dir`, for example `$CI_ENVIRONMENT_URL`. |
 | `wcag_tags` | array | `["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]` | axe-core tags to run. Add `wcag22aa` for WCAG 2.2 AA. |
 | `color_schemes` | array | `["light", "dark"]` | Color schemes each page is checked in: `light`, `dark` or `no-preference`. |

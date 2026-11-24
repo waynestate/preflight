@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Routes fixture: the a11y component</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { margin: 0; font: 16px/1.5 system-ui, sans-serif; background: #ffffff; color: #1a1a1a; }
+    header, main, footer { padding: 1rem; max-width: 40rem; margin: 0 auto; }
+    a { color: #0c5132; }
+    @media (prefers-color-scheme: dark) {
+      body { background: #101418; color: #e8ecef; }
+      a { color: #8fd3b0; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav aria-label="Main">
+      <a href="index.html">Home</a>
+      <a href="docs/">Docs</a>
+    </nav>
+  </header>
+  <main>
+    <h1>Every route on the list</h1>
+    <p>A front page for the required-routes cases: the site has two pages, and the routes file names where the router points.</p>
+  </main>
+  <footer>
+    <p>A fixture for the required_routes_file cases in tests/check-a11y.</p>
+  </footer>
+</body>
+</html>

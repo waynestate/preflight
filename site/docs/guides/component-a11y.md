@@ -62,6 +62,7 @@ include:
 | `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline. Set it to `true` while a site fixes its first findings. |
 | `site_dir` | string | `site` | Static folder to serve, relative to the project root. Page globs expand in it. A relative path; GitLab refuses the pipeline at creation if it is not. |
 | `pages` | array | `["**/*.html"]` | Pages to check, relative to the site root: paths (`index.html`, `docs/`) or globs (`docs/**/*.html`). A glob must match at least one file. |
+| `required_routes_file` | string | `""` | Optional file of routes the page list must cover, one path per line (a leading `/` is allowed; blank lines and lines starting with `#` are ignored). The job fails when a listed route is not one of the checked pages. Generate it from the app's router so a new route cannot go unchecked. |
 | `base_url` | string | `""` | Check a running site at this URL instead of serving `site_dir`, for example `$CI_ENVIRONMENT_URL`. Empty serves `site_dir`. |
 | `wcag_tags` | array | `["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]` | axe-core tags to run. The default is WCAG 2.1 AA; add `wcag22aa` for WCAG 2.2 AA. |
 | `color_schemes` | array | `["light", "dark"]` | Color schemes each page is checked in: `light`, `dark` or `no-preference`. |
@@ -121,6 +122,26 @@ include:
 ```
 
 `base_url` goes into a job variable, so GitLab expands CI variables in it. Pages are paths under it. Globs still expand in `site_dir`, so with `base_url` and no local folder, list the pages by hand. The job must be able to reach the URL; put it in a stage after the deploy.
+
+## Keep every route on the list [#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#keep-every-route-on-the-list)
+
+A hand-written `pages` list goes stale the day a route is added. Generate the list from the app's router instead and hand it to the job as `required_routes_file`: the checker fails when a listed route is not one of the checked pages, so a new route cannot go unchecked. For a Laravel app, the GET routes without parameters:
+
+```bash
+php artisan route:list --method=GET --json \
+  | jq -r '.[] | select(.uri | test("[{]") | not) | "/" + .uri' > build/routes.txt
+```
+
+```yaml
+include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+    inputs:
+      base_url: $CI_ENVIRONMENT_URL
+      pages: ["/", "about", "apply"]
+      required_routes_file: build/routes.txt
+```
+
+The file holds one route per line; a leading `/` is allowed, and blank lines and lines starting with `#` are ignored. Parameterized routes (`/users/{id}`) are dropped by the recipe above, because `pages` names concrete pages: check a representative page for those. Keyboard operation and dialog behavior stay checks a person makes; this gate adds coverage, not judgement.
 
 ## Pages behind a sign-in [#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#pages-behind-a-sign-in)
 
