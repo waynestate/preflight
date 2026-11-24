@@ -6,6 +6,7 @@ are Git tags.
 
 ## Unreleased
 
+- Changed: `deploy/` requires PROCTOR `^0.18` (was `^0.16`, which does not allow 0.18); 0.18.0 adds the update notice, the fake-driver check and the app-env warning (D-133). No component changes for it.
 - Removed: Squire's local-running kit files (docker-compose.squire.yml, haproxy.cfg, parity scripts, env example; D-095). Parity runs the app locally: `parity up` in `deploy/`.
 - Docs: SECURITY.md says how to report a vulnerability privately.
 
