@@ -473,7 +473,7 @@ include:
 | `color_schemes` | array | `["light", "dark"]` | Color schemes each page is checked in. |
 | `widths` | array | `[320, 1280]` | Viewport widths in CSS pixels; at 320 or less the job also checks reflow. |
 | `playwright_version` | string | `""` | playwright npm version. Empty reads it from the image tag. |
-| `axe_core_version` | string | `4.14.0` | axe-core version; the job fails if a different one ran. |
+| `axe_core_version` | string | `4.14.1` | axe-core version; the job fails if a different one ran. |
 | `axe_playwright_version` | string | `4.14.0` | @axe-core/playwright version; its axe-core range must include `axe_core_version`. |
 | `tag_pipeline` | string | `full` | What the job does on a tag pipeline. `full` (the default) runs it as on any pipeline; `release-only` skips it on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component. |
 
