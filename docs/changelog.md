@@ -13,6 +13,7 @@ are Git tags.
 
 ## Unreleased
 
+- Changed: the shared Renovate preset no longer automerges lock file maintenance (it opens MRs for review) and waynestate packages follow the same 3 day minimumReleaseAge as everything else.
 - Added: the a11y component's opt-in `required_routes_file` input: a file of routes the page list must cover, one per line, generated from the app's router. The job fails when a listed route is not one of the checked pages, so a new route cannot go unchecked.
 - Changed: the Renovate preset holds quay.io/buildah/stable at v1.45.x until the portability job passes on a newer buildah (1.46.1 fails on fuse-overlayfs in our runner).
 - Changed: `deploy/` requires PROCTOR `^0.18` (was `^0.16`, which does not allow 0.18); 0.18.0 adds the update notice, the fake-driver check and the app-env warning (D-133). No component changes for it.
