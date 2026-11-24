@@ -50,10 +50,6 @@
     },
     {
       "matchPackageNames": ["waynestate/*", "@waynestate/*"],
-      "minimumReleaseAge": "0"
-    },
-    {
-      "matchPackageNames": ["waynestate/*", "@waynestate/*"],
       "matchUpdateTypes": ["patch", "minor"],
       "automerge": true
     },
@@ -103,7 +99,7 @@
   "lockFileMaintenance": {
     "enabled": true,
     "schedule": ["on monday"],
-    "automerge": true
+    "automerge": false
   },
   "customManagers": [
     {
