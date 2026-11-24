@@ -44,6 +44,10 @@
       "groupName": "axe-core for the a11y component"
     },
     {
+      "matchPackageNames": ["playwright", "@playwright/test", "mcr.microsoft.com/playwright"],
+      "groupName": "playwright"
+    },
+    {
       "matchPackageNames": ["waynestate/*", "@waynestate/*"],
       "minimumReleaseAge": "0"
     },
