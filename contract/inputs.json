@@ -190,6 +190,7 @@
         { "name": "allow_failure", "type": "boolean", "default": false },
         { "name": "site_dir", "type": "string", "default": "site", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" },
         { "name": "pages", "type": "array", "default": ["**/*.html"] },
+        { "name": "required_routes_file", "type": "string", "default": "", "regex": "^(|[A-Za-z0-9_./-]+)$" },
         { "name": "base_url", "type": "string", "default": "", "regex": "^(|https?://\\S+|\\$\\{?[A-Za-z_][A-Za-z0-9_]*\\}?\\S*)$" },
         { "name": "wcag_tags", "type": "array", "default": ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"] },
         { "name": "color_schemes", "type": "array", "default": ["light", "dark"] },
