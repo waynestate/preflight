@@ -12,6 +12,7 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ## Unreleased [#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Changed: the `renovate` component's default Renovate image is 44.261.0 (pinned by digest); the README, the renovate guide and the components reference show it.
 - Changed: the Renovate preset holds quay.io/buildah/stable at v1.45.x until the portability job passes on a newer buildah (1.46.1 fails on fuse-overlayfs in our runner).
 - Changed: `deploy/` requires PROCTOR `^0.18` (was `^0.16`, which does not allow 0.18); 0.18.0 adds the update notice, the fake-driver check and the app-env warning (D-133). No component changes for it.
 - Removed: Squire's local-running kit files (docker-compose.squire.yml, haproxy.cfg, parity scripts, env example; D-095). Parity runs the app locally: `parity up` in `deploy/`.
