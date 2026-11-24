@@ -1293,6 +1293,12 @@ php-test-next:
 <td>Pages to check, relative to the site root: paths or globs. A glob must match at least one file.</td>
 </tr>
 <tr>
+<td><code>required_routes_file</code></td>
+<td>string</td>
+<td><code>&quot;&quot;</code></td>
+<td>Optional file of routes the page list must cover, one path per line (a leading <code>/</code> is allowed; blank lines and lines starting with <code>#</code> are ignored). The job fails when a listed route is not one of the checked pages. Generate it from the app's router so a new route cannot go unchecked.</td>
+</tr>
+<tr>
 <td><code>base_url</code></td>
 <td>string</td>
 <td><code>&quot;&quot;</code></td>

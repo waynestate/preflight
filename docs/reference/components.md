@@ -468,6 +468,7 @@ include:
 | `allow_failure` | boolean | `false` | Whether the job can fail without failing the pipeline, for a site fixing its first findings. |
 | `site_dir` | string | `site` | Static folder to serve, relative to the project root. Page globs expand in it. |
 | `pages` | array | `["**/*.html"]` | Pages to check, relative to the site root: paths or globs. A glob must match at least one file. |
+| `required_routes_file` | string | `""` | Optional file of routes the page list must cover, one path per line (a leading `/` is allowed; blank lines and lines starting with `#` are ignored). The job fails when a listed route is not one of the checked pages. Generate it from the app's router so a new route cannot go unchecked. |
 | `base_url` | string | `""` | Check a running site at this URL instead of serving `site_dir`. Empty serves `site_dir`. |
 | `wcag_tags` | array | `["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]` | axe-core tags to run; add `wcag22aa` for WCAG 2.2 AA. |
 | `color_schemes` | array | `["light", "dark"]` | Color schemes each page is checked in. |
