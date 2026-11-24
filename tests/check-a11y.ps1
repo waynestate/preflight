@@ -15,11 +15,17 @@
 #   good, a glob matching nothing  exit 2: a configuration error
 #   good, the root page ""         exit 0: "" is the site root, 1 page x 4 modes
 #   good, the root page "/"        exit 0: "/" is the site root, 1 page x 4 modes
+#   routes, the unit test          exit 0: the coverage logic, no Docker, no
+#                                  browser
+#   routes, the file is missing    exit 2: a configuration error
+#   routes, a route off the list   exit 1: the message names the route and the
+#                                  file; the browser never runs
+#   routes, every route covered    exit 0: the check proceeds, 2 pages x 4 modes
 #
 # One result line per case goes to stdout; the checker's own output is kept
 # in a temp folder and printed only for a case that went wrong. Windows
-# PowerShell 5.1 and PowerShell 7. Needs Docker. Its twin, check-a11y.sh,
-# does the same on Linux and macOS.
+# PowerShell 5.1 and PowerShell 7. Needs Docker and node. Its twin,
+# check-a11y.sh, does the same on Linux and macOS.
 
 $ErrorActionPreference = "Stop"
 
@@ -28,6 +34,11 @@ Set-Location -LiteralPath $Root
 
 if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
   [Console]::Error.WriteLine("docker is required")
+  exit 1
+}
+
+if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+  [Console]::Error.WriteLine("node is required")
   exit 1
 }
 
@@ -83,6 +94,70 @@ function Get-CaseFailure([string]$junit, [string]$name) {
     }
   }
   return ""
+}
+
+# The default of one input in the component's spec, without YAML quotes: the
+# same reader as scripts/a11y.ps1. The routes cases below drive the container
+# themselves, because scripts/a11y.ps1 predates required_routes_file and
+# cannot forward it to the checker.
+$tplLines = Get-Content -LiteralPath "templates/a11y/template.yml"
+function Read-InputDefault([string]$name) {
+  $inBlock = $false
+  foreach ($line in $tplLines) {
+    if ($line -ceq "    ${name}:") { $inBlock = $true; continue }
+    if ($inBlock -and $line -match '^    [A-Za-z_]') { break }
+    if ($inBlock -and $line -match '^      default:\s*(.*)$') {
+      $value = $Matches[1].Trim()
+      if ($value -match '^"(.*)"$') { $value = $Matches[1] }
+      return $value
+    }
+  }
+  return ""
+}
+
+$image = Read-InputDefault "image"
+$axeCore = Read-InputDefault "axe_core_version"
+$axePw = Read-InputDefault "axe_playwright_version"
+$schemes = Read-InputDefault "color_schemes"
+$widths = Read-InputDefault "widths"
+$pw = ""
+if ($image -match 'playwright:v([0-9]+\.[0-9]+\.[0-9]+)') { $pw = $Matches[1] }
+if (-not $image -or -not $axeCore -or -not $axePw -or -not $pw) {
+  [Console]::Error.WriteLine("check-a11y: cannot read the image and versions from templates/a11y/template.yml")
+  exit 1
+}
+
+# Run the checker with A11Y_REQUIRED_ROUTES_FILE set, keep its log and
+# reports, return its exit code.
+function Invoke-RoutesGate([string]$case, [string]$site, [string]$pages, [string]$routesFile) {
+  $report = Join-Path $Tmp $case
+  New-Item -ItemType Directory -Force -Path $report | Out-Null
+  $config = '{{"siteDir": "{0}", "pages": {1}, "tags": {2}, "colorSchemes": {3}, "widths": {4}, "axeCoreVersion": "{5}"}}' -f $site, $pages, $Tags, $schemes, $widths, $axeCore
+  # The values go to the container through an env file, not -e: Windows
+  # PowerShell 5.1 drops the double quotes inside a native argument, and the
+  # config is JSON. An env file line is read literally.
+  $envFile = Join-Path ([IO.Path]::GetTempPath()) "check-a11y-$PID.env"
+  $envLines = @(
+    "A11Y_CONFIG=$config",
+    "A11Y_REPORT_DIR=/report",
+    "A11Y_PLAYWRIGHT_VERSION=$pw",
+    "A11Y_AXE_PLAYWRIGHT_VERSION=$axePw",
+    "A11Y_AXE_CORE_VERSION=$axeCore",
+    "A11Y_REQUIRED_ROUTES_FILE=$routesFile"
+  )
+  [IO.File]::WriteAllText($envFile, (($envLines -join "`n") + "`n"), [Text.UTF8Encoding]::new($false))
+  $dockerArgs = @("run", "--rm", "--label", "task=preflight-a11y-routes-1124", "-v", "$((Get-Location).Path):/work:ro", "-v", "preflight-a11y-npm-cache:/root/.npm", "-v", "$((Resolve-Path -LiteralPath $report).Path):/report", "-w", "/work", "--env-file", $envFile, $image, "sh", "scripts/a11y-container.sh")
+  $previous = $ErrorActionPreference
+  $ErrorActionPreference = "Continue"
+  try {
+    $log = & docker @dockerArgs *>&1 | Out-String
+  } finally {
+    $ErrorActionPreference = $previous
+    [IO.File]::Delete($envFile)
+    Set-Location -LiteralPath $Root
+  }
+  [IO.File]::WriteAllText((Join-Path $Tmp "$case.log"), $log)
+  return $LASTEXITCODE
 }
 
 try {
@@ -144,6 +219,39 @@ try {
   }
   if (-not (Read-Report "rootslash" "gl-a11y-junit.xml").Contains('name="/ light 320px"')) {
     Fail "rootslash: the JUnit report does not name the root /"
+  }
+
+  # routes-unit: the coverage logic as pure functions, no Docker, no browser.
+  $previous = $ErrorActionPreference
+  $ErrorActionPreference = "Continue"
+  try {
+    $log = & node "tests/check-a11y-routes.mjs" *>&1 | Out-String
+  } finally {
+    $ErrorActionPreference = $previous
+  }
+  [IO.File]::WriteAllText((Join-Path $Tmp "routes-unit.log"), $log)
+  Test-Exit "routes-unit" 0 $LASTEXITCODE
+
+  # routes-missing: the file is set but not there: a tool error, not a check failure.
+  $code = Invoke-RoutesGate "routes-missing" "tests/a11y-fixtures/routes" '["**/*.html"]' "tests/a11y-fixtures/routes/nope.txt"
+  Test-Exit "routes-missing" 2 $code
+  if (-not ([IO.File]::ReadAllText((Join-Path $Tmp "routes-missing.log"))).Contains("a11y: required_routes_file tests/a11y-fixtures/routes/nope.txt was not found.")) {
+    Fail "routes-missing: the log does not name the missing file"
+  }
+
+  # routes-fail: a route the page list does not cover fails the check before
+  # any page is opened.
+  $code = Invoke-RoutesGate "routes-fail" "tests/a11y-fixtures/routes" '["**/*.html"]' "tests/a11y-fixtures/routes/routes.txt"
+  Test-Exit "routes-fail" 1 $code
+  if (-not ([IO.File]::ReadAllText((Join-Path $Tmp "routes-fail.log"))).Contains("a11y: 1 required route(s) are not on the page list: /about. Add them to pages, or drop them from tests/a11y-fixtures/routes/routes.txt.")) {
+    Fail "routes-fail: the log does not name the uncovered route"
+  }
+
+  # routes-ok: every route covered: the check proceeds and passes.
+  $code = Invoke-RoutesGate "routes-ok" "tests/a11y-fixtures/routes" '["**/*.html"]' "tests/a11y-fixtures/routes/routes-ok.txt"
+  Test-Exit "routes-ok" 0 $code
+  if (-not (Read-Report "routes-ok" "gl-a11y-junit.xml").Contains('tests="8" failures="0"')) {
+    Fail "routes-ok: the JUnit report does not show 8 checks and 0 failures"
   }
 } finally {
   [IO.Directory]::Delete($Tmp, $true)

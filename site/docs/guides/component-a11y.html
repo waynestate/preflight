@@ -133,6 +133,12 @@ commit SHA of a commit at or after it.</p></aside>
 <td>Pages to check, relative to the site root: paths (<code>index.html</code>, <code>docs/</code>) or globs (<code>docs/**/*.html</code>). A glob must match at least one file.</td>
 </tr>
 <tr>
+<td><code>required_routes_file</code></td>
+<td>string</td>
+<td><code>&quot;&quot;</code></td>
+<td>Optional file of routes the page list must cover, one path per line (a leading <code>/</code> is allowed; blank lines and lines starting with <code>#</code> are ignored). The job fails when a listed route is not one of the checked pages. Generate it from the app's router so a new route cannot go unchecked.</td>
+</tr>
+<tr>
 <td><code>base_url</code></td>
 <td>string</td>
 <td><code>&quot;&quot;</code></td>
@@ -234,6 +240,24 @@ or a pre-production deploy, and list the paths:</p>
 <p><code>base_url</code> goes into a job variable, so GitLab expands CI variables in it. Pages are paths under it. Globs still expand
 in <code>site_dir</code>, so with <code>base_url</code> and no local folder, list the pages by hand. The job must be able to reach the URL;
 put it in a stage after the deploy.</p>
+<h2 id="keep-every-route-on-the-list">Keep every route on the <span class="docs-heading-tail"><span>list</span><a class="docs-heading-link" aria-label="Link to this section" href="#keep-every-route-on-the-list">#</a></span></h2>
+<p>A hand-written <code>pages</code> list goes stale the day a route is added. Generate the list from the app's router instead and
+hand it to the job as <code>required_routes_file</code>: the checker fails when a listed route is not one of the checked pages, so
+a new route cannot go unchecked. For a Laravel app, the GET routes without parameters:</p>
+<pre tabindex="0"><code class="language-bash">php artisan route:list --method=GET --json \
+  | jq -r '.[] | select(.uri | test(&quot;[{]&quot;) | not) | &quot;/&quot; + .uri' &gt; build/routes.txt
+</code></pre>
+<pre tabindex="0"><code class="language-yaml">include:
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/a11y@44e683f6dc1a24913af50959827f1f50da2be23d # 0.10.0
+    inputs:
+      base_url: $CI_ENVIRONMENT_URL
+      pages: [&quot;/&quot;, &quot;about&quot;, &quot;apply&quot;]
+      required_routes_file: build/routes.txt
+</code></pre>
+<p>The file holds one route per line; a leading <code>/</code> is allowed, and blank lines and lines starting with <code>#</code> are ignored.
+Parameterized routes (<code>/users/{id}</code>) are dropped by the recipe above, because <code>pages</code> names concrete pages: check a
+representative page for those. Keyboard operation and dialog behavior stay checks a person makes; this gate adds
+coverage, not judgement.</p>
 <h2 id="pages-behind-a-sign-in">Pages behind a <span class="docs-heading-tail"><span>sign-in</span><a class="docs-heading-link" aria-label="Link to this section" href="#pages-behind-a-sign-in">#</a></span></h2>
 <p>The job opens pages anonymously, so a page that needs a sign-in answers with its login or access-denied screen instead
 of the app. For a signed-in app, have the app's own job sign in, save the rendered signed-in pages as static HTML into
@@ -311,7 +335,7 @@ token and no Docker socket.</p></aside>
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../../docs/guides/component-portability.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">The portability component</span></a><a class="docs-pager__link docs-pager__link--next" href="../../docs/guides/component-squire-kit.html"><span class="docs-pager__dir">Next</span><span class="docs-pager__title">The squire-kit component</span></a></nav>
   </div>
-  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#what-the-job-checks">What the job checks</a></li><li class="docs-toc__item"><a href="#include-the-component">Include the component</a></li><li class="docs-toc__item"><a href="#inputs">Inputs</a></li><li class="docs-toc__item"><a href="#how-the-job-works">How the job works</a></li><li class="docs-toc__item"><a href="#reports">Reports</a></li><li class="docs-toc__item"><a href="#roll-it-out-on-a-site-with-findings">Roll it out on a site with findings</a></li><li class="docs-toc__item"><a href="#check-a-running-site">Check a running site</a></li><li class="docs-toc__item"><a href="#pages-behind-a-sign-in">Pages behind a sign-in</a></li><li class="docs-toc__item"><a href="#run-it-on-your-desk">Run it on your desk</a></li><li class="docs-toc__item"><a href="#run-it-locally-in-your-repo">Run it locally in your repo</a></li><li class="docs-toc__item"><a href="#verify">Verify</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#what-the-job-checks">What the job checks</a></li><li class="docs-toc__item"><a href="#include-the-component">Include the component</a></li><li class="docs-toc__item"><a href="#inputs">Inputs</a></li><li class="docs-toc__item"><a href="#how-the-job-works">How the job works</a></li><li class="docs-toc__item"><a href="#reports">Reports</a></li><li class="docs-toc__item"><a href="#roll-it-out-on-a-site-with-findings">Roll it out on a site with findings</a></li><li class="docs-toc__item"><a href="#check-a-running-site">Check a running site</a></li><li class="docs-toc__item"><a href="#keep-every-route-on-the-list">Keep every route on the list</a></li><li class="docs-toc__item"><a href="#pages-behind-a-sign-in">Pages behind a sign-in</a></li><li class="docs-toc__item"><a href="#run-it-on-your-desk">Run it on your desk</a></li><li class="docs-toc__item"><a href="#run-it-locally-in-your-repo">Run it locally in your repo</a></li><li class="docs-toc__item"><a href="#verify">Verify</a></li><li class="docs-toc__item"><a href="#related">Related</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
   <span>Documents Preflight <span data-docs-version>0.12.0</span></span>
