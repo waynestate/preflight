@@ -1187,7 +1187,7 @@ Cockpit placards
 
 ### Ten checks, one include each
 
-Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All ten are in the 0.10.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Six more components ship in the same tag, and the docs cover each one: `secret-detection`, `squire-kit`, `portability`, `package-publish`, `renovate` and `npm-audit`. New in 0.12.0: a seventeenth component, `release-gate`, which fails a tag pipeline unless the default branch already ran a successful pipeline on the tagged commit. New in 0.10.0: `proctor` and `mysql56-migrate` default to PHP 8.5 (8.3 or later still flies through `image`), Playwright and Renovate move to new digests, Preflight's deploy kit follows Squire 0.11.1, and a `must-fail-composer-ci` job and two new guards make the pipeline do what the docs say it does. Nothing renamed, nothing removed. Since 0.9.0: `composer-ci` and `proctor`'s `check_path`; since 0.8.0, `portability`'s `session_header`. Every input on these placards is held to [a written contract](https://preflight.apps.wayne.edu/#contract).
+Each one is an ordinary GitLab job with typed inputs, and the defaults below are what you get if you set nothing. All ten are in the 0.12.0 tag, so pin the full commit SHA of the release tag, with the tag in a comment. Six more components ship in the same tag, and the docs cover each one: `secret-detection`, `squire-kit`, `portability`, `package-publish`, `renovate` and `npm-audit`. New in 0.12.0: a seventeenth component, `release-gate`, which fails a tag pipeline unless the default branch already ran a successful pipeline on the tagged commit. New in 0.10.0: `proctor` and `mysql56-migrate` default to PHP 8.5 (8.3 or later still flies through `image`), Playwright and Renovate move to new digests, Preflight's deploy kit follows Squire 0.11.1, and a `must-fail-composer-ci` job and two new guards make the pipeline do what the docs say it does. Nothing renamed, nothing removed. Since 0.9.0: `composer-ci` and `proctor`'s `check_path`; since 0.8.0, `portability`'s `session_header`. Every input on these placards is held to [a written contract](https://preflight.apps.wayne.edu/#contract).
 
 in 0.12.0
 
@@ -1740,6 +1740,7 @@ All notable changes to Preflight are recorded here. Entries follow [Keep a Chang
 
 ### Unreleased [#](https://preflight.apps.wayne.edu/docs/changelog.html#unreleased)
 
+- Changed: `deploy/` requires PROCTOR `^0.18` (was `^0.16`, which does not allow 0.18); 0.18.0 adds the update notice, the fake-driver check and the app-env warning (D-133). No component changes for it.
 - Removed: Squire's local-running kit files (docker-compose.squire.yml, haproxy.cfg, parity scripts, env example; D-095). Parity runs the app locally: `parity up` in `deploy/`.
 - Docs: SECURITY.md says how to report a vulnerability privately.
 
