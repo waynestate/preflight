@@ -6,6 +6,17 @@
 # their image_prefix input (default: the proxy) in front of their image, so
 # the includes below pass no image; tests/check-dependency-cache.sh fails
 # if one does, or if a job here pulls from Docker Hub directly.
+# The pipeline shape D-176 sets for the stack: branch pipelines only, and a
+# new commit cancels the pipeline it supersedes. Preflight runs everything
+# on every branch (it is the component catalog), so no PREFLIGHT_TIER here.
+workflow:
+  auto_cancel:
+    on_new_commit: interruptible
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      when: never
+    - when: always
+
 include:
   # The real PROCTOR (fixture-app require-dev), on the component's default command.
   - component: $CI_SERVER_FQDN/$CI_PROJECT_PATH/proctor@$CI_COMMIT_SHA
@@ -443,8 +454,6 @@ must-fail-mysql56-migrate:
       when: never
     - if: $CI_PIPELINE_SOURCE == "schedule"
       when: never
-    - if: $CI_COMMIT_TAG
-      when: on_success
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       when: on_success
     - if: $CI_MERGE_REQUEST_IID
