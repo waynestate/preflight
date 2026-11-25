@@ -8,6 +8,8 @@ are Git tags.
 
 ## 0.13.0 (2026-11-24)
 
+Tag commit: `80ff4e366d6d7af1b95c29c7d4303b4cb90a863c` (pin this SHA, with `# 0.13.0` in a trailing comment).
+
 Pipelines can run a fast tier on pushes and the full tier nightly, on tags and on manual runs (D-176). Nothing changes for a repo that sets nothing: the `tier` input defaults to `always`. No input or job was renamed or removed.
 
 - Changed: the `renovate` component's default Renovate image is 44.261.0 (pinned by digest); the README, the renovate guide and the components reference show it.
