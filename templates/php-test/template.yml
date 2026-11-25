@@ -50,6 +50,11 @@ spec:
       type: string
       default: full
       regex: '^(full|release-only)$'
+    tier:
+      description: "When this job runs. always (default): on every pipeline, as before. full: only when the pipeline sets PREFLIGHT_TIER to full (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). Set full only when the repo's workflow rules set PREFLIGHT_TIER, or the job never runs."
+      type: string
+      default: always
+      regex: '^(always|full)$'
 ---
 ".$[[ inputs.job_name ]]-base":
   image: $[[ inputs.image_prefix ]]/$[[ inputs.image ]]
@@ -99,6 +104,8 @@ spec:
   rules:
     - if: '$CI_COMMIT_TAG && "$[[ inputs.tag_pipeline ]]" == "release-only"'
       when: never
+    - if: '"$[[ inputs.tier ]]" == "full" && $PREFLIGHT_TIER != "full"'
+      when: never
     - when: on_success
   # An array input that replaces an entire YAML value is interpolated as its
   # specified type (docs: Input types), so the array feeds parallel:matrix
@@ -118,6 +125,8 @@ spec:
     PHP_VERSION: "$[[ inputs.php_advisory_version ]]"
   rules:
     - if: '$CI_COMMIT_TAG && "$[[ inputs.tag_pipeline ]]" == "release-only"'
+      when: never
+    - if: '"$[[ inputs.tier ]]" == "full" && $PREFLIGHT_TIER != "full"'
       when: never
     - if: $PHP_VERSION == null || $PHP_VERSION == ""
       when: never

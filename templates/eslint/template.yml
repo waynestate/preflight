@@ -47,6 +47,11 @@ spec:
       type: string
       default: full
       regex: '^(full|release-only)$'
+    tier:
+      description: "When this job runs. always (default): on every pipeline, as before. full: only when the pipeline sets PREFLIGHT_TIER to full (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). Set full only when the repo's workflow rules set PREFLIGHT_TIER, or the job never runs."
+      type: string
+      default: always
+      regex: '^(always|full)$'
 ---
 "$[[ inputs.job_name ]]":
   stage: $[[ inputs.stage ]]
@@ -55,6 +60,8 @@ spec:
   timeout: 15m
   rules:
     - if: '$CI_COMMIT_TAG && "$[[ inputs.tag_pipeline ]]" == "release-only"'
+      when: never
+    - if: '"$[[ inputs.tier ]]" == "full" && $PREFLIGHT_TIER != "full"'
       when: never
     - when: on_success
   # The key is fixed, not a package-lock.json hash: npm's cache is
