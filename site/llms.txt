@@ -49,6 +49,7 @@ Every page below is Markdown. The HTML pages send the same Markdown to a client 
 - [Keep the job token allowlist short | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/job-token-allowlist.md): List only the projects an app really needs in its CI/CD job token allowlist, and review the list when a dependency is dropped.
 - [Which hosts the jobs reach | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/network-egress.md): Every host a Preflight job or its image pull reaches, by component, for a runner whose network is locked down.
 - [Quick start | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/quick-start.md): Wire one Preflight component into an app and watch the pipeline run it.
+- [Recommended pipeline shape | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/recommended-pipeline-shape.md): The workflow block the stack recommends: a fast tier on pushes, the full tier nightly, on tags and on manual runs.
 - [Renovate | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/renovate.md): Preflight owns the stack's version automation: the shared preset and the component that runs it.
 - [Same instance only | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/same-instance-only.md): Components work only inside the GitLab instance that hosts this project.
 - [Template lint | Preflight docs](https://preflight.apps.wayne.edu/docs/guides/template-lint.md): `composer ci` scans the templates for unsafe CI patterns before the fixture tests.

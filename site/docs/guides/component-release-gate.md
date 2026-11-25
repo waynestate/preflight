@@ -24,7 +24,7 @@ The job, in order:
 
 The git fallback has an honest limit. It proves the commit is on the default branch, not that it passed there: git history records merges, not pipeline results. In fallback mode the gate's green-ness rests on the release procedure instead, which says to tag only after main is green. The job prints that in its log when it falls back.
 
-A repo with no release jobs still gets the gate. With the test components set to `tag_pipeline: release-only` and this component included, its tag pipeline is just the gate, and the gate still refuses a tag on a commit the default branch never tested.
+A repo with no release jobs gets no tag pipeline at all. GitLab does not run a pipeline whose only jobs sit in `.pre`, and once the test components opt into `tag_pipeline: release-only` the gate is the only job left. Where release jobs do exist, the gate refuses a tag on a commit the default branch never tested.
 
 The default image ships git and curl, which the job uses for the API check and the git fallback. The job is interruptible and times out after 5 minutes.
 
