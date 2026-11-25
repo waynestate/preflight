@@ -126,6 +126,7 @@ include:
 | `test_command` | string | `vendor/bin/phpunit` | The test command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
 | `tag_pipeline` | string | `full` | What this job does on a tag pipeline. `full` (default): it runs, as on any pipeline. `release-only`: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch. |
+| `tier` | string | `always` | When this job runs. `always` (default): on every pipeline, as before. `full`: only when the pipeline sets `PREFLIGHT_TIER` to `full` (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). Set `full` only when the repo's workflow rules set `PREFLIGHT_TIER`, or the job never runs. |
 
 ##### Caching
 
@@ -345,6 +346,7 @@ include:
 | `eslint_args` | string | `.` | Arguments passed to eslint. |
 | `prettier` | boolean | `true` | Whether to also run `prettier --check`. |
 | `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
+| `tier` | string | `always` | When this job runs. `always` (default): on every pipeline, as before. `full`: only when the pipeline sets `PREFLIGHT_TIER` to `full` (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). Set `full` only when the repo's workflow rules set `PREFLIGHT_TIER`, or the job never runs. |
 
 #### secret-detection
 
@@ -522,6 +524,7 @@ sign-in route for `session-hop` and what each failure usually means.
 | `require_healthcheck` | boolean | `false` | Fail when the image declares no HEALTHCHECK. Docker and Coolify use it; OpenShift and Kubernetes use their own probes. |
 | `checks` | array | `["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm", "healthcheck"]` | The checks to run. Leave one out only on purpose; the strict boot always runs. |
 | `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
+| `tier` | string | `always` | When this job runs. `always` (default): on every pipeline, as before. `full`: only when the pipeline sets `PREFLIGHT_TIER` to `full` (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). Set `full` only when the repo's workflow rules set `PREFLIGHT_TIER`, or the job never runs. |
 
 The `image` default is an immutable tag (`-immutable`) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.
 
@@ -566,6 +569,7 @@ a11y ships in 0.2.0 (0.1.4 does not include it). While a site fixes its first fi
 | `axe_core_version` | string | `4.14.1` | axe-core version, the rules engine. The job fails if a different axe-core ran. |
 | `axe_playwright_version` | string | `4.14.0` | @axe-core/playwright version. Its axe-core range must include `axe_core_version`. |
 | `tag_pipeline` | string | `full` | What the job does on a tag pipeline. `full` (the default) runs it as on any pipeline; `release-only` skips it on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component. |
+| `tier` | string | `always` | When this job runs. `always` (default): on every pipeline, as before. `full`: only when the pipeline sets `PREFLIGHT_TIER` to `full` (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). Set `full` only when the repo's workflow rules set `PREFLIGHT_TIER`, or the job never runs. |
 
 The job installs the three npm packages at exact versions with `--ignore-scripts` into a temporary folder, never into
 the app. The checker is `templates/a11y/check.mjs`, inlined in the template because a component ships only its
@@ -2124,10 +2128,13 @@ include:
 | `axe_core_version` | string | `4.14.1` | axe-core version, the rules engine. The job fails if a different axe-core ran. |
 | `axe_playwright_version` | string | `4.14.0` | @axe-core/playwright version, the bridge to Playwright. Its axe-core range must include `axe_core_version`. |
 | `tag_pipeline` | string | `full` | What the job does on a tag pipeline. `full` (the default) runs it as on any pipeline; `release-only` skips it on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component. |
+| `tier` | string | `always` | When this job runs. `always` (default): on every pipeline, as before. `full`: only when the pipeline sets `PREFLIGHT_TIER` to `full` (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). Set `full` only when the repo's workflow rules set `PREFLIGHT_TIER`, or the job never runs. |
 
 A page glob uses `**` for any number of folders and `*` inside one folder name. Folders that start with a dot, `node_modules` and `vendor` are skipped. A literal page that is not there fails its check (HTTP 404); a glob that matches nothing stops the job as a configuration error, so a moved docs folder cannot quietly shrink the gate.
 
 Set `tag_pipeline: release-only` when a tag is cut from a commit that main already tested: the job is skipped on the tag pipeline and the `release-gate` component checks main was green.
+
+Set `tier: full` to run this job only on nightly, tag and manual pipelines. It needs the repo's workflow rules to set `PREFLIGHT_TIER` (see Recommended pipeline shape).
 
 ### How the job works [#](https://preflight.apps.wayne.edu/docs/guides/component-a11y.html#how-the-job-works)
 
@@ -2449,8 +2456,11 @@ include:
 | `eslint_args` | string | `.` | Arguments passed to eslint. |
 | `prettier` | boolean | `true` | Whether to also run `prettier --check`. |
 | `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
+| `tier` | string | `always` | When this job runs. `always` (default): on every pipeline, as before. `full`: only when the pipeline sets `PREFLIGHT_TIER` to `full` (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). Set `full` only when the repo's workflow rules set `PREFLIGHT_TIER`, or the job never runs. |
 
 Set `tag_pipeline: release-only` when a tag is cut from a commit that main already tested: the job is skipped on the tag pipeline and the `release-gate` component checks main was green.
+
+Set `tier: full` to run this job only on nightly, tag and manual pipelines. It needs the repo's workflow rules to set `PREFLIGHT_TIER` (see Recommended pipeline shape).
 
 ### Verify [#](https://preflight.apps.wayne.edu/docs/guides/component-eslint.html#verify)
 
@@ -2753,12 +2763,15 @@ include:
 | `test_command` | string | `vendor/bin/phpunit` | The test command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
 | `tag_pipeline` | string | `full` | What this job does on a tag pipeline. `full` (default): it runs, as on any pipeline. `release-only`: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch. |
+| `tier` | string | `always` | When this job runs. `always` (default): on every pipeline, as before. `full`: only when the pipeline sets `PREFLIGHT_TIER` to `full` (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). Set `full` only when the repo's workflow rules set `PREFLIGHT_TIER`, or the job never runs. |
 
 Note
 
 The template adds regexes to three inputs: `job_name` must match `^[A-Za-z0-9_][A-Za-z0-9_.-]*$`, `composer_version` must match `^2\.(9\.([6-9]|[1-9][0-9]+)|[1-9][0-9]+\.[0-9]+)$`, and `working_dir` must match `^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$`.
 
 Set `tag_pipeline: release-only` when a tag is cut from a commit that main already tested: the job is skipped on the tag pipeline and the `release-gate` component checks main was green.
+
+Set `tier: full` to run this job only on nightly, tag and manual pipelines. It needs the repo's workflow rules to set `PREFLIGHT_TIER` (see Recommended pipeline shape).
 
 ### What the jobs do [#](https://preflight.apps.wayne.edu/docs/guides/component-php-test.html#what-the-jobs-do)
 
@@ -3143,8 +3156,11 @@ Before 0.5.0 an Apache image needed a `start_command` shim such as `exec setsid 
 | `require_healthcheck` | boolean | `false` | Fail when the image declares no HEALTHCHECK. Docker and Coolify use it; OpenShift and Kubernetes use their own probes. |
 | `checks` | array | `["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm", "healthcheck"]` | The checks to run. Leave one out only on purpose; the strict boot always runs. |
 | `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
+| `tier` | string | `always` | When this job runs. `always` (default): on every pipeline, as before. `full`: only when the pipeline sets `PREFLIGHT_TIER` to `full` (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). Set `full` only when the repo's workflow rules set `PREFLIGHT_TIER`, or the job never runs. |
 
 Set `tag_pipeline: release-only` when a tag is cut from a commit that main already tested: the job is skipped on the tag pipeline and the `release-gate` component checks main was green.
+
+Set `tier: full` to run this job only on nightly, tag and manual pipelines. It needs the repo's workflow rules to set `PREFLIGHT_TIER` (see Recommended pipeline shape).
 
 The `image` default is an immutable tag (`-immutable`) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.
 
@@ -4592,6 +4608,7 @@ include:
 | `test_command` | string | `vendor/bin/phpunit` | The test command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
 | `tag_pipeline` | string | `full` | What this job does on a tag pipeline. `full` (default): it runs, as on any pipeline. `release-only`: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch. |
+| `tier` | string | `always` | When this job runs. `always` (default): on every pipeline, as before. `full`: only when the pipeline sets `PREFLIGHT_TIER` to `full` (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). Set `full` only when the repo's workflow rules set `PREFLIGHT_TIER`, or the job never runs. |
 
 From `templates/php-test/template.yml`: one job is created per entry in `php_versions` through `parallel:matrix`; `PHP_VERSION` becomes a CI/CD variable in each job, which the image input's default expands, and each job runs the newest patch release of its version. The default image is deliberately tag-pinned (the template points at the README section Updating image pins). Each job installs Composer the same way as proctor, runs `composer install --no-interaction --no-progress`, and then the test command. The jobs are `interruptible: true` with a timeout of 30 minutes. The `<job_name>-advisory` job runs the same script on `php_advisory_version` (default `8.6`) with `allow_failure: true`, and it is skipped while that input is empty. Because the official 8.6 image ships without `mbstring`, the script installs it first when `php -m` does not list it (a no-op on 8.3 to 8.5), so PHPUnit can start.
 
@@ -4789,6 +4806,7 @@ include:
 | `eslint_args` | string | `.` | Arguments passed to eslint. |
 | `prettier` | boolean | `true` | Whether to also run `prettier --check`. |
 | `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
+| `tier` | string | `always` | When this job runs. `always` (default): on every pipeline, as before. `full`: only when the pipeline sets `PREFLIGHT_TIER` to `full` (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). Set `full` only when the repo's workflow rules set `PREFLIGHT_TIER`, or the job never runs. |
 
 From `templates/eslint/template.yml`: the component does not install ESLint or Prettier itself; it runs `npm ci --ignore-scripts --cache .npm-cache` (the cache uses the fixed key `preflight-eslint` and stores `.npm-cache/`), then `npx --no-install eslint` with the `eslint_args` value, and, while `prettier` is true, `npx --no-install prettier --check .`. The job is `interruptible: true` with a timeout of 15m.
 
@@ -4931,6 +4949,7 @@ The one-job form ships in 0.2.0; 0.1.4 carries the earlier two-job form (`portab
 | `require_healthcheck` | boolean | `false` | Fail when the image declares no HEALTHCHECK. Docker and Coolify use it; OpenShift and Kubernetes use their own probes. |
 | `checks` | array | `["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm", "healthcheck"]` | The checks to run. Leave one out only on purpose; the strict boot always runs. |
 | `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
+| `tier` | string | `always` | When this job runs. `always` (default): on every pipeline, as before. `full`: only when the pipeline sets `PREFLIGHT_TIER` to `full` (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). Set `full` only when the repo's workflow rules set `PREFLIGHT_TIER`, or the job never runs. |
 
 The `image` default is an immutable tag (`-immutable`) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.
 
@@ -4967,6 +4986,7 @@ include:
 | `axe_core_version` | string | `4.14.1` | axe-core version; the job fails if a different one ran. |
 | `axe_playwright_version` | string | `4.14.0` | @axe-core/playwright version; its axe-core range must include `axe_core_version`. |
 | `tag_pipeline` | string | `full` | What the job does on a tag pipeline. `full` (the default) runs it as on any pipeline; `release-only` skips it on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component. |
+| `tier` | string | `always` | When this job runs. `always` (default): on every pipeline, as before. `full`: only when the pipeline sets `PREFLIGHT_TIER` to `full` (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). Set `full` only when the repo's workflow rules set `PREFLIGHT_TIER`, or the job never runs. |
 
 From `templates/a11y/template.yml`: the single job (named by `job_name`) runs in the `test` stage by default, is `interruptible: true`, and has a timeout of 30 minutes. It reads the Playwright version from the image tag, installs `playwright`, `@axe-core/playwright` and `axe-core` at exact versions with `npm install --ignore-scripts` into a temporary folder outside the project, writes the inputs as JSON and the checker (inlined from `templates/a11y/check.mjs`, because a component ships only its `template.yml`), and runs it from the project root with every check at reduced motion. It writes `gl-a11y-junit.xml` (published as a JUnit report) and `gl-a11y-report.json`, kept as artifacts for 30 days with `when: always`. It exits 0 clean, 1 on a violation or a page that did not load, and 2 on a tool or configuration error. `allow_failure` is interpolated as a real YAML boolean.
 

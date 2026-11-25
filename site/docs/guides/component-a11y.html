@@ -186,12 +186,19 @@ commit SHA of a commit at or after it.</p></aside>
 <td><code>full</code></td>
 <td>What the job does on a tag pipeline. <code>full</code> (the default) runs it as on any pipeline; <code>release-only</code> skips it on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component.</td>
 </tr>
+<tr>
+<td><code>tier</code></td>
+<td>string</td>
+<td><code>always</code></td>
+<td>When this job runs. <code>always</code> (default): on every pipeline, as before. <code>full</code>: only when the pipeline sets <code>PREFLIGHT_TIER</code> to <code>full</code> (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). Set <code>full</code> only when the repo's workflow rules set <code>PREFLIGHT_TIER</code>, or the job never runs.</td>
+</tr>
 </tbody>
 </table></div>
 <p>A page glob uses <code>**</code> for any number of folders and <code>*</code> inside one folder name. Folders that start with a dot,
 <code>node_modules</code> and <code>vendor</code> are skipped. A literal page that is not there fails its check (HTTP 404); a glob that matches
 nothing stops the job as a configuration error, so a moved docs folder cannot quietly shrink the gate.</p>
 <p>Set <code>tag_pipeline: release-only</code> when a tag is cut from a commit that main already tested: the job is skipped on the tag pipeline and the <code>release-gate</code> component checks main was green.</p>
+<p>Set <code>tier: full</code> to run this job only on nightly, tag and manual pipelines. It needs the repo's workflow rules to set <code>PREFLIGHT_TIER</code> (see Recommended pipeline shape).</p>
 <h2 id="how-the-job-works">How the job <span class="docs-heading-tail"><span>works</span><a class="docs-heading-link" aria-label="Link to this section" href="#how-the-job-works">#</a></span></h2>
 <p>From <code>templates/a11y/template.yml</code>, the job (named by <code>job_name</code>) runs in the <code>test</code> stage by default, is
 <code>interruptible: true</code>, and has a timeout of 30 minutes. In order:</p>

@@ -120,10 +120,17 @@
 <td><code>full</code></td>
 <td>What this job does on a tag pipeline. <code>full</code> (default): it runs, as on any pipeline. <code>release-only</code>: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch.</td>
 </tr>
+<tr>
+<td><code>tier</code></td>
+<td>string</td>
+<td><code>always</code></td>
+<td>When this job runs. <code>always</code> (default): on every pipeline, as before. <code>full</code>: only when the pipeline sets <code>PREFLIGHT_TIER</code> to <code>full</code> (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). Set <code>full</code> only when the repo's workflow rules set <code>PREFLIGHT_TIER</code>, or the job never runs.</td>
+</tr>
 </tbody>
 </table></div>
 <aside class="docs-callout docs-callout--note" role="note"><p class="docs-callout__label">Note</p><p>The template adds regexes to three inputs: <code>job_name</code> must match <code>^[A-Za-z0-9_][A-Za-z0-9_.-]*$</code>, <code>composer_version</code> must match <code>^2\.(9\.([6-9]|[1-9][0-9]+)|[1-9][0-9]+\.[0-9]+)$</code>, and <code>working_dir</code> must match <code>^(\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$</code>.</p></aside>
 <p>Set <code>tag_pipeline: release-only</code> when a tag is cut from a commit that main already tested: the job is skipped on the tag pipeline and the <code>release-gate</code> component checks main was green.</p>
+<p>Set <code>tier: full</code> to run this job only on nightly, tag and manual pipelines. It needs the repo's workflow rules to set <code>PREFLIGHT_TIER</code> (see Recommended pipeline shape).</p>
 <h2 id="what-the-jobs-do">What the jobs <span class="docs-heading-tail"><span>do</span><a class="docs-heading-link" aria-label="Link to this section" href="#what-the-jobs-do">#</a></span></h2>
 <p>The array input feeds <code>parallel:matrix</code> directly, so one job is created per PHP version. <code>PHP_VERSION</code> becomes a CI/CD variable in each job, which the <code>image</code> input's default expands at job time. The default image is deliberately tag-pinned, so each job runs the newest patch release of its PHP version. The <code>&lt;job_name&gt;-advisory</code> job runs the same script on <code>php_advisory_version</code> (default <code>8.6</code>) with <code>allow_failure: true</code>, and is skipped while that input is empty. Each job is <code>interruptible: true</code> with a <code>timeout: 30 minutes</code>, and its script:</p>
 <ol>

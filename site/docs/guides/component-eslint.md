@@ -48,8 +48,11 @@ include:
 | `eslint_args` | string | `.` | Arguments passed to eslint. |
 | `prettier` | boolean | `true` | Whether to also run `prettier --check`. |
 | `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
+| `tier` | string | `always` | When this job runs. `always` (default): on every pipeline, as before. `full`: only when the pipeline sets `PREFLIGHT_TIER` to `full` (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). Set `full` only when the repo's workflow rules set `PREFLIGHT_TIER`, or the job never runs. |
 
 Set `tag_pipeline: release-only` when a tag is cut from a commit that main already tested: the job is skipped on the tag pipeline and the `release-gate` component checks main was green.
+
+Set `tier: full` to run this job only on nightly, tag and manual pipelines. It needs the repo's workflow rules to set `PREFLIGHT_TIER` (see Recommended pipeline shape).
 
 ## Verify [#](https://preflight.apps.wayne.edu/docs/guides/component-eslint.html#verify)
 

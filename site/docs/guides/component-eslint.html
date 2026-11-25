@@ -129,9 +129,16 @@ with the tag in a trailing comment:</p>
 <td><code>full</code></td>
 <td>What the job does on a tag pipeline: <code>full</code> (default) runs it as on any pipeline; <code>release-only</code> skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the <code>release-gate</code> component.</td>
 </tr>
+<tr>
+<td><code>tier</code></td>
+<td>string</td>
+<td><code>always</code></td>
+<td>When this job runs. <code>always</code> (default): on every pipeline, as before. <code>full</code>: only when the pipeline sets <code>PREFLIGHT_TIER</code> to <code>full</code> (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). Set <code>full</code> only when the repo's workflow rules set <code>PREFLIGHT_TIER</code>, or the job never runs.</td>
+</tr>
 </tbody>
 </table></div>
 <p>Set <code>tag_pipeline: release-only</code> when a tag is cut from a commit that main already tested: the job is skipped on the tag pipeline and the <code>release-gate</code> component checks main was green.</p>
+<p>Set <code>tier: full</code> to run this job only on nightly, tag and manual pipelines. It needs the repo's workflow rules to set <code>PREFLIGHT_TIER</code> (see Recommended pipeline shape).</p>
 <h2 id="verify"><span class="docs-heading-tail"><span>Verify</span><a class="docs-heading-link" aria-label="Link to this section" href="#verify">#</a></span></h2>
 <p>Push the change. The <code>eslint</code> job lands in the <code>test</code> stage by default, and
 a green job means ESLint and Prettier found nothing to fix.</p>

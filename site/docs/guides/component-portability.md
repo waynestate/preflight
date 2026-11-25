@@ -151,8 +151,11 @@ Before 0.5.0 an Apache image needed a `start_command` shim such as `exec setsid 
 | `require_healthcheck` | boolean | `false` | Fail when the image declares no HEALTHCHECK. Docker and Coolify use it; OpenShift and Kubernetes use their own probes. |
 | `checks` | array | `["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm", "healthcheck"]` | The checks to run. Leave one out only on purpose; the strict boot always runs. |
 | `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
+| `tier` | string | `always` | When this job runs. `always` (default): on every pipeline, as before. `full`: only when the pipeline sets `PREFLIGHT_TIER` to `full` (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). Set `full` only when the repo's workflow rules set `PREFLIGHT_TIER`, or the job never runs. |
 
 Set `tag_pipeline: release-only` when a tag is cut from a commit that main already tested: the job is skipped on the tag pipeline and the `release-gate` component checks main was green.
+
+Set `tier: full` to run this job only on nightly, tag and manual pipelines. It needs the repo's workflow rules to set `PREFLIGHT_TIER` (see Recommended pipeline shape).
 
 The `image` default is an immutable tag (`-immutable`) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.
 
