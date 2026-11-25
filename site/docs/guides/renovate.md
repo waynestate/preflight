@@ -27,6 +27,8 @@ Every stack repository carries a `renovate.json` that extends the shared preset,
 
 Digest updates, pin and pinDigest updates, and patch and minor version bumps auto-merge when the pipeline is green. Lock file maintenance runs weekly and auto-merges the same way. Every merge request carries the `auto-deps` label.
 
+Non-major updates arrive together in one weekly merge request per repo (Monday before 06:00, America/Detroit). Updates to templates, the contract and `.gitlab-ci.yml` still come one at a time and need review.
+
 The exception is Preflight's own pins: an update that touches the templates, the contract or this repository's own pipeline, a bump of a component include version, and a bump of the recorded Squire kit version, never auto-merge (see [What waits for review](https://preflight.apps.wayne.edu/docs/guides/renovate.html#what-waits-for-review)).
 
 ## What waits [#](https://preflight.apps.wayne.edu/docs/guides/renovate.html#what-waits)
