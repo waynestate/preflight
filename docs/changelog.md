@@ -13,6 +13,10 @@ are Git tags.
 
 ## Unreleased
 
+## 0.13.0 (2026-11-24)
+
+Pipelines can run a fast tier on pushes and the full tier nightly, on tags and on manual runs (D-176). Nothing changes for a repo that sets nothing: the `tier` input defaults to `always`. No input or job was renamed or removed.
+
 - Changed: the `renovate` component's default Renovate image is 44.261.0 (pinned by digest); the README, the renovate guide and the components reference show it.
 - Changed: the shared Renovate preset no longer automerges lock file maintenance (it opens MRs for review) and waynestate packages follow the same 3 day minimumReleaseAge as everything else.
 - Added: the a11y component's opt-in `required_routes_file` input: a file of routes the page list must cover, one per line, generated from the app's router. The job fails when a listed route is not one of the checked pages, so a new route cannot go unchecked.
@@ -22,6 +26,10 @@ are Git tags.
 - Docs: SECURITY.md says how to report a vulnerability privately.
 - Playwright pinned to 1.65.0 to match the image.
 - Changed: the `a11y` component's `axe_core_version` input defaults to 4.14.1 (was 4.14.0); the consumer kit pin and the docs input tables follow.
+- Added: the `tier` input (`always` by default, or `full`) on php-test (both jobs), a11y, portability and eslint (D-176). With `full` the job runs only when the pipeline sets `PREFLIGHT_TIER=full` (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). It sits beside `tag_pipeline` as a second rule; both are off by default.
+- Added: the recommended pipeline shape page (`docs/guides/recommended-pipeline-shape.md`): branch pipelines only, auto-cancel of superseded pipelines, a fast tier on pushes, the full tier nightly, on tags and on manual runs.
+- Changed: the shared Renovate preset (`renovate/default.json`) updates weekly and groups all non-major updates into one MR, so a repo gets one review a week instead of one per package.
+- Docs: workflow examples, stale `rules` claims and the release-gate claim corrected; BEST_PRACTICES 3.4 now advises branch pipelines only and links the recommended pipeline shape page. Preflight's own pipeline cancels superseded pipelines and no longer runs merge request pipelines.
 
 ## 0.12.0 (2026-11-20)
 

@@ -429,7 +429,7 @@ proctor job (`proctor/preflight-gates/no-proctor-job`). Both warn and never fail
 and that none of them fails the run. Rollcall's "apps with CI" number is a plan.
 
 ### 3.4 Control when pipelines run, once, in the app
-Set `workflow:rules` so a branch with an open merge request does not run twice, and so merge request pipelines exist.
+Set `workflow:rules` so only branch pipelines run (no merge request pipelines), a push to a branch with an open merge request runs once, and superseded pipelines cancel themselves. See [the recommended pipeline shape](docs/guides/recommended-pipeline-shape.md).
 
 Why: each component job carries only the `tag_pipeline` and `tier` rules, both off by default, so the app's own
 file decides when pipelines run, and two pipelines per push waste runner time.

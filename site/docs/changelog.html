@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Changelog | Preflight docs</title>
 <meta name="description" content="All notable changes to this project.">
-<meta name="docs-version" content="0.12.0">
+<meta name="docs-version" content="0.13.0">
 <link rel="stylesheet" href="../assets/wayne-ui/wayne-ui.css">
 <link rel="stylesheet" href="../assets/docs.css">
 <link rel="stylesheet" href="../docs/theme/preflight.css">
@@ -20,7 +20,7 @@
     <a class="brand" href="../index.html">
       <img src="../brand/preflight-avatar-256.png" width="36" height="36" alt="">
       <span class="brand__name">PREFLIGHT</span>
-      <span class="brand__tail">0.12.0</span>
+      <span class="brand__tail">0.13.0</span>
     </a>
     <nav class="topnav" aria-label="Site">
       <a class="topnav__section" href="../index.html#checklist">Checklist</a>
@@ -46,6 +46,8 @@
 <a rel="noopener" href="https://keepachangelog.com/en/1.1.0/">Keep a Changelog</a>; released versions
 are Git tags.</p>
 <h2 id="unreleased"><span class="docs-heading-tail"><span>Unreleased</span><a class="docs-heading-link" aria-label="Link to this section" href="#unreleased">#</a></span></h2>
+<h2 id="0-13-0-2026-11-24">0.13.0 <span class="docs-heading-tail"><span>(2026-11-24)</span><a class="docs-heading-link" aria-label="Link to this section" href="#0-13-0-2026-11-24">#</a></span></h2>
+<p>Pipelines can run a fast tier on pushes and the full tier nightly, on tags and on manual runs (D-176). Nothing changes for a repo that sets nothing: the <code>tier</code> input defaults to <code>always</code>. No input or job was renamed or removed.</p>
 <ul>
 <li>Changed: the <code>renovate</code> component's default Renovate image is 44.261.0 (pinned by digest); the README, the renovate guide and the components reference show it.</li>
 <li>Changed: the shared Renovate preset no longer automerges lock file maintenance (it opens MRs for review) and waynestate packages follow the same 3 day minimumReleaseAge as everything else.</li>
@@ -56,6 +58,10 @@ are Git tags.</p>
 <li>Docs: SECURITY.md says how to report a vulnerability privately.</li>
 <li>Playwright pinned to 1.65.0 to match the image.</li>
 <li>Changed: the <code>a11y</code> component's <code>axe_core_version</code> input defaults to 4.14.1 (was 4.14.0); the consumer kit pin and the docs input tables follow.</li>
+<li>Added: the <code>tier</code> input (<code>always</code> by default, or <code>full</code>) on php-test (both jobs), a11y, portability and eslint (D-176). With <code>full</code> the job runs only when the pipeline sets <code>PREFLIGHT_TIER=full</code> (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). It sits beside <code>tag_pipeline</code> as a second rule; both are off by default.</li>
+<li>Added: the recommended pipeline shape page (<code>docs/guides/recommended-pipeline-shape.md</code>): branch pipelines only, auto-cancel of superseded pipelines, a fast tier on pushes, the full tier nightly, on tags and on manual runs.</li>
+<li>Changed: the shared Renovate preset (<code>renovate/default.json</code>) updates weekly and groups all non-major updates into one MR, so a repo gets one review a week instead of one per package.</li>
+<li>Docs: workflow examples, stale <code>rules</code> claims and the release-gate claim corrected; BEST_PRACTICES 3.4 now advises branch pipelines only and links the recommended pipeline shape page. Preflight's own pipeline cancels superseded pipelines and no longer runs merge request pipelines.</li>
 </ul>
 <h2 id="0-12-0-2026-11-20">0.12.0 <span class="docs-heading-tail"><span>(2026-11-20)</span><a class="docs-heading-link" aria-label="Link to this section" href="#0-12-0-2026-11-20">#</a></span></h2>
 <p>Tag pipelines can run only the release jobs (D-125). Every test component gains an opt-in <code>tag_pipeline</code> input and a new <code>release-gate</code> component fails the tag pipeline unless main passed the tagged commit. Nothing changes for a repo that sets nothing: the input defaults to <code>full</code>. No input or job was renamed or removed.</p>
@@ -398,10 +404,10 @@ deprecation checks now run on every analysis.</li>
     </main>
     <nav class="docs-pager" aria-label="Pages"><a class="docs-pager__link" href="../docs/upgrading.html"><span class="docs-pager__dir">Previous</span><span class="docs-pager__title">Upgrading</span></a></nav>
   </div>
-  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#unreleased">Unreleased</a></li><li class="docs-toc__item"><a href="#0-12-0-2026-11-20">0.12.0 (2026-11-20)</a></li><li class="docs-toc__item"><a href="#0-11-0-2026-11-19">0.11.0 (2026-11-19)</a></li><li class="docs-toc__item"><a href="#0-10-0-2026-11-19">0.10.0 (2026-11-19)</a></li><li class="docs-toc__item"><a href="#0-9-0-2026-11-12">0.9.0 (2026-11-12)</a></li><li class="docs-toc__item"><a href="#0-8-0-2026-11-10">0.8.0 (2026-11-10)</a></li><li class="docs-toc__item"><a href="#0-7-0-2026-11-10">0.7.0 (2026-11-10)</a></li><li class="docs-toc__item"><a href="#0-6-0-2026-11-10">0.6.0 (2026-11-10)</a></li><li class="docs-toc__item"><a href="#0-5-0-2026-11-09">0.5.0 (2026-11-09)</a></li><li class="docs-toc__item"><a href="#0-4-0-2026-11-08">0.4.0 (2026-11-08)</a></li><li class="docs-toc__item"><a href="#0-3-1-2026-11-08">0.3.1 (2026-11-08)</a></li><li class="docs-toc__item"><a href="#0-3-0-2026-11-08">0.3.0 (2026-11-08)</a></li><li class="docs-toc__item"><a href="#0-2-0-2026-11-07">0.2.0 (2026-11-07)</a></li><li class="docs-toc__item"><a href="#0-1-4-2026-11-03">0.1.4 (2026-11-03)</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed">Changed</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#added">Added</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#fixed">Fixed</a></li><li class="docs-toc__item"><a href="#0-1-3-2026-11-03">0.1.3 (2026-11-03)</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#added-1">Added</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed-1">Changed</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#fixed-1">Fixed</a></li><li class="docs-toc__item"><a href="#0-1-2-2026-10-29">0.1.2 (2026-10-29)</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#added-2">Added</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#fixed-2">Fixed</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed-2">Changed</a></li><li class="docs-toc__item"><a href="#0-1-1-2026-10-29">0.1.1 (2026-10-29)</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#added-3">Added</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed-3">Changed</a></li><li class="docs-toc__item"><a href="#0-1-0-2026-10-27">0.1.0 (2026-10-27)</a></li></ul></nav>
+  <nav class="docs-toc" aria-label="On this page"><h2 class="docs-toc__title">On this page</h2><ul class="docs-toc__list"><li class="docs-toc__item"><a href="#unreleased">Unreleased</a></li><li class="docs-toc__item"><a href="#0-13-0-2026-11-24">0.13.0 (2026-11-24)</a></li><li class="docs-toc__item"><a href="#0-12-0-2026-11-20">0.12.0 (2026-11-20)</a></li><li class="docs-toc__item"><a href="#0-11-0-2026-11-19">0.11.0 (2026-11-19)</a></li><li class="docs-toc__item"><a href="#0-10-0-2026-11-19">0.10.0 (2026-11-19)</a></li><li class="docs-toc__item"><a href="#0-9-0-2026-11-12">0.9.0 (2026-11-12)</a></li><li class="docs-toc__item"><a href="#0-8-0-2026-11-10">0.8.0 (2026-11-10)</a></li><li class="docs-toc__item"><a href="#0-7-0-2026-11-10">0.7.0 (2026-11-10)</a></li><li class="docs-toc__item"><a href="#0-6-0-2026-11-10">0.6.0 (2026-11-10)</a></li><li class="docs-toc__item"><a href="#0-5-0-2026-11-09">0.5.0 (2026-11-09)</a></li><li class="docs-toc__item"><a href="#0-4-0-2026-11-08">0.4.0 (2026-11-08)</a></li><li class="docs-toc__item"><a href="#0-3-1-2026-11-08">0.3.1 (2026-11-08)</a></li><li class="docs-toc__item"><a href="#0-3-0-2026-11-08">0.3.0 (2026-11-08)</a></li><li class="docs-toc__item"><a href="#0-2-0-2026-11-07">0.2.0 (2026-11-07)</a></li><li class="docs-toc__item"><a href="#0-1-4-2026-11-03">0.1.4 (2026-11-03)</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed">Changed</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#added">Added</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#fixed">Fixed</a></li><li class="docs-toc__item"><a href="#0-1-3-2026-11-03">0.1.3 (2026-11-03)</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#added-1">Added</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed-1">Changed</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#fixed-1">Fixed</a></li><li class="docs-toc__item"><a href="#0-1-2-2026-10-29">0.1.2 (2026-10-29)</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#added-2">Added</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#fixed-2">Fixed</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed-2">Changed</a></li><li class="docs-toc__item"><a href="#0-1-1-2026-10-29">0.1.1 (2026-10-29)</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#added-3">Added</a></li><li class="docs-toc__item docs-toc__item--sub"><a href="#changed-3">Changed</a></li><li class="docs-toc__item"><a href="#0-1-0-2026-10-27">0.1.0 (2026-10-27)</a></li></ul></nav>
 </div>
 <footer class="docs-footer">
-  <span>Documents Preflight <span data-docs-version>0.12.0</span></span>
+  <span>Documents Preflight <span data-docs-version>0.13.0</span></span>
   <span><a rel="noopener" href="https://github.com/waynestate/preflight">Source</a> <a href="changelog.md">Markdown</a></span>
 </footer>
 </body>
