@@ -55,6 +55,7 @@ are Git tags.</p>
 <li>Removed: Squire's local-running kit files (docker-compose.squire.yml, haproxy.cfg, parity scripts, env example; D-095). Parity runs the app locally: <code>parity up</code> in <code>deploy/</code>.</li>
 <li>Docs: SECURITY.md says how to report a vulnerability privately.</li>
 <li>Playwright pinned to 1.65.0 to match the image.</li>
+<li>Changed: the <code>a11y</code> component's <code>axe_core_version</code> input defaults to 4.14.1 (was 4.14.0); the consumer kit pin and the docs input tables follow.</li>
 </ul>
 <h2 id="0-12-0-2026-11-20">0.12.0 <span class="docs-heading-tail"><span>(2026-11-20)</span><a class="docs-heading-link" aria-label="Link to this section" href="#0-12-0-2026-11-20">#</a></span></h2>
 <p>Tag pipelines can run only the release jobs (D-125). Every test component gains an opt-in <code>tag_pipeline</code> input and a new <code>release-gate</code> component fails the tag pipeline unless main passed the tagged commit. Nothing changes for a repo that sets nothing: the input defaults to <code>full</code>. No input or job was renamed or removed.</p>

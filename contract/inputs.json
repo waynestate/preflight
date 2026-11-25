@@ -196,7 +196,7 @@
         { "name": "color_schemes", "type": "array", "default": ["light", "dark"] },
         { "name": "widths", "type": "array", "default": [320, 1280] },
         { "name": "playwright_version", "type": "string", "default": "", "regex": "^([0-9]+\\.[0-9]+\\.[0-9]+)?$" },
-        { "name": "axe_core_version", "type": "string", "default": "4.14.0", "regex": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        { "name": "axe_core_version", "type": "string", "default": "4.14.1", "regex": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
         { "name": "axe_playwright_version", "type": "string", "default": "4.14.0", "regex": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
         { "name": "tag_pipeline", "type": "string", "default": "full", "regex": "^(full|release-only)$" }
       ],
