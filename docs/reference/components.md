@@ -358,7 +358,7 @@ From `templates/package-publish/template.yml`: the job runs only when `$CI_COMMI
 
 Version 1 · Category: Release/Publishing · Tags: release,gate,tag-pipeline
 
-Fails a tag pipeline unless the default branch already ran a successful pipeline on the tagged commit (D-125). The job runs only on tags, in the `.pre` stage before every other stage, so a failure stops the whole tag pipeline before any release job starts. It asks the GitLab API first, with the job token only, and falls back to git when the API cannot be read; the fallback proves the commit is on the default branch, not that it passed there, so in fallback mode the green-ness rests on the release procedure, which says to tag only after the default branch is green. A repo with no release jobs still gets a tag pipeline of just the gate. See [The release-gate component](../guides/component-release-gate.md).
+Fails a tag pipeline unless the default branch already ran a successful pipeline on the tagged commit (D-125). The job runs only on tags, in the `.pre` stage before every other stage, so a failure stops the whole tag pipeline before any release job starts. It asks the GitLab API first, with the job token only, and falls back to git when the API cannot be read; the fallback proves the commit is on the default branch, not that it passed there, so in fallback mode the green-ness rests on the release procedure, which says to tag only after the default branch is green. A repo with no release jobs gets no tag pipeline at all: GitLab does not run a pipeline whose only jobs sit in `.pre`, so the gate matters only where release jobs exist. See [The release-gate component](../guides/component-release-gate.md).
 
 ```yaml
 include:

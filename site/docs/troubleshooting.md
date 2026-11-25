@@ -26,19 +26,34 @@ Components work only inside the GitLab instance that hosts this project, and the
 
 ### The components do not run on merge requests [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#the-components-do-not-run-on-merge-requests)
 
-The components are ordinary jobs, so they run whenever the app's pipeline runs. Whether the pipeline runs on a merge request is decided by a `workflow:rules` block, and a component cannot set it for the project that includes it.
+The components are ordinary jobs, so they run whenever the app's pipeline runs. Whether the pipeline runs on a merge request is decided by a `workflow:rules` block, and a component cannot set it for the project that includes it. The recommended block keeps pipelines to branches only, so a merge request runs nothing by design: its branch pipeline already covers the commit.
 
-- **Cause:** the app's own `.gitlab-ci.yml` has no `workflow:rules` block with a `merge_request_event` rule.
-- **Fix:** add the block to the app's own file:
+- **Cause:** the app's own `.gitlab-ci.yml` has no `workflow:rules` block, or it holds an older copy.
+- **Fix:** put the recommended block in the app's own file:
 
 ```yaml
 workflow:
+  auto_cancel:
+    on_new_commit: interruptible
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: never
+    - if: $CI_COMMIT_TAG
+      variables: { PREFLIGHT_TIER: full }
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $PREFLIGHT_TIER == "full"
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+      variables: { PREFLIGHT_TIER: fast }
+    - if: $CI_PIPELINE_SOURCE == "web"
+      variables: { PREFLIGHT_TIER: full }
+    - if: $CI_COMMIT_BRANCH
+      variables: { PREFLIGHT_TIER: fast }
+default:
+  interruptible: true
 ```
 
-- **Check:** a merge request pipeline runs, and so does a push to the default branch.
+What each pipeline runs is on the [Recommended pipeline shape](https://preflight.apps.wayne.edu/docs/guides/recommended-pipeline-shape.html) page. A block without a tag rule drops the release jobs: a tag pipeline then has no rule that lets it run.
+
+- **Check:** a push to a branch runs the fast tier, a tag runs everything, and a merge request opens no pipeline of its own.
 
 ### A gate was skipped or weakened [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#a-gate-was-skipped-or-weakened)
 
@@ -95,7 +110,7 @@ A tag or branch can move. A SHA cannot. PROCTOR's `preflight-pinned` check warns
 New advisories are published after code is merged, so a green pipeline today can be stale tomorrow.
 
 - **Cause:** no pipeline has run since the advisory was published.
-- **Fix:** create a weekly pipeline schedule on the default branch: project settings, Build, Pipeline schedules. The component needs nothing extra. It carries no `rules:` block, so it runs in scheduled pipelines like any other. Someone with Maintainer rights on the app creates the schedule.
+- **Fix:** create a weekly pipeline schedule on the default branch: project settings, Build, Pipeline schedules. The component needs nothing extra. It carries only the `tag_pipeline` rule, which is off by default, so it runs in scheduled pipelines like any other. Someone with Maintainer rights on the app creates the schedule.
 - **Check:** the schedule appears under project settings, Build, Pipeline schedules, and its latest pipeline is green.
 
 ### composer-audit fails on an abandoned package [#](https://preflight.apps.wayne.edu/docs/troubleshooting.html#composer-audit-fails-on-an-abandoned-package)

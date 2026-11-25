@@ -87,7 +87,7 @@ Preflight's own pipeline keeps these promises with the `must-fail-npm-audit` job
 
 ## Run it on a schedule [#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#run-it-on-a-schedule)
 
-New advisories are published after code is merged. The weekly pipeline schedule from [composer-audit](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#run-it-on-a-schedule) covers this job too: it carries no `rules:` block, so it runs in scheduled pipelines like any other.
+New advisories are published after code is merged. The weekly pipeline schedule from [composer-audit](https://preflight.apps.wayne.edu/docs/guides/component-composer-audit.html#run-it-on-a-schedule) covers this job too: it carries only the `tag_pipeline` rule, which is off by default, so it runs in scheduled pipelines like any other.
 
 ## Related [#](https://preflight.apps.wayne.edu/docs/guides/component-npm-audit.html#related)
 
