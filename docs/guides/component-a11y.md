@@ -83,12 +83,15 @@ include:
 | `axe_core_version` | string | `4.14.0` | axe-core version, the rules engine. The job fails if a different axe-core ran. |
 | `axe_playwright_version` | string | `4.14.0` | @axe-core/playwright version, the bridge to Playwright. Its axe-core range must include `axe_core_version`. |
 | `tag_pipeline` | string | `full` | What the job does on a tag pipeline. `full` (the default) runs it as on any pipeline; `release-only` skips it on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component. |
+| `tier` | string | `always` | When this job runs. `always` (default): on every pipeline, as before. `full`: only when the pipeline sets `PREFLIGHT_TIER` to `full` (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). Set `full` only when the repo's workflow rules set `PREFLIGHT_TIER`, or the job never runs. |
 
 A page glob uses `**` for any number of folders and `*` inside one folder name. Folders that start with a dot,
 `node_modules` and `vendor` are skipped. A literal page that is not there fails its check (HTTP 404); a glob that matches
 nothing stops the job as a configuration error, so a moved docs folder cannot quietly shrink the gate.
 
 Set `tag_pipeline: release-only` when a tag is cut from a commit that main already tested: the job is skipped on the tag pipeline and the `release-gate` component checks main was green.
+
+Set `tier: full` to run this job only on nightly, tag and manual pipelines. It needs the repo's workflow rules to set `PREFLIGHT_TIER` (see Recommended pipeline shape).
 
 ## How the job works
 

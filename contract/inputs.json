@@ -28,7 +28,8 @@
         { "name": "composer_version", "type": "string", "default": "2.11.1", "regex": "^2\\.(9\\.([6-9]|[1-9][0-9]+)|[1-9][0-9]+\\.[0-9]+)$" },
         { "name": "test_command", "type": "string", "default": "vendor/bin/phpunit" },
         { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" },
-        { "name": "tag_pipeline", "type": "string", "default": "full", "regex": "^(full|release-only)$" }
+        { "name": "tag_pipeline", "type": "string", "default": "full", "regex": "^(full|release-only)$" },
+        { "name": "tier", "type": "string", "default": "always", "regex": "^(always|full)$" }
       ],
       "jobs": ["php-test", "php-test-advisory"]
     },
@@ -101,7 +102,8 @@
         { "name": "working_dir", "type": "string", "default": ".", "regex": "^(\\.|[A-Za-z0-9_-][A-Za-z0-9._/-]*)$" },
         { "name": "eslint_args", "type": "string", "default": "." },
         { "name": "prettier", "type": "boolean", "default": true },
-        { "name": "tag_pipeline", "type": "string", "default": "full", "regex": "^(full|release-only)$" }
+        { "name": "tag_pipeline", "type": "string", "default": "full", "regex": "^(full|release-only)$" },
+        { "name": "tier", "type": "string", "default": "always", "regex": "^(always|full)$" }
       ],
       "jobs": ["eslint"]
     },
@@ -178,7 +180,8 @@
         { "name": "logs_path", "type": "string", "default": "storage/logs" },
         { "name": "require_healthcheck", "type": "boolean", "default": false },
         { "name": "checks", "type": "array", "default": ["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm", "healthcheck"] },
-        { "name": "tag_pipeline", "type": "string", "default": "full", "regex": "^(full|release-only)$" }
+        { "name": "tag_pipeline", "type": "string", "default": "full", "regex": "^(full|release-only)$" },
+        { "name": "tier", "type": "string", "default": "always", "regex": "^(always|full)$" }
       ],
       "jobs": ["portability"]
     },
@@ -198,7 +201,8 @@
         { "name": "playwright_version", "type": "string", "default": "", "regex": "^([0-9]+\\.[0-9]+\\.[0-9]+)?$" },
         { "name": "axe_core_version", "type": "string", "default": "4.14.0", "regex": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
         { "name": "axe_playwright_version", "type": "string", "default": "4.14.0", "regex": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
-        { "name": "tag_pipeline", "type": "string", "default": "full", "regex": "^(full|release-only)$" }
+        { "name": "tag_pipeline", "type": "string", "default": "full", "regex": "^(full|release-only)$" },
+        { "name": "tier", "type": "string", "default": "always", "regex": "^(always|full)$" }
       ],
       "jobs": ["a11y"]
     },

@@ -104,6 +104,7 @@ include:
 | `test_command` | string | `vendor/bin/phpunit` | The test command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
 | `tag_pipeline` | string | `full` | What this job does on a tag pipeline. `full` (default): it runs, as on any pipeline. `release-only`: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch. |
+| `tier` | string | `always` | When this job runs. `always` (default): on every pipeline, as before. `full`: only when the pipeline sets `PREFLIGHT_TIER` to `full` (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). Set `full` only when the repo's workflow rules set `PREFLIGHT_TIER`, or the job never runs. |
 
 From `templates/php-test/template.yml`: one job is created per entry in `php_versions` through `parallel:matrix`; `PHP_VERSION` becomes a CI/CD variable in each job, which the image input's default expands, and each job runs the newest patch release of its version. The default image is deliberately tag-pinned (the template points at the README section Updating image pins). Each job installs Composer the same way as proctor, runs `composer install --no-interaction --no-progress`, and then the test command. The jobs are `interruptible: true` with a timeout of 30 minutes. The `<job_name>-advisory` job runs the same script on `php_advisory_version` (default `8.6`) with `allow_failure: true`, and it is skipped while that input is empty. Because the official 8.6 image ships without `mbstring`, the script installs it first when `php -m` does not list it (a no-op on 8.3 to 8.5), so PHPUnit can start.
 
@@ -301,6 +302,7 @@ include:
 | `eslint_args` | string | `.` | Arguments passed to eslint. |
 | `prettier` | boolean | `true` | Whether to also run `prettier --check`. |
 | `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
+| `tier` | string | `always` | When this job runs. `always` (default): on every pipeline, as before. `full`: only when the pipeline sets `PREFLIGHT_TIER` to `full` (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). Set `full` only when the repo's workflow rules set `PREFLIGHT_TIER`, or the job never runs. |
 
 From `templates/eslint/template.yml`: the component does not install ESLint or Prettier itself; it runs `npm ci --ignore-scripts --cache .npm-cache` (the cache uses the fixed key `preflight-eslint` and stores `.npm-cache/`), then `npx --no-install eslint` with the `eslint_args` value, and, while `prettier` is true, `npx --no-install prettier --check .`. The job is `interruptible: true` with a timeout of 15m.
 
@@ -442,6 +444,7 @@ The one-job form ships in 0.2.0; 0.1.4 carries the earlier two-job form (`portab
 | `require_healthcheck` | boolean | `false` | Fail when the image declares no HEALTHCHECK. Docker and Coolify use it; OpenShift and Kubernetes use their own probes. |
 | `checks` | array | `["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm", "healthcheck"]` | The checks to run. Leave one out only on purpose; the strict boot always runs. |
 | `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
+| `tier` | string | `always` | When this job runs. `always` (default): on every pipeline, as before. `full`: only when the pipeline sets `PREFLIGHT_TIER` to `full` (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). Set `full` only when the repo's workflow rules set `PREFLIGHT_TIER`, or the job never runs. |
 
 The `image` default is an immutable tag (`-immutable`) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.
 
@@ -477,6 +480,7 @@ include:
 | `axe_core_version` | string | `4.14.0` | axe-core version; the job fails if a different one ran. |
 | `axe_playwright_version` | string | `4.14.0` | @axe-core/playwright version; its axe-core range must include `axe_core_version`. |
 | `tag_pipeline` | string | `full` | What the job does on a tag pipeline. `full` (the default) runs it as on any pipeline; `release-only` skips it on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component. |
+| `tier` | string | `always` | When this job runs. `always` (default): on every pipeline, as before. `full`: only when the pipeline sets `PREFLIGHT_TIER` to `full` (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). Set `full` only when the repo's workflow rules set `PREFLIGHT_TIER`, or the job never runs. |
 
 From `templates/a11y/template.yml`: the single job (named by `job_name`) runs in the `test` stage by default, is `interruptible: true`, and has a timeout of 30 minutes. It reads the Playwright version from the image tag, installs `playwright`, `@axe-core/playwright` and `axe-core` at exact versions with `npm install --ignore-scripts` into a temporary folder outside the project, writes the inputs as JSON and the checker (inlined from `templates/a11y/check.mjs`, because a component ships only its `template.yml`), and runs it from the project root with every check at reduced motion. It writes `gl-a11y-junit.xml` (published as a JUnit report) and `gl-a11y-report.json`, kept as artifacts for 30 days with `when: always`. It exits 0 clean, 1 on a violation or a page that did not load, and 2 on a tool or configuration error. `allow_failure` is interpolated as a real YAML boolean.
 

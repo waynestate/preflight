@@ -136,6 +136,7 @@ include:
 | `test_command` | string | `vendor/bin/phpunit` | The test command to run. |
 | `working_dir` | string | `.` | Directory to run the command in, relative to the project root. |
 | `tag_pipeline` | string | `full` | What this job does on a tag pipeline. `full` (default): it runs, as on any pipeline. `release-only`: it is skipped on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component, which fails the tag pipeline unless that commit passed on the default branch. |
+| `tier` | string | `always` | When this job runs. `always` (default): on every pipeline, as before. `full`: only when the pipeline sets `PREFLIGHT_TIER` to `full` (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). Set `full` only when the repo's workflow rules set `PREFLIGHT_TIER`, or the job never runs. |
 
 #### Caching
 
@@ -355,6 +356,7 @@ include:
 | `eslint_args` | string | `.` | Arguments passed to eslint. |
 | `prettier` | boolean | `true` | Whether to also run `prettier --check`. |
 | `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
+| `tier` | string | `always` | When this job runs. `always` (default): on every pipeline, as before. `full`: only when the pipeline sets `PREFLIGHT_TIER` to `full` (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). Set `full` only when the repo's workflow rules set `PREFLIGHT_TIER`, or the job never runs. |
 
 ### secret-detection
 
@@ -532,6 +534,7 @@ sign-in route for `session-hop` and what each failure usually means.
 | `require_healthcheck` | boolean | `false` | Fail when the image declares no HEALTHCHECK. Docker and Coolify use it; OpenShift and Kubernetes use their own probes. |
 | `checks` | array | `["health", "env-only", "forwarded-headers", "logs", "session-hop", "sigterm", "healthcheck"]` | The checks to run. Leave one out only on purpose; the strict boot always runs. |
 | `tag_pipeline` | string | `full` | What the job does on a tag pipeline: `full` (default) runs it as on any pipeline; `release-only` skips it, for a repo whose tag points at a commit main already tested (D-125). Pair it with the `release-gate` component. |
+| `tier` | string | `always` | When this job runs. `always` (default): on every pipeline, as before. `full`: only when the pipeline sets `PREFLIGHT_TIER` to `full` (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). Set `full` only when the repo's workflow rules set `PREFLIGHT_TIER`, or the job never runs. |
 
 The `image` default is an immutable tag (`-immutable`) pinned by digest, because the plain version tag can be re-pushed and its old digest removed.
 
@@ -576,6 +579,7 @@ a11y ships in 0.2.0 (0.1.4 does not include it). While a site fixes its first fi
 | `axe_core_version` | string | `4.14.0` | axe-core version, the rules engine. The job fails if a different axe-core ran. |
 | `axe_playwright_version` | string | `4.14.0` | @axe-core/playwright version. Its axe-core range must include `axe_core_version`. |
 | `tag_pipeline` | string | `full` | What the job does on a tag pipeline. `full` (the default) runs it as on any pipeline; `release-only` skips it on tag pipelines, for a repo whose tag points at a commit that main already tested (D-125). Pair it with the release-gate component. |
+| `tier` | string | `always` | When this job runs. `always` (default): on every pipeline, as before. `full`: only when the pipeline sets `PREFLIGHT_TIER` to `full` (nightly schedules, tags and manual runs in a repo that follows the recommended pipeline shape). Set `full` only when the repo's workflow rules set `PREFLIGHT_TIER`, or the job never runs. |
 
 The job installs the three npm packages at exact versions with `--ignore-scripts` into a temporary folder, never into
 the app. The checker is `templates/a11y/check.mjs`, inlined in the template because a component ships only its
