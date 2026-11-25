@@ -34,13 +34,13 @@ default:
   interruptible: true
 
 include:
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@b1fa3809495794e98475e9d2c20877a331cd6975 # 0.12.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@b1fa3809495794e98475e9d2c20877a331cd6975 # 0.12.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@b1fa3809495794e98475e9d2c20877a331cd6975 # 0.12.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@b1fa3809495794e98475e9d2c20877a331cd6975 # 0.12.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@b1fa3809495794e98475e9d2c20877a331cd6975 # 0.12.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@b1fa3809495794e98475e9d2c20877a331cd6975 # 0.12.0
-  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@b1fa3809495794e98475e9d2c20877a331cd6975 # 0.12.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/proctor@80ff4e366d6d7af1b95c29c7d4303b4cb90a863c # 0.13.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/php-test@80ff4e366d6d7af1b95c29c7d4303b4cb90a863c # 0.13.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/composer-audit@80ff4e366d6d7af1b95c29c7d4303b4cb90a863c # 0.13.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/sbom@80ff4e366d6d7af1b95c29c7d4303b4cb90a863c # 0.13.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/pint@80ff4e366d6d7af1b95c29c7d4303b4cb90a863c # 0.13.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/phpstan@80ff4e366d6d7af1b95c29c7d4303b4cb90a863c # 0.13.0
+  - component: $CI_SERVER_FQDN/enterprise-apps/preflight/eslint@80ff4e366d6d7af1b95c29c7d4303b4cb90a863c # 0.13.0
 ```
 
 Note
