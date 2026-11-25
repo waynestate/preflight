@@ -198,8 +198,9 @@ fails the job instead of passing it. Preflight's own `must-fail-composer-audit` 
 New advisories are published after code is merged, so a green pipeline today
 can be stale tomorrow. Create a weekly pipeline schedule on the default
 branch: project settings, Build, Pipeline schedules. The component needs
-nothing extra; it carries no `rules:` block, so it runs in scheduled
-pipelines like any other. Creating the schedule is a project setting, not a
+nothing extra; it carries only the `tag_pipeline` rule, which is off by
+default, so it runs in scheduled pipelines like any other. Creating the
+schedule is a project setting, not a
 file in the app's repo, and someone with Maintainer rights on the app must
 do it. It is the one preflight check that books its own flight time.
 
@@ -419,7 +420,8 @@ the job token only, and falls back to git when the API cannot be read; the
 fallback proves the commit is on the default branch, not that it passed
 there, so in fallback mode the green-ness rests on the release procedure,
 which says to tag only after main is green. A repo with no release jobs
-still gets a tag pipeline of just the gate.
+gets no tag pipeline at all: GitLab does not run a pipeline whose only
+jobs sit in `.pre`, so the gate matters only where release jobs exist.
 
 ```yaml
 include:

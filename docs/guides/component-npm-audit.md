@@ -115,8 +115,8 @@ test button.
 ## Run it on a schedule
 
 New advisories are published after code is merged. The weekly pipeline schedule from
-[composer-audit](component-composer-audit.md#run-it-on-a-schedule) covers this job too: it carries no `rules:` block,
-so it runs in scheduled pipelines like any other.
+[composer-audit](component-composer-audit.md#run-it-on-a-schedule) covers this job too: it carries only the
+`tag_pipeline` rule, which is off by default, so it runs in scheduled pipelines like any other.
 
 ## Related
 

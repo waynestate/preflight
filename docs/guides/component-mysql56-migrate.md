@@ -71,11 +71,12 @@ The script reads the same `DB_*` environment variables. It does not need a frame
 The rules are baked into the component, like WELD's portability job:
 
 - never on `schedule` pipelines;
-- run on tags and on the default branch;
+- never on a tag when the `tag_pipeline` input is `release-only`;
+- `on_success` on other tags and on pushes to the default branch;
 - `when: manual` with `allow_failure: true` on merge requests;
 - nothing else.
 
-That keeps a real 5.6 container off scheduled runs and off the small shared amd64 host except where a migration actually changed.
+There is no `changes:` filter, so the job starts on every push to the default branch, not only when a migration changed. That keeps a real 5.6 container off scheduled runs, off release-only tags and off merge requests, where it waits for a hand.
 
 ## Verify locally
 

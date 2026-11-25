@@ -431,13 +431,15 @@ and that none of them fails the run. Rollcall's "apps with CI" number is a plan.
 ### 3.4 Control when pipelines run, once, in the app
 Set `workflow:rules` so a branch with an open merge request does not run twice, and so merge request pipelines exist.
 
-Why: components set no `rules`, and two pipelines per push waste runner time.
+Why: each component job carries only the `tag_pipeline` and `tier` rules, both off by default, so the app's own
+file decides when pipelines run, and two pipelines per push waste runner time.
 
 Sources: [GitLab: merge request pipelines](https://docs.gitlab.com/ci/pipelines/merge_request_pipelines/);
 [GitLab: CI/CD YAML, `workflow:rules`](https://docs.gitlab.com/ci/yaml/).
 
-**How the stack holds it: Documented.** The README's "When the components run" section has a `workflow:rules` example
-and says it must be copied into each app's own `.gitlab-ci.yml`. The components still leave `rules` unset.
+**How the stack holds it: Documented.** The README's "When the components run" section has the recommended
+`workflow:rules` block and says it must be copied into each app's own `.gitlab-ci.yml`. The components leave the
+pipeline shape to the app: each job carries only the `tag_pipeline` and `tier` rules, both off by default.
 
 Second pass: GitLab's merge request pipeline page says the `merge_request_event` rule must be in the app's own
 `.gitlab-ci.yml`. Rules that arrive through `include:component` do not satisfy it. So the README cannot fix this from the
@@ -636,7 +638,7 @@ Why: advisories are published after code is merged.
 
 Sources: [OpenSSF Scorecard: Vulnerabilities](https://github.com/ossf/scorecard/blob/main/docs/checks.md).
 
-**How the stack holds it: Documented.** The README's "Run it on a schedule" note under `composer-audit` says to create a weekly pipeline schedule on the default branch (project settings, Build, Pipeline schedules), and the component carries no `rules:` block, so it runs in scheduled pipelines. The schedule itself is a project setting that Preflight cannot create or check.
+**How the stack holds it: Documented.** The README's "Run it on a schedule" note under `composer-audit` says to create a weekly pipeline schedule on the default branch (project settings, Build, Pipeline schedules), and the component carries only the `tag_pipeline` rule, which is off by default, so it runs in scheduled pipelines. The schedule itself is a project setting that Preflight cannot create or check.
 
 ### 4.8 Cache dependencies under a fixed key and keep protected and unprotected caches apart
 Cache Composer and npm downloads under a fixed key per job, not a lock-file hash. Leave GitLab's separation of protected and unprotected caches on.
