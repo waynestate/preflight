@@ -123,6 +123,10 @@
           "path": "guides/when-components-run"
         },
         {
+          "title": "Recommended pipeline shape",
+          "path": "guides/recommended-pipeline-shape"
+        },
+        {
           "title": "What the components cannot force",
           "path": "guides/what-components-cannot-force"
         },
