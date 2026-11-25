@@ -8,7 +8,16 @@
   ],
   "platformAutomerge": true,
   "labels": ["auto-deps"],
+  "timezone": "America/Detroit",
+  "schedule": ["before 6am on monday"],
   "packageRules": [
+    {
+      "description": "D-176: one weekly MR for every non-major update outside the needs-review files.",
+      "matchUpdateTypes": ["digest", "pin", "pinDigest", "patch", "minor"],
+      "matchFileNames": ["!templates/**", "!contract/**", "!.gitlab-ci.yml"],
+      "groupName": "non-major dependencies",
+      "groupSlug": "all-non-major"
+    },
     {
       "matchUpdateTypes": ["digest", "pin", "pinDigest", "patch", "minor"],
       "automerge": true
